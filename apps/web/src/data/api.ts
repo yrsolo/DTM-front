@@ -8,11 +8,20 @@ export function getApiBaseUrl(): string | null {
 export async function fetchSnapshot(): Promise<any> {
   const base = getApiBaseUrl();
   const url = base ? `${base.replace(/\/$/, "")}/snapshot` : DEFAULT_LOCAL_SNAPSHOT;
-  const res = await fetch(url, {
-    headers: {
-      "accept": "application/json"
+  try {
+    const res = await fetch(url, {
+      headers: {
+        "accept": "application/json"
+      }
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status} for ${url}`);
+    return await res.json();
+  } catch (err) {
+    if (base) {
+      console.warn("API fetch failed, falling back to local snapshot:", err);
+      const fallbackRes = await fetch(DEFAULT_LOCAL_SNAPSHOT);
+      if (fallbackRes.ok) return await fallbackRes.json();
     }
-  });
-  if (!res.ok) throw new Error(`HTTP ${res.status} for ${url}`);
-  return await res.json();
+    throw err;
+  }
 }

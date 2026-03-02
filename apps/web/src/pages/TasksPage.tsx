@@ -76,11 +76,21 @@ export function TasksPage() {
             </thead>
             <tbody>
               {tasks.map((t) => (
-                <tr key={t.id} style={{ cursor: "pointer" }} onClick={() => setSelectedId(t.id)}>
-                  <td>{t.title}</td>
+                <tr
+                  key={t.id}
+                  style={{ cursor: "pointer", height: 32 }}
+                  onClick={() => setSelectedId(t.id)}
+                >
+                  <td style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", maxWidth: 180 }}>
+                    {t.title}
+                  </td>
                   <td className="muted">{t.ownerId ? (peopleById.get(t.ownerId) ?? t.ownerId) : "—"}</td>
-                  <td><span className="badge">{statusLabels[t.status] ?? t.status}</span></td>
-                  <td className="muted">{(t.start ?? "—") + " → " + (t.end ?? "—")}</td>
+                  <td>
+                    <span className="badge">{statusLabels[t.status] ?? t.status}</span>
+                  </td>
+                  <td className="muted" style={{ fontSize: 11 }}>
+                    {(t.start ?? "—") + " → " + (t.end ?? "—")}
+                  </td>
                 </tr>
               ))}
             </tbody>
