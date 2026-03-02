@@ -57,15 +57,54 @@ export function DesignersPage() {
         Tasks: {tasks.length} • Generated: {snapshot.meta.generatedAt}
       </div>
 
-      <DesignersTimeline
-        people={snapshot.people}
-        tasks={tasks}
-        width={1100}
-        height={Math.max(260, snapshot.people.length * 40)}
-        onHover={onHover}
-        onLeave={onLeave}
-        onClick={(t) => setSelectedId(t.id)}
-      />
+      <div className="grid2">
+        <div className="card">
+          <table className="table">
+            <thead>
+              <tr>
+                <th>Designer</th>
+                <th>Tasks</th>
+                <th>Load</th>
+              </tr>
+            </thead>
+            <tbody>
+              {snapshot.people.map((p) => {
+                const pTasks = tasks.filter((t) => t.ownerId === p.id);
+                const load = Math.min(100, (pTasks.length / 5) * 100); // 5 tasks = 100% load
+                return (
+                  <tr key={p.id}>
+                    <td>{p.name}</td>
+                    <td>{pTasks.length}</td>
+                    <td>
+                      <div style={{ width: 60, height: 6, background: "#eee", borderRadius: 3, overflow: "hidden" }}>
+                        <div
+                          style={{
+                            width: `${load}%`,
+                            height: "100%",
+                            background: load > 80 ? "#ff4d4f" : "#52c41a",
+                          }}
+                        />
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+
+        <div className="card" style={{ overflow: "auto" }}>
+          <DesignersTimeline
+            people={snapshot.people}
+            tasks={tasks}
+            width={760}
+            height={Math.max(260, snapshot.people.length * 40)}
+            onHover={onHover}
+            onLeave={onLeave}
+            onClick={(t) => setSelectedId(t.id)}
+          />
+        </div>
+      </div>
 
       <Tooltip state={tooltip} />
       <TaskDetailsDrawer
