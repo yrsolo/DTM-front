@@ -1,0 +1,83 @@
+{
+  "meta": {
+    "version": "v1",
+    "generatedAt": "2026-03-02T12:00:00Z",
+    "source": "example",
+    "hash": "sha256:example"
+  },
+  "people": [
+    { "id": "p-alex", "name": "Alex" },
+    { "id": "p-nina", "name": "Nina" },
+    { "id": "p-ivan", "name": "Ivan" }
+  ],
+  "groups": [
+    { "id": "g-brand", "name": "Brand refresh" },
+    { "id": "g-menu", "name": "Menu visuals" }
+  ],
+  "enums": {
+    "status": {
+      "todo": "To do",
+      "in_progress": "In progress",
+      "review": "Review",
+      "done": "Done",
+      "blocked": "Blocked"
+    }
+  },
+  "tasks": [
+    {
+      "id": "t-100",
+      "title": "Homepage hero concept",
+      "ownerId": "p-alex",
+      "status": "in_progress",
+      "start": "2026-03-01",
+      "end": "2026-03-05",
+      "tags": ["web"],
+      "groupId": "g-brand",
+      "links": {
+        "sheetRowUrl": "https://example.local/sheet/row/100"
+      }
+    },
+    {
+      "id": "t-101",
+      "title": "Icon set v1",
+      "ownerId": "p-alex",
+      "status": "review",
+      "start": "2026-03-04",
+      "end": "2026-03-07",
+      "tags": ["ui"],
+      "groupId": "g-brand",
+      "deps": ["t-100"]
+    },
+    {
+      "id": "t-200",
+      "title": "Drink menu layout",
+      "ownerId": "p-nina",
+      "status": "todo",
+      "start": "2026-03-03",
+      "end": "2026-03-08",
+      "tags": ["print"],
+      "groupId": "g-menu"
+    },
+    {
+      "id": "t-201",
+      "title": "Menu product renders",
+      "ownerId": "p-ivan",
+      "status": "blocked",
+      "start": "2026-03-02",
+      "end": "2026-03-10",
+      "tags": ["3d"],
+      "groupId": "g-menu",
+      "notes": "Waiting for final product list."
+    },
+    {
+      "id": "t-202",
+      "title": "Social pack templates",
+      "status": "todo",
+      "start": "2026-03-06",
+      "end": "2026-03-12",
+      "tags": ["smm"],
+      "groupId": "g-brand",
+      "notes": "Unassigned task example."
+    }
+  ]
+}
