@@ -1,0 +1,8 @@
+{
+  "name": "dtm-front",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ]
+}
