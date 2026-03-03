@@ -1,15 +1,9 @@
 import { addDays, maxDate, minDate, parseIsoDateOrDateTime, startOfDayUtc } from "../utils/date";
 import { RenderTask, TimeRange } from "./types";
 
-export function toRenderTasks(tasks: Array<{
-  id: string;
-  title: string;
-  ownerId?: string;
-  status: string;
-  start?: string;
-  end?: string;
-  groupId?: string;
-}>): RenderTask[] {
+import { TaskV1 } from "@dtm/schema/snapshot";
+
+export function toRenderTasks(tasks: TaskV1[]): RenderTask[] {
   return tasks.map((t) => ({
     id: t.id,
     title: t.title,

@@ -6,7 +6,7 @@ export type TimeRange = {
 export type RenderTask = {
   id: string;
   title: string;
-  ownerId?: string;
+  ownerId?: string | null;
   status: string;
   start: Date | null;
   end: Date | null;

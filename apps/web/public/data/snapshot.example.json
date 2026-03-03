@@ -1,83 +1,89 @@
 {
   "meta": {
-    "version": "v1",
+    "artifact": "dtm_frontend_api_v2",
+    "contractVersion": "2.0.1",
     "generatedAt": "2026-03-02T12:00:00Z",
-    "source": "example",
-    "hash": "sha256:example"
+    "syncedAt": "2026-03-02T11:00:00Z",
+    "source": {
+      "env": "test",
+      "sourceId": "sheet:example:sheet:1",
+      "sheetName": "Example Sheet",
+      "sheetUrl": "https://example.local"
+    },
+    "hash": "sha256:example",
+    "features": {
+      "milestonesDefault": true,
+      "timeWindowFilter": true
+    },
+    "paging": {
+      "limit": 200,
+      "nextCursor": null
+    }
   },
-  "people": [
-    { "id": "p-alex", "name": "Alex" },
-    { "id": "p-nina", "name": "Nina" },
-    { "id": "p-ivan", "name": "Ivan" }
-  ],
-  "groups": [
-    { "id": "g-brand", "name": "Brand refresh" },
-    { "id": "g-menu", "name": "Menu visuals" }
-  ],
-  "enums": {
-    "status": {
-      "todo": "To do",
-      "in_progress": "In progress",
-      "review": "Review",
-      "done": "Done",
-      "blocked": "Blocked"
+  "filters": {
+    "statuses": ["work","pre_done"],
+    "designer": null,
+    "limit": 200,
+    "include_people": true,
+    "window": {
+      "enabled": false,
+      "start": null,
+      "end": null,
+      "mode": "intersects"
+    }
+  },
+  "summary": {
+    "tasksTotal": 1,
+    "tasksReturned": 1,
+    "peopleTotal": 1,
+    "groupsTotal": 1,
+    "milestonesTotal": 2
+  },
+  "entities": {
+    "people": [
+      { "id": "p1", "name": "Designer A", "position": null, "links": { "self": "/api/v2/frontend/people/p1" } }
+    ],
+    "groups": [
+      { "id": "g1", "name": "Project X", "links": { "self": "/api/v2/frontend/groups/g1" } }
+    ],
+    "tags": [],
+    "enums": {
+      "status": {
+        "work": "Work",
+        "pre_done": "Pre-done",
+        "done": "Done"
+      },
+      "statusGroups": {
+        "active": ["work","pre_done"],
+        "done": ["done"]
+      },
+      "milestoneType": {
+        "storyboard": "раскадровка",
+        "animatic": "аниматик"
+      },
+      "milestoneStatus": {
+        "planned": "Запланировано",
+        "done": "Готово",
+        "unknown": "Неизвестно"
+      }
     }
   },
   "tasks": [
     {
-      "id": "t-100",
+      "id": "14",
       "title": "Homepage hero concept",
-      "ownerId": "p-alex",
-      "status": "in_progress",
-      "start": "2026-03-01",
-      "end": "2026-03-05",
-      "tags": ["web"],
-      "groupId": "g-brand",
-      "links": {
-        "sheetRowUrl": "https://example.local/sheet/row/100"
-      }
-    },
-    {
-      "id": "t-101",
-      "title": "Icon set v1",
-      "ownerId": "p-alex",
-      "status": "review",
-      "start": "2026-03-04",
-      "end": "2026-03-07",
-      "tags": ["ui"],
-      "groupId": "g-brand",
-      "deps": ["t-100"]
-    },
-    {
-      "id": "t-200",
-      "title": "Drink menu layout",
-      "ownerId": "p-nina",
-      "status": "todo",
-      "start": "2026-03-03",
-      "end": "2026-03-08",
-      "tags": ["print"],
-      "groupId": "g-menu"
-    },
-    {
-      "id": "t-201",
-      "title": "Menu product renders",
-      "ownerId": "p-ivan",
-      "status": "blocked",
-      "start": "2026-03-02",
-      "end": "2026-03-10",
-      "tags": ["3d"],
-      "groupId": "g-menu",
-      "notes": "Waiting for final product list."
-    },
-    {
-      "id": "t-202",
-      "title": "Social pack templates",
-      "status": "todo",
-      "start": "2026-03-06",
-      "end": "2026-03-12",
-      "tags": ["smm"],
-      "groupId": "g-brand",
-      "notes": "Unassigned task example."
+      "ownerId": "p1",
+      "groupId": "g1",
+      "status": "work",
+      "date": { "start": "2026-02-13", "end": "2026-04-07", "nextDue": "2026-03-06" },
+      "tags": [],
+      "hash": null,
+      "revision": null,
+      "links": { "sheetRowUrl": null, "self": "/api/v2/frontend/tasks/14" },
+      "milestones": [
+        { "type": "storyboard", "planned": "2026-03-03", "actual": null, "status": "planned" },
+        { "type": "animatic", "planned": "2026-03-11", "actual": null, "status": "planned" }
+      ]
     }
   ]
 }
