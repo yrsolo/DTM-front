@@ -1,0 +1,156 @@
+﻿name: Release Yandex Cloud Function (prod manual)
+
+on:
+  workflow_dispatch:
+    inputs:
+      git_ref:
+        description: "Git ref to release (branch or tag)"
+        required: false
+        default: "main"
+      function_target:
+        description: "Prod function name/id override (optional)"
+        required: false
+        default: ""
+      dry_run_release:
+        description: "Run deploy as dry-run contour in prod function"
+        required: false
+        default: "false"
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    environment: production
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.git_ref }}
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.actions.txt
+
+      - name: Load deploy defaults from YAML
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import yaml
+          from pathlib import Path
+
+          yc = (yaml.safe_load(Path("config/deploy.yaml").read_text(encoding="utf-8")) or {}).get("yandex_cloud", {})
+          values = {
+              "YC_FOLDER_ID": str(yc.get("folder_id", "")).strip(),
+              "YC_SERVICE_ACCOUNT_ID": str(yc.get("service_account_id", "")).strip(),
+              "YC_CLOUD_FUNCTION_PROD_NAME": str(yc.get("function_name_prod", "")).strip(),
+              "YC_FUNCTION_RUNTIME": str(yc.get("function_runtime", "python311")).strip(),
+              "YC_FUNCTION_TIMEOUT": str(yc.get("function_timeout", "60s")).strip(),
+              "YC_FUNCTION_MEMORY": str(yc.get("function_memory", "512Mb")).strip(),
+              "YC_FUNCTION_ENTRYPOINT": str(yc.get("function_entrypoint", "index.handler")).strip(),
+          }
+          with Path("${GITHUB_ENV}").open("a", encoding="utf-8") as f:
+              for k, v in values.items():
+                  f.write(f"{k}={v}\\n")
+          PY
+
+      - name: Resolve function target
+        id: target
+        shell: bash
+        env:
+          YC_CLOUD_FUNCTION_PROD_NAME: ${{ vars.YC_CLOUD_FUNCTION_PROD_NAME || secrets.YC_CLOUD_FUNCTION_PROD_NAME || env.YC_CLOUD_FUNCTION_PROD_NAME }}
+          YC_CLOUD_FUNCTION_PROD_ID: ${{ vars.YC_CLOUD_FUNCTION_PROD_ID || secrets.YC_CLOUD_FUNCTION_PROD_ID }}
+          DEFAULT_PROD_FUNCTION_TARGET: dtm-prod
+          INPUT_FUNCTION_TARGET: ${{ inputs.function_target }}
+        run: |
+          set -euo pipefail
+          target="${INPUT_FUNCTION_TARGET:-${YC_CLOUD_FUNCTION_PROD_NAME:-${YC_CLOUD_FUNCTION_PROD_ID:-${DEFAULT_PROD_FUNCTION_TARGET}}}}"
+          if [ -z "${target}" ]; then
+            echo "Unable to resolve prod function target." >&2
+            exit 1
+          fi
+          echo "target=${target}" >> "${GITHUB_OUTPUT}"
+
+      - name: Contract regression smoke checks
+        run: |
+          python agent/read_model_contract_compat_smoke.py
+          python agent/schema_snapshot_smoke.py
+
+      - name: Preflight required variables
+        shell: bash
+        env:
+          YC_LOCKBOX_SECRET_ID: ${{ vars.YC_LOCKBOX_SECRET_ID || secrets.YC_LOCKBOX_SECRET_ID }}
+          YC_SERVICE_ACCOUNT_ID: ${{ vars.YC_SERVICE_ACCOUNT_ID || secrets.YC_SERVICE_ACCOUNT_ID || env.YC_SERVICE_ACCOUNT_ID }}
+          YC_RUNTIME_SERVICE_ACCOUNT_ID: ${{ vars.YC_RUNTIME_SERVICE_ACCOUNT_ID || secrets.YC_RUNTIME_SERVICE_ACCOUNT_ID }}
+        run: |
+          set -euo pipefail
+          if [ -z "${YC_LOCKBOX_SECRET_ID}" ]; then
+            echo "Missing required repository variable: YC_LOCKBOX_SECRET_ID" >&2
+            exit 1
+          fi
+          if [ -z "${YC_SERVICE_ACCOUNT_ID}" ] && [ -z "${YC_RUNTIME_SERVICE_ACCOUNT_ID}" ]; then
+            echo "Missing runtime service account variable: set YC_RUNTIME_SERVICE_ACCOUNT_ID or YC_SERVICE_ACCOUNT_ID" >&2
+            exit 1
+          fi
+
+      - name: Deploy PROD function version
+        id: deploy
+        uses: yc-actions/yc-sls-function@v4
+        with:
+          yc-sa-json-credentials: ${{ secrets.YC_SA_JSON_CREDENTIALS }}
+          folder-id: ${{ vars.YC_FOLDER_ID || secrets.YC_FOLDER_ID || env.YC_FOLDER_ID }}
+          function-name: ${{ steps.target.outputs.target }}
+          runtime: ${{ vars.YC_FUNCTION_RUNTIME || env.YC_FUNCTION_RUNTIME || 'python311' }}
+          memory: ${{ vars.YC_FUNCTION_MEMORY || env.YC_FUNCTION_MEMORY || '512Mb' }}
+          execution-timeout: ${{ vars.YC_FUNCTION_TIMEOUT || env.YC_FUNCTION_TIMEOUT || '60s' }}
+          entrypoint: ${{ vars.YC_FUNCTION_ENTRYPOINT || secrets.YC_FUNCTION_ENTRYPOINT || env.YC_FUNCTION_ENTRYPOINT || 'index.handler' }}
+          service-account: ${{ vars.YC_RUNTIME_SERVICE_ACCOUNT_ID || secrets.YC_RUNTIME_SERVICE_ACCOUNT_ID || vars.YC_SERVICE_ACCOUNT_ID || secrets.YC_SERVICE_ACCOUNT_ID || env.YC_SERVICE_ACCOUNT_ID }}
+          environment: |
+            ENV=prod
+            RELEASE_DRY_RUN=${{ inputs.dry_run_release }}
+          secrets: |
+            TG_TOKEN=${{ vars.YC_LOCKBOX_SECRET_ID || secrets.YC_LOCKBOX_SECRET_ID }}/latest/TG_TOKEN
+            OPENAI_TOKEN=${{ vars.YC_LOCKBOX_SECRET_ID || secrets.YC_LOCKBOX_SECRET_ID }}/latest/OPENAI_TOKEN
+            ORG_TOKEN=${{ vars.YC_LOCKBOX_SECRET_ID || secrets.YC_LOCKBOX_SECRET_ID }}/latest/ORG_TOKEN
+            PROXY_URL=${{ vars.YC_LOCKBOX_SECRET_ID || secrets.YC_LOCKBOX_SECRET_ID }}/latest/PROXY_URL
+            GOOGLE_KEY_JSON=${{ vars.YC_LOCKBOX_SECRET_ID || secrets.YC_LOCKBOX_SECRET_ID }}/latest/GOOGLE_KEY_JSON
+            DEFAULT_CHAT_ID=${{ vars.YC_LOCKBOX_SECRET_ID || secrets.YC_LOCKBOX_SECRET_ID }}/latest/DEFAULT_CHAT_ID
+            YDB_ID_PROD=${{ vars.YC_LOCKBOX_SECRET_ID || secrets.YC_LOCKBOX_SECRET_ID }}/latest/YDB_ID_PROD
+            YDB_ENDPOINT_PROD=${{ vars.YC_LOCKBOX_SECRET_ID || secrets.YC_LOCKBOX_SECRET_ID }}/latest/YDB_ENDPOINT_PROD
+            YDB_DATABASE_PROD=${{ vars.YC_LOCKBOX_SECRET_ID || secrets.YC_LOCKBOX_SECRET_ID }}/latest/YDB_DATABASE_PROD
+          include: |
+            **/*.py
+            requirements.txt
+            run_timer.cmd
+            AGENTS.md
+            README.md
+            docs/**/*.md
+            work/**/*.md
+          exclude: |
+            .env
+            .env.*
+            .venv/**
+            venv/**
+            artifacts/**
+            old/**
+            .git/**
+            .github/**
+            **/__pycache__/**
+            **/*.ipynb
+
+      - name: Deployment summary
+        if: always()
+        run: |
+          echo "Manual PROD release action finished."
+          echo "Ref: ${{ inputs.git_ref }}"
+          echo "Function target: ${{ steps.target.outputs.target }}"
