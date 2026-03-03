@@ -45,8 +45,8 @@ A dedicated web UI:
    - Filters: designer, status; text search.
 
 3) Data
-   - Load from `data/snapshot.example.json`.
-   - Optional: load from API configured in `apps/web/config/public.yaml` (`api_base_url` + `api_frontend_path`).
+  - Load from `data/snapshot.example.json`.
+  - Optional: load from API configured in `apps/web/config/public.yaml` (`api_base_url` + `api_frontend_path`).
 
 ### Non-goals (MVP)
 - Authentication/authorization.
