@@ -2,6 +2,12 @@
 
 This folder documents the **current state** of the frontend repository.
 
+Canonical scheme:
+- Product docs: `docs/product/*`
+- System/technical docs: `docs/system/*`
+- Structure rules: `docs/DOCS_STRUCTURE.md`
+- Top-level `docs/*.md` topic files are compatibility pointers.
+
 ## Entry points
 - Product overview: `docs/product/PRODUCT.md`
 - System architecture: `docs/system/ARCHITECTURE.md`

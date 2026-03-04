@@ -1,8 +1,6 @@
-# Gemini / Agent References
+# GEMINI Notes (Pointer)
 
-This project may use shared Gemini artifacts (links) for prompts and workflows.
-- Primary shared thread (owner will update): https://g.co/gemini/share/39ab0ece4f2d
+Canonical file:
+- `docs/system/GEMINI.md`
 
-Important:
-- Do not store secrets in shared public links.
-- Keep essential instructions duplicated inside repo docs to avoid link rot.
+This file is a compatibility pointer to avoid broken legacy links.

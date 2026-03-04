@@ -7,7 +7,7 @@
   - `GET /changes?since=...`
 - Define status taxonomy and mapping.
 Deliverables:
-- `docs/API_CONTRACT.md` finalized for v1.
+- `docs/system/API_CONTRACT.md` finalized for v1.
 - UI uses adapter for v1.
 
 ---
