@@ -119,6 +119,9 @@ export function TasksPage() {
             gridOpacity={design.timelineGridOpacity}
             barInsetY={design.barInsetY}
             barRadius={design.barRadius}
+            milestoneSizeScale={design.milestoneSizeScale}
+            milestoneOpacity={design.milestoneOpacity}
+            taskColorMixPercent={design.taskColorMixPercent}
             rowH={rowH}
             onHover={onHover}
             onLeave={onLeave}

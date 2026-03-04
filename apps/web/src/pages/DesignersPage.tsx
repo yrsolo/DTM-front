@@ -135,6 +135,9 @@ export function DesignersPage() {
             gridOpacity={design.timelineGridOpacity}
             barInsetY={design.barInsetY}
             barRadius={design.barRadius}
+            milestoneSizeScale={design.milestoneSizeScale}
+            milestoneOpacity={design.milestoneOpacity}
+            taskColorMixPercent={design.taskColorMixPercent}
             onHover={onHover}
             onLeave={onLeave}
             onClick={(t) => setSelectedId(t.id)}

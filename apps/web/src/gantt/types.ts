@@ -11,4 +11,9 @@ export type RenderTask = {
   start: Date | null;
   end: Date | null;
   groupId?: string;
+  milestones?: Array<{
+    type: string;
+    status: string;
+    date: Date;
+  }>;
 };

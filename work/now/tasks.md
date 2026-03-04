@@ -29,3 +29,8 @@ Done:
 - [x] CAM-ADHOC-LOCAL-FIRST-SNAPSHOT-T001 Default data load from local JSON, add actions to reload local JSON and update local JSON from API.
 - [x] CAM-ADHOC-DESIGN-CONTROLS-T001 Add in-browser design controls panel for size/offset tuning with save/load/reset presets in local storage.
 - [x] CAM-ADHOC-TIMELINE-FINETUNE-T001 Add date-label offset control, wheel zoom, dd-mm labels, themed scrollbar, remove KPI blocks, and simplify tasks table to title+status.
+- [x] CAM-ADHOC-DESIGN-PRESET-DEPLOY-T001 Add export/import for design presets and runtime loading from /config/design-controls.json for deploy persistence.
+- [x] CAM-ADHOC-MATERIAL-CONTROLS-T001 Add separate left-side material controls panel for visual depth/color styling without changing layout dimensions.
+- [x] CAM-ADHOC-COLOR-CONTROLS-T001 Add third center color controls panel for key theme colors, applied to CSS and timeline gradients.
+- [x] CAM-ADHOC-GANTT-MILESTONES-T001 Render task milestones on gantt bars and include milestone dates in timeline range.
+- [x] CAM-ADHOC-MILESTONE-STYLING-T001 Add controls for milestone size/color and per-task deterministic random color mix by task id.

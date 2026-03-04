@@ -11,7 +11,14 @@ export function toRenderTasks(tasks: TaskV1[]): RenderTask[] {
     status: t.status,
     start: parseIsoDateOrDateTime(t.start),
     end: parseIsoDateOrDateTime(t.end),
-    groupId: t.groupId
+    groupId: t.groupId,
+    milestones: (t.milestones ?? [])
+      .map((m) => ({
+        type: m.type,
+        status: m.status,
+        date: parseIsoDateOrDateTime(m.actual ?? m.planned),
+      }))
+      .filter((m): m is { type: string; status: string; date: Date } => Boolean(m.date)),
   }));
 }
 
@@ -23,6 +30,10 @@ export function computeRange(tasks: RenderTask[]): TimeRange {
   for (const t of tasks) {
     if (t.start) start = minDate(start, startOfDayUtc(t.start));
     if (t.end) end = maxDate(end, startOfDayUtc(t.end));
+    for (const m of t.milestones ?? []) {
+      start = minDate(start, startOfDayUtc(m.date));
+      end = maxDate(end, startOfDayUtc(m.date));
+    }
   }
 
   // pad
