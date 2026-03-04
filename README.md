@@ -19,6 +19,7 @@ Web frontend for the DTM (Designers Task Manager) system.
 
 ## Where to read next
 - System docs: `docs/README.md`
+- Deploy guide: `docs/DEPLOY.md`
 - Delivery/process (campaigns, now, roadmap, archive): `work/README.md`
 
 License: see `LICENSE`.

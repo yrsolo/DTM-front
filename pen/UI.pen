@@ -3,24 +3,521 @@
   "children": [
     {
       "type": "frame",
+      "id": "2SNEW",
+      "x": 371,
+      "y": -1861,
+      "name": "dashboard-dtm",
+      "theme": {
+        "Mode": "Light"
+      },
+      "clip": true,
+      "width": 2271,
+      "height": 1301,
+      "fill": "#F6F8FC",
+      "children": [
+        {
+          "type": "frame",
+          "id": "dtmRoot",
+          "name": "web-style-root",
+          "x": 24,
+          "y": 24,
+          "width": 1280,
+          "layout": "vertical",
+          "gap": 14,
+          "children": [
+            {
+              "type": "frame",
+              "id": "dtmTopbar",
+              "name": "topbar",
+              "width": 1280,
+              "fill": "#F7F9FC",
+              "cornerRadius": 18,
+              "layout": "vertical",
+              "gap": 0,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "dtmNav",
+                  "name": "nav",
+                  "width": 1280,
+                  "layout": "horizontal",
+                  "gap": 14,
+                  "padding": 16,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "dtmBrand",
+                      "name": "brand",
+                      "width": 760,
+                      "layout": "vertical",
+                      "gap": 2,
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "dtmBrandTitle",
+                          "name": "brand-title",
+                          "content": "DTM Grant Charts",
+                          "fill": "#1C2434",
+                          "fontFamily": "Manrope",
+                          "fontSize": 19,
+                          "fontWeight": "700"
+                        },
+                        {
+                          "type": "text",
+                          "id": "dtmBrandSub",
+                          "name": "brand-subtitle",
+                          "content": "Planning and workload timeline",
+                          "fill": "#65718A",
+                          "fontFamily": "Manrope",
+                          "fontSize": 13,
+                          "fontWeight": "500"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "dtmLinks",
+                      "name": "nav-links",
+                      "width": 474,
+                      "layout": "horizontal",
+                      "gap": 10,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "dtmLinkDesigners",
+                          "name": "link-designers",
+                          "width": 150,
+                          "height": 38,
+                          "cornerRadius": 999,
+                          "fill": "#F2F7FF",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "dtmLinkDesignersText",
+                              "x": 24,
+                              "y": 10,
+                              "content": "By designers",
+                              "fill": "#3F4A61",
+                              "fontFamily": "Manrope",
+                              "fontSize": 14,
+                              "fontWeight": "600"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "dtmLinkTasks",
+                          "name": "link-tasks-active",
+                          "width": 130,
+                          "height": 38,
+                          "cornerRadius": 999,
+                          "fill": "#FEF0D5",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "dtmLinkTasksText",
+                              "x": 30,
+                              "y": 10,
+                              "content": "By tasks",
+                              "fill": "#0F2942",
+                              "fontFamily": "Manrope",
+                              "fontSize": 14,
+                              "fontWeight": "700"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "dtmFilters",
+                  "name": "filters",
+                  "width": 1280,
+                  "layout": "horizontal",
+                  "gap": 10,
+                  "padding": 16,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "dtmF1",
+                      "width": 230,
+                      "height": 40,
+                      "cornerRadius": 12,
+                      "fill": "#FFFFFF",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "dtmF1Text",
+                          "x": 12,
+                          "y": 11,
+                          "content": "Owner: All designers",
+                          "fill": "#3F4A61",
+                          "fontFamily": "Manrope",
+                          "fontSize": 13,
+                          "fontWeight": "500"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "dtmF2",
+                      "width": 190,
+                      "height": 40,
+                      "cornerRadius": 12,
+                      "fill": "#FFFFFF",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "dtmF2Text",
+                          "x": 12,
+                          "y": 11,
+                          "content": "Status: Any",
+                          "fill": "#3F4A61",
+                          "fontFamily": "Manrope",
+                          "fontSize": 13,
+                          "fontWeight": "500"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "dtmF3",
+                      "width": 280,
+                      "height": 40,
+                      "cornerRadius": 12,
+                      "fill": "#FFFFFF",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "dtmF3Text",
+                          "x": 12,
+                          "y": 11,
+                          "content": "Search tasks...",
+                          "fill": "#7B879B",
+                          "fontFamily": "Manrope",
+                          "fontSize": 13,
+                          "fontWeight": "500"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "dtmContainer",
+              "name": "container",
+              "width": 1280,
+              "layout": "vertical",
+              "gap": 12,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "dtmMainCard",
+                  "name": "main-card",
+                  "width": 1280,
+                  "fill": "#FFFFFF",
+                  "cornerRadius": 18,
+                  "layout": "vertical",
+                  "gap": 12,
+                  "padding": 14,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "dtmPageHeader",
+                      "name": "page-header",
+                      "width": 1252,
+                      "layout": "horizontal",
+                      "gap": 12,
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "dtmTitle",
+                          "content": "Grant chart by tasks",
+                          "fill": "#1C2434",
+                          "fontFamily": "Manrope",
+                          "fontSize": 22,
+                          "fontWeight": "700"
+                        },
+                        {
+                          "type": "text",
+                          "id": "dtmGenerated",
+                          "content": "Generated: 2026-03-04T10:30:00Z",
+                          "fill": "#65718A",
+                          "fontFamily": "Manrope",
+                          "fontSize": 13,
+                          "fontWeight": "500"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "dtmKpiGrid",
+                      "width": 1252,
+                      "layout": "horizontal",
+                      "gap": 10,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "dtmKpi1",
+                          "width": 410,
+                          "cornerRadius": 14,
+                          "fill": "#F4F9FF",
+                          "layout": "vertical",
+                          "gap": 4,
+                          "padding": 12,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "dtmKpi1Label",
+                              "content": "Done / complete",
+                              "fill": "#61708C",
+                              "fontFamily": "Manrope",
+                              "fontSize": 12,
+                              "fontWeight": "500"
+                            },
+                            {
+                              "type": "text",
+                              "id": "dtmKpi1Value",
+                              "content": "28",
+                              "fill": "#1C2434",
+                              "fontFamily": "Manrope",
+                              "fontSize": 22,
+                              "fontWeight": "700"
+                            },
+                            {
+                              "type": "text",
+                              "id": "dtmKpi1Hint",
+                              "content": "From filtered tasks: 64",
+                              "fill": "#6F7C95",
+                              "fontFamily": "Manrope",
+                              "fontSize": 12,
+                              "fontWeight": "500"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "dtmKpi2",
+                          "width": 410,
+                          "cornerRadius": 14,
+                          "fill": "#F4F9FF",
+                          "layout": "vertical",
+                          "gap": 4,
+                          "padding": 12,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "dtmKpi2Label",
+                              "content": "In progress",
+                              "fill": "#61708C",
+                              "fontFamily": "Manrope",
+                              "fontSize": 12,
+                              "fontWeight": "500"
+                            },
+                            {
+                              "type": "text",
+                              "id": "dtmKpi2Value",
+                              "content": "23",
+                              "fill": "#1C2434",
+                              "fontFamily": "Manrope",
+                              "fontSize": 22,
+                              "fontWeight": "700"
+                            },
+                            {
+                              "type": "text",
+                              "id": "dtmKpi2Hint",
+                              "content": "Tasks in active execution phase",
+                              "fill": "#6F7C95",
+                              "fontFamily": "Manrope",
+                              "fontSize": 12,
+                              "fontWeight": "500"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "dtmKpi3",
+                          "width": 410,
+                          "cornerRadius": 14,
+                          "fill": "#F4F9FF",
+                          "layout": "vertical",
+                          "gap": 4,
+                          "padding": 12,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "dtmKpi3Label",
+                              "content": "Risk / delayed",
+                              "fill": "#61708C",
+                              "fontFamily": "Manrope",
+                              "fontSize": 12,
+                              "fontWeight": "500"
+                            },
+                            {
+                              "type": "text",
+                              "id": "dtmKpi3Value",
+                              "content": "13",
+                              "fill": "#1C2434",
+                              "fontFamily": "Manrope",
+                              "fontSize": 22,
+                              "fontWeight": "700"
+                            },
+                            {
+                              "type": "text",
+                              "id": "dtmKpi3Hint",
+                              "content": "Flags by status keyword match",
+                              "fill": "#6F7C95",
+                              "fontFamily": "Manrope",
+                              "fontSize": 12,
+                              "fontWeight": "500"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "dtmGrid2",
+                      "width": 1252,
+                      "layout": "horizontal",
+                      "gap": 12,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "dtmTableCard",
+                          "width": 420,
+                          "fill": "#FFFFFF",
+                          "cornerRadius": 16,
+                          "layout": "vertical",
+                          "gap": 8,
+                          "padding": 12,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "dtmTableHead",
+                              "content": "Title           Owner        Status       Dates",
+                              "fill": "#5B6781",
+                              "fontFamily": "Manrope",
+                              "fontSize": 12,
+                              "fontWeight": "700"
+                            },
+                            {
+                              "type": "text",
+                              "id": "dtmRow1",
+                              "content": "Landing redesign     Anna    In progress   2026-03-01 -> 2026-03-12",
+                              "fill": "#1C2434",
+                              "fontFamily": "Manrope",
+                              "fontSize": 12,
+                              "fontWeight": "500"
+                            },
+                            {
+                              "type": "text",
+                              "id": "dtmRow2",
+                              "content": "Data validation      Max     Done          2026-02-18 -> 2026-03-02",
+                              "fill": "#1C2434",
+                              "fontFamily": "Manrope",
+                              "fontSize": 12,
+                              "fontWeight": "500"
+                            },
+                            {
+                              "type": "text",
+                              "id": "dtmRow3",
+                              "content": "Grant QA batch       Kate    Risk          2026-03-04 -> 2026-03-20",
+                              "fill": "#1C2434",
+                              "fontFamily": "Manrope",
+                              "fontSize": 12,
+                              "fontWeight": "500"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "dtmTimelineCard",
+                          "width": 820,
+                          "fill": "#FFFFFF",
+                          "cornerRadius": 16,
+                          "layout": "vertical",
+                          "gap": 10,
+                          "padding": 12,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "dtmTimelineTitle",
+                              "content": "Timeline preview",
+                              "fill": "#1C2434",
+                              "fontFamily": "Manrope",
+                              "fontSize": 14,
+                              "fontWeight": "700"
+                            },
+                            {
+                              "type": "frame",
+                              "id": "dtmTlGrid1",
+                              "width": 796,
+                              "height": 34,
+                              "fill": "#EEF5FF",
+                              "cornerRadius": 10
+                            },
+                            {
+                              "type": "frame",
+                              "id": "dtmTlGrid2",
+                              "width": 796,
+                              "height": 34,
+                              "fill": "#F5F9FF",
+                              "cornerRadius": 10
+                            },
+                            {
+                              "type": "frame",
+                              "id": "dtmTlGrid3",
+                              "width": 796,
+                              "height": 34,
+                              "fill": "#FFF6EA",
+                              "cornerRadius": 10
+                            },
+                            {
+                              "type": "text",
+                              "id": "dtmTimelineHint",
+                              "content": "Visual shell synced from apps/web (colors, spacing, cards, layout)",
+                              "fill": "#6F7C95",
+                              "fontFamily": "Manrope",
+                              "fontSize": 12,
+                              "fontWeight": "500"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
       "id": "frame-1761929672442",
-      "x": 1808,
-      "y": -35,
+      "x": 0,
+      "y": 0,
       "name": "lunaris: design system components",
       "theme": {
         "Mode": "Dark"
       },
       "clip": true,
-      "width": 4865,
-      "height": 2781,
+      "width": 3000,
+      "height": 4400,
       "fill": "$--background",
       "layout": "none",
       "children": [
         {
           "type": "frame",
           "id": "xCEfn",
-          "x": 4187,
-          "y": 1848,
+          "x": 2200,
+          "y": 4051,
           "name": "Tooltip",
           "reusable": true,
           "clip": true,
@@ -143,12 +640,12 @@
         {
           "type": "frame",
           "id": "W4YFH",
-          "x": 2863,
-          "y": 1984,
+          "x": 200,
+          "y": 3166,
           "name": "Progress",
           "reusable": true,
           "clip": true,
-          "width": "fill_container(360)",
+          "width": 360,
           "height": 16,
           "fill": "$--secondary",
           "cornerRadius": "$--radius-pill",
@@ -177,8 +674,8 @@
         {
           "type": "frame",
           "id": "9PVw5",
-          "x": 3789,
-          "y": 335.99999999999955,
+          "x": 1802,
+          "y": 2538.9999999999995,
           "name": "Pagination",
           "reusable": true,
           "stroke": {
@@ -241,8 +738,8 @@
         {
           "type": "frame",
           "id": "QFzE8",
-          "x": 4187,
-          "y": 1404,
+          "x": 2200,
+          "y": 3607,
           "name": "Textarea Group",
           "reusable": true,
           "width": 274,
@@ -324,8 +821,8 @@
         {
           "type": "frame",
           "id": "M5Mgn",
-          "x": 4187,
-          "y": 1092,
+          "x": 2200,
+          "y": 3295,
           "name": "Input OTP Group/Default",
           "reusable": true,
           "width": 274,
@@ -630,8 +1127,8 @@
         {
           "type": "frame",
           "id": "XhJWF",
-          "x": 4187,
-          "y": 820,
+          "x": 2200,
+          "y": 3023,
           "name": "Select Group/Default",
           "reusable": true,
           "width": 274,
@@ -748,8 +1245,8 @@
         {
           "type": "frame",
           "id": "gKpi4",
-          "x": 4187,
-          "y": 388,
+          "x": 2200,
+          "y": 2591,
           "name": "Input Group/Default",
           "reusable": true,
           "width": 274,
@@ -1812,7 +2309,6 @@
           "y": 952,
           "name": "Alert/Error",
           "fill": "$--color-error",
-          "width": "fill_container(640)",
           "descendants": {
             "fS3NL": {
               "type": "frame",
@@ -1868,7 +2364,6 @@
           "y": 656,
           "name": "Alert/Success",
           "fill": "$--color-success",
-          "width": "fill_container(640)",
           "descendants": {
             "fS3NL": {
               "type": "frame",
@@ -1924,7 +2419,6 @@
           "y": 804,
           "name": "Alert/Warning",
           "fill": "$--color-warning",
-          "width": "fill_container(640)",
           "descendants": {
             "fS3NL": {
               "type": "frame",
@@ -2008,7 +2502,7 @@
           "y": 508,
           "name": "Alert/Info",
           "reusable": true,
-          "width": "fill_container(640)",
+          "width": 640,
           "fill": "$--color-info",
           "cornerRadius": "$--radius-none",
           "stroke": {
@@ -2148,7 +2642,7 @@
           "x": 200,
           "y": 352,
           "name": "Accordion/Closed",
-          "width": "fill_container(480)",
+          "width": 480,
           "descendants": {
             "WLBKp": {
               "type": "frame",
@@ -2193,7 +2687,7 @@
           "y": 200,
           "name": "Accordion/Open",
           "reusable": true,
-          "width": "fill_container(480)",
+          "width": 480,
           "stroke": {
             "align": "inside",
             "thickness": {
@@ -2334,6 +2828,12 @@
           "x": 280,
           "y": 1448,
           "name": "Avatar/Image",
+          "fill": {
+            "type": "image",
+            "enabled": true,
+            "url": "",
+            "mode": "fill"
+          },
           "descendants": {
             "xr4rB": {
               "enabled": false
@@ -2697,8 +3197,8 @@
         {
           "type": "frame",
           "id": "ERkuB",
-          "x": 3510,
-          "y": 1890,
+          "x": 200,
+          "y": 2538,
           "name": "Card",
           "reusable": true,
           "clip": true,
@@ -2981,8 +3481,8 @@
           "type": "ref",
           "reusable": true,
           "ref": "gKpi4",
-          "x": 4187,
-          "y": 494,
+          "x": 2200,
+          "y": 2697,
           "width": 274,
           "name": "Input Group/Filled",
           "descendants": {
@@ -2997,8 +3497,8 @@
           "type": "ref",
           "reusable": true,
           "ref": "gKpi4",
-          "x": 4187,
-          "y": 600,
+          "x": 2200,
+          "y": 2803,
           "name": "Input/Default",
           "width": 274,
           "descendants": {
@@ -3015,8 +3515,8 @@
           "type": "ref",
           "reusable": true,
           "ref": "gKpi4",
-          "x": 4187,
-          "y": 680,
+          "x": 2200,
+          "y": 2883,
           "width": 274,
           "name": "Input/Filled",
           "descendants": {
@@ -3034,8 +3534,8 @@
           "type": "ref",
           "reusable": true,
           "ref": "XhJWF",
-          "x": 4187,
-          "y": 926,
+          "x": 2200,
+          "y": 3129,
           "flipX": false,
           "flipY": false,
           "width": 274,
@@ -3060,8 +3560,8 @@
           "type": "ref",
           "reusable": true,
           "ref": "M5Mgn",
-          "x": 4187,
-          "y": 1198,
+          "x": 2200,
+          "y": 3401,
           "name": "Input OTP Group/Filled",
           "descendants": {
             "mdnDd": {
@@ -3520,8 +4020,8 @@
           "type": "ref",
           "reusable": true,
           "ref": "QFzE8",
-          "x": 4187,
-          "y": 1550,
+          "x": 2200,
+          "y": 3753,
           "name": "Textarea/Default",
           "descendants": {
             "nQmmR": {
@@ -3542,8 +4042,8 @@
           "type": "ref",
           "reusable": true,
           "ref": "QFzE8",
-          "x": 4187,
-          "y": 1670,
+          "x": 2200,
+          "y": 3873,
           "name": "Textarea/Filled",
           "descendants": {
             "nQmmR": {
@@ -3561,8 +4061,8 @@
         {
           "type": "frame",
           "id": "KbyBJ",
-          "x": 3510,
-          "y": 2194,
+          "x": 200,
+          "y": 2842,
           "name": "Tab Item/Active",
           "reusable": true,
           "fill": "$--background",
@@ -3608,8 +4108,8 @@
           "type": "ref",
           "reusable": true,
           "ref": "KbyBJ",
-          "x": 3510,
-          "y": 2246,
+          "x": 200,
+          "y": 2894,
           "name": "Tab Item/Inactive",
           "fill": [],
           "effect": [],
@@ -3622,8 +4122,8 @@
         {
           "type": "frame",
           "id": "Kbr4h",
-          "x": 3510,
-          "y": 2298,
+          "x": 200,
+          "y": 2946,
           "name": "Tabs",
           "reusable": true,
           "slot": [
@@ -3648,8 +4148,8 @@
           "id": "Hygdd",
           "type": "ref",
           "ref": "Kbr4h",
-          "x": 3510,
-          "y": 2378,
+          "x": 200,
+          "y": 3026,
           "name": "Tabs",
           "width": "fit_content",
           "height": 40,
@@ -3913,8 +4413,8 @@
         {
           "type": "frame",
           "id": "d5ZTS",
-          "x": 2993,
-          "y": 240,
+          "x": 1006,
+          "y": 2443,
           "name": "Sidebar",
           "reusable": true,
           "width": 280,
@@ -4080,8 +4580,8 @@
         {
           "type": "frame",
           "id": "h12kK",
-          "x": 3313,
-          "y": 240,
+          "x": 1326,
+          "y": 2443,
           "name": "Sidebar Section Title",
           "reusable": true,
           "width": 248,
@@ -4110,8 +4610,8 @@
         {
           "type": "frame",
           "id": "dOLzc",
-          "x": 3313,
-          "y": 328,
+          "x": 1326,
+          "y": 2531,
           "name": "Sidebar Item/Active",
           "reusable": true,
           "width": 248,
@@ -4158,8 +4658,8 @@
           "type": "ref",
           "reusable": true,
           "ref": "dOLzc",
-          "x": 3313,
-          "y": 416,
+          "x": 1326,
+          "y": 2619,
           "width": 248,
           "height": "fit_content",
           "flipX": false,
@@ -4178,8 +4678,8 @@
         {
           "type": "frame",
           "id": "oT0d2",
-          "x": 3789,
-          "y": 256.211644890092,
+          "x": 1802,
+          "y": 2459.211644890092,
           "name": "Pagination Item/Active",
           "reusable": true,
           "width": 40,
@@ -4223,8 +4723,8 @@
           "type": "ref",
           "reusable": true,
           "ref": "oT0d2",
-          "x": 3869,
-          "y": 256.211644890092,
+          "x": 1882,
+          "y": 2459.211644890092,
           "name": "Pagination Item/Default",
           "fill": [],
           "stroke": {
@@ -4238,8 +4738,8 @@
           "type": "ref",
           "reusable": true,
           "ref": "oT0d2",
-          "x": 3948.7883551099067,
-          "y": 256.42555354195747,
+          "x": 1961.7883551099067,
+          "y": 2459.4255535419575,
           "name": "Pagination Item/Ellipsis",
           "fill": [],
           "stroke": {
@@ -4789,8 +5289,8 @@
           "type": "ref",
           "reusable": true,
           "ref": "ERkuB",
-          "x": 3365,
-          "y": 1013,
+          "x": 1378,
+          "y": 3216,
           "fill": "$--background",
           "width": 336,
           "height": "fit_content",
@@ -4899,8 +5399,8 @@
           "type": "ref",
           "reusable": true,
           "ref": "ERkuB",
-          "x": 2987,
-          "y": 1013,
+          "x": 1000,
+          "y": 3216,
           "fill": "$--background",
           "width": 336,
           "height": 280,
@@ -4974,8 +5474,8 @@
           "type": "ref",
           "reusable": true,
           "ref": "ERkuB",
-          "x": 2987,
-          "y": 1334,
+          "x": 1000,
+          "y": 3537,
           "fill": "$--background",
           "width": 336,
           "height": "fit_content",
@@ -5098,7 +5598,7 @@
           "name": "Data Table",
           "reusable": true,
           "clip": true,
-          "width": "fill_container(1024)",
+          "width": 1024,
           "layout": "vertical",
           "gap": 16,
           "justifyContent": "center",
@@ -5310,7 +5810,7 @@
           "slot": [
             "T73Cd"
           ],
-          "width": "fill_container(1024)",
+          "width": 1024,
           "height": 300,
           "fill": "$--background",
           "cornerRadius": "$--radius-none",
@@ -5414,8 +5914,8 @@
         {
           "type": "frame",
           "id": "tbrR4",
-          "x": 993,
-          "y": 1366,
+          "x": 1000,
+          "y": 1372,
           "name": "Table Column Header",
           "reusable": true,
           "width": "fill_container(293)",
@@ -5458,1160 +5958,83 @@
           "fontFamily": "Inter",
           "fontSize": 14,
           "fontWeight": "normal"
-        },
-        {
-          "id": "PHDgS",
-          "type": "ref",
-          "ref": "ERkuB",
-          "x": 2874,
-          "y": 2196,
-          "name": "Card Simple",
-          "descendants": {
-            "tiojM": {
-              "enabled": false
-            }
-          }
         }
       ]
     },
     {
-      "type": "text",
-      "id": "MUz5r",
-      "x": 283,
-      "y": -2871,
-      "name": "Start here",
-      "fill": "#ff8303ff",
-      "content": "Start Here",
-      "lineHeight": 1.399999976158142,
-      "fontFamily": "Funnel Display",
-      "fontSize": 320,
-      "fontWeight": "500",
-      "letterSpacing": -4
-    },
-    {
-      "type": "text",
-      "id": "ifWF1",
-      "x": 1.1368683772161603e-13,
-      "y": -2216,
-      "name": "Step 2",
-      "fill": "#ff8303ff",
-      "textGrowth": "fixed-width",
-      "width": 845,
-      "content": "Step 1: Basics",
-      "lineHeight": 1.399999976158142,
-      "fontFamily": "Funnel Display",
-      "fontSize": 100,
-      "fontWeight": "600"
-    },
-    {
       "type": "prompt",
-      "id": "2wZ9Y",
-      "x": 1909,
-      "y": -1990,
+      "id": "Yn35J",
+      "x": 3184,
+      "y": 0,
       "model": "cursor-composer",
-      "width": 582,
+      "width": 400,
       "height": 219,
-      "content": "Add 3 more rows to the Step 2 Frame with some funny rover names."
-    },
-    {
-      "type": "text",
-      "id": "tTKjr",
-      "x": 1909,
-      "y": -2216,
-      "name": "Step 3",
-      "fill": "#ff8303ff",
-      "content": "Step 2: Vibe design",
-      "lineHeight": 1.399999976158142,
-      "fontFamily": "Funnel Display",
-      "fontSize": 100,
-      "fontWeight": "600"
-    },
-    {
-      "type": "prompt",
-      "id": "zHxSZ",
-      "x": 1.1368683772161603e-13,
-      "y": -1990,
-      "model": "cursor-composer",
-      "width": 361,
-      "height": 219,
-      "content": "Turn the \"Step 1 Frame\" into dark mode."
-    },
-    {
-      "type": "text",
-      "id": "tU9Hf",
-      "x": 382,
-      "y": -1870,
-      "name": "Step 2",
-      "fill": "#959595ff",
-      "content": "← Click \"Run\" here",
-      "lineHeight": 1.399999976158142,
-      "fontFamily": "Inter",
-      "fontSize": 100,
-      "fontWeight": "600"
-    },
-    {
-      "type": "text",
-      "id": "mHHN1",
-      "x": 2513,
-      "y": -1869,
-      "name": "Step 2",
-      "fill": "#ff8303ff",
-      "content": "←",
-      "lineHeight": 1.399999976158142,
-      "fontFamily": "Inter",
-      "fontSize": 100,
-      "fontWeight": "600"
+      "content": "Design a dashboard with a sidebar on the left into \"dashboard-utility\" frame for a utility company showing current usage and a history in a table."
     },
     {
       "type": "frame",
-      "id": "CzlXB",
-      "x": 3747,
-      "y": -1531,
-      "name": "Step 3 Frame",
+      "id": "iIONl",
+      "x": 3184,
+      "y": 374,
+      "name": "dashboard-utility",
       "theme": {
         "Mode": "Dark"
       },
       "clip": true,
       "width": 1440,
-      "height": 900,
+      "height": "fit_content(1002)",
       "fill": "$--background"
     },
     {
       "type": "prompt",
-      "id": "fS3BI",
-      "x": 3747,
-      "y": -1990,
+      "id": "pG317",
+      "x": 3184,
+      "y": 1493,
       "model": "cursor-composer",
-      "width": 1005,
+      "width": 400,
       "height": 219,
-      "content": "Design a dashboard in the \"Step 3 Frame\" for a rover management platform using the components\n- add a sidebar for navigation\n- add rover stats and table with available rovers for rent in the content body"
-    },
-    {
-      "type": "text",
-      "id": "5jTfc",
-      "x": 3747,
-      "y": -2216,
-      "name": "Step 4",
-      "fill": "#ff8303ff",
-      "content": "Step 3: Pencil it out!",
-      "lineHeight": 1.399999976158142,
-      "fontFamily": "Funnel Display",
-      "fontSize": 100,
-      "fontWeight": "600"
-    },
-    {
-      "type": "prompt",
-      "id": "e51uh",
-      "x": 5668,
-      "y": -1990,
-      "model": "claude-4.5-sonnet",
-      "width": 1005,
-      "height": 229,
-      "content": "Setup and create a NextJS project with all necessary configuration files\n- use React, Typescript and Tailwind CSS v4\n- replicate \"Step 3 Frame\" design in the code"
-    },
-    {
-      "type": "text",
-      "id": "4csXI",
-      "x": 5668,
-      "y": -2216,
-      "name": "Step 5",
-      "fill": "#ff8303ff",
-      "content": "Final Step: Generate React code",
-      "lineHeight": 1.399999976158142,
-      "fontFamily": "Funnel Display",
-      "fontSize": 100,
-      "fontWeight": "600"
+      "content": "Design a dashboard into \"dashboard-revenue\" frame for a revenue tracking app with a sidebar, showing revenue stats, history in the content."
     },
     {
       "type": "frame",
-      "id": "cOnQP",
-      "x": 0,
-      "y": -1565,
-      "name": "Step 1 Frame",
-      "theme": {
-        "Mode": "Light"
-      },
-      "clip": true,
-      "width": 1440,
-      "height": 900,
-      "fill": "$--background",
-      "children": [
-        {
-          "id": "Ko6AF",
-          "type": "ref",
-          "ref": "d5ZTS",
-          "x": 0,
-          "y": 0,
-          "descendants": {
-            "NvL81": {
-              "children": [
-                {
-                  "id": "eGOU8",
-                  "type": "ref",
-                  "ref": "h12kK"
-                },
-                {
-                  "id": "Ct09n",
-                  "type": "ref",
-                  "ref": "dOLzc"
-                },
-                {
-                  "id": "oUCen",
-                  "type": "ref",
-                  "ref": "X6nwq"
-                },
-                {
-                  "id": "NMbml",
-                  "type": "ref",
-                  "ref": "X6nwq"
-                },
-                {
-                  "id": "2u0Td",
-                  "type": "ref",
-                  "ref": "X6nwq"
-                }
-              ]
-            }
-          }
-        },
-        {
-          "type": "frame",
-          "id": "jV147",
-          "name": "Content",
-          "clip": true,
-          "width": "fill_container",
-          "height": 900,
-          "layout": "vertical",
-          "gap": 24,
-          "padding": 24,
-          "children": [
-            {
-              "id": "V2SYW",
-              "type": "ref",
-              "ref": "Kbr4h",
-              "x": 24,
-              "y": 24,
-              "name": "Tabs",
-              "width": "fit_content",
-              "height": 40,
-              "flipX": false,
-              "flipY": false,
-              "children": [
-                {
-                  "id": "EKcSr",
-                  "type": "ref",
-                  "ref": "KbyBJ",
-                  "x": 4,
-                  "y": 4,
-                  "descendants": {
-                    "248ys": {
-                      "x": 12,
-                      "y": 6,
-                      "content": "Integrations"
-                    }
-                  }
-                },
-                {
-                  "id": "faJgQ",
-                  "type": "ref",
-                  "ref": "BdBJJ",
-                  "x": 116,
-                  "y": 4,
-                  "descendants": {
-                    "248ys": {
-                      "content": "Billing"
-                    }
-                  }
-                },
-                {
-                  "id": "B6TiH",
-                  "type": "ref",
-                  "ref": "BdBJJ",
-                  "x": 189,
-                  "y": 4,
-                  "descendants": {
-                    "248ys": {
-                      "content": "Profile"
-                    }
-                  }
-                },
-                {
-                  "id": "dGLeT",
-                  "type": "ref",
-                  "ref": "BdBJJ",
-                  "x": 264,
-                  "y": 4,
-                  "descendants": {
-                    "248ys": {
-                      "content": "Advanced"
-                    }
-                  }
-                }
-              ]
-            },
-            {
-              "id": "p1r72",
-              "type": "ref",
-              "ref": "nIj3a",
-              "x": 24,
-              "y": 88,
-              "width": "fill_container"
-            },
-            {
-              "id": "GqMoS",
-              "type": "ref",
-              "ref": "yLiVX",
-              "x": 24,
-              "y": 196,
-              "width": "fill_container",
-              "descendants": {
-                "iC3n0": {
-                  "children": [
-                    {
-                      "id": "VZdSB",
-                      "type": "ref",
-                      "ref": "T73Cd",
-                      "children": [
-                        {
-                          "id": "AG4YD",
-                          "type": "ref",
-                          "ref": "tbrR4"
-                        },
-                        {
-                          "id": "GkMsj",
-                          "type": "ref",
-                          "ref": "tbrR4"
-                        },
-                        {
-                          "id": "MTOr5",
-                          "type": "ref",
-                          "ref": "tbrR4"
-                        },
-                        {
-                          "id": "tapg1",
-                          "type": "ref",
-                          "ref": "tbrR4"
-                        },
-                        {
-                          "id": "qIKqw",
-                          "type": "ref",
-                          "ref": "tbrR4"
-                        }
-                      ]
-                    },
-                    {
-                      "id": "oLoRH",
-                      "type": "ref",
-                      "ref": "T73Cd",
-                      "children": [
-                        {
-                          "id": "9tiSi",
-                          "type": "ref",
-                          "ref": "uKYIj"
-                        },
-                        {
-                          "id": "a1KTQ",
-                          "type": "ref",
-                          "ref": "uKYIj"
-                        },
-                        {
-                          "id": "QOEGC",
-                          "type": "ref",
-                          "ref": "uKYIj"
-                        },
-                        {
-                          "id": "U1Vgi",
-                          "type": "ref",
-                          "ref": "uKYIj"
-                        },
-                        {
-                          "id": "lOxqV",
-                          "type": "ref",
-                          "ref": "uKYIj"
-                        }
-                      ]
-                    },
-                    {
-                      "id": "QtacS",
-                      "type": "ref",
-                      "ref": "T73Cd",
-                      "children": [
-                        {
-                          "id": "uqf2F",
-                          "type": "ref",
-                          "ref": "uKYIj"
-                        },
-                        {
-                          "id": "DUztJ",
-                          "type": "ref",
-                          "ref": "uKYIj"
-                        },
-                        {
-                          "id": "fuzdv",
-                          "type": "ref",
-                          "ref": "uKYIj"
-                        },
-                        {
-                          "id": "btWWS",
-                          "type": "ref",
-                          "ref": "uKYIj"
-                        },
-                        {
-                          "id": "FwWTQ",
-                          "type": "ref",
-                          "ref": "uKYIj"
-                        }
-                      ]
-                    },
-                    {
-                      "id": "vrbkM",
-                      "type": "ref",
-                      "ref": "T73Cd",
-                      "children": [
-                        {
-                          "id": "dXw5w",
-                          "type": "ref",
-                          "ref": "uKYIj"
-                        },
-                        {
-                          "id": "62vsl",
-                          "type": "ref",
-                          "ref": "uKYIj"
-                        },
-                        {
-                          "id": "wW3Ky",
-                          "type": "ref",
-                          "ref": "uKYIj"
-                        },
-                        {
-                          "id": "YU4v3",
-                          "type": "ref",
-                          "ref": "uKYIj"
-                        },
-                        {
-                          "id": "L8MeZ",
-                          "type": "ref",
-                          "ref": "uKYIj"
-                        }
-                      ]
-                    },
-                    {
-                      "id": "9mwBt",
-                      "type": "ref",
-                      "ref": "T73Cd",
-                      "children": [
-                        {
-                          "id": "gbamQ",
-                          "type": "ref",
-                          "ref": "uKYIj"
-                        },
-                        {
-                          "id": "EPpJM",
-                          "type": "ref",
-                          "ref": "uKYIj"
-                        },
-                        {
-                          "id": "tNRTe",
-                          "type": "ref",
-                          "ref": "uKYIj"
-                        },
-                        {
-                          "id": "1InjP",
-                          "type": "ref",
-                          "ref": "uKYIj"
-                        },
-                        {
-                          "id": "mhKru",
-                          "type": "ref",
-                          "ref": "uKYIj"
-                        }
-                      ]
-                    }
-                  ]
-                }
-              }
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "type": "frame",
-      "id": "DynJU",
-      "x": 5668,
-      "y": -1531,
-      "name": "fyi",
-      "width": 1440,
-      "height": 128,
-      "fill": "#6b6b6bff",
-      "stroke": {
-        "align": "inside",
-        "thickness": 1
-      },
-      "layout": "vertical",
-      "gap": 24,
-      "padding": 40,
-      "children": [
-        {
-          "type": "text",
-          "id": "DNjZZ",
-          "name": "Connect MCP server",
-          "fill": "#ffffffff",
-          "content": "You might need to save this file to your workspace/project.",
-          "lineHeight": 1.399999976158142,
-          "fontFamily": "Inter",
-          "fontSize": 36,
-          "fontWeight": "normal"
-        }
-      ]
-    },
-    {
-      "type": "text",
-      "id": "pQr0G",
-      "x": 40.000015258789176,
-      "y": -508,
-      "name": "For best results select Claude Sonnet 4.5 as a model",
-      "fill": "fff",
-      "content": "FYI: When you run the prompt, you will have to allow the MCP calls.",
-      "lineHeight": 1.399999976158142,
-      "fontFamily": "Inter",
-      "fontSize": 34,
-      "fontWeight": "normal"
-    },
-    {
-      "type": "frame",
-      "id": "CyTSW",
-      "x": 0.000015258789176186838,
-      "y": -548,
-      "name": "fyi",
-      "width": 1440,
-      "height": 128,
-      "fill": "#6b6b6bff",
-      "stroke": {
-        "align": "inside",
-        "thickness": 1
-      },
-      "layout": "vertical",
-      "gap": 24,
-      "padding": 40,
-      "children": [
-        {
-          "type": "text",
-          "id": "LWde7",
-          "name": "Connect MCP server",
-          "fill": "#ffffffff",
-          "content": "You might need to approve the MCP calls.",
-          "lineHeight": 1.399999976158142,
-          "fontFamily": "Inter",
-          "fontSize": 36,
-          "fontWeight": "normal"
-        }
-      ]
-    },
-    {
-      "type": "frame",
-      "id": "tlPHu",
-      "x": 1909,
-      "y": -1565,
-      "name": "Step 2 Frame",
+      "id": "eELxA",
+      "x": 3184,
+      "y": 1878,
+      "name": "dashboard-revenue",
       "theme": {
         "Mode": "Dark"
       },
       "clip": true,
       "width": 1440,
-      "layout": "vertical",
-      "children": [
-        {
-          "id": "XHg17",
-          "type": "ref",
-          "ref": "pPOgy",
-          "width": "fill_container",
-          "height": "fit_content",
-          "name": "table",
-          "children": [
-            {
-              "id": "RQ8PM",
-              "type": "ref",
-              "ref": "T73Cd",
-              "width": "fill_container",
-              "name": "headerRow",
-              "children": [
-                {
-                  "id": "NPyv3",
-                  "type": "ref",
-                  "ref": "tbrR4",
-                  "width": 160,
-                  "name": "statusHeader",
-                  "descendants": {
-                    "XGc4z": {
-                      "content": "Status"
-                    }
-                  }
-                },
-                {
-                  "id": "9TkWj",
-                  "type": "ref",
-                  "ref": "tbrR4",
-                  "width": 240,
-                  "name": "nameHeader",
-                  "descendants": {
-                    "XGc4z": {
-                      "content": "Name"
-                    }
-                  }
-                },
-                {
-                  "id": "Iv9hb",
-                  "type": "ref",
-                  "ref": "tbrR4",
-                  "width": "fill_container",
-                  "name": "descHeader",
-                  "descendants": {
-                    "XGc4z": {
-                      "content": "Description"
-                    }
-                  }
-                },
-                {
-                  "id": "zJ1us",
-                  "type": "ref",
-                  "ref": "tbrR4",
-                  "width": 240,
-                  "name": "dateHeader",
-                  "descendants": {
-                    "XGc4z": {
-                      "content": "Return date"
-                    }
-                  }
-                }
-              ]
-            },
-            {
-              "id": "M873F",
-              "type": "ref",
-              "ref": "T73Cd",
-              "width": "fill_container",
-              "name": "row1",
-              "children": [
-                {
-                  "id": "Kk3Ys",
-                  "type": "ref",
-                  "ref": "uKYIj",
-                  "width": 160,
-                  "name": "cell1_1",
-                  "children": [
-                    {
-                      "id": "j3zHI",
-                      "type": "ref",
-                      "ref": "7KC5U",
-                      "name": "label1",
-                      "descendants": {
-                        "AWwyf": {
-                          "content": "New"
-                        }
-                      }
-                    }
-                  ]
-                },
-                {
-                  "id": "ahaRl",
-                  "type": "ref",
-                  "ref": "uKYIj",
-                  "width": 240,
-                  "name": "cell1_2",
-                  "children": [
-                    {
-                      "type": "text",
-                      "id": "nfryI",
-                      "name": "text1_2",
-                      "fill": "$--foreground",
-                      "content": "Aurora Scout",
-                      "fontFamily": "$--font-secondary",
-                      "fontSize": 14,
-                      "fontWeight": "normal"
-                    }
-                  ]
-                },
-                {
-                  "id": "eVibu",
-                  "type": "ref",
-                  "ref": "uKYIj",
-                  "width": "fill_container",
-                  "name": "cell1_3",
-                  "children": [
-                    {
-                      "type": "text",
-                      "id": "XZh8s",
-                      "name": "text1_3",
-                      "fill": "$--foreground",
-                      "content": "Lightweight rover ideal for high-speed reconnaissance.",
-                      "fontFamily": "$--font-secondary",
-                      "fontSize": 14,
-                      "fontWeight": "normal"
-                    }
-                  ]
-                },
-                {
-                  "id": "KLn3j",
-                  "type": "ref",
-                  "ref": "uKYIj",
-                  "width": 240,
-                  "name": "cell1_4",
-                  "children": [
-                    {
-                      "type": "text",
-                      "id": "Pl4HM",
-                      "name": "text1_4",
-                      "fill": "$--foreground",
-                      "content": "Sol 543",
-                      "fontFamily": "$--font-secondary",
-                      "fontSize": 14,
-                      "fontWeight": "normal"
-                    }
-                  ]
-                }
-              ]
-            },
-            {
-              "id": "isAPY",
-              "type": "ref",
-              "ref": "T73Cd",
-              "width": "fill_container",
-              "name": "row2",
-              "children": [
-                {
-                  "id": "h0Kjy",
-                  "type": "ref",
-                  "ref": "uKYIj",
-                  "width": 160,
-                  "name": "cell2_1",
-                  "children": [
-                    {
-                      "id": "9vKOM",
-                      "type": "ref",
-                      "ref": "L8Rgv",
-                      "name": "label2",
-                      "descendants": {
-                        "glumS": {
-                          "content": "Active"
-                        }
-                      }
-                    }
-                  ]
-                },
-                {
-                  "id": "9KrrG",
-                  "type": "ref",
-                  "ref": "uKYIj",
-                  "width": 240,
-                  "name": "cell2_2",
-                  "children": [
-                    {
-                      "type": "text",
-                      "id": "OkJXU",
-                      "name": "text2_2",
-                      "fill": "$--foreground",
-                      "content": "Curiosity-X",
-                      "fontFamily": "$--font-primary",
-                      "fontSize": 14,
-                      "fontWeight": "normal"
-                    }
-                  ]
-                },
-                {
-                  "id": "FeOeo",
-                  "type": "ref",
-                  "ref": "uKYIj",
-                  "width": "fill_container",
-                  "name": "cell2_3",
-                  "children": [
-                    {
-                      "type": "text",
-                      "id": "wZrIk",
-                      "name": "text2_3",
-                      "fill": "$--foreground",
-                      "content": "Reliable all-rounder for exploration and sample collection.",
-                      "fontFamily": "$--font-primary",
-                      "fontSize": 14,
-                      "fontWeight": "normal"
-                    }
-                  ]
-                },
-                {
-                  "id": "S2VcE",
-                  "type": "ref",
-                  "ref": "uKYIj",
-                  "width": 240,
-                  "name": "cell2_4",
-                  "children": [
-                    {
-                      "type": "text",
-                      "id": "4i51H",
-                      "name": "text2_4",
-                      "fill": "$--foreground",
-                      "content": "Sol 527",
-                      "fontFamily": "$--font-primary",
-                      "fontSize": 14,
-                      "fontWeight": "normal"
-                    }
-                  ]
-                }
-              ]
-            },
-            {
-              "id": "RCtI4",
-              "type": "ref",
-              "ref": "T73Cd",
-              "width": "fill_container",
-              "name": "row3",
-              "children": [
-                {
-                  "id": "sEsWm",
-                  "type": "ref",
-                  "ref": "uKYIj",
-                  "width": 160,
-                  "name": "cell3_1",
-                  "children": [
-                    {
-                      "id": "kF2XZ",
-                      "type": "ref",
-                      "ref": "L8Rgv",
-                      "name": "label3",
-                      "descendants": {
-                        "glumS": {
-                          "content": "Active"
-                        }
-                      }
-                    }
-                  ]
-                },
-                {
-                  "id": "T2Ej1",
-                  "type": "ref",
-                  "ref": "uKYIj",
-                  "width": 240,
-                  "name": "cell3_2",
-                  "children": [
-                    {
-                      "type": "text",
-                      "id": "Sk19q",
-                      "name": "text3_2",
-                      "fill": "$--foreground",
-                      "content": "Pathfinder Neo",
-                      "fontFamily": "$--font-primary",
-                      "fontSize": 14,
-                      "fontWeight": "normal"
-                    }
-                  ]
-                },
-                {
-                  "id": "w8nnC",
-                  "type": "ref",
-                  "ref": "uKYIj",
-                  "width": "fill_container",
-                  "name": "cell3_3",
-                  "children": [
-                    {
-                      "type": "text",
-                      "id": "QTOr3",
-                      "name": "text3_3",
-                      "fill": "$--foreground",
-                      "content": "Compact model for short-range geological missions.",
-                      "fontFamily": "$--font-primary",
-                      "fontSize": 14,
-                      "fontWeight": "normal"
-                    }
-                  ]
-                },
-                {
-                  "id": "Gm45A",
-                  "type": "ref",
-                  "ref": "uKYIj",
-                  "width": 240,
-                  "name": "cell3_4",
-                  "children": [
-                    {
-                      "type": "text",
-                      "id": "ORrwr",
-                      "name": "text3_4",
-                      "fill": "$--foreground",
-                      "content": "Sol 519",
-                      "fontFamily": "$--font-primary",
-                      "fontSize": 14,
-                      "fontWeight": "normal"
-                    }
-                  ]
-                }
-              ]
-            },
-            {
-              "id": "SD5v5",
-              "type": "ref",
-              "ref": "T73Cd",
-              "width": "fill_container",
-              "name": "row4",
-              "children": [
-                {
-                  "id": "QBNsU",
-                  "type": "ref",
-                  "ref": "uKYIj",
-                  "width": 160,
-                  "name": "cell4_1",
-                  "children": [
-                    {
-                      "id": "Nm4Er",
-                      "type": "ref",
-                      "ref": "it00G",
-                      "name": "label4",
-                      "descendants": {
-                        "izLyj": {
-                          "content": "Maintenance"
-                        }
-                      }
-                    }
-                  ]
-                },
-                {
-                  "id": "PBllO",
-                  "type": "ref",
-                  "ref": "uKYIj",
-                  "width": 240,
-                  "name": "cell4_2",
-                  "children": [
-                    {
-                      "type": "text",
-                      "id": "AJXcm",
-                      "name": "text4_2",
-                      "fill": "$--foreground",
-                      "content": "Spirit-9",
-                      "fontFamily": "$--font-primary",
-                      "fontSize": 14,
-                      "fontWeight": "normal"
-                    }
-                  ]
-                },
-                {
-                  "id": "aStAb",
-                  "type": "ref",
-                  "ref": "uKYIj",
-                  "width": "fill_container",
-                  "name": "cell4_3",
-                  "children": [
-                    {
-                      "type": "text",
-                      "id": "V8SMQ",
-                      "name": "text4_3",
-                      "fill": "$--foreground",
-                      "content": "Completed mapping of Sector D-12 successfully.",
-                      "fontFamily": "$--font-primary",
-                      "fontSize": 14,
-                      "fontWeight": "normal"
-                    }
-                  ]
-                },
-                {
-                  "id": "5MuoQ",
-                  "type": "ref",
-                  "ref": "uKYIj",
-                  "width": 240,
-                  "name": "cell4_4",
-                  "children": [
-                    {
-                      "type": "text",
-                      "id": "Vz5jd",
-                      "name": "text4_4",
-                      "fill": "$--foreground",
-                      "content": "—",
-                      "fontFamily": "$--font-primary",
-                      "fontSize": 14,
-                      "fontWeight": "normal"
-                    }
-                  ]
-                }
-              ]
-            }
-          ]
-        }
-      ]
+      "height": "fit_content(717)",
+      "fill": "$--background"
+    },
+    {
+      "type": "prompt",
+      "id": "VPr15",
+      "x": 3184,
+      "y": 2934.9999999999995,
+      "model": "cursor-composer",
+      "width": 400,
+      "height": 219,
+      "content": "Design a dashboard into \"dashboard-football\" frame with a table ranking UEFA teams. Show goal counts, captain name, etc. Put stats on the top."
     },
     {
       "type": "frame",
-      "id": "sbChi",
-      "x": 0,
-      "y": -35,
-      "name": "welcome ↓",
-      "clip": true,
-      "width": 1578,
-      "height": 1733,
-      "fill": "#141414ff",
-      "cornerRadius": 16,
-      "stroke": {
-        "align": "inside",
-        "thickness": 0.75
+      "id": "RZJKy",
+      "x": 3184,
+      "y": 3266.9999999999995,
+      "name": "dashboard-football",
+      "theme": {
+        "Mode": "Dark"
       },
-      "layout": "none",
-      "children": [
-        {
-          "type": "text",
-          "id": "moD8f",
-          "x": 60,
-          "y": 546,
-          "name": "Look around and see what’s possible, or clear the canvas and start creating.",
-          "fill": "#ffffffff",
-          "textGrowth": "fixed-width",
-          "width": 630,
-          "content": "Look around and see what’s possible, or clear the canvas and start creating.",
-          "lineHeight": 1.4583333333333333,
-          "textAlignVertical": "bottom",
-          "fontFamily": "Rubik",
-          "fontSize": 48,
-          "fontWeight": "normal",
-          "letterSpacing": -1.44
-        },
-        {
-          "type": "text",
-          "id": "vZvTE",
-          "x": 60,
-          "y": 60,
-          "name": "Welcome to Pencil!",
-          "fill": "#ffffffff",
-          "textGrowth": "fixed-width",
-          "width": 630,
-          "content": "Welcome to Pencil!",
-          "lineHeight": 1.100000023841858,
-          "fontFamily": "Funnel Display",
-          "fontSize": 120,
-          "fontWeight": "500",
-          "letterSpacing": -3.5999999999999996
-        },
-        {
-          "type": "frame",
-          "id": "kjpSw",
-          "x": 1170,
-          "y": 81,
-          "name": "logotype",
-          "clip": true,
-          "width": 325.4095458984375,
-          "height": 64,
-          "stroke": {
-            "align": "inside",
-            "thickness": 0.5633822083473206
-          },
-          "layout": "none",
-          "children": [
-            {
-              "type": "path",
-              "id": "E95mx",
-              "x": 0.0004119873046875,
-              "y": 0,
-              "name": "type",
-              "geometry": "M135.58105 30.40039c8.35553 0.00001 15.51127 1.59981 21.4668 4.7998 6.04434 3.19999 10.66626 7.77792 13.86621 13.7334 3.19997 5.95552 4.79979 13.06641 4.79981 21.33301l0 7.4668-60.66602 0c0.88889 5.95543 3.15547 10.48852 6.79981 13.59961 3.64444 3.11111 8.44484 4.66699 14.40039 4.66699 4.71086-0.00005 8.44375-0.80048 11.19922-2.40039 2.75555-1.6 4.71164-4.04412 5.86718-7.33301l22.13282 0c-1.77778 8.53332-6.0882 15.24491-12.93262 20.13379-6.84445 4.8-15.55602 7.19922-26.13379 7.19922-8.62217-0.00002-16.13323-1.68865-22.5332-5.06641-6.39995-3.46665-11.33316-8.31103-14.79981-14.5332-3.46666-6.3111-5.20019-13.73328-5.20019-22.2666 0-8.53327 1.68868-15.86669 5.0664-22 3.37778-6.22222 8.17817-10.97771 14.40039-14.2666 6.3111-3.37775 13.73329-5.06641 22.2666-5.06641z m0.13282 17.46582c-5.42202 0.00007-9.86644 1.28948-13.33301 3.86719-3.37766 2.57773-5.64424 6.35542-6.79981 11.33301l38.9336 0c-0.71114-5.06655-2.66724-8.84416-5.86719-11.33301-3.2-2.57773-7.51143-3.86719-12.93359-3.86719z m194.6875-17.46582c10.57779 0 19.28933 2.66667 26.13379 8 6.84433 5.33332 11.15582 12.66675 12.93359 22l-22.2666 0c-1.15552-3.46651-3.15576-6.13335-6-8-2.84445-1.86667-6.44522-2.80078-10.80078-2.80078-5.95536 0.0001-10.75507 1.95618-14.39942 5.86719-3.55554 3.91111-5.333 9.4221-5.333 16.5332 0 7.11094 1.82156 12.62211 5.46582 16.5332 3.64434 3.91101 8.40014 5.86709 14.2666 5.86719 9.42206 0 15.15567-4.00028 17.20019-12l22.2666 0c-1.60003 9.77741-5.82186 17.4216-12.66601 22.93262-6.84445 5.51111-15.77857 8.2666-26.80078 8.2666-8.35538-0.00006-15.689-1.68869-22-5.06641-6.22202-3.46663-11.11054-8.31115-14.66602-14.5332-3.46667-6.22222-5.20019-13.55556-5.20019-22 0-8.44443 1.73352-15.77778 5.20019-22 3.46665-6.22212 8.35501-11.02264 14.66602-14.40039 6.311-3.4666 13.64462-5.19916 22-5.19922z m-279.06836-26.40039c12.17778 0 21.64484 3.06686 28.40039 9.2002 6.75546 6.13332 10.13281 14.5336 10.13281 25.20019-0.00008 10.57747-3.3775 18.97709-10.13281 25.19922-6.75555 6.13333-16.22261 9.2002-28.40039 9.2002l-28.79981 0 0 39.20019-22.5332 0 0-108 51.33301 0z m-28.79981 49.2002l27.4668-0.00001c5.6 0 9.86647-1.28941 12.7998-3.86718 2.93321-2.66659 4.40031-6.31061 4.40039-10.93262 0-4.71111-1.46706-8.35581-4.40038-10.93359-2.93333-2.57775-7.19983-3.86719-12.79981-3.86719l-27.4668 0 0 29.60058z m218.47168-22.667c11.11107 0 19.68897 3.06692 25.7334 9.2002 6.13333 6.04444 9.2002 14.17817 9.2002 24.40039l0 47.86621-22.13282 0 0-43.7334c-0.00001-5.68327-1.50181-10.03202-4.50488-13.0459l-0.5918-0.57422c-3.10269-2.9197-7.58195-4.37988-13.4375-4.37988-6.04425 0.00006-10.66627 1.55595-13.86621 4.66699-3.11103 3.02221-4.66697 7.46643-4.66699 13.33301l0 43.7334-22.13281 0-0.00098-63.5-10.60449 0 0-16.5 22.07227 0 0 13.06641 5.59961 0c3.11106-4.6221 7.02239-8.17716 11.73339-10.66602 4.71105-2.57774 10.57753-3.86715 17.59961-3.86719z m160.66114 81.4668l-22 0 0-79 22 0 0 79z m40.98925 0l-22.13379 0 0-112 22.13379 0 0 112z m-40.98925-95.5l-22 0 0-16.5 22 0 0 16.5z",
-              "fill": "#ffffffff",
-              "width": 249.3841094970703,
-              "height": 64
-            },
-            {
-              "type": "frame",
-              "id": "LtSu9",
-              "x": 274.93011474609375,
-              "y": 0,
-              "name": "mark-mono-v1",
-              "width": 50.47904586791992,
-              "height": 63.09880828857422,
-              "stroke": {
-                "align": "inside",
-                "thickness": 0.22535288333892822
-              },
-              "layout": "none",
-              "children": [
-                {
-                  "type": "path",
-                  "id": "g9jTd",
-                  "x": 12.61976146697998,
-                  "y": 50.3802375793457,
-                  "name": "graphite",
-                  "geometry": "M0 0l113.13708 0-56.56854 56.56854-56.56854-56.56854z",
-                  "fill": "#ffffffff",
-                  "width": 25.23952293395996,
-                  "height": 12.61976146697998,
-                  "stroke": {
-                    "align": "inside",
-                    "thickness": 0.22535288333892822
-                  }
-                },
-                {
-                  "type": "rectangle",
-                  "id": "zmJqu",
-                  "x": 0,
-                  "y": 0,
-                  "name": "wood",
-                  "fill": "#ffffffff",
-                  "width": 50.47904586791992,
-                  "height": 37.859283447265625,
-                  "stroke": {
-                    "align": "outside",
-                    "thickness": 0.22535288333892822
-                  }
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "type": "text",
-          "id": "vCuCj",
-          "x": 60,
-          "y": 1014,
-          "name": "Look around and see what’s possible, or clear the canvas and start creating.",
-          "fill": "#ffffffff",
-          "textGrowth": "fixed-width",
-          "width": 1469,
-          "content": "Pro tips:\n\n- Explore \"Design Kits and Style Guides\" on the top\n- Copy and paste from Figma (bitmaps are ommited)\n- In agent chat, ask to change \"selected frame\"\n- Variables let you define reusable primitives like colors\n- Components are in the top right corner\n- Slots let you define how to components are assembled together",
-          "lineHeight": 1.4583333333333333,
-          "textAlignVertical": "bottom",
-          "fontFamily": "Rubik",
-          "fontSize": 48,
-          "fontWeight": "normal",
-          "letterSpacing": -1.44
-        }
-      ]
-    },
-    {
-      "type": "text",
-      "id": "moMxv",
-      "x": -50,
-      "y": -2841,
-      "fill": "#ff8303ff",
-      "content": "↓",
-      "fontFamily": "Inter",
-      "fontSize": 320,
-      "fontWeight": "normal"
-    },
-    {
-      "type": "text",
-      "id": "y1EI4",
-      "x": 4772,
-      "y": -1869,
-      "name": "Step 2",
-      "fill": "#ff8303ff",
-      "content": "←",
-      "lineHeight": 1.399999976158142,
-      "fontFamily": "Inter",
-      "fontSize": 100,
-      "fontWeight": "600"
-    },
-    {
-      "type": "text",
-      "id": "9184N",
-      "x": 6688,
-      "y": -1873,
-      "name": "Step 2",
-      "fill": "#ff8303ff",
-      "content": "←",
-      "lineHeight": 1.399999976158142,
-      "fontFamily": "Inter",
-      "fontSize": 100,
-      "fontWeight": "600"
+      "clip": true,
+      "width": 1440,
+      "height": 933,
+      "fill": "$--background",
+      "layout": "vertical",
+      "gap": 24,
+      "padding": 32
     }
   ],
   "themes": {

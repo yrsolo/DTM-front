@@ -1,5 +1,4 @@
 import React from "react";
-import { useSnapshot } from "../data/useSnapshot";
 import { LayoutContext } from "./Layout";
 
 export type FiltersState = {
@@ -10,10 +9,9 @@ export type FiltersState = {
 
 export function FiltersBar() {
   const ctx = React.useContext(LayoutContext);
-  const { snapshot, reload, isLoading, error } = useSnapshot();
-
   if (!ctx) return null;
-  const { filters, setFilters } = ctx;
+  const { filters, setFilters, snapshotState } = ctx;
+  const { snapshot, reloadLocal, syncFromApi, isLoading, error } = snapshotState;
 
   const people = snapshot?.people ?? [];
   const statusEntries = Object.entries(snapshot?.enums?.status ?? {});
@@ -49,8 +47,12 @@ export function FiltersBar() {
         aria-label="Search"
       />
 
-      <button onClick={reload} disabled={isLoading}>
-        {isLoading ? "Loading..." : "Refresh"}
+      <button onClick={reloadLocal} disabled={isLoading}>
+        {isLoading ? "Загрузка..." : "Обновить из локального JSON"}
+      </button>
+
+      <button onClick={syncFromApi} disabled={isLoading}>
+        {isLoading ? "Загрузка..." : "Обновить JSON из API"}
       </button>
 
       {error ? <span className="muted">Error: {String(error)}</span> : null}

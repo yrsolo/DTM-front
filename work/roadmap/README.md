@@ -16,3 +16,4 @@ Add detailed campaign plans under `work/roadmap/campaigns/<CAM>/`.
 | CAM | Goal | Priority | Status | Link |
 |---|---|---|---|---|
 | CAM-MVP-DEPLOY-FRONTEND-OBJECT-STORAGE | MVP one-command deploy фронта в Yandex Object Storage static hosting | P0 | active-now | `work/roadmap/campaigns/CAM-MVP-DEPLOY-FRONTEND-OBJECT-STORAGE/` |
+| CAM-ADHOC-GANTT-UI-REFRESH | Visual refresh for grant/gantt charts UI in web frontend | P1 | done | n/a |

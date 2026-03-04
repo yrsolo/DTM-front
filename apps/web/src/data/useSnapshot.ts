@@ -1,7 +1,9 @@
 import { SnapshotV1 } from "@dtm/schema/snapshot";
 import React from "react";
-import { fetchSnapshot } from "./api";
+import { fetchApiSnapshot, fetchLocalSnapshot } from "./api";
 import { normalizeToSnapshotV1 } from "./normalize";
+
+const LOCAL_SNAPSHOT_STORAGE_KEY = "dtm.web.localSnapshotRaw.v1";
 
 let cached: SnapshotV1 | null = null;
 
@@ -10,11 +12,28 @@ export function useSnapshot() {
   const [isLoading, setIsLoading] = React.useState<boolean>(!cached);
   const [error, setError] = React.useState<unknown>(null);
 
-  const load = React.useCallback(async () => {
+  const loadLocal = React.useCallback(async () => {
     try {
       setIsLoading(true);
       setError(null);
-      const raw = await fetchSnapshot();
+      const fromStorage = localStorage.getItem(LOCAL_SNAPSHOT_STORAGE_KEY);
+      const raw = fromStorage ? JSON.parse(fromStorage) : await fetchLocalSnapshot();
+      const normalized = normalizeToSnapshotV1(raw);
+      cached = normalized;
+      setSnapshot(normalized);
+    } catch (e) {
+      setError(e);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  const syncFromApi = React.useCallback(async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      const raw = await fetchApiSnapshot();
+      localStorage.setItem(LOCAL_SNAPSHOT_STORAGE_KEY, JSON.stringify(raw));
       const normalized = normalizeToSnapshotV1(raw);
       cached = normalized;
       setSnapshot(normalized);
@@ -26,8 +45,8 @@ export function useSnapshot() {
   }, []);
 
   React.useEffect(() => {
-    if (!cached) void load();
-  }, [load]);
+    if (!cached) void loadLocal();
+  }, [loadLocal]);
 
-  return { snapshot, isLoading, error, reload: load };
+  return { snapshot, isLoading, error, reloadLocal: loadLocal, syncFromApi };
 }

@@ -1,0 +1,9 @@
+# Copy to your shell/session and set real values before deploy.
+# Do not commit real secrets.
+
+AWS_ACCESS_KEY_ID=YOUR_ACCESS_KEY_ID
+AWS_SECRET_ACCESS_KEY=YOUR_SECRET_ACCESS_KEY
+# Non-secret bucket/endpoint/region values are configured in scripts/deploy.yaml
+
+# Optional: override runtime config file source
+DTM_WEB_PUBLIC_CONFIG_PATH=apps/web/config/public.yaml
