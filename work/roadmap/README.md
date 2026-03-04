@@ -1,19 +1,13 @@
 # Roadmap
 
-List of planned campaigns (not started yet).
-
-Columns (suggested):
-- CAM
-- Goal
-- Priority (P0/P1/P2)
-- Status (planned/designed/blocked)
-- Link to charter/plan
-
-Add detailed campaign plans under `work/roadmap/campaigns/<CAM>/`.
+List of planned and active campaigns.
 
 ## Campaigns
 
 | CAM | Goal | Priority | Status | Link |
 |---|---|---|---|---|
-| CAM-MVP-DEPLOY-FRONTEND-OBJECT-STORAGE | MVP one-command deploy фронта в Yandex Object Storage static hosting | P0 | active-now | `work/roadmap/campaigns/CAM-MVP-DEPLOY-FRONTEND-OBJECT-STORAGE/` |
-| CAM-ADHOC-GANTT-UI-REFRESH | Visual refresh for grant/gantt charts UI in web frontend | P1 | done | n/a |
+| CAM-VERSIONED-RELEASES-FRONTEND | Introduce release versioning and immutable release manifests for frontend deploys | P1 | done | `work/roadmap/campaigns/CAM-VERSIONED-RELEASES-FRONTEND/` |
+| CAM-CDN-CUSTOM-DOMAIN-FRONTEND | Frontend delivery via CDN + custom domain over current Object Storage deploy | P1 | done | `work/roadmap/campaigns/CAM-CDN-CUSTOM-DOMAIN-FRONTEND/` |
+| CAM-CI-DEPLOY-FRONTEND-OBJECT-STORAGE | GitHub Actions deploy for frontend to Yandex Object Storage | P1 | done | `work/roadmap/campaigns/CAM-CI-DEPLOY-FRONTEND-OBJECT-STORAGE/` |
+| CAM-MVP-DEPLOY-FRONTEND-OBJECT-STORAGE | MVP one-command deploy to Yandex Object Storage static hosting | P0 | done | `work/roadmap/campaigns/CAM-MVP-DEPLOY-FRONTEND-OBJECT-STORAGE/` |
+| CAM-ADHOC-GANTT-UI-REFRESH | Visual refresh for gantt charts UI in web frontend | P1 | done | n/a |
