@@ -58,15 +58,10 @@ function toNumber(value: string | undefined, fallback: number): number {
   return Number.isFinite(parsed) ? parsed : fallback;
 }
 
-let cachedConfig: PublicConfig | null = null;
-
-export function getPublicConfig(): PublicConfig {
-  if (cachedConfig) return cachedConfig;
-
-  const parsed = parseSimpleYaml(rawPublicConfig);
+function buildConfig(parsed: Record<string, string>): PublicConfig {
   const apiBaseUrl = parsed.api_base_url?.trim() || null;
 
-  cachedConfig = {
+  return {
     apiBaseUrl,
     apiFrontendPath: parsed.api_frontend_path || DEFAULT_CONFIG.apiFrontendPath,
     apiStatuses: parsed.api_statuses || DEFAULT_CONFIG.apiStatuses,
@@ -78,6 +73,29 @@ export function getPublicConfig(): PublicConfig {
     localSnapshotPath:
       parsed.local_snapshot_path || DEFAULT_CONFIG.localSnapshotPath,
   };
+}
 
-  return cachedConfig;
+let cachedConfigPromise: Promise<PublicConfig> | null = null;
+
+export async function loadPublicConfig(): Promise<PublicConfig> {
+  if (cachedConfigPromise) return cachedConfigPromise;
+
+  cachedConfigPromise = (async () => {
+    try {
+      const res = await fetch("/config/public.yaml", {
+        headers: { accept: "text/yaml,text/plain" },
+        cache: "no-store",
+      });
+      if (res.ok) {
+        const yaml = await res.text();
+        return buildConfig(parseSimpleYaml(yaml));
+      }
+    } catch {
+      // Runtime config is optional; fallback is applied below.
+    }
+
+    return buildConfig(parseSimpleYaml(rawPublicConfig));
+  })();
+
+  return cachedConfigPromise;
 }

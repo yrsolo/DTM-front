@@ -5,23 +5,29 @@ import { LayoutContext } from "../components/Layout";
 import { LoadingState } from "../components/LoadingState";
 import { TaskDetailsDrawer } from "../components/TaskDetailsDrawer";
 import { Tooltip, TooltipState } from "../components/Tooltip";
-import { useSnapshot } from "../data/useSnapshot";
 import { TasksTimeline } from "../gantt/TasksTimeline";
 import { RenderTask } from "../gantt/types";
+import { useElementWidth } from "../utils/useElementWidth";
+
+function clamp(value: number, min: number, max: number) {
+  return Math.max(min, Math.min(max, value));
+}
 
 export function TasksPage() {
   const ctx = React.useContext(LayoutContext);
-  const { snapshot, isLoading, error, reload } = useSnapshot();
-
   const [tooltip, setTooltip] = React.useState<TooltipState>({ visible: false });
   const [selectedId, setSelectedId] = React.useState<string | null>(null);
+  const [zoom, setZoom] = React.useState(1);
+  const timelineHost = useElementWidth<HTMLDivElement>();
+
+  if (!ctx) return null;
+  const { filters, snapshotState, design } = ctx;
+  const { snapshot, isLoading, error, reloadLocal } = snapshotState;
+  const rowH = design.tableRowHeight;
 
   if (isLoading) return <LoadingState />;
-  if (error) return <ErrorBanner error={error} onRetry={reload} />;
+  if (error) return <ErrorBanner error={error} onRetry={reloadLocal} />;
   if (!snapshot) return <EmptyState title="No data" description="Snapshot is empty." />;
-  if (!ctx) return null;
-
-  const { filters } = ctx;
 
   const peopleById = new Map(snapshot.people.map((p) => [p.id, p.name]));
   const statusLabels = snapshot.enums?.status ?? {};
@@ -55,41 +61,36 @@ export function TasksPage() {
   };
 
   const onLeave = () => setTooltip({ visible: false });
+  const timelineWidth = Math.max(timelineHost.width, design.timelineWidth);
 
   return (
     <div className="card">
-      <h3 style={{ marginTop: 0 }}>By tasks</h3>
-      <div className="muted" style={{ marginBottom: 10 }}>
-        Tasks: {tasks.length} • Generated: {snapshot.meta.generatedAt}
+      <div className="pageHeader">
+        <h3 className="pageTitle">Grant chart by tasks</h3>
+        <div className="muted">Generated: {snapshot.meta.generatedAt}</div>
       </div>
 
       <div className="grid2">
-        <div className="card">
-          <table className="table">
+        <div className="card tablePinnedTop">
+          <table className="table tableFixedRows">
             <thead>
               <tr>
-                <th>Title</th>
-                <th>Owner</th>
-                <th>Status</th>
-                <th>Dates</th>
+                <th style={{ width: `${design.tasksTitleCol}%` }}>Title</th>
+                <th style={{ width: `${design.tasksStatusCol}%` }}>Status</th>
               </tr>
             </thead>
             <tbody>
               {tasks.map((t) => (
                 <tr
                   key={t.id}
-                  style={{ cursor: "pointer", height: 32 }}
+                  style={{ cursor: "pointer" }}
                   onClick={() => setSelectedId(t.id)}
                 >
-                  <td style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", maxWidth: 180 }}>
+                  <td className="nowrap">
                     {t.title}
                   </td>
-                  <td className="muted">{t.ownerId ? (peopleById.get(t.ownerId) ?? t.ownerId) : "—"}</td>
                   <td>
                     <span className="badge">{statusLabels[t.status] ?? t.status}</span>
-                  </td>
-                  <td className="muted" style={{ fontSize: 11 }}>
-                    {(t.start ?? "—") + " → " + (t.end ?? "—")}
                   </td>
                 </tr>
               ))}
@@ -97,10 +98,28 @@ export function TasksPage() {
           </table>
         </div>
 
-        <div className="card" style={{ overflow: "auto" }}>
+        <div
+          className="card timelineScroll"
+          ref={timelineHost.ref}
+          onWheel={(e) => {
+            e.preventDefault();
+            const factor = e.deltaY < 0 ? 1.08 : 0.92;
+            setZoom((z) => clamp(z * factor, 0.4, 5));
+          }}
+          style={{ overflow: "auto" }}
+        >
           <TasksTimeline
             tasks={tasks}
-            width={760}
+            width={timelineWidth}
+            minHeight={design.timelineMinHeight}
+            topOffset={design.timelineTopOffset}
+            dateLabelY={design.timelineDateLabelY}
+            zoom={zoom}
+            stripeOpacity={design.timelineStripeOpacity}
+            gridOpacity={design.timelineGridOpacity}
+            barInsetY={design.barInsetY}
+            barRadius={design.barRadius}
+            rowH={rowH}
             onHover={onHover}
             onLeave={onLeave}
             onClick={(t) => setSelectedId(t.id)}

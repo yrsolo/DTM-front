@@ -5,23 +5,30 @@ import { LayoutContext } from "../components/Layout";
 import { LoadingState } from "../components/LoadingState";
 import { TaskDetailsDrawer } from "../components/TaskDetailsDrawer";
 import { Tooltip, TooltipState } from "../components/Tooltip";
-import { useSnapshot } from "../data/useSnapshot";
 import { DesignersTimeline } from "../gantt/DesignersTimeline";
 import { RenderTask } from "../gantt/types";
+import { useElementWidth } from "../utils/useElementWidth";
+
+function clamp(value: number, min: number, max: number) {
+  return Math.max(min, Math.min(max, value));
+}
 
 export function DesignersPage() {
   const ctx = React.useContext(LayoutContext);
-  const { snapshot, isLoading, error, reload } = useSnapshot();
 
   const [tooltip, setTooltip] = React.useState<TooltipState>({ visible: false });
   const [selectedId, setSelectedId] = React.useState<string | null>(null);
+  const [zoom, setZoom] = React.useState(1);
+  const timelineHost = useElementWidth<HTMLDivElement>();
+
+  if (!ctx) return null;
+  const { filters, snapshotState, design } = ctx;
+  const { snapshot, isLoading, error, reloadLocal } = snapshotState;
+  const rowH = design.tableRowHeight;
 
   if (isLoading) return <LoadingState />;
-  if (error) return <ErrorBanner error={error} onRetry={reload} />;
+  if (error) return <ErrorBanner error={error} onRetry={reloadLocal} />;
   if (!snapshot) return <EmptyState title="No data" description="Snapshot is empty." />;
-  if (!ctx) return null;
-
-  const { filters } = ctx;
 
   const tasks = snapshot.tasks.filter((t) => {
     if (filters.ownerId && t.ownerId !== filters.ownerId) return false;
@@ -31,7 +38,6 @@ export function DesignersPage() {
   });
 
   const selectedTask = selectedId ? snapshot.tasks.find((t) => t.id === selectedId) ?? null : null;
-
   const onHover = (e: React.MouseEvent, t: RenderTask) => {
     setTooltip({
       visible: true,
@@ -49,22 +55,23 @@ export function DesignersPage() {
   };
 
   const onLeave = () => setTooltip({ visible: false });
+  const timelineWidth = Math.max(timelineHost.width, design.timelineWidth);
 
   return (
     <div className="card">
-      <h3 style={{ marginTop: 0 }}>By designers</h3>
-      <div className="muted" style={{ marginBottom: 10 }}>
-        Tasks: {tasks.length} • Generated: {snapshot.meta.generatedAt}
+      <div className="pageHeader">
+        <h3 className="pageTitle">Grant chart by designers</h3>
+        <div className="muted">Generated: {snapshot.meta.generatedAt}</div>
       </div>
 
       <div className="grid2">
-        <div className="card">
-          <table className="table">
+        <div className="card tablePinnedTop">
+          <table className="table tableFixedRows">
             <thead>
               <tr>
-                <th>Designer</th>
-                <th>Tasks</th>
-                <th>Load</th>
+                <th style={{ width: `${design.designersNameCol}%` }}>Designer</th>
+                <th style={{ width: `${design.designersTasksCol}%` }}>Tasks</th>
+                <th style={{ width: `${design.designersLoadCol}%` }}>Load</th>
               </tr>
             </thead>
             <tbody>
@@ -73,15 +80,26 @@ export function DesignersPage() {
                 const load = Math.min(100, (pTasks.length / 5) * 100); // 5 tasks = 100% load
                 return (
                   <tr key={p.id}>
-                    <td>{p.name}</td>
+                    <td className="nowrap">{p.name}</td>
                     <td>{pTasks.length}</td>
                     <td>
-                      <div style={{ width: 60, height: 6, background: "#eee", borderRadius: 3, overflow: "hidden" }}>
+                      <div
+                        style={{
+                          width: 92,
+                          height: 8,
+                          background: "rgba(146, 165, 228, 0.22)",
+                          borderRadius: 8,
+                          overflow: "hidden"
+                        }}
+                      >
                         <div
                           style={{
                             width: `${load}%`,
                             height: "100%",
-                            background: load > 80 ? "#ff4d4f" : "#52c41a",
+                            background:
+                              load > 80
+                                ? "linear-gradient(90deg, #ff9a8b 0%, #f062e4 100%)"
+                                : "linear-gradient(90deg, #6bb6ff 0%, #5be2ce 100%)"
                           }}
                         />
                       </div>
@@ -93,12 +111,30 @@ export function DesignersPage() {
           </table>
         </div>
 
-        <div className="card" style={{ overflow: "auto" }}>
+        <div
+          className="card timelineScroll"
+          ref={timelineHost.ref}
+          onWheel={(e) => {
+            e.preventDefault();
+            const factor = e.deltaY < 0 ? 1.08 : 0.92;
+            setZoom((z) => clamp(z * factor, 0.4, 5));
+          }}
+          style={{ overflow: "auto" }}
+        >
           <DesignersTimeline
             people={snapshot.people}
             tasks={tasks}
-            width={760}
-            height={Math.max(260, snapshot.people.length * 40)}
+            width={timelineWidth}
+            rowH={rowH}
+            height={Math.max(design.timelineMinHeight, snapshot.people.length * rowH)}
+            labelW={design.timelineLabelWidth}
+            topOffset={design.timelineTopOffset}
+            dateLabelY={design.timelineDateLabelY}
+            zoom={zoom}
+            stripeOpacity={design.timelineStripeOpacity}
+            gridOpacity={design.timelineGridOpacity}
+            barInsetY={design.barInsetY}
+            barRadius={design.barRadius}
             onHover={onHover}
             onLeave={onLeave}
             onClick={(t) => setSelectedId(t.id)}
