@@ -28,21 +28,21 @@ export function DesignControlsPanel() {
   return (
     <div className={`designPanel ${open ? "open" : ""}`}>
       <button className="designPanelToggle" onClick={() => setOpen((v) => !v)}>
-        {open ? "Hide controls" : "Design controls"}
+        {open ? "Скрыть крутилки" : "Крутилки дизайна"}
       </button>
       {open ? (
         <div className="designPanelBody">
           <div className="muted" style={{ fontSize: 12, marginBottom: 8 }}>
-            For deploy persistence upload preset to <code>{DESIGN_CONTROLS_PUBLIC_PATH}</code>
+            Для деплоя загрузи пресет в <code>{DESIGN_CONTROLS_PUBLIC_PATH}</code>
           </div>
 
           <div className="designPanelActions">
-            <button onClick={saveDesign}>Save local</button>
-            <button onClick={loadDesign}>Load local</button>
-            <button onClick={resetDesign}>Reset</button>
-            <button onClick={exportPreset}>Export preset</button>
-            <button onClick={() => importRef.current?.click()}>Import preset</button>
-            <button onClick={() => void loadDeployDesign()}>Load deploy</button>
+            <button onClick={saveDesign}>Сохранить локально</button>
+            <button onClick={loadDesign}>Загрузить локально</button>
+            <button onClick={resetDesign}>Сброс</button>
+            <button onClick={exportPreset}>Экспорт пресета</button>
+            <button onClick={() => importRef.current?.click()}>Импорт пресета</button>
+            <button onClick={() => void loadDeployDesign()}>Загрузить deploy</button>
             <input
               ref={importRef}
               type="file"

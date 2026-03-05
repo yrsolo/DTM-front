@@ -4,10 +4,27 @@ export type KeyColors = {
   keyMint: string;
   keyViolet: string;
   keyMilestone: string;
+  keyCursorTrail: string;
+  keyLeftPillText: string;
   keySurfaceTop: string;
   keySurfaceBottom: string;
   keySurfaceAlt: string;
   keyText: string;
+  keyBtnGradFrom: string;
+  keyBtnGradTo: string;
+  keyBtnHoverFrom: string;
+  keyBtnHoverTo: string;
+  keyNavBtnFrom: string;
+  keyNavBtnTo: string;
+  keyNavActiveFrom: string;
+  keyNavActiveTo: string;
+  keyBackdropLeft: string;
+  keyBackdropRight: string;
+  keyBackdropBottom: string;
+  keyAppBgTop: string;
+  keyAppBgMid: string;
+  keyAppBgBottom: string;
+  keyAppBgBase: string;
   taskColor1: string;
   taskColor2: string;
   taskColor3: string;
@@ -24,10 +41,27 @@ export const DEFAULT_KEY_COLORS: KeyColors = {
   keyMint: "#66f0d6",
   keyViolet: "#9a93ff",
   keyMilestone: "#ffd46b",
+  keyCursorTrail: "#ffd46b",
+  keyLeftPillText: "#ffd0de",
   keySurfaceTop: "#18203b",
   keySurfaceBottom: "#121a32",
   keySurfaceAlt: "#1f1736",
   keyText: "#e5ecff",
+  keyBtnGradFrom: "#ff91cb",
+  keyBtnGradTo: "#6f89ff",
+  keyBtnHoverFrom: "#ff9dd3",
+  keyBtnHoverTo: "#7c96ff",
+  keyNavBtnFrom: "#1b2440",
+  keyNavBtnTo: "#251f45",
+  keyNavActiveFrom: "#ff8ec9",
+  keyNavActiveTo: "#9a93ff",
+  keyBackdropLeft: "#ff8ec9",
+  keyBackdropRight: "#6897ff",
+  keyBackdropBottom: "#66f0d6",
+  keyAppBgTop: "#070b16",
+  keyAppBgMid: "#090e1b",
+  keyAppBgBottom: "#070b15",
+  keyAppBgBase: "#0a0d17",
   taskColor1: "#6bb8ff",
   taskColor2: "#7f8dff",
   taskColor3: "#5be2ce",
@@ -53,10 +87,27 @@ export const KEY_COLOR_ITEMS: Array<{ key: keyof KeyColors; label: string }> = [
   { key: "keyMint", label: "Mint" },
   { key: "keyViolet", label: "Violet" },
   { key: "keyMilestone", label: "Milestone" },
+  { key: "keyCursorTrail", label: "Cursor trail" },
+  { key: "keyLeftPillText", label: "Left pill text" },
   { key: "keySurfaceTop", label: "Surface top" },
   { key: "keySurfaceBottom", label: "Surface bottom" },
   { key: "keySurfaceAlt", label: "Surface alt" },
   { key: "keyText", label: "Text" },
+  { key: "keyBtnGradFrom", label: "Button from" },
+  { key: "keyBtnGradTo", label: "Button to" },
+  { key: "keyBtnHoverFrom", label: "Button hover from" },
+  { key: "keyBtnHoverTo", label: "Button hover to" },
+  { key: "keyNavBtnFrom", label: "Nav button from" },
+  { key: "keyNavBtnTo", label: "Nav button to" },
+  { key: "keyNavActiveFrom", label: "Nav active from" },
+  { key: "keyNavActiveTo", label: "Nav active to" },
+  { key: "keyBackdropLeft", label: "Backdrop left glow" },
+  { key: "keyBackdropRight", label: "Backdrop right glow" },
+  { key: "keyBackdropBottom", label: "Backdrop bottom glow" },
+  { key: "keyAppBgTop", label: "App bg top" },
+  { key: "keyAppBgMid", label: "App bg mid" },
+  { key: "keyAppBgBottom", label: "App bg bottom" },
+  { key: "keyAppBgBase", label: "App bg base" },
 ];
 
 export const TASK_PALETTE_ITEMS: Array<{ key: keyof KeyColors; label: string }> = [

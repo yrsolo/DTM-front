@@ -1,5 +1,6 @@
 import React from "react";
 import { useSnapshot } from "../data/useSnapshot";
+import { AppLocale, getUiText, UiText } from "../i18n/uiText";
 import {
   DEFAULT_DESIGN_CONTROLS,
   DESIGN_CONTROLS_PUBLIC_PATH,
@@ -13,13 +14,26 @@ import {
   KeyColors,
   normalizeKeyColors,
 } from "../design/colors";
-import { DesignControlsPanel } from "./DesignControlsPanel";
-import { ColorControlsPanel } from "./ColorControlsPanel";
-import { MaterialControlsPanel } from "./MaterialControlsPanel";
-import { TaskPalettePanel } from "./TaskPalettePanel";
-import { FiltersBar, FiltersState } from "./FiltersBar";
+import { ControlsWorkbench } from "./ControlsWorkbench";
+import { FiltersState } from "./FiltersBar";
+
+export type TimelineViewMode =
+  | "brand_designer_show"
+  | "format_brand_show"
+  | "designer_brand_show"
+  | "flat_brand_show"
+  | "show_brand_designer";
+
+export type TimelineSortMode = "last_milestone_desc" | "last_milestone_asc";
 
 export type LayoutContextValue = {
+  locale: AppLocale;
+  setLocale: React.Dispatch<React.SetStateAction<AppLocale>>;
+  ui: UiText;
+  viewMode: TimelineViewMode;
+  setViewMode: React.Dispatch<React.SetStateAction<TimelineViewMode>>;
+  sortMode: TimelineSortMode;
+  setSortMode: React.Dispatch<React.SetStateAction<TimelineSortMode>>;
   filters: FiltersState;
   setFilters: React.Dispatch<React.SetStateAction<FiltersState>>;
   snapshotState: ReturnType<typeof useSnapshot>;
@@ -38,6 +52,9 @@ export type LayoutContextValue = {
 
 export const LayoutContext = React.createContext<LayoutContextValue | null>(null);
 const UI_PRESET_STORAGE_KEY = "dtm.web.uiPreset.v1";
+const VIEW_MODE_STORAGE_KEY = "dtm.viewMode.v1";
+const SORT_MODE_STORAGE_KEY = "dtm.sortMode.v1";
+const LOCALE_STORAGE_KEY = "dtm.locale.v1";
 
 type UiPreset = {
   design: DesignControls;
@@ -66,14 +83,46 @@ function normalizeUiPreset(input: unknown): UiPreset {
 }
 
 export function Layout(props: { children: React.ReactNode }) {
+  const [locale, setLocale] = React.useState<AppLocale>("ru");
+  const ui = getUiText(locale);
+  const [viewMode, setViewMode] = React.useState<TimelineViewMode>("brand_designer_show");
+  const [sortMode, setSortMode] = React.useState<TimelineSortMode>("last_milestone_desc");
   const [filters, setFilters] = React.useState<FiltersState>({
     ownerId: "",
     status: "",
-    search: ""
+    search: "",
+    displayLimit: 30,
+    loadLimit: 30,
   });
   const snapshotState = useSnapshot();
   const [design, setDesign] = React.useState<DesignControls>(DEFAULT_DESIGN_CONTROLS);
   const [keyColors, setKeyColors] = React.useState<KeyColors>(DEFAULT_KEY_COLORS);
+  const textRenderingValue = React.useMemo(() => {
+    const mode = Math.round(design.textRenderingMode);
+    if (mode === 1) return "optimizeLegibility";
+    if (mode === 2) return "geometricPrecision";
+    if (mode === 3) return "optimizeSpeed";
+    return "auto";
+  }, [design.textRenderingMode]);
+  const smoothingValue = React.useMemo(() => {
+    const mode = Math.round(design.textSmoothingMode);
+    if (mode === 0) {
+      return {
+        webkit: "auto",
+        moz: "auto",
+      };
+    }
+    if (mode === 2) {
+      return {
+        webkit: "none",
+        moz: "auto",
+      };
+    }
+    return {
+      webkit: "antialiased",
+      moz: "grayscale",
+    };
+  }, [design.textSmoothingMode]);
 
   const loadDeployDesign = React.useCallback(async () => {
     try {
@@ -90,6 +139,44 @@ export function Layout(props: { children: React.ReactNode }) {
       // ignore optional preset file errors
     }
   }, []);
+
+  React.useEffect(() => {
+    const stored = localStorage.getItem(VIEW_MODE_STORAGE_KEY);
+    if (
+      stored === "brand_designer_show" ||
+      stored === "format_brand_show" ||
+      stored === "designer_brand_show" ||
+      stored === "flat_brand_show" ||
+      stored === "show_brand_designer"
+    ) {
+      setViewMode(stored);
+    }
+  }, []);
+
+  React.useEffect(() => {
+    const stored = localStorage.getItem(SORT_MODE_STORAGE_KEY);
+    if (stored === "last_milestone_desc" || stored === "last_milestone_asc") {
+      setSortMode(stored);
+    }
+  }, []);
+
+  React.useEffect(() => {
+    const stored = localStorage.getItem(LOCALE_STORAGE_KEY);
+    if (stored === "ru" || stored === "en") {
+      setLocale(stored);
+    }
+  }, []);
+
+  React.useEffect(() => {
+    localStorage.setItem(VIEW_MODE_STORAGE_KEY, viewMode);
+  }, [viewMode]);
+  React.useEffect(() => {
+    localStorage.setItem(SORT_MODE_STORAGE_KEY, sortMode);
+  }, [sortMode]);
+
+  React.useEffect(() => {
+    localStorage.setItem(LOCALE_STORAGE_KEY, locale);
+  }, [locale]);
 
   React.useEffect(() => {
     let active = true;
@@ -207,15 +294,81 @@ export function Layout(props: { children: React.ReactNode }) {
         "--mat-badge-glow-a": String(design.matBadgeGlowStrength),
         "--mat-row-hover-a": String(design.matRowHoverStrength),
         "--mat-scrollbar-glow-a": String(design.matScrollbarGlowStrength),
+        "--drawer-width": `${design.drawerWidth}px`,
+        "--drawer-padding": `${design.drawerPadding}px`,
+        "--drawer-title-size": `${design.drawerTitleSize}px`,
+        "--drawer-meta-gap": `${design.drawerMetaGap}px`,
+        "--drawer-section-gap": `${design.drawerSectionGap}px`,
+        "--drawer-mini-dates-fs": `${design.drawerMiniDatesFontSize}px`,
+        "--drawer-milestone-date-fs": `${design.drawerMilestoneDateFontSize}px`,
+        "--drawer-milestone-row-gap": `${design.drawerMilestoneRowGap}px`,
+        "--drawer-calendar-cell-h": `${design.drawerCalendarCellHeight}px`,
+        "--drawer-calendar-day-fs": `${design.drawerCalendarDayFontSize}px`,
+        "--drawer-calendar-radius": `${design.drawerCalendarRadius}px`,
+        "--drawer-calendar-month-tint-a": String(design.drawerCalendarMonthTintOpacity),
+        "--drawer-calendar-weekend-tint-a": String(design.drawerCalendarWeekendTintOpacity),
+        "--drawer-calendar-holiday-tint-a": String(design.drawerCalendarHolidayTintOpacity),
+        "--drawer-milestone-cell-glow-a": String(design.drawerMilestoneCellGlowOpacity),
+        "--drawer-milestone-cell-shadow-a": String(design.drawerMilestoneCellShadowOpacity),
+        "--drawer-milestone-dot-size": `${design.drawerMilestoneDotSize}px`,
+        "--drawer-milestone-label-fs": `${design.drawerMilestoneLabelFontSize}px`,
+        "--drawer-milestone-label-maxw": `${design.drawerMilestoneLabelMaxWidth}px`,
+        "--drawer-month-label-fs": `${design.drawerMonthLabelFontSize}px`,
+        "--drawer-milestone-day-shadow-a": String(design.drawerMilestoneDayShadowOpacity),
+        "--drawer-milestone-cell-dark-shadow-a": String(design.drawerMilestoneCellDarkShadowOpacity),
+        "--drawer-milestone-cell-dark-shadow-blur": `${design.drawerMilestoneCellDarkShadowBlur}px`,
+        "--wb-dock-left": `${design.workbenchDockLeft}px`,
+        "--wb-dock-right": `${design.workbenchDockRight}px`,
+        "--wb-dock-bottom": `${design.workbenchDockBottom}px`,
+        "--wb-width-max": `${design.workbenchWidthMax}px`,
+        "--wb-viewport-margin": `${design.workbenchViewportMargin}px`,
+        "--wb-body-max-h-vh": `${design.workbenchBodyMaxHeightVh}vh`,
+        "--wb-body-padding": `${design.workbenchBodyPadding}px`,
+        "--wb-main-gap": `${design.workbenchMainGap}px`,
+        "--wb-tabs-gap": `${design.workbenchTabsGap}px`,
+        "--wb-tab-fs": `${design.workbenchTabFontSize}px`,
+        "--wb-tab-py": `${design.workbenchTabPadY}px`,
+        "--wb-tab-px": `${design.workbenchTabPadX}px`,
+        "--wb-side-w": `${design.workbenchSideWidth}px`,
+        "--wb-grid-min-col": `${design.workbenchGridMinCol}px`,
+        "--wb-grid-gap": `${design.workbenchGridGap}px`,
+        "--wb-group-padding": `${design.workbenchGroupPadding}px`,
+        "--wb-control-gap": `${design.workbenchControlGap}px`,
+        "--wb-action-btn-fs": `${design.workbenchActionBtnFontSize}px`,
+        "--wb-action-btn-py": `${design.workbenchActionBtnPadY}px`,
+        "--wb-action-btn-px": `${design.workbenchActionBtnPadX}px`,
+        "--wb-slider-w": `${design.workbenchSliderWidth}px`,
+        "--wb-number-w": `${design.workbenchNumberWidth}px`,
+        "--wb-label-min": `${design.workbenchLabelMinWidth}px`,
+        "--wb-color-text-w": `${design.workbenchColorTextWidth}px`,
+        "--wb-label-fs": `${design.workbenchControlLabelFontSize}px`,
+        "--wb-input-fs": `${design.workbenchControlInputFontSize}px`,
         "--key-pink": keyColors.keyPink,
         "--key-blue": keyColors.keyBlue,
         "--key-mint": keyColors.keyMint,
         "--key-violet": keyColors.keyViolet,
         "--key-milestone": keyColors.keyMilestone,
+        "--key-cursor-trail": keyColors.keyCursorTrail,
+        "--key-left-pill-text": keyColors.keyLeftPillText,
         "--key-surface-top": keyColors.keySurfaceTop,
         "--key-surface-bottom": keyColors.keySurfaceBottom,
         "--key-surface-alt": keyColors.keySurfaceAlt,
         "--key-text": keyColors.keyText,
+        "--key-btn-grad-from": keyColors.keyBtnGradFrom,
+        "--key-btn-grad-to": keyColors.keyBtnGradTo,
+        "--key-btn-hover-from": keyColors.keyBtnHoverFrom,
+        "--key-btn-hover-to": keyColors.keyBtnHoverTo,
+        "--key-nav-btn-from": keyColors.keyNavBtnFrom,
+        "--key-nav-btn-to": keyColors.keyNavBtnTo,
+        "--key-nav-active-from": keyColors.keyNavActiveFrom,
+        "--key-nav-active-to": keyColors.keyNavActiveTo,
+        "--key-backdrop-left": keyColors.keyBackdropLeft,
+        "--key-backdrop-right": keyColors.keyBackdropRight,
+        "--key-backdrop-bottom": keyColors.keyBackdropBottom,
+        "--key-app-bg-top": keyColors.keyAppBgTop,
+        "--key-app-bg-mid": keyColors.keyAppBgMid,
+        "--key-app-bg-bottom": keyColors.keyAppBgBottom,
+        "--key-app-bg-base": keyColors.keyAppBgBase,
         "--task-color-1": keyColors.taskColor1,
         "--task-color-2": keyColors.taskColor2,
         "--task-color-3": keyColors.taskColor3,
@@ -224,13 +377,23 @@ export function Layout(props: { children: React.ReactNode }) {
         "--task-color-6": keyColors.taskColor6,
         "--task-color-7": keyColors.taskColor7,
         "--task-color-8": keyColors.taskColor8,
+        textRendering: textRenderingValue,
+        WebkitFontSmoothing: smoothingValue.webkit,
+        MozOsxFontSmoothing: smoothingValue.moz,
       }) as React.CSSProperties,
-    [design, keyColors]
+    [design, keyColors, smoothingValue, textRenderingValue]
   );
 
   return (
     <LayoutContext.Provider
       value={{
+        locale,
+        setLocale,
+        ui,
+        viewMode,
+        setViewMode,
+        sortMode,
+        setSortMode,
         filters,
         setFilters,
         snapshotState,
@@ -251,19 +414,14 @@ export function Layout(props: { children: React.ReactNode }) {
         <div className="topbar">
           <div className="nav">
             <div className="brand">
-              <strong>DTM Grant Charts</strong>
-              <span className="muted">Planning and workload timeline</span>
+              <strong>{ui.appTitle}</strong>
+              <span className="muted">{ui.appSubtitle}</span>
             </div>
-            <div className="navLinks" />
           </div>
-          <FiltersBar />
         </div>
         <div className="container">{props.children}</div>
         <div className="controlDock">
-          <MaterialControlsPanel />
-          <ColorControlsPanel />
-          <TaskPalettePanel />
-          <DesignControlsPanel />
+          <ControlsWorkbench />
         </div>
       </div>
     </LayoutContext.Provider>

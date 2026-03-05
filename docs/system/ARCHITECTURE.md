@@ -42,8 +42,8 @@ MVP focuses on UI correctness and data normalization.
 ### Layers
 
 1) Data loading (`apps/web/src/data`)
-   - `useSnapshot.ts`: fetches snapshot from local or API.
-   - `api.ts`: fetch wrapper with base URL.
+   - `useSnapshot.ts`: SWR-style loader (memory + localStorage cache + background refresh).
+   - `api.ts`: fetch wrapper with timeout/retry and optional ETag/304 handling.
    - `normalize.ts`: adapts API payload to `SnapshotV1`.
 
 2) Domain + layout (`apps/web/src/gantt`)
@@ -60,6 +60,10 @@ MVP focuses on UI correctness and data normalization.
 - Use SVG for timelines in MVP for pixel control and simplicity.
 - Keep the “normalization boundary” stable: UI expects `SnapshotV1`.
 - Avoid complex state management libraries in MVP; React state + hooks only.
+- Keep UI responsive for slow API by stale-while-revalidate:
+  - show last valid snapshot immediately
+  - refresh in background
+  - keep stale data on refresh errors
 
 ---
 

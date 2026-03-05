@@ -1,59 +1,58 @@
-import React from "react";
+﻿import React from "react";
 import { LayoutContext } from "./Layout";
 
 export type FiltersState = {
   ownerId: string;
   status: string;
   search: string;
+  displayLimit: number;
+  loadLimit: number;
 };
 
 export function FiltersBar() {
   const ctx = React.useContext(LayoutContext);
   if (!ctx) return null;
-  const { filters, setFilters, snapshotState } = ctx;
-  const { snapshot, reloadLocal, syncFromApi, isLoading, error } = snapshotState;
 
-  const people = snapshot?.people ?? [];
-  const statusEntries = Object.entries(snapshot?.enums?.status ?? {});
+  const { snapshotState, ui } = ctx;
+  const {
+    snapshot,
+    reloadLocal,
+    syncFromApi,
+    isRefreshing,
+    error,
+    lastUpdatedAt,
+    lastRefreshAttemptAt,
+    refreshIntervalMs,
+    setRefreshIntervalMs,
+  } = snapshotState;
 
   return (
     <div className="filters">
-      <select
-        value={filters.ownerId}
-        onChange={(e) => setFilters((s) => ({ ...s, ownerId: e.target.value }))}
-        aria-label="Designer filter"
-      >
-        <option value="">All designers</option>
-        {people.map((p) => (
-          <option key={p.id} value={p.id}>{p.name}</option>
-        ))}
-      </select>
-
-      <select
-        value={filters.status}
-        onChange={(e) => setFilters((s) => ({ ...s, status: e.target.value }))}
-        aria-label="Status filter"
-      >
-        <option value="">All statuses</option>
-        {statusEntries.map(([code, label]) => (
-          <option key={code} value={code}>{label}</option>
-        ))}
-      </select>
-
-      <input
-        value={filters.search}
-        onChange={(e) => setFilters((s) => ({ ...s, search: e.target.value }))}
-        placeholder="Search tasks..."
-        aria-label="Search"
-      />
-
-      <button onClick={reloadLocal} disabled={isLoading}>
-        {isLoading ? "Загрузка..." : "Обновить из локального JSON"}
+      <button onClick={() => { void reloadLocal(); }} disabled={isRefreshing}>
+        {ui.filters.updateFromLocal}
       </button>
 
-      <button onClick={syncFromApi} disabled={isLoading}>
-        {isLoading ? "Загрузка..." : "Обновить JSON из API"}
+      <button onClick={() => { void syncFromApi(); }} disabled={isRefreshing}>
+        {ui.filters.updateFromApi}
       </button>
+
+      <select
+        value={String(refreshIntervalMs)}
+        onChange={(e) => setRefreshIntervalMs(Number(e.target.value))}
+        aria-label="Auto refresh interval"
+      >
+        <option value="0">{ui.filters.autoRefreshOff}</option>
+        <option value="15000">{ui.filters.autoRefresh15s}</option>
+        <option value="30000">{ui.filters.autoRefresh30s}</option>
+        <option value="60000">{ui.filters.autoRefresh1m}</option>
+        <option value="300000">{ui.filters.autoRefresh5m}</option>
+      </select>
+
+      <span className="refreshMeta muted">
+        {isRefreshing ? ui.filters.refreshing : ui.filters.ready} | {ui.filters.generated}:{" "}
+        {snapshot?.meta.generatedAt ?? "-"} | {ui.filters.updated}: {lastUpdatedAt ?? "-"} |{" "}
+        {ui.filters.attempt}: {lastRefreshAttemptAt ?? "-"}
+      </span>
 
       {error ? <span className="muted">Error: {String(error)}</span> : null}
     </div>

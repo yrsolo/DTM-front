@@ -23,11 +23,11 @@ export function DesignersPage() {
 
   if (!ctx) return null;
   const { filters, snapshotState, design } = ctx;
-  const { snapshot, isLoading, error, reloadLocal } = snapshotState;
+  const { snapshot, isLoading, status, error, reloadLocal } = snapshotState;
   const rowH = design.tableRowHeight;
 
-  if (isLoading) return <LoadingState />;
-  if (error) return <ErrorBanner error={error} onRetry={reloadLocal} />;
+  if (isLoading && !snapshot) return <LoadingState />;
+  if (!snapshot && error) return <ErrorBanner error={error} onRetry={reloadLocal} />;
   if (!snapshot) return <EmptyState title="No data" description="Snapshot is empty." />;
 
   const tasks = snapshot.tasks.filter((t) => {
@@ -56,61 +56,26 @@ export function DesignersPage() {
 
   const onLeave = () => setTooltip({ visible: false });
   const timelineWidth = Math.max(timelineHost.width, design.timelineWidth);
+  const showMilestoneLabels = design.timelineShowMilestoneLabels >= 0.5;
+  const labelEveryDay = design.timelineLabelEveryDay >= 0.5;
+  const weekendFillMode = design.timelineWeekendFullDay >= 0.5 ? "full-day" : "legacy";
 
   return (
     <div className="card">
       <div className="pageHeader">
         <h3 className="pageTitle">Grant chart by designers</h3>
-        <div className="muted">Generated: {snapshot.meta.generatedAt}</div>
       </div>
 
-      <div className="grid2">
-        <div className="card tablePinnedTop">
-          <table className="table tableFixedRows">
-            <thead>
-              <tr>
-                <th style={{ width: `${design.designersNameCol}%` }}>Designer</th>
-                <th style={{ width: `${design.designersTasksCol}%` }}>Tasks</th>
-                <th style={{ width: `${design.designersLoadCol}%` }}>Load</th>
-              </tr>
-            </thead>
-            <tbody>
-              {snapshot.people.map((p) => {
-                const pTasks = tasks.filter((t) => t.ownerId === p.id);
-                const load = Math.min(100, (pTasks.length / 5) * 100); // 5 tasks = 100% load
-                return (
-                  <tr key={p.id}>
-                    <td className="nowrap">{p.name}</td>
-                    <td>{pTasks.length}</td>
-                    <td>
-                      <div
-                        style={{
-                          width: 92,
-                          height: 8,
-                          background: "rgba(146, 165, 228, 0.22)",
-                          borderRadius: 8,
-                          overflow: "hidden"
-                        }}
-                      >
-                        <div
-                          style={{
-                            width: `${load}%`,
-                            height: "100%",
-                            background:
-                              load > 80
-                                ? "linear-gradient(90deg, #ff9a8b 0%, #f062e4 100%)"
-                                : "linear-gradient(90deg, #6bb6ff 0%, #5be2ce 100%)"
-                          }}
-                        />
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
+      {status === "stale_error" && error ? (
+        <ErrorBanner
+          compact
+          title="Stale data: refresh failed"
+          error={error}
+          onRetry={reloadLocal}
+        />
+      ) : null}
 
+      <div>
         <div
           className="card timelineScroll"
           ref={timelineHost.ref}
@@ -123,20 +88,25 @@ export function DesignersPage() {
         >
           <DesignersTimeline
             people={snapshot.people}
+            groups={snapshot.groups}
             tasks={tasks}
             width={timelineWidth}
             rowH={rowH}
-            height={Math.max(design.timelineMinHeight, snapshot.people.length * rowH)}
-            labelW={design.timelineLabelWidth}
+            labelW={Math.max(320, design.desktopLeftColWidth)}
             topOffset={design.timelineTopOffset}
             dateLabelY={design.timelineDateLabelY}
             zoom={zoom}
             stripeOpacity={design.timelineStripeOpacity}
             gridOpacity={design.timelineGridOpacity}
+            gridLineWidth={design.timelineGridLineWidth}
             barInsetY={design.barInsetY}
             barRadius={design.barRadius}
+            labelEveryDay={labelEveryDay}
+            weekendFillMode={weekendFillMode}
+            weekendFillOpacity={design.timelineWeekendFillOpacity}
             milestoneSizeScale={design.milestoneSizeScale}
             milestoneOpacity={design.milestoneOpacity}
+            showMilestoneLabels={showMilestoneLabels}
             taskColorMixPercent={design.taskColorMixPercent}
             onHover={onHover}
             onLeave={onLeave}
@@ -151,6 +121,7 @@ export function DesignersPage() {
         people={snapshot.people}
         groups={snapshot.groups}
         statusLabels={snapshot.enums?.status}
+        milestoneTypeLabels={snapshot.enums?.milestoneType}
         onClose={() => setSelectedId(null)}
       />
     </div>

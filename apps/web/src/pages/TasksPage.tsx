@@ -22,11 +22,11 @@ export function TasksPage() {
 
   if (!ctx) return null;
   const { filters, snapshotState, design } = ctx;
-  const { snapshot, isLoading, error, reloadLocal } = snapshotState;
+  const { snapshot, isLoading, status, error, reloadLocal } = snapshotState;
   const rowH = design.tableRowHeight;
 
-  if (isLoading) return <LoadingState />;
-  if (error) return <ErrorBanner error={error} onRetry={reloadLocal} />;
+  if (isLoading && !snapshot) return <LoadingState />;
+  if (!snapshot && error) return <ErrorBanner error={error} onRetry={reloadLocal} />;
   if (!snapshot) return <EmptyState title="No data" description="Snapshot is empty." />;
 
   const peopleById = new Map(snapshot.people.map((p) => [p.id, p.name]));
@@ -62,13 +62,24 @@ export function TasksPage() {
 
   const onLeave = () => setTooltip({ visible: false });
   const timelineWidth = Math.max(timelineHost.width, design.timelineWidth);
+  const showMilestoneLabels = design.timelineShowMilestoneLabels >= 0.5;
+  const labelEveryDay = design.timelineLabelEveryDay >= 0.5;
+  const weekendFillMode = design.timelineWeekendFullDay >= 0.5 ? "full-day" : "legacy";
 
   return (
     <div className="card">
       <div className="pageHeader">
         <h3 className="pageTitle">Grant chart by tasks</h3>
-        <div className="muted">Generated: {snapshot.meta.generatedAt}</div>
       </div>
+
+      {status === "stale_error" && error ? (
+        <ErrorBanner
+          compact
+          title="Stale data: refresh failed"
+          error={error}
+          onRetry={reloadLocal}
+        />
+      ) : null}
 
       <div className="grid2">
         <div className="card tablePinnedTop">
@@ -117,10 +128,15 @@ export function TasksPage() {
             zoom={zoom}
             stripeOpacity={design.timelineStripeOpacity}
             gridOpacity={design.timelineGridOpacity}
+            gridLineWidth={design.timelineGridLineWidth}
             barInsetY={design.barInsetY}
             barRadius={design.barRadius}
+            labelEveryDay={labelEveryDay}
+            weekendFillMode={weekendFillMode}
+            weekendFillOpacity={design.timelineWeekendFillOpacity}
             milestoneSizeScale={design.milestoneSizeScale}
             milestoneOpacity={design.milestoneOpacity}
+            showMilestoneLabels={showMilestoneLabels}
             taskColorMixPercent={design.taskColorMixPercent}
             rowH={rowH}
             onHover={onHover}
@@ -136,6 +152,7 @@ export function TasksPage() {
         people={snapshot.people}
         groups={snapshot.groups}
         statusLabels={snapshot.enums?.status}
+        milestoneTypeLabels={snapshot.enums?.milestoneType}
         onClose={() => setSelectedId(null)}
       />
     </div>

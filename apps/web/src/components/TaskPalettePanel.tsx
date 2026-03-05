@@ -12,14 +12,14 @@ export function TaskPalettePanel() {
   return (
     <div className={`palettePanel ${open ? "open" : ""}`}>
       <button className="palettePanelToggle" onClick={() => setOpen((v) => !v)}>
-        {open ? "Hide task palette" : "Task palette"}
+        {open ? "Скрыть палитру задач" : "Палитра задач"}
       </button>
       {open ? (
         <div className="palettePanelBody">
           <div className="palettePanelActions">
-            <button onClick={saveKeyColors}>Save palette</button>
-            <button onClick={loadKeyColors}>Load palette</button>
-            <button onClick={resetKeyColors}>Reset palette</button>
+            <button onClick={saveKeyColors}>Сохранить палитру</button>
+            <button onClick={loadKeyColors}>Загрузить палитру</button>
+            <button onClick={resetKeyColors}>Сброс палитры</button>
           </div>
           <div className="palettePanelGrid">
             {TASK_PALETTE_ITEMS.map((item) => (

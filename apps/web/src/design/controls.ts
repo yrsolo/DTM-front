@@ -15,10 +15,46 @@ export type DesignControls = {
   timelineTopOffset: number;
   timelineDateLabelY: number;
   timelineLabelWidth: number;
+  timelineLeftOwnerFontSize: number;
+  timelineLeftOwnerXOffset: number;
+  timelineLeftOwnerTextOffsetY: number;
+  timelineLeftOwnerCropLeft: number;
+  timelineLeftTaskFontSize: number;
+  timelineLeftTaskXOffset: number;
+  timelineLeftTaskTextOffsetY: number;
+  timelineLeftTaskCropLeft: number;
+  timelineLeftMetaFontSize: number;
+  timelineLeftMetaTextOffsetY: number;
+  timelineLeftPillOffsetY: number;
+  timelineLeftPillXOffset: number;
+  timelineLeftPillWidth: number;
+  timelineLeftPillSizeScale: number;
+  timelineLeftGroupOffsetY: number;
+  timelineLeftGroupXOffset: number;
+  timelineLeftGroupCropLeft: number;
+  timelineLeftGroupFontSize: number;
   timelineStripeOpacity: number;
   timelineGridOpacity: number;
+  timelineGridLineWidth: number;
+  timelineLabelEveryDay: number;
+  timelineDateFontSize: number;
+  timelineDateIdleOpacity: number;
+  timelineDateHoverOpacity: number;
+  timelineMonthFontSize: number;
+  timelineMonthOffsetY: number;
+  timelineMonthOffsetX: number;
+  timelineTodayLineOpacity: number;
+  timelineTodayLineWidth: number;
+  timelineCursorTrailDays: number;
+  timelineCursorTrailOpacity: number;
+  timelineHolidayFillOpacity: number;
+  timelineWeekendFullDay: number;
+  timelineWeekendFillOpacity: number;
+  timelineShowMilestoneLabels: number;
   barInsetY: number;
   barRadius: number;
+  textRenderingMode: number;
+  textSmoothingMode: number;
   cardPadding: number;
   matBgPinkOpacity: number;
   matBgBlueOpacity: number;
@@ -35,6 +71,55 @@ export type DesignControls = {
   milestoneSizeScale: number;
   milestoneOpacity: number;
   taskColorMixPercent: number;
+  drawerWidth: number;
+  drawerPadding: number;
+  drawerTitleSize: number;
+  drawerMetaGap: number;
+  drawerSectionGap: number;
+  drawerMiniDatesFontSize: number;
+  drawerMilestoneDateFontSize: number;
+  drawerMilestoneRowGap: number;
+  drawerCalendarCellHeight: number;
+  drawerCalendarDayFontSize: number;
+  drawerCalendarRadius: number;
+  drawerCalendarMonthTintOpacity: number;
+  drawerCalendarWeekendTintOpacity: number;
+  drawerCalendarHolidayTintOpacity: number;
+  drawerMilestoneCellGlowOpacity: number;
+  drawerMilestoneCellShadowOpacity: number;
+  drawerMilestoneDotSize: number;
+  drawerMilestoneLabelFontSize: number;
+  drawerMilestoneLabelMaxWidth: number;
+  drawerMonthLabelFontSize: number;
+  drawerMilestoneDayShadowOpacity: number;
+  drawerMilestoneCellDarkShadowOpacity: number;
+  drawerMilestoneCellDarkShadowBlur: number;
+  workbenchDockLeft: number;
+  workbenchDockRight: number;
+  workbenchDockBottom: number;
+  workbenchWidthMax: number;
+  workbenchViewportMargin: number;
+  workbenchBodyMaxHeightVh: number;
+  workbenchBodyPadding: number;
+  workbenchMainGap: number;
+  workbenchTabsGap: number;
+  workbenchTabFontSize: number;
+  workbenchTabPadY: number;
+  workbenchTabPadX: number;
+  workbenchSideWidth: number;
+  workbenchGridMinCol: number;
+  workbenchGridGap: number;
+  workbenchGroupPadding: number;
+  workbenchControlGap: number;
+  workbenchActionBtnFontSize: number;
+  workbenchActionBtnPadY: number;
+  workbenchActionBtnPadX: number;
+  workbenchSliderWidth: number;
+  workbenchNumberWidth: number;
+  workbenchLabelMinWidth: number;
+  workbenchColorTextWidth: number;
+  workbenchControlLabelFontSize: number;
+  workbenchControlInputFontSize: number;
 };
 
 export const DEFAULT_DESIGN_CONTROLS: DesignControls = {
@@ -54,10 +139,46 @@ export const DEFAULT_DESIGN_CONTROLS: DesignControls = {
   timelineTopOffset: 20,
   timelineDateLabelY: 12,
   timelineLabelWidth: 200,
+  timelineLeftOwnerFontSize: 20,
+  timelineLeftOwnerXOffset: 0,
+  timelineLeftOwnerTextOffsetY: 20,
+  timelineLeftOwnerCropLeft: 0,
+  timelineLeftTaskFontSize: 12,
+  timelineLeftTaskXOffset: 0,
+  timelineLeftTaskTextOffsetY: 20,
+  timelineLeftTaskCropLeft: 0,
+  timelineLeftMetaFontSize: 10,
+  timelineLeftMetaTextOffsetY: 19,
+  timelineLeftPillOffsetY: 5,
+  timelineLeftPillXOffset: 0,
+  timelineLeftPillWidth: 74,
+  timelineLeftPillSizeScale: 1,
+  timelineLeftGroupOffsetY: 20,
+  timelineLeftGroupXOffset: 0,
+  timelineLeftGroupCropLeft: 0,
+  timelineLeftGroupFontSize: 12,
   timelineStripeOpacity: 0.08,
   timelineGridOpacity: 1,
+  timelineGridLineWidth: 0.8,
+  timelineLabelEveryDay: 1,
+  timelineDateFontSize: 10,
+  timelineDateIdleOpacity: 0.52,
+  timelineDateHoverOpacity: 1,
+  timelineMonthFontSize: 10,
+  timelineMonthOffsetY: -2,
+  timelineMonthOffsetX: 0,
+  timelineTodayLineOpacity: 0.65,
+  timelineTodayLineWidth: 1.2,
+  timelineCursorTrailDays: 5,
+  timelineCursorTrailOpacity: 0.22,
+  timelineHolidayFillOpacity: 0.2,
+  timelineWeekendFullDay: 1,
+  timelineWeekendFillOpacity: 0.12,
+  timelineShowMilestoneLabels: 1,
   barInsetY: 8,
   barRadius: 8,
+  textRenderingMode: 0,
+  textSmoothingMode: 1,
   cardPadding: 14,
   matBgPinkOpacity: 0.24,
   matBgBlueOpacity: 0.28,
@@ -74,6 +195,55 @@ export const DEFAULT_DESIGN_CONTROLS: DesignControls = {
   milestoneSizeScale: 1,
   milestoneOpacity: 0.95,
   taskColorMixPercent: 28,
+  drawerWidth: 520,
+  drawerPadding: 16,
+  drawerTitleSize: 18,
+  drawerMetaGap: 8,
+  drawerSectionGap: 12,
+  drawerMiniDatesFontSize: 12,
+  drawerMilestoneDateFontSize: 11,
+  drawerMilestoneRowGap: 8,
+  drawerCalendarCellHeight: 54,
+  drawerCalendarDayFontSize: 12,
+  drawerCalendarRadius: 10,
+  drawerCalendarMonthTintOpacity: 0.2,
+  drawerCalendarWeekendTintOpacity: 0.15,
+  drawerCalendarHolidayTintOpacity: 0.18,
+  drawerMilestoneCellGlowOpacity: 0.32,
+  drawerMilestoneCellShadowOpacity: 0.28,
+  drawerMilestoneDotSize: 6,
+  drawerMilestoneLabelFontSize: 10,
+  drawerMilestoneLabelMaxWidth: 68,
+  drawerMonthLabelFontSize: 10,
+  drawerMilestoneDayShadowOpacity: 0.55,
+  drawerMilestoneCellDarkShadowOpacity: 0.38,
+  drawerMilestoneCellDarkShadowBlur: 28,
+  workbenchDockLeft: 12,
+  workbenchDockRight: 12,
+  workbenchDockBottom: 12,
+  workbenchWidthMax: 1880,
+  workbenchViewportMargin: 24,
+  workbenchBodyMaxHeightVh: 76,
+  workbenchBodyPadding: 8,
+  workbenchMainGap: 8,
+  workbenchTabsGap: 6,
+  workbenchTabFontSize: 13,
+  workbenchTabPadY: 7,
+  workbenchTabPadX: 8,
+  workbenchSideWidth: 180,
+  workbenchGridMinCol: 240,
+  workbenchGridGap: 8,
+  workbenchGroupPadding: 8,
+  workbenchControlGap: 8,
+  workbenchActionBtnFontSize: 12,
+  workbenchActionBtnPadY: 6,
+  workbenchActionBtnPadX: 8,
+  workbenchSliderWidth: 220,
+  workbenchNumberWidth: 86,
+  workbenchLabelMinWidth: 120,
+  workbenchColorTextWidth: 110,
+  workbenchControlLabelFontSize: 11,
+  workbenchControlInputFontSize: 12,
 };
 
 export const DESIGN_CONTROLS_STORAGE_KEY = "dtm.web.designControls.v1";
@@ -104,14 +274,99 @@ export const DESIGN_CONTROL_ITEMS: DesignControlItem[] = [
   { key: "timelineTopOffset", label: "Timeline top offset", min: 0, max: 60, step: 1 },
   { key: "timelineDateLabelY", label: "Date labels Y", min: 4, max: 28, step: 1 },
   { key: "timelineLabelWidth", label: "Timeline label width", min: 120, max: 340, step: 1 },
+  { key: "timelineLeftOwnerFontSize", label: "Left owner font", min: 12, max: 36, step: 1 },
+  { key: "timelineLeftOwnerXOffset", label: "Left owner X", min: -80, max: 120, step: 1 },
+  { key: "timelineLeftOwnerTextOffsetY", label: "Left owner Y", min: 10, max: 40, step: 1 },
+  { key: "timelineLeftOwnerCropLeft", label: "Left owner crop right", min: 0, max: 220, step: 1 },
+  { key: "timelineLeftTaskFontSize", label: "Left task font", min: 9, max: 20, step: 1 },
+  { key: "timelineLeftTaskXOffset", label: "Left task X", min: -80, max: 120, step: 1 },
+  { key: "timelineLeftTaskTextOffsetY", label: "Left task Y", min: 10, max: 34, step: 1 },
+  { key: "timelineLeftTaskCropLeft", label: "Left task crop right", min: 0, max: 220, step: 1 },
+  { key: "timelineLeftMetaFontSize", label: "Left meta font", min: 8, max: 18, step: 1 },
+  { key: "timelineLeftMetaTextOffsetY", label: "Left meta Y", min: 10, max: 34, step: 1 },
+  { key: "timelineLeftPillOffsetY", label: "Left pill Y", min: 0, max: 24, step: 1 },
+  { key: "timelineLeftPillXOffset", label: "Left pill X", min: -120, max: 120, step: 1 },
+  { key: "timelineLeftPillWidth", label: "Left pill width", min: 52, max: 140, step: 1 },
+  { key: "timelineLeftPillSizeScale", label: "Left pill size", min: 0.5, max: 2.5, step: 0.01 },
+  { key: "timelineLeftGroupOffsetY", label: "Left group Y", min: 10, max: 34, step: 1 },
+  { key: "timelineLeftGroupXOffset", label: "Left group X", min: -120, max: 160, step: 1 },
+  { key: "timelineLeftGroupCropLeft", label: "Left group crop right", min: 0, max: 220, step: 1 },
+  { key: "timelineLeftGroupFontSize", label: "Left group font", min: 8, max: 20, step: 1 },
   { key: "timelineStripeOpacity", label: "Stripe opacity", min: 0, max: 0.3, step: 0.01 },
   { key: "timelineGridOpacity", label: "Grid opacity", min: 0.2, max: 1, step: 0.01 },
+  { key: "timelineGridLineWidth", label: "Grid line width", min: 0.2, max: 2, step: 0.1 },
+  { key: "timelineLabelEveryDay", label: "Date label every day (0/1)", min: 0, max: 1, step: 1 },
+  { key: "timelineDateFontSize", label: "Date font size", min: 8, max: 16, step: 1 },
+  { key: "timelineDateIdleOpacity", label: "Date idle opacity", min: 0.1, max: 1, step: 0.01 },
+  { key: "timelineDateHoverOpacity", label: "Date hover opacity", min: 0.1, max: 1, step: 0.01 },
+  { key: "timelineMonthFontSize", label: "Month font size", min: 8, max: 16, step: 1 },
+  { key: "timelineMonthOffsetY", label: "Month Y", min: -16, max: 14, step: 1 },
+  { key: "timelineMonthOffsetX", label: "Month X", min: -40, max: 40, step: 1 },
+  { key: "timelineTodayLineOpacity", label: "Today line opacity", min: 0, max: 1, step: 0.01 },
+  { key: "timelineTodayLineWidth", label: "Today line width", min: 0.5, max: 4, step: 0.1 },
+  { key: "timelineCursorTrailDays", label: "Cursor trail days", min: 0, max: 20, step: 0.25 },
+  { key: "timelineCursorTrailOpacity", label: "Cursor trail opacity", min: 0, max: 1, step: 0.01 },
+  { key: "timelineHolidayFillOpacity", label: "Holiday fill opacity", min: 0, max: 0.5, step: 0.01 },
+  { key: "timelineWeekendFullDay", label: "Weekend full-day fill (0/1)", min: 0, max: 1, step: 1 },
+  { key: "timelineWeekendFillOpacity", label: "Weekend fill opacity", min: 0, max: 0.35, step: 0.01 },
+  { key: "timelineShowMilestoneLabels", label: "Show milestone labels (0/1)", min: 0, max: 1, step: 1 },
   { key: "barInsetY", label: "Bar inset Y", min: 2, max: 20, step: 1 },
   { key: "barRadius", label: "Bar radius", min: 2, max: 20, step: 1 },
+  { key: "textRenderingMode", label: "Text rendering mode (0..3)", min: 0, max: 3, step: 1 },
+  { key: "textSmoothingMode", label: "Text smoothing mode (0..2)", min: 0, max: 2, step: 1 },
   { key: "milestoneSizeScale", label: "Milestone size", min: 0.4, max: 2.5, step: 0.01 },
   { key: "milestoneOpacity", label: "Milestone opacity", min: 0.05, max: 1, step: 0.01 },
   { key: "taskColorMixPercent", label: "Task random color %", min: 0, max: 100, step: 1 },
   { key: "cardPadding", label: "Card padding", min: 8, max: 28, step: 1 },
+  { key: "workbenchDockLeft", label: "Workbench dock left", min: 0, max: 80, step: 1 },
+  { key: "workbenchDockRight", label: "Workbench dock right", min: 0, max: 80, step: 1 },
+  { key: "workbenchDockBottom", label: "Workbench dock bottom", min: 0, max: 80, step: 1 },
+  { key: "workbenchWidthMax", label: "Workbench max width", min: 900, max: 2600, step: 1 },
+  { key: "workbenchViewportMargin", label: "Workbench viewport margin", min: 0, max: 120, step: 1 },
+  { key: "workbenchBodyMaxHeightVh", label: "Workbench max height vh", min: 30, max: 95, step: 1 },
+  { key: "workbenchBodyPadding", label: "Workbench body padding", min: 4, max: 26, step: 1 },
+  { key: "workbenchMainGap", label: "Workbench main gap", min: 2, max: 24, step: 1 },
+  { key: "workbenchTabsGap", label: "Workbench tabs gap", min: 2, max: 20, step: 1 },
+  { key: "workbenchTabFontSize", label: "Workbench tab font", min: 10, max: 22, step: 1 },
+  { key: "workbenchTabPadY", label: "Workbench tab pad Y", min: 3, max: 18, step: 1 },
+  { key: "workbenchTabPadX", label: "Workbench tab pad X", min: 4, max: 24, step: 1 },
+  { key: "workbenchSideWidth", label: "Workbench side width", min: 120, max: 420, step: 1 },
+  { key: "workbenchGridMinCol", label: "Workbench min grid col", min: 150, max: 460, step: 1 },
+  { key: "workbenchGridGap", label: "Workbench grid gap", min: 2, max: 24, step: 1 },
+  { key: "workbenchGroupPadding", label: "Workbench group padding", min: 4, max: 24, step: 1 },
+  { key: "workbenchControlGap", label: "Workbench control gap", min: 2, max: 20, step: 1 },
+  { key: "workbenchActionBtnFontSize", label: "Workbench action font", min: 9, max: 18, step: 1 },
+  { key: "workbenchActionBtnPadY", label: "Workbench action pad Y", min: 3, max: 14, step: 1 },
+  { key: "workbenchActionBtnPadX", label: "Workbench action pad X", min: 4, max: 20, step: 1 },
+  { key: "workbenchSliderWidth", label: "Workbench slider width", min: 120, max: 420, step: 1 },
+  { key: "workbenchNumberWidth", label: "Workbench number width", min: 56, max: 180, step: 1 },
+  { key: "workbenchLabelMinWidth", label: "Workbench label min", min: 70, max: 260, step: 1 },
+  { key: "workbenchColorTextWidth", label: "Workbench color text width", min: 70, max: 220, step: 1 },
+  { key: "workbenchControlLabelFontSize", label: "Workbench label font", min: 9, max: 20, step: 1 },
+  { key: "workbenchControlInputFontSize", label: "Workbench input font", min: 9, max: 20, step: 1 },
+  { key: "drawerWidth", label: "Drawer width", min: 360, max: 760, step: 1 },
+  { key: "drawerPadding", label: "Drawer padding", min: 8, max: 36, step: 1 },
+  { key: "drawerTitleSize", label: "Drawer title size", min: 14, max: 30, step: 1 },
+  { key: "drawerMetaGap", label: "Drawer meta gap", min: 2, max: 24, step: 1 },
+  { key: "drawerSectionGap", label: "Drawer section gap", min: 6, max: 28, step: 1 },
+  { key: "drawerMiniDatesFontSize", label: "Drawer dates font", min: 9, max: 16, step: 1 },
+  { key: "drawerMilestoneDateFontSize", label: "Milestone date font", min: 9, max: 16, step: 1 },
+  { key: "drawerMilestoneRowGap", label: "Milestone rows gap", min: 2, max: 20, step: 1 },
+  { key: "drawerCalendarCellHeight", label: "Calendar cell height", min: 34, max: 90, step: 1 },
+  { key: "drawerCalendarDayFontSize", label: "Calendar day font", min: 9, max: 18, step: 1 },
+  { key: "drawerCalendarRadius", label: "Calendar cell radius", min: 2, max: 18, step: 1 },
+  { key: "drawerCalendarMonthTintOpacity", label: "Month tint opacity", min: 0, max: 0.5, step: 0.01 },
+  { key: "drawerCalendarWeekendTintOpacity", label: "Weekend tint opacity", min: 0, max: 0.5, step: 0.01 },
+  { key: "drawerCalendarHolidayTintOpacity", label: "Holiday tint opacity", min: 0, max: 0.6, step: 0.01 },
+  { key: "drawerMilestoneCellGlowOpacity", label: "Cell glow opacity", min: 0, max: 1, step: 0.01 },
+  { key: "drawerMilestoneCellShadowOpacity", label: "Cell inset shadow", min: 0, max: 1, step: 0.01 },
+  { key: "drawerMilestoneDotSize", label: "Milestone dot size", min: 2, max: 16, step: 1 },
+  { key: "drawerMilestoneLabelFontSize", label: "Milestone label font", min: 8, max: 16, step: 1 },
+  { key: "drawerMilestoneLabelMaxWidth", label: "Milestone label width", min: 30, max: 130, step: 1 },
+  { key: "drawerMonthLabelFontSize", label: "Month label font", min: 8, max: 14, step: 1 },
+  { key: "drawerMilestoneDayShadowOpacity", label: "Day shadow opacity", min: 0, max: 1, step: 0.01 },
+  { key: "drawerMilestoneCellDarkShadowOpacity", label: "Cell dark shadow", min: 0, max: 1, step: 0.01 },
+  { key: "drawerMilestoneCellDarkShadowBlur", label: "Cell dark shadow blur", min: 0, max: 80, step: 1 },
 ];
 
 export const MATERIAL_CONTROL_ITEMS: DesignControlItem[] = [
@@ -127,6 +382,32 @@ export const MATERIAL_CONTROL_ITEMS: DesignControlItem[] = [
   { key: "matBadgeGlowStrength", label: "Badge glow", min: 0, max: 0.6, step: 0.01 },
   { key: "matRowHoverStrength", label: "Table hover strength", min: 0, max: 0.6, step: 0.01 },
   { key: "matScrollbarGlowStrength", label: "Scrollbar glow", min: 0, max: 1, step: 0.01 },
+];
+
+export const DRAWER_CONTROL_ITEMS: DesignControlItem[] = [
+  { key: "drawerWidth", label: "Width", min: 360, max: 760, step: 1 },
+  { key: "drawerPadding", label: "Padding", min: 8, max: 36, step: 1 },
+  { key: "drawerTitleSize", label: "Title size", min: 14, max: 30, step: 1 },
+  { key: "drawerMetaGap", label: "Meta gap", min: 2, max: 24, step: 1 },
+  { key: "drawerSectionGap", label: "Section gap", min: 6, max: 28, step: 1 },
+  { key: "drawerMiniDatesFontSize", label: "Dates font", min: 9, max: 16, step: 1 },
+  { key: "drawerMilestoneDateFontSize", label: "Milestone date font", min: 9, max: 16, step: 1 },
+  { key: "drawerMilestoneRowGap", label: "Milestone row gap", min: 2, max: 20, step: 1 },
+  { key: "drawerCalendarCellHeight", label: "Calendar cell height", min: 34, max: 90, step: 1 },
+  { key: "drawerCalendarDayFontSize", label: "Calendar day font", min: 9, max: 18, step: 1 },
+  { key: "drawerCalendarRadius", label: "Calendar radius", min: 2, max: 18, step: 1 },
+  { key: "drawerCalendarMonthTintOpacity", label: "Month tint", min: 0, max: 0.5, step: 0.01 },
+  { key: "drawerCalendarWeekendTintOpacity", label: "Weekend tint", min: 0, max: 0.5, step: 0.01 },
+  { key: "drawerCalendarHolidayTintOpacity", label: "Holiday tint", min: 0, max: 0.6, step: 0.01 },
+  { key: "drawerMilestoneCellGlowOpacity", label: "Cell glow", min: 0, max: 1, step: 0.01 },
+  { key: "drawerMilestoneCellShadowOpacity", label: "Cell inset shadow", min: 0, max: 1, step: 0.01 },
+  { key: "drawerMilestoneDotSize", label: "Dot size", min: 2, max: 16, step: 1 },
+  { key: "drawerMilestoneLabelFontSize", label: "Label font", min: 8, max: 16, step: 1 },
+  { key: "drawerMilestoneLabelMaxWidth", label: "Label width", min: 30, max: 130, step: 1 },
+  { key: "drawerMonthLabelFontSize", label: "Month label font", min: 8, max: 14, step: 1 },
+  { key: "drawerMilestoneDayShadowOpacity", label: "Day shadow", min: 0, max: 1, step: 0.01 },
+  { key: "drawerMilestoneCellDarkShadowOpacity", label: "Cell dark shadow", min: 0, max: 1, step: 0.01 },
+  { key: "drawerMilestoneCellDarkShadowBlur", label: "Cell dark blur", min: 0, max: 80, step: 1 },
 ];
 
 export function normalizeDesignControls(input: Partial<DesignControls>): DesignControls {

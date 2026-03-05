@@ -6,6 +6,10 @@ type PublicConfig = {
   apiStatuses: string;
   apiIncludePeople: boolean;
   apiLimit: number;
+  apiTimeoutMs: number;
+  apiRetryCount: number;
+  apiRetryDelayMs: number;
+  apiRefreshIntervalMs: number;
   localSnapshotPath: string;
 };
 
@@ -15,6 +19,10 @@ const DEFAULT_CONFIG: PublicConfig = {
   apiStatuses: "work,pre_done",
   apiIncludePeople: true,
   apiLimit: 200,
+  apiTimeoutMs: 12000,
+  apiRetryCount: 1,
+  apiRetryDelayMs: 500,
+  apiRefreshIntervalMs: 60000,
   localSnapshotPath: "/data/snapshot.example.json",
 };
 
@@ -70,6 +78,13 @@ function buildConfig(parsed: Record<string, string>): PublicConfig {
       DEFAULT_CONFIG.apiIncludePeople
     ),
     apiLimit: toNumber(parsed.api_limit, DEFAULT_CONFIG.apiLimit),
+    apiTimeoutMs: toNumber(parsed.api_timeout_ms, DEFAULT_CONFIG.apiTimeoutMs),
+    apiRetryCount: toNumber(parsed.api_retry_count, DEFAULT_CONFIG.apiRetryCount),
+    apiRetryDelayMs: toNumber(parsed.api_retry_delay_ms, DEFAULT_CONFIG.apiRetryDelayMs),
+    apiRefreshIntervalMs: toNumber(
+      parsed.api_refresh_interval_ms,
+      DEFAULT_CONFIG.apiRefreshIntervalMs
+    ),
     localSnapshotPath:
       parsed.local_snapshot_path || DEFAULT_CONFIG.localSnapshotPath,
   };

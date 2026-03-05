@@ -12,7 +12,7 @@ export function MaterialControlsPanel() {
   return (
     <div className={`materialPanel ${open ? "open" : ""}`}>
       <button className="materialPanelToggle" onClick={() => setOpen((v) => !v)}>
-        {open ? "Hide material" : "Material controls"}
+        {open ? "Скрыть материал" : "Материал"}
       </button>
       {open ? (
         <div className="materialPanelBody">

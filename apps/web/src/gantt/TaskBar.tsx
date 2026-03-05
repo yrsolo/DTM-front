@@ -1,5 +1,6 @@
 import React from "react";
 import { TimeScale } from "./TimeScale";
+import { addDays } from "../utils/date";
 import { barXWidth } from "./layout";
 import { RenderTask } from "./types";
 
@@ -45,6 +46,12 @@ function milestoneLabel(type: string): string {
   return `${normalized.slice(0, 9)}...`;
 }
 
+function milestoneFullLabel(type: string): string {
+  if (!type) return "";
+  if (type.startsWith("stage_")) return "stage";
+  return type.replace(/[_-]+/g, " ").trim();
+}
+
 function hashToHue(seed: string): number {
   let hash = 0;
   for (let i = 0; i < seed.length; i++) {
@@ -58,12 +65,19 @@ export function TaskBar(props: {
   scale: TimeScale;
   y: number;
   rowH: number;
+  visibleStartX?: number;
+  visibleEndX?: number;
   insetY?: number;
   radius?: number;
   milestoneSizeScale?: number;
   milestoneOpacity?: number;
   taskColorMixPercent?: number;
-  onHover: (e: React.MouseEvent, t: RenderTask) => void;
+  showMilestoneLabels?: boolean;
+  onHover: (
+    e: React.MouseEvent,
+    t: RenderTask,
+    meta?: { date: Date; milestoneLabel?: string }
+  ) => void;
   onLeave: () => void;
   onClick: (t: RenderTask) => void;
 }) {
@@ -71,6 +85,13 @@ export function TaskBar(props: {
   const { x, w } = barXWidth(scale.xForDate, task.start, task.end);
 
   if (w <= 0) return null;
+  if (
+    Number.isFinite(props.visibleStartX) &&
+    Number.isFinite(props.visibleEndX) &&
+    (x + w < (props.visibleStartX as number) || x > (props.visibleEndX as number))
+  ) {
+    return null;
+  }
 
   const insetY = props.insetY ?? 8;
   const radius = props.radius ?? 8;
@@ -83,12 +104,30 @@ export function TaskBar(props: {
   const milestoneY = ry + h / 2;
   const milestoneFontSize = Math.max(9, Math.min(11, rowH * 0.24));
   const mix = Math.max(0, Math.min(100, props.taskColorMixPercent ?? 0)) / 100;
+  const showMilestoneLabels = props.showMilestoneLabels ?? true;
   const paletteIndex = hashToHue(task.id) + 1;
   const taskColor = `var(--task-color-${paletteIndex}, var(--key-blue, #6897ff))`;
 
+  const pointerDate = (e: React.MouseEvent): Date => {
+    const target = e.currentTarget as SVGGElement;
+    const ctm = target.getScreenCTM();
+    if (!ctm) return scale.range.start;
+    const svg = target.ownerSVGElement;
+    if (!svg) return scale.range.start;
+    const point = svg.createSVGPoint();
+    point.x = e.clientX;
+    point.y = e.clientY;
+    const local = point.matrixTransform(ctm.inverse());
+    const dayIndex = Math.max(
+      0,
+      Math.round((local.x - scale.leftPadding) / scale.pxPerDay)
+    );
+    return addDays(scale.range.start, dayIndex);
+  };
+
   return (
     <g
-      onMouseMove={(e) => props.onHover(e, task)}
+      onMouseMove={(e) => props.onHover(e, task, { date: pointerDate(e) })}
       onMouseLeave={props.onLeave}
       onClick={() => props.onClick(task)}
       style={{ cursor: "pointer" }}
@@ -142,7 +181,17 @@ export function TaskBar(props: {
         const mx = scale.xForDate(m.date) + scale.pxPerDay * 0.5;
         const labelY = milestoneY - milestoneSize - 4;
         return (
-          <g key={`${task.id}-m-${idx}`}>
+          <g
+            key={`${task.id}-m-${idx}`}
+            onMouseMove={(e) => {
+              e.stopPropagation();
+              props.onHover(e, task, {
+                date: m.date,
+                milestoneLabel: milestoneFullLabel(m.type),
+              });
+            }}
+            onMouseLeave={props.onLeave}
+          >
             <rect
               x={mx - milestoneSize}
               y={milestoneY - milestoneSize}
@@ -155,17 +204,19 @@ export function TaskBar(props: {
               strokeWidth={1}
               transform={`rotate(45 ${mx} ${milestoneY})`}
             />
-            <text
-              x={mx}
-              y={labelY}
-              textAnchor="middle"
-              fontSize={milestoneFontSize}
-              fill="#dfe8ff"
-              opacity={0.95}
-              style={{ pointerEvents: "none" }}
-            >
-              {milestoneLabel(m.type)}
-            </text>
+            {showMilestoneLabels ? (
+              <text
+                x={mx}
+                y={labelY}
+                textAnchor="middle"
+                fontSize={milestoneFontSize}
+                fill="#dfe8ff"
+                opacity={0.95}
+                style={{ pointerEvents: "none" }}
+              >
+                {milestoneLabel(m.type)}
+              </text>
+            ) : null}
           </g>
         );
       })}

@@ -12,14 +12,14 @@ export function ColorControlsPanel() {
   return (
     <div className={`colorPanel ${open ? "open" : ""}`}>
       <button className="colorPanelToggle" onClick={() => setOpen((v) => !v)}>
-        {open ? "Hide colors" : "Color controls"}
+        {open ? "Скрыть цвета" : "Цвета"}
       </button>
       {open ? (
         <div className="colorPanelBody">
           <div className="colorPanelActions">
-            <button onClick={saveKeyColors}>Save colors</button>
-            <button onClick={loadKeyColors}>Load colors</button>
-            <button onClick={resetKeyColors}>Reset colors</button>
+            <button onClick={saveKeyColors}>Сохранить цвета</button>
+            <button onClick={loadKeyColors}>Загрузить цвета</button>
+            <button onClick={resetKeyColors}>Сбросить цвета</button>
           </div>
           <div className="colorPanelGrid">
             {KEY_COLOR_ITEMS.map((item) => (

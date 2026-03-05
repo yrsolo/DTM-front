@@ -15,6 +15,7 @@ Canonical scheme:
 - MVP plan: `docs/system/MVP_PLAN.md`
 - Roadmap to production: `docs/system/ROADMAP.md`
 - UI design controls and milestones: `docs/system/UI_DESIGN_CONTROLS.md`
+- SWR loading smoke checklist: `docs/system/SWR_SMOKE_CHECKLIST.md`
 - LLM notes (if used): `docs/system/GEMINI.md`
 - Master spec (historic single source): `docs/system/MASTER_SPEC.md`
 

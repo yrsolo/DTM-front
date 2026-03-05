@@ -131,3 +131,28 @@ Echo of applied query parameters.
   "tasks": []
 }
 ```
+
+## Guarantees
+
+### ID mapping
+- `tasks[].ownerId` should reference `entities.people[].id`.
+- If owner is unknown/missing, backend may return `ownerId = null` (or omit it).
+- Frontend behavior for unknown owner id:
+  - render as unassigned/unknown owner
+  - do not hard-fail render
+
+### Dates format
+- `meta.generatedAt`, `meta.syncedAt`: ISO 8601 datetime (`YYYY-MM-DDTHH:mm:ssZ`).
+- `tasks[].date.start`, `tasks[].date.end`, `tasks[].date.nextDue`: `YYYY-MM-DD`.
+- `tasks[].milestones[].planned`, `tasks[].milestones[].actual`: `YYYY-MM-DD` or `null` for `actual`.
+
+### Hash / revision semantics
+- `meta.hash` identifies snapshot content version for cache/compare purposes.
+- `tasks[].hash` and `tasks[].revision` are optional task-level change markers.
+- Missing hash/revision values are allowed (`null`) and must not break frontend rendering.
+
+### Error behavior
+- If payload is structurally invalid for expected snapshot contract:
+  - frontend must keep previously valid cached snapshot (if present)
+  - frontend should show stale/error banner and avoid blank screen
+  - refresh action remains available for retry

@@ -33,6 +33,11 @@ export type TaskV1 = {
   id: string;
   title: string;
   ownerId?: string | null; // optional: unassigned tasks allowed
+  ownerName?: string | null;
+  brand?: string | null;
+  customer?: string | null;
+  format_?: string | null;
+  type?: string | null;
   status: string;
   start?: string; // ISO date
   end?: string; // ISO date
@@ -42,6 +47,7 @@ export type TaskV1 = {
   deps?: string[]; // task ids
   links?: TaskLinksV1;
   notes?: string;
+  history?: string | null;
   milestones?: MilestoneV1[];
   hash?: string | null;
   revision?: string | null;

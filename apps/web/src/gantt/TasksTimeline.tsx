@@ -14,13 +14,18 @@ export function TasksTimeline(props: {
   topOffset?: number;
   stripeOpacity?: number;
   gridOpacity?: number;
+  gridLineWidth?: number;
   dateLabelY?: number;
+  labelEveryDay?: boolean;
+  weekendFillMode?: "full-day" | "legacy";
+  weekendFillOpacity?: number;
   zoom?: number;
   barInsetY?: number;
   barRadius?: number;
   milestoneSizeScale?: number;
   milestoneOpacity?: number;
   taskColorMixPercent?: number;
+  showMilestoneLabels?: boolean;
   onHover: (e: React.MouseEvent, t: RenderTask) => void;
   onLeave: () => void;
   onClick: (t: RenderTask) => void;
@@ -73,6 +78,10 @@ export function TasksTimeline(props: {
           height={svgH - topOffset}
           gridOpacity={props.gridOpacity}
           dateLabelY={props.dateLabelY}
+          labelEveryDay={props.labelEveryDay}
+          weekendFillMode={props.weekendFillMode}
+          weekendFillOpacity={props.weekendFillOpacity}
+          lineWidth={props.gridLineWidth}
         />
         {renderTasks.map((t, i) => {
           const y = i * rowH;
@@ -92,6 +101,7 @@ export function TasksTimeline(props: {
                 milestoneSizeScale={props.milestoneSizeScale}
                 milestoneOpacity={props.milestoneOpacity}
                 taskColorMixPercent={props.taskColorMixPercent}
+                showMilestoneLabels={props.showMilestoneLabels}
                 onHover={props.onHover}
                 onLeave={props.onLeave}
                 onClick={props.onClick}
