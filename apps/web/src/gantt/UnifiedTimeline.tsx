@@ -1,4 +1,4 @@
-﻿import { GroupV1, PersonV1, TaskV1 } from "@dtm/schema/snapshot";
+import { GroupV1, PersonV1, TaskV1 } from "@dtm/schema/snapshot";
 import React from "react";
 import { fetchRuHolidayAndTransferDaysInRange } from "../calendar/ruNonWorkingDays";
 import { addDays } from "../utils/date";
@@ -50,7 +50,7 @@ function dateKeyUtc(d: Date): string {
 function isUnassignedDesignerTask(task: RenderTask): boolean {
   const ownerName = (task.ownerName ?? "").toLowerCase();
   const ownerId = (task.ownerId ?? "").toLowerCase();
-  return ownerName.includes("назначен") || ownerId.includes("назначен");
+  return ownerName.includes("????????") || ownerId.includes("????????");
 }
 
 function taskEndTs(task: RenderTask): number | null {
@@ -233,6 +233,7 @@ export function UnifiedTimeline(props: {
   cursorTrailDays?: number;
   cursorTrailOpacity?: number;
   holidayFillOpacity?: number;
+  perfMinWeekPxDetailedX10?: number;
   labelEveryDay?: boolean;
   weekendFillMode?: "full-day" | "legacy";
   weekendFillOpacity?: number;
@@ -287,12 +288,12 @@ export function UnifiedTimeline(props: {
   const labelsTopSafePad = 8;
   const topHeaderHeight = 24;
   const topOffset = baseTopOffset + labelsTopSafePad + topHeaderHeight;
-  const zoom = props.zoom ?? 1;
   const labelW = Math.max(280, props.labelW);
   const rightWidth = Math.max(320, props.width - labelW);
   const rowH = props.rowH;
   const leftPinOffset = props.leftPinOffset ?? 0;
   const viewportWidth = Math.max(320, props.viewportWidth ?? props.width);
+  const [hoveredRowKey, setHoveredRowKey] = React.useState<string | null>(null);
   const [hoveredBlockKey, setHoveredBlockKey] = React.useState<string | null>(null);
   const [holidaySet, setHolidaySet] = React.useState<Set<string>>(new Set());
   const [cursorSnapX, setCursorSnapX] = React.useState<number | null>(null);
@@ -312,6 +313,13 @@ export function UnifiedTimeline(props: {
   }, [props.tasks, groupById]);
 
   const range = React.useMemo(() => computeRange(renderTasks), [renderTasks]);
+  const rangeDays = React.useMemo(
+    () => Math.max(1, Math.round((range.end.getTime() - range.start.getTime()) / (24 * 60 * 60 * 1000))),
+    [range.end, range.start]
+  );
+  // Zoom semantics: 100% (zoom=1) means one month fits the visible timeline width.
+  const monthFitZoomBase = React.useMemo(() => Math.max(0.01, rangeDays / 30.44), [rangeDays]);
+  const zoom = (props.zoom ?? 1) * monthFitZoomBase;
   const scale = React.useMemo(
     () => createTimeScale(range, rightWidth, { zoom }),
     [range, rightWidth, zoom]
@@ -397,6 +405,15 @@ export function UnifiedTimeline(props: {
         : ticks,
     [ticks, scale.pxPerDay, visibleTimelineStart, visibleTimelineEnd, hasVisibleWindow]
   );
+  const weekPxInViewport = Math.max(1, scale.pxPerDay * 7);
+  const perfMinWeekPxDetailed = Math.max(1, (props.perfMinWeekPxDetailedX10 ?? 40) * 10);
+  const perfSimplified = weekPxInViewport < perfMinWeekPxDetailed;
+  const showDateLabels = !perfSimplified;
+  const showWeekendHolidayOverlays = !perfSimplified;
+  const showDailyGridLines = !perfSimplified;
+  const showPerRowDateLabels = !perfSimplified;
+  const showMilestones = true;
+  const showMilestoneLabels = !perfSimplified && (props.showMilestoneLabels ?? true);
 
   const todayX = React.useMemo(() => {
     const now = new Date();
@@ -532,7 +549,7 @@ export function UnifiedTimeline(props: {
                   );
                 })()
               : null}
-            {t.label ? (
+            {showDateLabels && t.label ? (
               <text
                 x={labelW + t.x + scale.pxPerDay / 2}
                 y={Math.max(16, dateY + 2)}
@@ -586,19 +603,30 @@ export function UnifiedTimeline(props: {
         const groupClipId = `group-clip-${safeId(row.key)}-${i}`;
 
         const isGroup = row.kind === "group";
+        const isRowHovered = hoveredRowKey === row.key;
         const isBlockHovered = hoveredBlockKey === row.blockKey;
-        const leftFill = isGroup ? "rgba(24,32,61,0.98)" : "rgba(14,21,41,0.98)";
+        const leftFill = isGroup
+          ? "rgba(24,32,61,0.98)"
+          : isRowHovered
+            ? "#000000"
+            : "rgba(14,21,41,0.98)";
         const rowFill = isGroup
           ? "rgba(41,50,86,0.32)"
-          : `rgba(159,183,255,${i % 2 === 0 ? props.stripeOpacity ?? 0.08 : 0})`;
+          : isRowHovered
+            ? "#000000"
+            : `rgba(159,183,255,${i % 2 === 0 ? props.stripeOpacity ?? 0.08 : 0})`;
 
         return (
           <g
             key={row.key}
-            onMouseEnter={() => setHoveredBlockKey(row.blockKey)}
-            onMouseLeave={() =>
-              setHoveredBlockKey((prev) => (prev === row.blockKey ? null : prev))
-            }
+            onMouseEnter={() => {
+              setHoveredRowKey(row.key);
+              setHoveredBlockKey(row.blockKey);
+            }}
+            onMouseLeave={() => {
+              setHoveredRowKey((prev) => (prev === row.key ? null : prev));
+              setHoveredBlockKey((prev) => (prev === row.blockKey ? null : prev));
+            }}
           >
             <rect x={labelW} y={y} width={scale.width} height={rowH} rx={8} fill={rowFill} />
             <line
@@ -612,7 +640,7 @@ export function UnifiedTimeline(props: {
 
             {visibleTicks.map((t, idx) => (
               <g key={`${row.key}-tick-${idx}`}>
-                {t.isWeekend ? (
+                {showWeekendHolidayOverlays && t.isWeekend ? (
                   <rect
                     x={labelW + t.x}
                     y={y}
@@ -626,7 +654,7 @@ export function UnifiedTimeline(props: {
                     fillOpacity={props.weekendFillOpacity ?? 0.12}
                   />
                 ) : null}
-                {t.isHoliday ? (
+                {showWeekendHolidayOverlays && t.isHoliday ? (
                   <rect
                     x={labelW + t.x}
                     y={y}
@@ -636,19 +664,21 @@ export function UnifiedTimeline(props: {
                     fillOpacity={props.holidayFillOpacity ?? 0.2}
                   />
                 ) : null}
-                <line
-                  x1={labelW + t.x}
-                  y1={y}
-                  x2={labelW + t.x}
-                  y2={y + rowH}
-                  stroke={t.isWeek ? "#4a5a88" : "#283252"}
-                  strokeOpacity={props.gridOpacity ?? 1}
-                  strokeWidth={props.gridLineWidth ?? 0.8}
-                />
+                {showDailyGridLines || t.isWeek ? (
+                  <line
+                    x1={labelW + t.x}
+                    y1={y}
+                    x2={labelW + t.x}
+                    y2={y + rowH}
+                    stroke={t.isWeek ? "#4a5a88" : "#283252"}
+                    strokeOpacity={props.gridOpacity ?? 1}
+                    strokeWidth={props.gridLineWidth ?? 0.8}
+                  />
+                ) : null}
               </g>
             ))}
 
-            {isGroup && (
+            {isGroup && showPerRowDateLabels && (
               <>
                 {visibleTicks.map((t, idx) =>
                   t.monthLabel ? (
@@ -668,9 +698,9 @@ export function UnifiedTimeline(props: {
                           fontSize={monthFontSize}
                           fill="#9fb4e6"
                           opacity={
-                            isBlockHovered
-                              ? props.dateHoverOpacity ?? 1
-                              : props.dateIdleOpacity ?? 0.52
+                              isBlockHovered
+                                ? props.dateHoverOpacity ?? 1
+                                : props.dateIdleOpacity ?? 0.52
                           }
                         >
                           {t.monthLabel}
@@ -713,7 +743,9 @@ export function UnifiedTimeline(props: {
                   milestoneSizeScale={props.milestoneSizeScale}
                   milestoneOpacity={props.milestoneOpacity}
                   taskColorMixPercent={props.taskColorMixPercent}
-                  showMilestoneLabels={props.showMilestoneLabels}
+                  showMilestones={showMilestones}
+                  showMilestoneLabels={showMilestoneLabels}
+                  highlighted={isRowHovered}
                   onHover={props.onHover}
                   onLeave={props.onLeave}
                   onClick={props.onClick}

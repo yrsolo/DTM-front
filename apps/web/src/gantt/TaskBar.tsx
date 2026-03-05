@@ -72,7 +72,9 @@ export function TaskBar(props: {
   milestoneSizeScale?: number;
   milestoneOpacity?: number;
   taskColorMixPercent?: number;
+  showMilestones?: boolean;
   showMilestoneLabels?: boolean;
+  highlighted?: boolean;
   onHover: (
     e: React.MouseEvent,
     t: RenderTask,
@@ -104,9 +106,13 @@ export function TaskBar(props: {
   const milestoneY = ry + h / 2;
   const milestoneFontSize = Math.max(9, Math.min(11, rowH * 0.24));
   const mix = Math.max(0, Math.min(100, props.taskColorMixPercent ?? 0)) / 100;
+  const showMilestones = props.showMilestones ?? true;
   const showMilestoneLabels = props.showMilestoneLabels ?? true;
   const paletteIndex = hashToHue(task.id) + 1;
   const taskColor = `var(--task-color-${paletteIndex}, var(--key-blue, #6897ff))`;
+  const barFilter = props.highlighted
+    ? `drop-shadow(0 0 12px ${palette.stroke}) drop-shadow(0 0 22px ${palette.shadow})`
+    : `drop-shadow(0 5px 10px ${palette.shadow})`;
 
   const pointerDate = (e: React.MouseEvent): Date => {
     const target = e.currentTarget as SVGGElement;
@@ -142,7 +148,7 @@ export function TaskBar(props: {
         fill={palette.fill}
         stroke={palette.stroke}
         strokeOpacity={0.7}
-        style={{ filter: `drop-shadow(0 5px 10px ${palette.shadow})` }}
+        style={{ filter: barFilter }}
       />
       {mix > 0 ? (
         <rect
@@ -177,7 +183,7 @@ export function TaskBar(props: {
         fillOpacity={0.2}
       />
 
-      {(task.milestones ?? []).map((m, idx) => {
+      {showMilestones ? (task.milestones ?? []).map((m, idx) => {
         const mx = scale.xForDate(m.date) + scale.pxPerDay * 0.5;
         const labelY = milestoneY - milestoneSize - 4;
         return (
@@ -219,7 +225,7 @@ export function TaskBar(props: {
             ) : null}
           </g>
         );
-      })}
+      }) : null}
     </g>
   );
 }

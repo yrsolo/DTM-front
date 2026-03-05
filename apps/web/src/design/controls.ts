@@ -50,6 +50,7 @@ export type DesignControls = {
   timelineHolidayFillOpacity: number;
   timelineWeekendFullDay: number;
   timelineWeekendFillOpacity: number;
+  timelinePerfMinWeekPxDetailedX10: number;
   timelineShowMilestoneLabels: number;
   barInsetY: number;
   barRadius: number;
@@ -174,6 +175,7 @@ export const DEFAULT_DESIGN_CONTROLS: DesignControls = {
   timelineHolidayFillOpacity: 0.2,
   timelineWeekendFullDay: 1,
   timelineWeekendFillOpacity: 0.12,
+  timelinePerfMinWeekPxDetailedX10: 40,
   timelineShowMilestoneLabels: 1,
   barInsetY: 8,
   barRadius: 8,
@@ -309,6 +311,7 @@ export const DESIGN_CONTROL_ITEMS: DesignControlItem[] = [
   { key: "timelineHolidayFillOpacity", label: "Holiday fill opacity", min: 0, max: 0.5, step: 0.01 },
   { key: "timelineWeekendFullDay", label: "Weekend full-day fill (0/1)", min: 0, max: 1, step: 1 },
   { key: "timelineWeekendFillOpacity", label: "Weekend fill opacity", min: 0, max: 0.35, step: 0.01 },
+  { key: "timelinePerfMinWeekPxDetailedX10", label: "Perf: min week px for details (x10)", min: 1, max: 120, step: 1 },
   { key: "timelineShowMilestoneLabels", label: "Show milestone labels (0/1)", min: 0, max: 1, step: 1 },
   { key: "barInsetY", label: "Bar inset Y", min: 2, max: 20, step: 1 },
   { key: "barRadius", label: "Bar radius", min: 2, max: 20, step: 1 },
@@ -411,9 +414,25 @@ export const DRAWER_CONTROL_ITEMS: DesignControlItem[] = [
 ];
 
 export function normalizeDesignControls(input: Partial<DesignControls>): DesignControls {
+  const maybeLegacy = input as Partial<DesignControls> & {
+    timelinePerfMinMonthPxDetailed?: number;
+    timelinePerfMinWeekPxDetailed?: number;
+  };
+  const normalizedWeekPxX10 =
+    maybeLegacy.timelinePerfMinWeekPxDetailedX10 ??
+    (typeof maybeLegacy.timelinePerfMinWeekPxDetailed === "number"
+      ? Math.round(maybeLegacy.timelinePerfMinWeekPxDetailed / 10)
+      : undefined) ??
+    (typeof maybeLegacy.timelinePerfMinMonthPxDetailed === "number"
+      ? Math.round((maybeLegacy.timelinePerfMinMonthPxDetailed * 7) / 30.44 / 10)
+      : undefined);
+
   return {
     ...DEFAULT_DESIGN_CONTROLS,
     ...input,
+    ...(typeof normalizedWeekPxX10 === "number"
+      ? { timelinePerfMinWeekPxDetailedX10: normalizedWeekPxX10 }
+      : {}),
   };
 }
 

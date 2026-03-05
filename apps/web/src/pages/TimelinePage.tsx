@@ -8,7 +8,7 @@ import { UnifiedTimeline } from "../gantt/UnifiedTimeline";
 import { RenderTask } from "../gantt/types";
 import { useElementWidth } from "../utils/useElementWidth";
 
-const ZOOM_PRESETS = [0.5, 0.75, 1, 1.25, 1.5, 2, 3, 4];
+const ZOOM_PRESETS = [0.5, 0.75, 1, 1.25, 1.5, 2, 3, 4, 5, 6, 8, 10];
 
 function clamp(value: number, min: number, max: number) {
   return Math.max(min, Math.min(max, value));
@@ -255,7 +255,7 @@ export function TimelinePage() {
               </button>
               <select
                 value={zoomPresetValue}
-                onChange={(e) => setZoom(clamp(Number(e.target.value), 0.4, 5))}
+                onChange={(e) => setZoom(clamp(Number(e.target.value), 0.4, 10))}
                 aria-label={ui.timeline.zoomAria}
               >
                 {ZOOM_PRESETS.map((z) => (
@@ -573,6 +573,7 @@ export function TimelinePage() {
             cursorTrailDays={design.timelineCursorTrailDays}
             cursorTrailOpacity={design.timelineCursorTrailOpacity}
             holidayFillOpacity={design.timelineHolidayFillOpacity}
+            perfMinWeekPxDetailedX10={design.timelinePerfMinWeekPxDetailedX10}
             leftOwnerFontSize={design.timelineLeftOwnerFontSize}
             leftOwnerXOffset={design.timelineLeftOwnerXOffset}
             leftOwnerTextOffsetY={design.timelineLeftOwnerTextOffsetY}

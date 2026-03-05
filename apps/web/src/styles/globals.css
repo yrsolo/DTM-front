@@ -370,6 +370,45 @@ button:hover {
   width: min(var(--wb-width-max, 1880px), calc(100vw - var(--wb-viewport-margin, 24px)));
 }
 
+.favoritesPanel {
+  width: fit-content;
+  max-width: calc(100vw - var(--wb-viewport-margin, 24px));
+  flex: 0 0 auto;
+}
+
+.favoritesPanelDetached {
+  position: fixed;
+  right: var(--wb-dock-right, 12px);
+  bottom: var(--wb-dock-bottom, 12px);
+  z-index: 85;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  pointer-events: auto;
+}
+
+.favoritesPanelToggle {
+  width: fit-content;
+  max-width: 100%;
+}
+
+.favoritesPanelBody {
+  width: fit-content;
+  max-width: calc(100vw - var(--wb-viewport-margin, 24px));
+  margin-top: 8px;
+  border: 1px solid rgba(149, 167, 221, 0.34);
+  border-radius: 14px;
+  padding: var(--wb-body-padding, 8px);
+  background: linear-gradient(170deg, rgba(10, 14, 28, 0.96), rgba(20, 17, 35, 0.96));
+  max-height: var(--wb-body-max-h-vh, 76vh);
+  overflow: auto;
+}
+
+.favoritesPanelBody .wbGroup {
+  width: max-content;
+  max-width: 100%;
+}
+
 .workbenchToggle {
   width: 100%;
 }
@@ -393,7 +432,7 @@ button:hover {
 
 .workbenchTabs {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: var(--wb-tabs-gap, 6px);
 }
 
@@ -446,10 +485,23 @@ button:hover {
   margin-top: 8px;
 }
 
+.wbToolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.wbSearch {
+  width: min(520px, 100%);
+}
+
 .wbGrid {
   display: grid;
   grid-template-columns: repeat(3, minmax(var(--wb-grid-min-col, 240px), 1fr));
   gap: var(--wb-grid-gap, 8px);
+  grid-auto-flow: dense;
+  align-items: start;
 }
 
 .wbGroup {
@@ -468,11 +520,12 @@ button:hover {
 .wbGroupBody {
   display: grid;
   gap: var(--wb-control-gap, 8px);
+  align-items: start;
 }
 
 .wbCtrl {
   display: grid;
-  grid-template-columns: minmax(var(--wb-label-min, 120px), 1fr) var(--wb-slider-w, 220px) var(--wb-number-w, 86px);
+  grid-template-columns: 22px minmax(var(--wb-label-min, 120px), 1fr) var(--wb-slider-w, 220px) var(--wb-number-w, 86px);
   gap: 6px;
   align-items: center;
 }
@@ -484,7 +537,7 @@ button:hover {
 
 .wbColorCtrl {
   display: grid;
-  grid-template-columns: minmax(var(--wb-label-min, 120px), 1fr) 58px var(--wb-color-text-w, 110px);
+  grid-template-columns: 22px minmax(var(--wb-label-min, 120px), 1fr) 58px var(--wb-color-text-w, 110px);
   gap: 6px;
   align-items: center;
 }
@@ -497,6 +550,24 @@ button:hover {
 .wbCtrl input,
 .wbColorCtrl input {
   font-size: var(--wb-input-fs, 12px);
+}
+
+.wbFavBtn {
+  border: 1px solid rgba(140, 155, 210, 0.28);
+  border-radius: 8px;
+  background: linear-gradient(150deg, rgba(17, 23, 42, 0.82), rgba(21, 17, 39, 0.82));
+  color: #99acd6;
+  width: 22px;
+  height: 22px;
+  line-height: 1;
+  padding: 0;
+  font-size: 12px;
+  box-shadow: none;
+}
+
+.wbFavBtn.active {
+  color: #f4cb8f;
+  border-color: rgba(225, 185, 117, 0.52);
 }
 
 .wbColorCtrl input[type="color"] {
@@ -1076,6 +1147,8 @@ button:hover {
   border-left: 1px solid rgba(114, 136, 197, 0.34);
   padding: var(--drawer-padding, 16px);
   overflow: auto;
+  overscroll-behavior: contain;
+  touch-action: pan-y;
 }
 
 .drawerHeaderRow {
@@ -1285,7 +1358,24 @@ button:hover {
   }
 
   .workbenchTabs {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr;
+  }
+
+  .favoritesPanel,
+  .workbench {
+    width: 100%;
+  }
+
+  .favoritesPanelDetached {
+    left: 12px;
+    right: 12px;
+    align-items: stretch;
+  }
+
+  .favoritesPanelToggle,
+  .favoritesPanelBody,
+  .favoritesPanelBody .wbGroup {
+    width: 100%;
   }
 
   .workbenchMain {

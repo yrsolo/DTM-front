@@ -1,4 +1,5 @@
 import React from "react";
+import { createPortal } from "react-dom";
 import { GroupV1, PersonV1, TaskV1 } from "@dtm/schema/snapshot";
 import { fetchRuHolidayAndTransferDaysInRange } from "../calendar/ruNonWorkingDays";
 import { fetchPersonNameByOwnerId } from "../data/api";
@@ -81,6 +82,7 @@ export function TaskDetailsDrawer(props: {
 
   const [resolvedOwnerName, setResolvedOwnerName] = React.useState<string | null>(null);
   const [holidays, setHolidays] = React.useState<Set<string>>(new Set());
+  const drawerRef = React.useRef<HTMLDivElement | null>(null);
 
   const findPerson = React.useCallback(
     (ref?: string | null) =>
@@ -230,9 +232,29 @@ export function TaskDetailsDrawer(props: {
     };
   }, [milestones]);
 
-  return (
+  React.useEffect(() => {
+    if (!t?.id) return;
+    drawerRef.current?.scrollTo({ top: 0, behavior: "auto" });
+  }, [t?.id]);
+
+  React.useEffect(() => {
+    if (typeof document === "undefined") return;
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prevOverflow;
+    };
+  }, []);
+
+  const drawerNode = (
     <div className="drawerBackdrop" onClick={props.onClose}>
-      <div className="drawer" onClick={(e) => e.stopPropagation()}>
+      <div
+        ref={drawerRef}
+        className="drawer"
+        onClick={(e) => e.stopPropagation()}
+        onWheel={(e) => e.stopPropagation()}
+        onTouchMove={(e) => e.stopPropagation()}
+      >
         <div className="drawerHeaderRow">
           <h2 className="drawerTitle">{t.title}</h2>
           <div className="drawerHeaderRight">
@@ -376,4 +398,7 @@ export function TaskDetailsDrawer(props: {
       </div>
     </div>
   );
+
+  if (typeof document === "undefined") return drawerNode;
+  return createPortal(drawerNode, document.body);
 }
