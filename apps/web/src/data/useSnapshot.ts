@@ -309,11 +309,19 @@ export function useSnapshot(initialRuntimeDefaults?: Partial<RuntimeDefaults>) {
   }, []);
 
   const resetRuntimeDefaults = React.useCallback(async () => {
-    const nextDateFilter = defaultDateFilter();
-    const nextStatusFilter = defaultStatusFilter();
-    const nextLoadLimit = 30;
-    const nextDemoMode = true;
-    const nextRefreshInterval = 0;
+    const nextDateFilter = {
+      ...defaultDateFilter(),
+      enabled: DEFAULT_RUNTIME_DEFAULTS.dateFilterEnabled,
+    };
+    const nextStatusFilter = {
+      work: DEFAULT_RUNTIME_DEFAULTS.statusWork,
+      preDone: DEFAULT_RUNTIME_DEFAULTS.statusPreDone,
+      done: DEFAULT_RUNTIME_DEFAULTS.statusDone,
+      wait: DEFAULT_RUNTIME_DEFAULTS.statusWait,
+    };
+    const nextLoadLimit = DEFAULT_RUNTIME_DEFAULTS.loadLimit;
+    const nextDemoMode = DEFAULT_RUNTIME_DEFAULTS.demoMode;
+    const nextRefreshInterval = DEFAULT_RUNTIME_DEFAULTS.refreshIntervalSec * 1000;
 
     setRefreshIntervalMsState(nextRefreshInterval);
     setLoadLimitState(nextLoadLimit);

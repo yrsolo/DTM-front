@@ -11,7 +11,7 @@ export type RuntimeDefaults = {
 };
 
 export const DEFAULT_RUNTIME_DEFAULTS: RuntimeDefaults = {
-  demoMode: true,
+  demoMode: false,
   displayLimit: 30,
   loadLimit: 30,
   refreshIntervalSec: 0,
@@ -36,4 +36,3 @@ export function normalizeRuntimeDefaults(input?: Partial<RuntimeDefaults>): Runt
     statusWait: Boolean(merged.statusWait),
   };
 }
-
