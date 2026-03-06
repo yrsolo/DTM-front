@@ -2,8 +2,14 @@
 import type { KeyColors } from "./colors";
 
 export type WorkbenchTabId =
+  | "defaults"
   | "material"
+  | "buttons"
+  | "panels"
+  | "panelGuide"
+  | "animation"
   | "timeline"
+  | "milestones"
   | "leftPanel"
   | "drawer"
   | "colors"
@@ -30,15 +36,20 @@ const color = (key: keyof KeyColors): WorkbenchControlRef => ({ kind: "color", k
 
 export const WORKBENCH_LAYOUT: WorkbenchSectionConfig[] = [
   {
+    id: "defaults",
+    title: "По умолчанию / Defaults",
+    groups: [],
+  },
+  {
     id: "material",
     title: "Материал / Material",
     groups: [
       {
-        title: "Материал | Фон интенсивность / Material | Background intensity",
-        controls: [range("matBgPinkOpacity"), range("matBgBlueOpacity"), range("matBgMintOpacity")],
+        title: "Сцена | Интенсивность и затемнение / Scene | Intensity and dimming",
+        controls: [range("sceneDimOpacity"), range("matBgPinkOpacity"), range("matBgBlueOpacity"), range("matBgMintOpacity")],
       },
       {
-        title: "Материал | Фон свечение / Material | Background glow",
+        title: "Сцена | Глоу по краям / Scene | Edge glows",
         controls: [
           color("keyBackdropLeft"),
           color("keyBackdropRight"),
@@ -49,43 +60,101 @@ export const WORKBENCH_LAYOUT: WorkbenchSectionConfig[] = [
         ],
       },
       {
-        title: "Материал | Фон база / Material | Background base",
+        title: "Сцена | База фона / Scene | Base background",
         controls: [color("keyAppBgBase"), color("keySurfaceTop"), color("keySurfaceBottom"), color("keySurfaceAlt")],
       },
+    ],
+  },
+  {
+    id: "buttons",
+    title: "Кнопки / Buttons",
+    groups: [
       {
-        title: "Материал | Карточки / Material | Cards",
+        title: "Кнопки | Подсветки / Buttons | Highlights",
+        controls: [
+          range("matButtonGlowStrength"),
+          range("matActiveGlowStrength"),
+          range("matBadgeGlowStrength"),
+        ],
+      },
+      {
+        title: "Кнопки | Градиент / Buttons | Gradient",
+        controls: [
+          color("keyBtnGradFrom"),
+          color("keyBtnGradTo"),
+          color("keyBtnHoverFrom"),
+          color("keyBtnHoverTo"),
+        ],
+      },
+      {
+        title: "Кнопки | Навигация / Buttons | Navigation",
+        controls: [
+          color("keyNavBtnFrom"),
+          color("keyNavBtnTo"),
+          color("keyNavActiveFrom"),
+          color("keyNavActiveTo"),
+          color("keyText"),
+          color("keyLeftPillText"),
+        ],
+      },
+    ],
+  },
+  {
+    id: "panels",
+    title: "Панели / Panels",
+    groups: [
+      {
+        title: "Панели | Общие карточки / Panels | Global cards",
         controls: [
           range("matCardBorderOpacity"),
           range("matCardShadowStrength"),
           range("matCardInsetStrength"),
           range("matTopbarBorderOpacity"),
+          range("topbarGlowOpacity"),
+          range("topbarBgOpacity"),
+        ],
+      },
+      {
+        title: "Панели | Общие карточки (2) / Panels | Global cards (2)",
+        controls: [
           range("matRowHoverStrength"),
-          color("keyText"),
+          color("keyTopbarGlow"),
         ],
       },
       {
-        title: "Материал | Сияние / Material | Glow",
+        title: "Панели | Карточка задачи / Panels | Task drawer",
         controls: [
-          range("matActiveGlowStrength"),
-          range("matButtonGlowStrength"),
-          range("matBadgeGlowStrength"),
-          range("matScrollbarGlowStrength"),
-          color("keyBtnGradFrom"),
-          color("keyBtnGradTo"),
+          range("drawerPanelBorderOpacity"),
+          range("drawerPanelShadowStrength"),
+          range("drawerPanelInsetStrength"),
+          range("drawerPanelGlowOpacity"),
+          range("drawerSectionGap"),
+          range("drawerPadding"),
+          range("drawerWidth"),
         ],
       },
       {
-        title: "Материал | Кнопки навигации / Material | Navigation buttons",
+        title: "Панели | Глоу карточки / Panels | Drawer glow colors",
         controls: [
-          color("keyBtnHoverFrom"),
-          color("keyBtnHoverTo"),
-          color("keyNavBtnFrom"),
-          color("keyNavBtnTo"),
-          color("keyNavActiveFrom"),
-          color("keyNavActiveTo"),
+          color("keyDrawerPanelGlowLeft"),
+          color("keyDrawerPanelGlowRight"),
+          color("keyDrawerPanelGlowBottom"),
         ],
+      },
+      {
+        title: "Панели | Внутри таблицы / Panels | Table inner colors",
+        controls: [color("keySurfaceTop"), color("keySurfaceBottom"), color("keySurfaceAlt")],
+      },
+      {
+        title: "Панели | Внутри карточки / Panels | Drawer inner colors",
+        controls: [color("keyDrawerSurfaceTop"), color("keyDrawerSurfaceBottom"), color("keyDrawerSurfaceAlt")],
       },
     ],
+  },
+  {
+    id: "panelGuide",
+    title: "Схема панелей / Panel map",
+    groups: [],
   },
   {
     id: "timeline",
@@ -140,26 +209,110 @@ export const WORKBENCH_LAYOUT: WorkbenchSectionConfig[] = [
         controls: [
           range("timelineWeekendFullDay"),
           range("timelinePerfMinWeekPxDetailedX10"),
-          range("timelineShowMilestoneLabels"),
+          range("tooltipOffsetX"),
+          range("tooltipOffsetY"),
+          range("tooltipBubbleScale"),
+        ],
+      },
+      {
+        title: "Таймлайн | Прочее / Timeline | Other",
+        controls: [
           range("textRenderingMode"),
           range("textSmoothingMode"),
           range("barInsetY"),
         ],
       },
       {
-        title: "Таймлайн | Майлстоуны / Timeline | Milestones",
+        title: "Таймлайн | Позиция панелей / Timeline | Dock panels position",
         controls: [
-          range("milestoneSizeScale"),
-          range("milestoneOpacity"),
-          range("taskColorMixPercent"),
-          color("keyMilestone"),
-          color("keyPink"),
-          color("keyBlue"),
+          range("timelineModeDockOffsetX"),
+          range("timelineModeDockOffsetY"),
+          range("timelineModeDockScale"),
+          range("timelineTopControlDockOffsetX"),
+          range("timelineTopControlDockOffsetY"),
         ],
       },
       {
         title: "Таймлайн | Акценты / Timeline | Accents",
         controls: [color("keyMint"), color("keyViolet")],
+      },
+    ],
+  },
+  {
+    id: "animation",
+    title: "Анимация / Animation",
+    groups: [
+      {
+        title: "Анимация | База / Animation | Base",
+        controls: [
+          range("animEnabled"),
+          range("animDrawerDurationMs"),
+          range("animDrawerEasePreset"),
+          range("animReorderDurationMs"),
+          range("animReorderEasePreset"),
+          range("animReorderStaggerMs"),
+        ],
+      },
+      {
+        title: "Анимация | Reorder / Animation | Reorder",
+        controls: [
+          range("animReorderStaggerCapMs"),
+          range("animReorderDistanceFactor"),
+          range("animReorderDistanceMaxExtraMs"),
+          range("animReorderViewportOnly"),
+          range("animReorderViewportBufferPx"),
+          range("animReorderAutoDisableRows"),
+        ],
+      },
+    ],
+  },
+  {
+    id: "milestones",
+    title: "Майлстоуны / Milestones",
+    groups: [
+      {
+        title: "Майлстоуны | Таймлайн / Milestones | Timeline",
+        controls: [
+          range("timelineShowMilestoneLabels"),
+          range("milestoneSizeScale"),
+          range("milestoneOpacity"),
+          range("taskColorMixPercent"),
+          color("keyMilestone"),
+          color("keyPink"),
+        ],
+      },
+      {
+        title: "Майлстоуны | Карточка список / Milestones | Drawer list",
+        controls: [
+          range("drawerMilestoneDateFontSize"),
+          range("drawerMilestoneRowGap"),
+          range("drawerMilestoneLabelFontSize"),
+          range("drawerMilestoneLabelMaxWidth"),
+          range("drawerMilestoneDotSize"),
+          range("drawerMilestoneDayShadowOpacity"),
+        ],
+      },
+      {
+        title: "Майлстоуны | Карточка ячейки / Milestones | Drawer cells",
+        controls: [
+          range("drawerMilestoneCellGlowOpacity"),
+          range("drawerMilestoneCellShadowOpacity"),
+          range("drawerMilestoneCellDarkShadowOpacity"),
+          range("drawerMilestoneCellDarkShadowBlur"),
+          color("keyDrawerMsStoryboard"),
+          color("keyDrawerMsAnimatic"),
+        ],
+      },
+      {
+        title: "Майлстоуны | Цвета типов / Milestones | Type colors",
+        controls: [
+          color("keyDrawerMsFeedback"),
+          color("keyDrawerMsDraft"),
+          color("keyDrawerMsPrefinal"),
+          color("keyDrawerMsFinal"),
+          color("keyDrawerMsOnair"),
+          color("keyDrawerMsStart"),
+        ],
       },
     ],
   },
@@ -231,23 +384,9 @@ export const WORKBENCH_LAYOUT: WorkbenchSectionConfig[] = [
       {
         title: "Карточка | Основа / Drawer | Base",
         controls: [
-          range("drawerWidth"),
-          range("drawerPadding"),
           range("drawerTitleSize"),
           range("drawerMetaGap"),
-          range("drawerSectionGap"),
           range("drawerMiniDatesFontSize"),
-        ],
-      },
-      {
-        title: "Карточка | Тайминг / Drawer | Timing list",
-        controls: [
-          range("drawerMilestoneDateFontSize"),
-          range("drawerMilestoneRowGap"),
-          range("drawerMilestoneLabelFontSize"),
-          range("drawerMilestoneLabelMaxWidth"),
-          range("drawerMilestoneDotSize"),
-          color("keyMilestone"),
         ],
       },
       {
@@ -265,11 +404,7 @@ export const WORKBENCH_LAYOUT: WorkbenchSectionConfig[] = [
         title: "Карточка | Календарь акценты / Drawer | Calendar accents",
         controls: [
           range("drawerCalendarHolidayTintOpacity"),
-          range("drawerMilestoneCellGlowOpacity"),
-          range("drawerMilestoneCellShadowOpacity"),
-          range("drawerMilestoneDayShadowOpacity"),
-          range("drawerMilestoneCellDarkShadowOpacity"),
-          range("drawerMilestoneCellDarkShadowBlur"),
+          color("keyText"),
         ],
       },
     ],
@@ -280,7 +415,7 @@ export const WORKBENCH_LAYOUT: WorkbenchSectionConfig[] = [
     groups: [
       {
         title: "Цвета | База / Colors | Base",
-        controls: [color("keyPink"), color("keyBlue"), color("keyMint"), color("keyViolet"), color("keyText"), color("keyMilestone")],
+        controls: [color("keyPink"), color("keyBlue"), color("keyMint"), color("keyViolet"), color("keyText"), color("keyCursorTrail")],
       },
       {
         title: "Цвета | Поверхности / Colors | Surfaces",
@@ -288,6 +423,14 @@ export const WORKBENCH_LAYOUT: WorkbenchSectionConfig[] = [
           color("keySurfaceTop"),
           color("keySurfaceBottom"),
           color("keySurfaceAlt"),
+          color("keyDrawerSurfaceTop"),
+          color("keyDrawerSurfaceBottom"),
+          color("keyDrawerSurfaceAlt"),
+        ],
+      },
+      {
+        title: "Цвета | Фон сцены / Colors | Scene background",
+        controls: [
           color("keyAppBgTop"),
           color("keyAppBgMid"),
           color("keyAppBgBottom"),
@@ -301,23 +444,8 @@ export const WORKBENCH_LAYOUT: WorkbenchSectionConfig[] = [
           color("keyBackdropRight"),
           color("keyBackdropBottom"),
           color("keyCursorTrail"),
-          color("keyLeftPillText"),
+          color("keyText"),
         ],
-      },
-      {
-        title: "Цвета | Кнопки / Colors | Buttons",
-        controls: [
-          color("keyBtnGradFrom"),
-          color("keyBtnGradTo"),
-          color("keyBtnHoverFrom"),
-          color("keyBtnHoverTo"),
-          color("keyNavBtnFrom"),
-          color("keyNavBtnTo"),
-        ],
-      },
-      {
-        title: "Цвета | Активные кнопки / Colors | Active buttons",
-        controls: [color("keyNavActiveFrom"), color("keyNavActiveTo")],
       },
     ],
   },

@@ -36,6 +36,15 @@ function capitalizeFirst(input: string): string {
   return input.charAt(0).toUpperCase() + input.slice(1);
 }
 
+function animationEaseByPreset(preset: number): string {
+  const id = Math.round(preset);
+  if (id === 0) return "linear";
+  if (id === 1) return "ease-out";
+  if (id === 3) return "cubic-bezier(0.22, 1, 0.36, 1)";
+  if (id === 4) return "cubic-bezier(0.2, 0.8, 0.2, 1)";
+  return "ease-in-out";
+}
+
 function normalizeFormatLabel(input?: string | null): string {
   if (!input || !input.trim()) return "-";
   return capitalizeFirst(input.trim());
@@ -265,6 +274,20 @@ export function UnifiedTimeline(props: {
   badgeHeight?: number;
   badgeFontSize?: number;
   textRenderingMode?: number;
+  animEnabled?: boolean;
+  reorderDurationMs?: number;
+  reorderEasePreset?: number;
+  reorderStaggerMs?: number;
+  reorderStaggerCapMs?: number;
+  reorderDistanceFactor?: number;
+  reorderDistanceMaxExtraMs?: number;
+  reorderViewportOnly?: boolean;
+  reorderViewportBufferPx?: number;
+  reorderAutoDisableRows?: number;
+  viewportTop?: number;
+  viewportHeight?: number;
+  disableReorderAnimation?: boolean;
+  onScaleChange?: (info: { rangeStartMs: number; pxPerDay: number; labelW: number }) => void;
   onHover: (
     e: React.MouseEvent,
     t: RenderTask,
@@ -286,7 +309,7 @@ export function UnifiedTimeline(props: {
 
   const baseTopOffset = props.topOffset ?? 20;
   const labelsTopSafePad = 8;
-  const topHeaderHeight = 24;
+  const topHeaderHeight = 34;
   const topOffset = baseTopOffset + labelsTopSafePad + topHeaderHeight;
   const labelW = Math.max(280, props.labelW);
   const rightWidth = Math.max(320, props.width - labelW);
@@ -297,7 +320,9 @@ export function UnifiedTimeline(props: {
   const [hoveredBlockKey, setHoveredBlockKey] = React.useState<string | null>(null);
   const [holidaySet, setHolidaySet] = React.useState<Set<string>>(new Set());
   const [cursorSnapX, setCursorSnapX] = React.useState<number | null>(null);
-  const [isTableHovered, setIsTableHovered] = React.useState(false);
+  const rowNodeRefs = React.useRef<Map<string, SVGGElement>>(new Map());
+  const prevRowYByKeyRef = React.useRef<Map<string, number>>(new Map());
+  const prevRowKeysRef = React.useRef<Set<string>>(new Set());
 
   const groupById = React.useMemo(() => {
     const m = new Map<string, string>();
@@ -328,6 +353,117 @@ export function UnifiedTimeline(props: {
     () => makeRows(props.mode, props.sortMode, renderTasks, props.people, props.unassignedLabel ?? "Unassigned"),
     [props.mode, props.sortMode, renderTasks, props.people, props.unassignedLabel]
   );
+  const reorderDurationMs = Math.max(0, Math.round(props.reorderDurationMs ?? 280));
+  const reorderEase = animationEaseByPreset(props.reorderEasePreset ?? 2);
+  const reorderStaggerMs = Math.max(0, Math.round(props.reorderStaggerMs ?? 8));
+  const reorderStaggerCapMs = Math.max(0, Math.round(props.reorderStaggerCapMs ?? 120));
+  const reorderDistanceFactor = Math.max(0, props.reorderDistanceFactor ?? 0.35);
+  const reorderDistanceMaxExtraMs = Math.max(0, Math.round(props.reorderDistanceMaxExtraMs ?? 180));
+  const reorderViewportOnly = Boolean(props.reorderViewportOnly);
+  const reorderViewportBufferPx = Math.max(0, Math.round(props.reorderViewportBufferPx ?? 160));
+  const reorderAutoDisableRows = Math.max(1, Math.round(props.reorderAutoDisableRows ?? 120));
+  const viewportTop = Math.max(0, Math.round(props.viewportTop ?? 0));
+  const viewportHeight = Math.max(0, Math.round(props.viewportHeight ?? 0));
+  const canAnimateReorder =
+    Boolean(props.animEnabled) &&
+    reorderDurationMs > 0 &&
+    !props.disableReorderAnimation &&
+    rows.length <= reorderAutoDisableRows;
+
+  React.useLayoutEffect(() => {
+    const nextYByKey = new Map<string, number>();
+    rows.forEach((row, i) => {
+      nextYByKey.set(row.key, topOffset + i * rowH);
+    });
+
+    const prevYByKey = prevRowYByKeyRef.current;
+    const prevKeys = prevRowKeysRef.current;
+
+    if (canAnimateReorder) {
+      for (let rowIndex = 0; rowIndex < rows.length; rowIndex += 1) {
+        const row = rows[rowIndex];
+        const node = rowNodeRefs.current.get(row.key);
+        if (!node) continue;
+
+        const nextY = nextYByKey.get(row.key);
+        if (typeof nextY !== "number") continue;
+        const rowTop = nextY;
+        const rowBottom = nextY + rowH;
+        const viewportWindowTop = topOffset + viewportTop - reorderViewportBufferPx;
+        const viewportWindowBottom = topOffset + viewportTop + viewportHeight + reorderViewportBufferPx;
+        const isVerticallyVisible =
+          viewportHeight > 0
+            ? rowBottom >= viewportWindowTop && rowTop <= viewportWindowBottom
+            : true;
+        const shouldAnimateThisRow = !reorderViewportOnly || isVerticallyVisible;
+        const prevY = prevYByKey.get(row.key);
+
+        if (typeof prevY === "number") {
+          const deltaY = prevY - nextY;
+          if (Math.abs(deltaY) > 0.5 && shouldAnimateThisRow) {
+            const staggerDelay = Math.min(reorderStaggerCapMs, rowIndex * reorderStaggerMs);
+            const extraDuration = Math.min(
+              reorderDistanceMaxExtraMs,
+              Math.abs(deltaY) * reorderDistanceFactor
+            );
+            const rowDuration = Math.max(0, Math.round(reorderDurationMs + extraDuration));
+            node.style.transition = "none";
+            node.style.transform = `translateY(${deltaY}px)`;
+            // Force style flush before starting transition.
+            void node.getBoundingClientRect();
+            requestAnimationFrame(() => {
+              node.style.transition = `transform ${rowDuration}ms ${reorderEase} ${staggerDelay}ms`;
+              node.style.transform = "translateY(0)";
+            });
+            window.setTimeout(() => {
+              node.style.transition = "";
+              node.style.transform = "";
+            }, rowDuration + staggerDelay + 40);
+          } else if (!shouldAnimateThisRow) {
+            node.style.transition = "";
+            node.style.transform = "";
+          }
+        } else if (!prevKeys.has(row.key)) {
+          if (!shouldAnimateThisRow) {
+            node.style.transition = "";
+            node.style.opacity = "";
+            continue;
+          }
+          const staggerDelay = Math.min(reorderStaggerCapMs, rowIndex * reorderStaggerMs);
+          const fadeMs = Math.max(80, Math.round(reorderDurationMs * 0.65));
+          node.style.transition = "none";
+          node.style.opacity = "0";
+          void node.getBoundingClientRect();
+          requestAnimationFrame(() => {
+            node.style.transition = `opacity ${fadeMs}ms ${reorderEase} ${staggerDelay}ms`;
+            node.style.opacity = "1";
+          });
+          window.setTimeout(() => {
+            node.style.transition = "";
+            node.style.opacity = "";
+          }, fadeMs + staggerDelay + 40);
+        }
+      }
+    }
+
+    prevRowYByKeyRef.current = nextYByKey;
+    prevRowKeysRef.current = new Set(rows.map((row) => row.key));
+  }, [
+    rows,
+    topOffset,
+    rowH,
+    canAnimateReorder,
+    reorderDurationMs,
+    reorderEase,
+    reorderStaggerMs,
+    reorderStaggerCapMs,
+    reorderDistanceFactor,
+    reorderDistanceMaxExtraMs,
+    reorderViewportOnly,
+    reorderViewportBufferPx,
+    viewportTop,
+    viewportHeight,
+  ]);
 
   const dayMs = 24 * 60 * 60 * 1000;
   const days = Math.round((scale.range.end.getTime() - scale.range.start.getTime()) / dayMs);
@@ -428,6 +564,20 @@ export function UnifiedTimeline(props: {
 
   const dateY = Math.max(props.dateLabelY ?? 12, 15);
   const monthY = Math.max(8, dateY + (props.monthOffsetY ?? -2) - 10);
+  const pinnedHeaderY = Math.max(0, viewportTop);
+  const topMonthBandHeight = Math.max(12, Math.floor(topHeaderHeight * 0.44));
+  const topDateBandHeight = Math.max(10, topHeaderHeight - topMonthBandHeight);
+  const topMonthTextY = pinnedHeaderY + Math.max(10, Math.floor(topMonthBandHeight * 0.68));
+  const topDateTextY =
+    pinnedHeaderY + topMonthBandHeight + Math.max(12, Math.floor(topDateBandHeight * 0.72));
+
+  React.useEffect(() => {
+    props.onScaleChange?.({
+      rangeStartMs: scale.range.start.getTime(),
+      pxPerDay: scale.pxPerDay,
+      labelW,
+    });
+  }, [props.onScaleChange, scale.pxPerDay, scale.range.start, labelW]);
 
   return (
     <svg
@@ -436,7 +586,6 @@ export function UnifiedTimeline(props: {
       style={{ display: "block" }}
       textRendering={svgTextRendering}
       shapeRendering={svgShapeRendering}
-      onMouseEnter={() => setIsTableHovered(true)}
       onMouseMove={(e) => {
         const rect = e.currentTarget.getBoundingClientRect();
         const rawX = e.clientX - rect.left;
@@ -451,7 +600,6 @@ export function UnifiedTimeline(props: {
       }}
       onMouseLeave={() => {
         setCursorSnapX(null);
-        setIsTableHovered(false);
       }}
     >
       <defs>
@@ -510,60 +658,7 @@ export function UnifiedTimeline(props: {
         y2={svgH}
         stroke="rgba(124,146,205,0.36)"
       />
-      <g opacity={isTableHovered ? 1 : 0}>
-        <rect
-          x={labelW}
-          y={0}
-          width={scale.width}
-          height={topHeaderHeight}
-          fill="rgba(14, 21, 41, 0.94)"
-        />
-        <line
-          x1={labelW}
-          y1={topHeaderHeight}
-          x2={svgW}
-          y2={topHeaderHeight}
-          stroke="rgba(124,146,205,0.32)"
-        />
-        {visibleTicks.map((t, idx) => (
-          <g key={`top-header-${idx}`}>
-            {t.monthLabel
-              ? (() => {
-                  const monthFontSize = props.monthFontSize ?? 10;
-                  const approxTextWidth = t.monthLabel.length * monthFontSize * 0.56;
-                  const fitsCell = approxTextWidth <= Math.max(0, scale.pxPerDay - 4);
-                  const textX = fitsCell
-                    ? labelW + t.x + scale.pxPerDay / 2 + (props.monthOffsetX ?? 0)
-                    : labelW + t.x + (props.monthOffsetX ?? 0);
-                  return (
-                    <text
-                      x={textX}
-                      y={Math.max(8, monthY - 2)}
-                      textAnchor={fitsCell ? "middle" : "start"}
-                      fontSize={monthFontSize}
-                      fill="#9fb4e6"
-                      opacity={props.dateHoverOpacity ?? 1}
-                    >
-                      {t.monthLabel}
-                    </text>
-                  );
-                })()
-              : null}
-            {showDateLabels && t.label ? (
-              <text
-                x={labelW + t.x + scale.pxPerDay / 2}
-                y={Math.max(16, dateY + 2)}
-                textAnchor="middle"
-                fontSize={props.dateFontSize ?? 10}
-                fill="#8f9fca"
-                opacity={props.dateHoverOpacity ?? 1}
-              >
-                {t.label}
-              </text>
-            ) : null}
-          </g>
-        ))}
-      </g>
+      <g opacity={0} />
 
       {todayX !== null ? (
         <line
@@ -619,6 +714,14 @@ export function UnifiedTimeline(props: {
         return (
           <g
             key={row.key}
+            data-row-key={row.key}
+            ref={(node) => {
+              if (node) {
+                rowNodeRefs.current.set(row.key, node);
+              } else {
+                rowNodeRefs.current.delete(row.key);
+              }
+            }}
             onMouseEnter={() => {
               setHoveredRowKey(row.key);
               setHoveredBlockKey(row.blockKey);
@@ -627,6 +730,7 @@ export function UnifiedTimeline(props: {
               setHoveredRowKey((prev) => (prev === row.key ? null : prev));
               setHoveredBlockKey((prev) => (prev === row.blockKey ? null : prev));
             }}
+            style={{ cursor: "default" }}
           >
             <rect x={labelW} y={y} width={scale.width} height={rowH} rx={8} fill={rowFill} />
             <line
@@ -698,9 +802,9 @@ export function UnifiedTimeline(props: {
                           fontSize={monthFontSize}
                           fill="#9fb4e6"
                           opacity={
-                              isBlockHovered
-                                ? props.dateHoverOpacity ?? 1
-                                : props.dateIdleOpacity ?? 0.52
+                            isBlockHovered
+                              ? props.dateHoverOpacity ?? 1
+                              : props.dateIdleOpacity ?? 0
                           }
                         >
                           {t.monthLabel}
@@ -719,7 +823,7 @@ export function UnifiedTimeline(props: {
                       fontSize={props.dateFontSize ?? 10}
                       fill="#8f9fca"
                       opacity={
-                        isBlockHovered ? props.dateHoverOpacity ?? 1 : props.dateIdleOpacity ?? 0.52
+                        isBlockHovered ? props.dateHoverOpacity ?? 1 : props.dateIdleOpacity ?? 0
                       }
                     >
                       {t.label}
@@ -753,7 +857,13 @@ export function UnifiedTimeline(props: {
               </g>
             ) : null}
 
-            <g transform={`translate(${leftPinOffset}, 0)`}>
+            <g
+              transform={`translate(${leftPinOffset}, 0)`}
+              onClick={() => {
+                if (row.kind === "task") props.onClick(row.task);
+              }}
+              style={{ cursor: row.kind === "task" ? "pointer" : "default" }}
+            >
               <rect x={0} y={y} width={labelW - 8} height={rowH} rx={8} fill={leftFill} />
               {row.kind === "group" ? (
                 <>
@@ -853,6 +963,83 @@ export function UnifiedTimeline(props: {
           </g>
         );
       })}
+      <g pointerEvents="none">
+        <rect
+          x={labelW}
+          y={pinnedHeaderY}
+          width={scale.width}
+          height={topMonthBandHeight}
+          fill="#090e1b"
+          fillOpacity={1}
+        />
+        <rect
+          x={labelW}
+          y={pinnedHeaderY + topMonthBandHeight}
+          width={scale.width}
+          height={topDateBandHeight}
+          fill="#080d19"
+          fillOpacity={1}
+        />
+        <line
+          x1={labelW}
+          y1={pinnedHeaderY}
+          x2={svgW}
+          y2={pinnedHeaderY}
+          stroke="rgba(142,166,228,0.26)"
+        />
+        <line
+          x1={labelW}
+          y1={pinnedHeaderY + topMonthBandHeight}
+          x2={svgW}
+          y2={pinnedHeaderY + topMonthBandHeight}
+          stroke="rgba(124,146,205,0.24)"
+        />
+        <line
+          x1={labelW}
+          y1={pinnedHeaderY + topHeaderHeight}
+          x2={svgW}
+          y2={pinnedHeaderY + topHeaderHeight}
+          stroke="rgba(124,146,205,0.44)"
+        />
+        {visibleTicks.map((t, idx) => (
+          <g key={`top-header-overlay-${idx}`}>
+            {t.monthLabel
+              ? (() => {
+                  const monthFontSize = props.monthFontSize ?? 10;
+                  const approxTextWidth = t.monthLabel.length * monthFontSize * 0.56;
+                  const fitsCell = approxTextWidth <= Math.max(0, scale.pxPerDay - 4);
+                  const textX = fitsCell
+                    ? labelW + t.x + scale.pxPerDay / 2 + (props.monthOffsetX ?? 0)
+                    : labelW + t.x + (props.monthOffsetX ?? 0);
+                  return (
+                    <text
+                      x={textX}
+                      y={topMonthTextY}
+                      textAnchor={fitsCell ? "middle" : "start"}
+                      fontSize={monthFontSize}
+                      fill="#a9bced"
+                      opacity={Math.max(0.92, props.dateHoverOpacity ?? 1)}
+                    >
+                      {t.monthLabel}
+                    </text>
+                  );
+                })()
+              : null}
+            {showDateLabels && t.label ? (
+              <text
+                x={labelW + t.x + scale.pxPerDay / 2}
+                y={topDateTextY}
+                textAnchor="middle"
+                fontSize={props.dateFontSize ?? 10}
+                fill="#9fb2e2"
+                opacity={Math.max(0.95, props.dateHoverOpacity ?? 1)}
+              >
+                {t.label}
+              </text>
+            ) : null}
+          </g>
+        ))}
+      </g>
     </svg>
   );
 }

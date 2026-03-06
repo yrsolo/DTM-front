@@ -9,6 +9,9 @@ export type KeyColors = {
   keySurfaceTop: string;
   keySurfaceBottom: string;
   keySurfaceAlt: string;
+  keyDrawerSurfaceTop: string;
+  keyDrawerSurfaceBottom: string;
+  keyDrawerSurfaceAlt: string;
   keyText: string;
   keyBtnGradFrom: string;
   keyBtnGradTo: string;
@@ -25,6 +28,18 @@ export type KeyColors = {
   keyAppBgMid: string;
   keyAppBgBottom: string;
   keyAppBgBase: string;
+  keyTopbarGlow: string;
+  keyDrawerPanelGlowLeft: string;
+  keyDrawerPanelGlowRight: string;
+  keyDrawerPanelGlowBottom: string;
+  keyDrawerMsStoryboard: string;
+  keyDrawerMsAnimatic: string;
+  keyDrawerMsFeedback: string;
+  keyDrawerMsDraft: string;
+  keyDrawerMsPrefinal: string;
+  keyDrawerMsFinal: string;
+  keyDrawerMsOnair: string;
+  keyDrawerMsStart: string;
   taskColor1: string;
   taskColor2: string;
   taskColor3: string;
@@ -46,6 +61,9 @@ export const DEFAULT_KEY_COLORS: KeyColors = {
   keySurfaceTop: "#18203b",
   keySurfaceBottom: "#121a32",
   keySurfaceAlt: "#1f1736",
+  keyDrawerSurfaceTop: "#18203b",
+  keyDrawerSurfaceBottom: "#121a32",
+  keyDrawerSurfaceAlt: "#1f1736",
   keyText: "#e5ecff",
   keyBtnGradFrom: "#ff91cb",
   keyBtnGradTo: "#6f89ff",
@@ -62,6 +80,18 @@ export const DEFAULT_KEY_COLORS: KeyColors = {
   keyAppBgMid: "#090e1b",
   keyAppBgBottom: "#070b15",
   keyAppBgBase: "#0a0d17",
+  keyTopbarGlow: "#ff80c8",
+  keyDrawerPanelGlowLeft: "#8d62ff",
+  keyDrawerPanelGlowRight: "#5aa4ff",
+  keyDrawerPanelGlowBottom: "#5ce6cf",
+  keyDrawerMsStoryboard: "#5ba9f5",
+  keyDrawerMsAnimatic: "#a75ff8",
+  keyDrawerMsFeedback: "#68769c",
+  keyDrawerMsDraft: "#7786e6",
+  keyDrawerMsPrefinal: "#cc8d41",
+  keyDrawerMsFinal: "#33a76b",
+  keyDrawerMsOnair: "#c64868",
+  keyDrawerMsStart: "#4aa096",
   taskColor1: "#6bb8ff",
   taskColor2: "#7f8dff",
   taskColor3: "#5be2ce",
@@ -92,6 +122,9 @@ export const KEY_COLOR_ITEMS: Array<{ key: keyof KeyColors; label: string }> = [
   { key: "keySurfaceTop", label: "Surface top" },
   { key: "keySurfaceBottom", label: "Surface bottom" },
   { key: "keySurfaceAlt", label: "Surface alt" },
+  { key: "keyDrawerSurfaceTop", label: "Drawer surface top" },
+  { key: "keyDrawerSurfaceBottom", label: "Drawer surface bottom" },
+  { key: "keyDrawerSurfaceAlt", label: "Drawer surface alt" },
   { key: "keyText", label: "Text" },
   { key: "keyBtnGradFrom", label: "Button from" },
   { key: "keyBtnGradTo", label: "Button to" },
@@ -101,13 +134,25 @@ export const KEY_COLOR_ITEMS: Array<{ key: keyof KeyColors; label: string }> = [
   { key: "keyNavBtnTo", label: "Nav button to" },
   { key: "keyNavActiveFrom", label: "Nav active from" },
   { key: "keyNavActiveTo", label: "Nav active to" },
-  { key: "keyBackdropLeft", label: "Backdrop left glow" },
-  { key: "keyBackdropRight", label: "Backdrop right glow" },
-  { key: "keyBackdropBottom", label: "Backdrop bottom glow" },
-  { key: "keyAppBgTop", label: "App bg top" },
-  { key: "keyAppBgMid", label: "App bg mid" },
-  { key: "keyAppBgBottom", label: "App bg bottom" },
-  { key: "keyAppBgBase", label: "App bg base" },
+  { key: "keyBackdropLeft", label: "Глоу слева / Left glow" },
+  { key: "keyBackdropRight", label: "Глоу справа сверху / Top-right glow" },
+  { key: "keyBackdropBottom", label: "Глоу снизу / Bottom glow" },
+  { key: "keyAppBgTop", label: "Фон верх / Background top" },
+  { key: "keyAppBgMid", label: "Фон центр / Background middle" },
+  { key: "keyAppBgBottom", label: "Фон низ / Background bottom" },
+  { key: "keyAppBgBase", label: "Фон база / Background base" },
+  { key: "keyTopbarGlow", label: "Свечение топбара / Topbar glow" },
+  { key: "keyDrawerPanelGlowLeft", label: "Drawer panel glow left" },
+  { key: "keyDrawerPanelGlowRight", label: "Drawer panel glow right" },
+  { key: "keyDrawerPanelGlowBottom", label: "Drawer panel glow bottom" },
+  { key: "keyDrawerMsStoryboard", label: "Drawer ms storyboard" },
+  { key: "keyDrawerMsAnimatic", label: "Drawer ms animatic" },
+  { key: "keyDrawerMsFeedback", label: "Drawer ms feedback" },
+  { key: "keyDrawerMsDraft", label: "Drawer ms draft" },
+  { key: "keyDrawerMsPrefinal", label: "Drawer ms prefinal" },
+  { key: "keyDrawerMsFinal", label: "Drawer ms final" },
+  { key: "keyDrawerMsOnair", label: "Drawer ms onair" },
+  { key: "keyDrawerMsStart", label: "Drawer ms start" },
 ];
 
 export const TASK_PALETTE_ITEMS: Array<{ key: keyof KeyColors; label: string }> = [
