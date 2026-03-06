@@ -13,8 +13,8 @@ export type RuntimeDefaults = {
 export const DEFAULT_RUNTIME_DEFAULTS: RuntimeDefaults = {
   demoMode: false,
   displayLimit: 30,
-  loadLimit: 30,
-  refreshIntervalSec: 0,
+  loadLimit: 100,
+  refreshIntervalSec: 60,
   dateFilterEnabled: false,
   statusWork: true,
   statusPreDone: true,
