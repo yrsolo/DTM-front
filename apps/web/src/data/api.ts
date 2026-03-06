@@ -94,10 +94,12 @@ export async function fetchApiSnapshotWithMeta(
   lastEtag?: string | null,
   windowFilter?: ApiWindowFilter,
   statusFilter?: ApiStatusFilter,
-  loadLimit?: number
+  loadLimit?: number,
+  apiBaseUrlOverride?: string | null
 ): Promise<ApiSnapshotFetchResult> {
   const cfg = await loadPublicConfig();
-  if (!cfg.apiBaseUrl) {
+  const apiBaseUrl = (apiBaseUrlOverride ?? "").trim() || cfg.apiBaseUrl;
+  if (!apiBaseUrl) {
     throw new Error("API base URL is not configured. Set api_base_url in public config.");
   }
 
@@ -128,7 +130,7 @@ export async function fetchApiSnapshotWithMeta(
     params.set("window_mode", "intersects");
   }
 
-  const url = buildApiUrl(cfg.apiBaseUrl, cfg.apiFrontendPath, params);
+  const url = buildApiUrl(apiBaseUrl, cfg.apiFrontendPath, params);
   let lastError: unknown = null;
 
   for (let attempt = 0; attempt <= cfg.apiRetryCount; attempt++) {

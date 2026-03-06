@@ -105,17 +105,34 @@ function normalizeUiPreset(input: unknown): UiPreset {
   };
 }
 
+function isLocalOrTestHost(host: string): boolean {
+  const h = host.toLowerCase();
+  return (
+    h === "localhost" ||
+    h === "127.0.0.1" ||
+    h === "::1" ||
+    h.endsWith(".local") ||
+    h.includes("test")
+  );
+}
+
+function sanitizeRuntimeDefaultsForHost(input: RuntimeDefaults): RuntimeDefaults {
+  if (typeof window === "undefined") return input;
+  if (isLocalOrTestHost(window.location.hostname)) return input;
+  return { ...input, demoMode: false };
+}
+
 export function Layout(props: { children: React.ReactNode }) {
   const [locale, setLocale] = React.useState<AppLocale>("ru");
   const ui = getUiText(locale);
   const [runtimeDefaults, setRuntimeDefaults] = React.useState<RuntimeDefaults>(() => {
     try {
       const raw = localStorage.getItem(UI_PRESET_STORAGE_KEY);
-      if (!raw) return DEFAULT_RUNTIME_DEFAULTS;
+      if (!raw) return sanitizeRuntimeDefaultsForHost(DEFAULT_RUNTIME_DEFAULTS);
       const preset = normalizeUiPreset(JSON.parse(raw));
-      return preset.runtimeDefaults;
+      return sanitizeRuntimeDefaultsForHost(preset.runtimeDefaults);
     } catch {
-      return DEFAULT_RUNTIME_DEFAULTS;
+      return sanitizeRuntimeDefaultsForHost(DEFAULT_RUNTIME_DEFAULTS);
     }
   });
   const [viewMode, setViewMode] = React.useState<TimelineViewMode>("brand_designer_show");
@@ -168,7 +185,7 @@ export function Layout(props: { children: React.ReactNode }) {
       const preset = normalizeUiPreset(parsed);
       setDesign(preset.design);
       setKeyColors(preset.keyColors);
-      setRuntimeDefaults(preset.runtimeDefaults);
+      setRuntimeDefaults(sanitizeRuntimeDefaultsForHost(preset.runtimeDefaults));
     } catch {
       // ignore optional preset file errors
     }
@@ -223,7 +240,7 @@ export function Layout(props: { children: React.ReactNode }) {
           if (!active) return;
           setDesign(preset.design);
           setKeyColors(preset.keyColors);
-          setRuntimeDefaults(preset.runtimeDefaults);
+          setRuntimeDefaults(sanitizeRuntimeDefaultsForHost(preset.runtimeDefaults));
           return;
         }
       } catch {
@@ -271,7 +288,7 @@ export function Layout(props: { children: React.ReactNode }) {
         const preset = normalizeUiPreset(JSON.parse(combinedRaw));
         setDesign(preset.design);
         setKeyColors(preset.keyColors);
-        setRuntimeDefaults(preset.runtimeDefaults);
+        setRuntimeDefaults(sanitizeRuntimeDefaultsForHost(preset.runtimeDefaults));
         return;
       }
     } catch {

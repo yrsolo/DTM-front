@@ -97,6 +97,8 @@ export function ControlsWorkbench() {
   const {
     demoMode,
     toggleDemoMode,
+    useTestApi,
+    setUseTestApi,
     dateFilter,
     setDateFilter,
     statusFilter,
@@ -104,6 +106,7 @@ export function ControlsWorkbench() {
     refreshIntervalMs,
     setRefreshIntervalMs,
     setLoadLimit,
+    syncFromApi,
   } = snapshotState;
 
   const pickLocaleText = React.useCallback(
@@ -383,6 +386,33 @@ export function ControlsWorkbench() {
           <section className="wbGroup">
             <h4>{locale === "en" ? "Defaults for next session" : "Параметры новой сессии"}</h4>
             <div className="wbGroupBody">
+              <label className="wbCtrl wbCtrlToggle wbCtrlToggleBare">
+                <span>{locale === "en" ? "Test API (current session)" : "Test API (текущая сессия)"}</span>
+                <button
+                  type="button"
+                  className={`wbBinaryBtn ${useTestApi ? "active" : ""}`}
+                  title={
+                    locale === "en"
+                      ? useTestApi
+                        ? "Current API: test"
+                        : "Current API: production"
+                      : useTestApi
+                        ? "Текущий API: test"
+                        : "Текущий API: prod"
+                  }
+                  aria-label={locale === "en" ? "Test API current session" : "Test API текущая сессия"}
+                  onClick={() => {
+                    const next = !useTestApi;
+                    setUseTestApi(next);
+                    if (!demoMode) {
+                      void syncFromApi();
+                    }
+                  }}
+                >
+                  <BinaryIcon active={useTestApi} />
+                </button>
+              </label>
+
               <label className="wbCtrl wbCtrlToggle wbCtrlToggleBare">
                 <span>{locale === "en" ? "Default demo mode" : "Демо режим по умолчанию"}</span>
                 <button

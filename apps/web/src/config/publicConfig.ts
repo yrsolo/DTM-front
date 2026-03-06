@@ -111,13 +111,16 @@ export async function loadPublicConfig(): Promise<PublicConfig> {
 
   cachedConfigPromise = (async () => {
     try {
-      const res = await fetch("/config/public.yaml", {
-        headers: { accept: "text/yaml,text/plain" },
-        cache: "no-store",
-      });
-      if (res.ok) {
-        const yaml = await res.text();
-        return buildConfig(parseSimpleYaml(yaml));
+      const paths = ["/config/public.yaml", "/config/public.yam"];
+      for (const path of paths) {
+        const res = await fetch(path, {
+          headers: { accept: "text/yaml,text/plain" },
+          cache: "no-store",
+        });
+        if (res.ok) {
+          const yaml = await res.text();
+          return buildConfig(parseSimpleYaml(yaml));
+        }
       }
     } catch {
       // Runtime config is optional; fallback is applied below.

@@ -259,11 +259,20 @@ if ($DryRun) {
 Write-Host "Uploading runtime config to /config/public.yaml ..."
 if ($DryRun) {
   Write-Host "[DRY-RUN] aws s3 cp `"$runtimeConfigPath`" `"$bucketUri/config/public.yaml`" --endpoint-url `"$endpoint`" --content-type text/yaml --cache-control no-cache"
+  Write-Host "[DRY-RUN] aws s3 cp `"$runtimeConfigPath`" `"$bucketUri/config/public.yam`" --endpoint-url `"$endpoint`" --content-type text/yaml --cache-control no-cache"
 } else {
   Invoke-Checked {
     aws s3 cp `
       $runtimeConfigPath `
       "$bucketUri/config/public.yaml" `
+      --endpoint-url $endpoint `
+      --content-type "text/yaml" `
+      --cache-control "no-cache"
+  }
+  Invoke-Checked {
+    aws s3 cp `
+      $runtimeConfigPath `
+      "$bucketUri/config/public.yam" `
       --endpoint-url $endpoint `
       --content-type "text/yaml" `
       --cache-control "no-cache"

@@ -17,6 +17,8 @@ import {
 } from "./runtimeDefaults";
 
 type SnapshotStatus = "cold_loading" | "ready" | "refreshing" | "stale_error";
+const API_BASE_PROD = "https://dtm-api.solofarm.ru";
+const API_BASE_TEST = "https://dtm-api-test.solofarm.ru";
 
 type PersistedMeta = {
   generatedAt?: string;
@@ -122,6 +124,7 @@ export function useSnapshot(initialRuntimeDefaults?: Partial<RuntimeDefaults>) {
     done: runtimeDefaults.statusDone,
     wait: runtimeDefaults.statusWait,
   }));
+  const [useTestApi, setUseTestApiState] = React.useState<boolean>(false);
 
   const snapshotRef = React.useRef<SnapshotV1 | null>(snapshot);
   React.useEffect(() => {
@@ -182,11 +185,13 @@ export function useSnapshot(initialRuntimeDefaults?: Partial<RuntimeDefaults>) {
         done: true,
         wait: true,
       };
+      const apiBaseOverride = useTestApi ? API_BASE_TEST : API_BASE_PROD;
       const { payload, etag, notModified } = await fetchApiSnapshotWithMeta(
         currentMeta?.etag ?? null,
         dateFilter,
         apiStatusFilterAll,
-        loadLimit
+        loadLimit,
+        apiBaseOverride
       );
       const nowIso = new Date().toISOString();
 
@@ -232,7 +237,7 @@ export function useSnapshot(initialRuntimeDefaults?: Partial<RuntimeDefaults>) {
       setLastError(error);
       setStatus(hasData ? "stale_error" : "cold_loading");
     }
-  }, [dateFilter, loadLimit, demoMode, loadDemo]);
+  }, [dateFilter, loadLimit, demoMode, loadDemo, useTestApi]);
 
   const reloadLocal = React.useCallback(async (opts?: { ignoreDemoMode?: boolean }) => {
     if (demoMode && !opts?.ignoreDemoMode) {
@@ -388,7 +393,7 @@ export function useSnapshot(initialRuntimeDefaults?: Partial<RuntimeDefaults>) {
       }
 
       if (!active) return;
-      const apiOn = Boolean(cfg.apiBaseUrl);
+      const apiOn = Boolean(cfg.apiBaseUrl) || Boolean(API_BASE_PROD);
       if (apiOn) {
         await refreshFromApi({ manual: false });
       } else if (!memorySnapshot && !snapshotRef.current) {
@@ -413,6 +418,10 @@ export function useSnapshot(initialRuntimeDefaults?: Partial<RuntimeDefaults>) {
     };
   }, [refreshIntervalMs, refreshFromApi, demoMode]);
 
+  const setUseTestApi = React.useCallback((next: boolean) => {
+    setUseTestApiState(Boolean(next));
+  }, []);
+
   const isLoading = status === "cold_loading";
   const isRefreshing = status === "refreshing";
 
@@ -432,6 +441,8 @@ export function useSnapshot(initialRuntimeDefaults?: Partial<RuntimeDefaults>) {
     demoMode,
     setDemoMode,
     toggleDemoMode,
+    useTestApi,
+    setUseTestApi,
     dateFilter,
     setDateFilter,
     statusFilter,
