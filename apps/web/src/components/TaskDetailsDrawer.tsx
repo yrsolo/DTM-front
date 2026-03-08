@@ -5,6 +5,7 @@ import { fetchRuHolidayAndTransferDaysInRange } from "../calendar/ruNonWorkingDa
 import { fetchPersonNameByOwnerId } from "../data/api";
 import { getUiText } from "../i18n/uiText";
 import { formatTaskIdForUi } from "../utils/id";
+import { resolveDayTone, resolveMilestoneTone } from "../utils/milestoneTone";
 import { toShortPersonName } from "../utils/personName";
 import { LayoutContext } from "./Layout";
 
@@ -73,16 +74,69 @@ export function TaskDetailsDrawer(props: {
   statusLabels?: Record<string, string>;
   milestoneTypeLabels?: Record<string, string>;
   onClose: () => void;
+  onExited?: () => void;
 }) {
   const ctx = React.useContext(LayoutContext);
   const ui = ctx?.ui ?? getUiText("ru");
   const locale = ctx?.locale ?? "ru";
-  const t = props.task;
-  if (!t) return null;
+  const drawerAnimEnabled = (ctx?.design?.animEnabled ?? 0) >= 0.5;
+  const drawerAnimDurationMs = Math.max(0, Math.round(ctx?.design?.animDrawerDurationMs ?? 220));
+  const [renderedTask, setRenderedTask] = React.useState<TaskV1 | null>(props.task);
+  const [animState, setAnimState] = React.useState<"hidden" | "entering" | "open" | "closing">(
+    props.task ? (drawerAnimEnabled && drawerAnimDurationMs > 0 ? "entering" : "open") : "hidden"
+  );
 
+  React.useEffect(() => {
+    if (props.task) {
+      setRenderedTask(props.task);
+      setAnimState(drawerAnimEnabled && drawerAnimDurationMs > 0 ? "entering" : "open");
+      return;
+    }
+
+    if (!renderedTask) {
+      setAnimState("hidden");
+      return;
+    }
+
+    if (drawerAnimEnabled && drawerAnimDurationMs > 0) {
+      setAnimState("closing");
+      return;
+    }
+
+    setAnimState("hidden");
+    setRenderedTask(null);
+    props.onExited?.();
+  }, [props.task, renderedTask, drawerAnimEnabled, drawerAnimDurationMs, props.onExited]);
+
+  React.useEffect(() => {
+    if (animState !== "entering") return;
+    const timeout = window.setTimeout(() => setAnimState("open"), 24);
+    return () => window.clearTimeout(timeout);
+  }, [animState]);
+
+  React.useEffect(() => {
+    if (animState !== "closing") return;
+    const timeout = window.setTimeout(() => {
+      setAnimState("hidden");
+      setRenderedTask(null);
+      props.onExited?.();
+    }, drawerAnimDurationMs);
+    return () => window.clearTimeout(timeout);
+  }, [animState, drawerAnimDurationMs, props.onExited]);
+
+  const t = renderedTask;
   const [resolvedOwnerName, setResolvedOwnerName] = React.useState<string | null>(null);
   const [holidays, setHolidays] = React.useState<Set<string>>(new Set());
+  const [calendarHint, setCalendarHint] = React.useState<{ x: number; y: number; label: string } | null>(null);
   const drawerRef = React.useRef<HTMLDivElement | null>(null);
+  const calendarRef = React.useRef<HTMLDivElement | null>(null);
+  const calendarDragRef = React.useRef<{
+    x: number;
+    y: number;
+    top: number;
+    left: number;
+  } | null>(null);
+  const [isCalendarDragging, setIsCalendarDragging] = React.useState(false);
 
   const findPerson = React.useCallback(
     (ref?: string | null) =>
@@ -92,15 +146,16 @@ export function TaskDetailsDrawer(props: {
     [props.people]
   );
 
-  const owner = findPerson(t.ownerId) ?? findPerson(t.ownerName);
-  const customerPerson = findPerson(t.customer);
-  const group = props.groups?.find((g) => g.id === t.groupId);
-  const statusLabel = props.statusLabels?.[t.status] ?? t.status;
+  const owner = t ? findPerson(t.ownerId) ?? findPerson(t.ownerName) : null;
+  const customerPerson = t ? findPerson(t.customer) : null;
+  const group = t ? props.groups?.find((g) => g.id === t.groupId) : null;
+  const statusLabel = t ? props.statusLabels?.[t.status] ?? t.status : "-";
 
   React.useEffect(() => {
     let active = true;
     setResolvedOwnerName(null);
 
+    if (!t) return;
     if ((!t.ownerId && !t.ownerName) || owner) return;
 
     void (async () => {
@@ -113,9 +168,11 @@ export function TaskDetailsDrawer(props: {
     return () => {
       active = false;
     };
-  }, [t.id, t.ownerId, t.ownerName, owner]);
+  }, [t?.id, t?.ownerId, t?.ownerName, owner]);
 
-  const ownerLabel = owner
+  const ownerLabel = !t
+    ? ui.common.unassigned
+    : owner
     ? toShortPersonName(owner.name)
     : t.ownerName
       ? toShortPersonName(t.ownerName)
@@ -126,34 +183,35 @@ export function TaskDetailsDrawer(props: {
         : ui.common.unassigned;
   const customerLabel = customerPerson
     ? customerPerson.name
-    : t.customer ?? "-";
-  const formatLabel = normalizeFormatLabel(t.format_ ?? t.type ?? "-");
+    : t?.customer ?? "-";
+  const formatLabel = normalizeFormatLabel(t?.format_ ?? t?.type ?? "-");
 
-  const milestones = React.useMemo(
-    () =>
-      [...(t.milestones ?? [])]
+  const milestones = React.useMemo(() => {
+    if (!t) return [];
+    return [...(t.milestones ?? [])]
         .map((m) => ({
           ...m,
           date: m.actual ?? m.planned ?? null,
           label: props.milestoneTypeLabels?.[m.type] ?? m.type,
         }))
-        .sort((a, b) => (a.date ?? "").localeCompare(b.date ?? "")),
-    [t.milestones, props.milestoneTypeLabels]
-  );
+        .sort((a, b) => (a.date ?? "").localeCompare(b.date ?? ""));
+  }, [t, props.milestoneTypeLabels]);
 
   const rangeStart = React.useMemo(() => {
+    if (!t) return new Date();
     const start = parseIsoDate(t.start);
     if (start) return start;
     const m0 = parseIsoDate(milestones[0]?.date);
     return m0 ?? new Date();
-  }, [t.start, milestones]);
+  }, [t?.start, milestones]);
 
   const rangeEnd = React.useMemo(() => {
+    if (!t) return rangeStart;
     const end = parseIsoDate(t.end);
     if (end) return end;
     const mLast = parseIsoDate(milestones[milestones.length - 1]?.date);
     return mLast ?? rangeStart;
-  }, [t.end, milestones, rangeStart]);
+  }, [t?.end, milestones, rangeStart]);
 
   const safeStart = rangeStart <= rangeEnd ? rangeStart : rangeEnd;
   const safeEnd = rangeStart <= rangeEnd ? rangeEnd : rangeStart;
@@ -231,6 +289,12 @@ export function TaskDetailsDrawer(props: {
       right: milestones.slice(half),
     };
   }, [milestones]);
+  const bubbleScale = Math.max(0.6, ctx?.design?.tooltipBubbleScale ?? 1);
+  const bubbleStyle: React.CSSProperties = {
+    fontSize: `${Math.round(11 * bubbleScale)}px`,
+    padding: `${Math.round(3 * bubbleScale)}px ${Math.round(9 * bubbleScale)}px`,
+    lineHeight: 1,
+  };
 
   React.useEffect(() => {
     if (!t?.id) return;
@@ -238,19 +302,35 @@ export function TaskDetailsDrawer(props: {
   }, [t?.id]);
 
   React.useEffect(() => {
-    if (typeof document === "undefined") return;
-    const prevOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = prevOverflow;
+    if (!isCalendarDragging) return;
+    const onMove = (e: MouseEvent) => {
+      const drag = calendarDragRef.current;
+      const node = calendarRef.current;
+      if (!drag || !node) return;
+      const dx = e.clientX - drag.x;
+      const dy = e.clientY - drag.y;
+      node.scrollTop = drag.top - dy;
+      node.scrollLeft = drag.left - dx;
     };
-  }, []);
+    const onUp = () => {
+      calendarDragRef.current = null;
+      setIsCalendarDragging(false);
+    };
+    window.addEventListener("mousemove", onMove);
+    window.addEventListener("mouseup", onUp);
+    return () => {
+      window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("mouseup", onUp);
+    };
+  }, [isCalendarDragging]);
+
+  if (!t) return null;
 
   const drawerNode = (
-    <div className="drawerBackdrop" onClick={props.onClose}>
+    <div className={`drawerBackdrop drawerAnim-${animState}`} onClick={props.onClose}>
       <div
         ref={drawerRef}
-        className="drawer"
+        className={`drawer drawerAnim-${animState}`}
         onClick={(e) => e.stopPropagation()}
         onWheel={(e) => e.stopPropagation()}
         onTouchMove={(e) => e.stopPropagation()}
@@ -288,7 +368,7 @@ export function TaskDetailsDrawer(props: {
                 {milestoneColumns.left.map((m, i) => (
                   <div key={`${m.type}-${m.date}-l-${i}`} className="drawerMilestoneRow">
                     <span className="badge drawerDateBadge">{formatDdMm(m.date)}</span>
-                    <span className={`drawerMilestoneName ${m.type === "feedback" ? "isFeedback" : ""}`}>
+                    <span className={`drawerMilestoneName msType-${resolveMilestoneTone(m.type, m.label)}`}>
                       {m.label}
                     </span>
                   </div>
@@ -298,7 +378,7 @@ export function TaskDetailsDrawer(props: {
                 {milestoneColumns.right.map((m, i) => (
                   <div key={`${m.type}-${m.date}-r-${i}`} className="drawerMilestoneRow">
                     <span className="badge drawerDateBadge">{formatDdMm(m.date)}</span>
-                    <span className={`drawerMilestoneName ${m.type === "feedback" ? "isFeedback" : ""}`}>
+                    <span className={`drawerMilestoneName msType-${resolveMilestoneTone(m.type, m.label)}`}>
                       {m.label}
                     </span>
                   </div>
@@ -318,7 +398,24 @@ export function TaskDetailsDrawer(props: {
             ))}
           </div>
 
-          <div className="drawerCalendarContinuous">
+          <div
+            ref={calendarRef}
+            className="drawerCalendarContinuous"
+            style={{ cursor: isCalendarDragging ? "grabbing" : "grab", userSelect: isCalendarDragging ? "none" : "auto" }}
+            onMouseDown={(e) => {
+              if (e.button !== 0) return;
+              const node = calendarRef.current;
+              if (!node) return;
+              e.preventDefault();
+              calendarDragRef.current = {
+                x: e.clientX,
+                y: e.clientY,
+                top: node.scrollTop,
+                left: node.scrollLeft,
+              };
+              setIsCalendarDragging(true);
+            }}
+          >
             {calendarWeeks.map((week, wi) => (
               <div key={`w-${wi}`}>
                 {week.find((d) => d.monthLabel)?.monthLabel ? (
@@ -334,9 +431,19 @@ export function TaskDetailsDrawer(props: {
                         day.isWeekend ? "isWeekend" : "",
                         day.isHoliday ? "isHoliday" : "",
                         day.milestones.length ? "hasMilestone" : "",
+                        day.milestones.length ? `msTone-${resolveDayTone(day.milestones)}` : "",
                       ]
                         .filter(Boolean)
                         .join(" ")}
+                      onMouseMove={(e) => {
+                        if (!day.milestones.length) return;
+                        setCalendarHint({
+                          x: e.clientX + 8,
+                          y: e.clientY + 8,
+                          label: day.milestones[0]?.label ?? "",
+                        });
+                      }}
+                      onMouseLeave={() => setCalendarHint(null)}
                     >
                       <div className="drawerCalendarDay">{day.date.getDate()}</div>
                       {day.milestones.length ? (
@@ -344,8 +451,15 @@ export function TaskDetailsDrawer(props: {
                           {day.milestones.slice(0, 2).map((m, idx) => (
                             <span
                               key={`${day.iso}-${m.type}-${idx}`}
-                              className={`drawerCellMilestoneName ${m.type === "feedback" ? "isFeedback" : ""}`}
-                              title={m.label}
+                              className={`drawerCellMilestoneName msType-${resolveMilestoneTone(m.type, m.label)}`}
+                              onMouseMove={(e) => {
+                                setCalendarHint({
+                                  x: e.clientX + 8,
+                                  y: e.clientY + 8,
+                                  label: m.label,
+                                });
+                              }}
+                              onMouseLeave={() => setCalendarHint(null)}
                             >
                               {m.label}
                             </span>
@@ -396,6 +510,11 @@ export function TaskDetailsDrawer(props: {
           </div>
         ) : null}
       </div>
+      {calendarHint ? (
+        <div className="tooltip" style={{ left: calendarHint.x, top: calendarHint.y, pointerEvents: "none", zIndex: 90 }}>
+          <span className="badge" style={bubbleStyle}>{calendarHint.label}</span>
+        </div>
+      ) : null}
     </div>
   );
 

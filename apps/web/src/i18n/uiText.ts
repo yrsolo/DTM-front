@@ -116,7 +116,7 @@ export type UiText = {
 };
 
 const RU_TEXT: UiText = {
-  appTitle: "DTM Grant Charts",
+  appTitle: "Спонсорские ТНТ",
   appSubtitle: "Планирование и загрузка команды",
   modeByBrandDesignerShow: "Бренд",
   modeByFormatBrandShow: "Формат",
@@ -231,7 +231,7 @@ const RU_TEXT: UiText = {
 };
 
 const EN_TEXT: UiText = {
-  appTitle: "DTM Grant Charts",
+  appTitle: "Спонсорские ТНТ",
   appSubtitle: "Planning and workload timeline",
   modeByBrandDesignerShow: "Brand",
   modeByFormatBrandShow: "Format",

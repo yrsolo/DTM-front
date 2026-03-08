@@ -16,6 +16,11 @@ import {
 } from "../design/colors";
 import { ControlsWorkbench } from "./ControlsWorkbench";
 import { FiltersState } from "./FiltersBar";
+import {
+  DEFAULT_RUNTIME_DEFAULTS,
+  RuntimeDefaults,
+  normalizeRuntimeDefaults,
+} from "../data/runtimeDefaults";
 
 export type TimelineViewMode =
   | "brand_designer_show"
@@ -36,6 +41,8 @@ export type LayoutContextValue = {
   setSortMode: React.Dispatch<React.SetStateAction<TimelineSortMode>>;
   filters: FiltersState;
   setFilters: React.Dispatch<React.SetStateAction<FiltersState>>;
+  runtimeDefaults: RuntimeDefaults;
+  setRuntimeDefaults: React.Dispatch<React.SetStateAction<RuntimeDefaults>>;
   snapshotState: ReturnType<typeof useSnapshot>;
   design: DesignControls;
   setDesign: React.Dispatch<React.SetStateAction<DesignControls>>;
@@ -59,11 +66,25 @@ const LOCALE_STORAGE_KEY = "dtm.locale.v1";
 type UiPreset = {
   design: DesignControls;
   keyColors: KeyColors;
+  runtimeDefaults: RuntimeDefaults;
 };
+
+function animationEaseByPreset(preset: number): string {
+  const id = Math.round(preset);
+  if (id === 0) return "linear";
+  if (id === 1) return "ease-out";
+  if (id === 3) return "cubic-bezier(0.22, 1, 0.36, 1)";
+  if (id === 4) return "cubic-bezier(0.2, 0.8, 0.2, 1)";
+  return "ease-in-out";
+}
 
 function normalizeUiPreset(input: unknown): UiPreset {
   if (!input || typeof input !== "object") {
-    return { design: DEFAULT_DESIGN_CONTROLS, keyColors: DEFAULT_KEY_COLORS };
+    return {
+      design: DEFAULT_DESIGN_CONTROLS,
+      keyColors: DEFAULT_KEY_COLORS,
+      runtimeDefaults: DEFAULT_RUNTIME_DEFAULTS,
+    };
   }
 
   const record = input as Record<string, unknown>;
@@ -73,30 +94,64 @@ function normalizeUiPreset(input: unknown): UiPreset {
     return {
       design: normalizeDesignControls((record.design ?? {}) as Partial<DesignControls>),
       keyColors: normalizeKeyColors((record.keyColors ?? {}) as Partial<KeyColors>),
+      runtimeDefaults: normalizeRuntimeDefaults((record.runtimeDefaults ?? {}) as Partial<RuntimeDefaults>),
     };
   }
 
   return {
     design: normalizeDesignControls(record as Partial<DesignControls>),
     keyColors: DEFAULT_KEY_COLORS,
+    runtimeDefaults: DEFAULT_RUNTIME_DEFAULTS,
   };
 }
 
+function isLocalOrTestHost(host: string): boolean {
+  const h = host.toLowerCase();
+  return (
+    h === "localhost" ||
+    h === "127.0.0.1" ||
+    h === "::1" ||
+    h.endsWith(".local") ||
+    h.includes("test")
+  );
+}
+
+function sanitizeRuntimeDefaultsForHost(input: RuntimeDefaults): RuntimeDefaults {
+  if (typeof window === "undefined") return input;
+  if (isLocalOrTestHost(window.location.hostname)) return input;
+  return { ...input, demoMode: false };
+}
+
 export function Layout(props: { children: React.ReactNode }) {
+  const INTRO_FADE_MS = 3000;
+  const INTRO_VIDEO_DELAY_MS = 1000;
   const [locale, setLocale] = React.useState<AppLocale>("ru");
   const ui = getUiText(locale);
+  const [runtimeDefaults, setRuntimeDefaults] = React.useState<RuntimeDefaults>(() => {
+    try {
+      const raw = localStorage.getItem(UI_PRESET_STORAGE_KEY);
+      if (!raw) return sanitizeRuntimeDefaultsForHost(DEFAULT_RUNTIME_DEFAULTS);
+      const preset = normalizeUiPreset(JSON.parse(raw));
+      return sanitizeRuntimeDefaultsForHost(preset.runtimeDefaults);
+    } catch {
+      return sanitizeRuntimeDefaultsForHost(DEFAULT_RUNTIME_DEFAULTS);
+    }
+  });
   const [viewMode, setViewMode] = React.useState<TimelineViewMode>("brand_designer_show");
   const [sortMode, setSortMode] = React.useState<TimelineSortMode>("last_milestone_desc");
-  const [filters, setFilters] = React.useState<FiltersState>({
+  const [filters, setFilters] = React.useState<FiltersState>(() => ({
     ownerId: "",
     status: "",
     search: "",
-    displayLimit: 30,
-    loadLimit: 30,
-  });
-  const snapshotState = useSnapshot();
+    displayLimit: runtimeDefaults.displayLimit,
+    loadLimit: runtimeDefaults.loadLimit,
+  }));
+  const snapshotState = useSnapshot(runtimeDefaults);
   const [design, setDesign] = React.useState<DesignControls>(DEFAULT_DESIGN_CONTROLS);
   const [keyColors, setKeyColors] = React.useState<KeyColors>(DEFAULT_KEY_COLORS);
+  const [introState, setIntroState] = React.useState<"idle" | "enter" | "playing" | "exit">("idle");
+  const [introOverlayActive, setIntroOverlayActive] = React.useState(false);
+  const introVideoRef = React.useRef<HTMLVideoElement | null>(null);
   const textRenderingValue = React.useMemo(() => {
     const mode = Math.round(design.textRenderingMode);
     if (mode === 1) return "optimizeLegibility";
@@ -135,6 +190,7 @@ export function Layout(props: { children: React.ReactNode }) {
       const preset = normalizeUiPreset(parsed);
       setDesign(preset.design);
       setKeyColors(preset.keyColors);
+      setRuntimeDefaults(sanitizeRuntimeDefaultsForHost(preset.runtimeDefaults));
     } catch {
       // ignore optional preset file errors
     }
@@ -189,6 +245,7 @@ export function Layout(props: { children: React.ReactNode }) {
           if (!active) return;
           setDesign(preset.design);
           setKeyColors(preset.keyColors);
+          setRuntimeDefaults(sanitizeRuntimeDefaultsForHost(preset.runtimeDefaults));
           return;
         }
       } catch {
@@ -224,10 +281,10 @@ export function Layout(props: { children: React.ReactNode }) {
   }, []);
 
   const saveDesign = React.useCallback(() => {
-    localStorage.setItem(UI_PRESET_STORAGE_KEY, JSON.stringify({ design, keyColors }));
+    localStorage.setItem(UI_PRESET_STORAGE_KEY, JSON.stringify({ design, keyColors, runtimeDefaults }));
     localStorage.setItem(DESIGN_CONTROLS_STORAGE_KEY, JSON.stringify(design));
     localStorage.setItem(KEY_COLORS_STORAGE_KEY, JSON.stringify(keyColors));
-  }, [design, keyColors]);
+  }, [design, keyColors, runtimeDefaults]);
 
   const loadDesign = React.useCallback(() => {
     try {
@@ -236,6 +293,7 @@ export function Layout(props: { children: React.ReactNode }) {
         const preset = normalizeUiPreset(JSON.parse(combinedRaw));
         setDesign(preset.design);
         setKeyColors(preset.keyColors);
+        setRuntimeDefaults(sanitizeRuntimeDefaultsForHost(preset.runtimeDefaults));
         return;
       }
     } catch {
@@ -272,6 +330,60 @@ export function Layout(props: { children: React.ReactNode }) {
     setKeyColors(DEFAULT_KEY_COLORS);
   }, []);
 
+  const startLogoIntro = React.useCallback(() => {
+    if (introState !== "idle") return;
+    setIntroOverlayActive(false);
+    setIntroState("enter");
+  }, [introState]);
+
+  React.useEffect(() => {
+    if (introState !== "enter") return;
+    const raf = window.requestAnimationFrame(() => {
+      setIntroOverlayActive(true);
+    });
+    const startTimer = window.setTimeout(() => {
+      const video = introVideoRef.current;
+      if (video) {
+        video.currentTime = 0;
+        void video.play().catch(() => {
+          setIntroState("exit");
+        });
+      }
+      setIntroState("playing");
+    }, INTRO_VIDEO_DELAY_MS);
+    return () => {
+      window.cancelAnimationFrame(raf);
+      window.clearTimeout(startTimer);
+    };
+  }, [introState]);
+
+  React.useEffect(() => {
+    if (introState !== "exit") return;
+    setIntroOverlayActive(false);
+    const endTimer = window.setTimeout(() => {
+      const video = introVideoRef.current;
+      if (video) {
+        video.pause();
+        video.currentTime = 0;
+      }
+      setIntroOverlayActive(false);
+      setIntroState("idle");
+    }, INTRO_FADE_MS);
+    return () => window.clearTimeout(endTimer);
+  }, [introState]);
+
+  React.useEffect(() => {
+    if (introState === "idle") return;
+    const onKeyDown = () => setIntroState("exit");
+    const onMouseDown = () => setIntroState("exit");
+    window.addEventListener("keydown", onKeyDown);
+    window.addEventListener("mousedown", onMouseDown);
+    return () => {
+      window.removeEventListener("keydown", onKeyDown);
+      window.removeEventListener("mousedown", onMouseDown);
+    };
+  }, [introState]);
+
   const layoutVarsStyle = React.useMemo(
     () =>
       ({
@@ -285,15 +397,19 @@ export function Layout(props: { children: React.ReactNode }) {
         "--mat-bg-pink-a": String(design.matBgPinkOpacity),
         "--mat-bg-blue-a": String(design.matBgBlueOpacity),
         "--mat-bg-mint-a": String(design.matBgMintOpacity),
+        "--scene-dim-a": String(design.sceneDimOpacity),
         "--mat-card-border-a": String(design.matCardBorderOpacity),
         "--mat-card-shadow-a": String(design.matCardShadowStrength),
         "--mat-card-inset-a": String(design.matCardInsetStrength),
         "--mat-topbar-border-a": String(design.matTopbarBorderOpacity),
+        "--topbar-glow-a": String(design.topbarGlowOpacity),
+        "--topbar-bg-a": String(design.topbarBgOpacity),
         "--mat-active-glow-a": String(design.matActiveGlowStrength),
         "--mat-button-glow-a": String(design.matButtonGlowStrength),
         "--mat-badge-glow-a": String(design.matBadgeGlowStrength),
         "--mat-row-hover-a": String(design.matRowHoverStrength),
         "--mat-scrollbar-glow-a": String(design.matScrollbarGlowStrength),
+        "--designers-card-tint-a": String(design.designersCardTintStrength),
         "--drawer-width": `${design.drawerWidth}px`,
         "--drawer-padding": `${design.drawerPadding}px`,
         "--drawer-title-size": `${design.drawerTitleSize}px`,
@@ -317,6 +433,15 @@ export function Layout(props: { children: React.ReactNode }) {
         "--drawer-milestone-day-shadow-a": String(design.drawerMilestoneDayShadowOpacity),
         "--drawer-milestone-cell-dark-shadow-a": String(design.drawerMilestoneCellDarkShadowOpacity),
         "--drawer-milestone-cell-dark-shadow-blur": `${design.drawerMilestoneCellDarkShadowBlur}px`,
+        "--drawer-panel-border-a": String(design.drawerPanelBorderOpacity),
+        "--drawer-panel-shadow-a": String(design.drawerPanelShadowStrength),
+        "--drawer-panel-inset-a": String(design.drawerPanelInsetStrength),
+        "--drawer-panel-glow-a": String(design.drawerPanelGlowOpacity),
+        "--anim-enabled": String(design.animEnabled >= 0.5 ? 1 : 0),
+        "--anim-drawer-duration-ms": `${Math.max(0, design.animDrawerDurationMs)}ms`,
+        "--anim-reorder-duration-ms": `${Math.max(0, design.animReorderDurationMs)}ms`,
+        "--anim-drawer-ease": animationEaseByPreset(design.animDrawerEasePreset),
+        "--anim-reorder-ease": animationEaseByPreset(design.animReorderEasePreset),
         "--wb-dock-left": `${design.workbenchDockLeft}px`,
         "--wb-dock-right": `${design.workbenchDockRight}px`,
         "--wb-dock-bottom": `${design.workbenchDockBottom}px`,
@@ -353,6 +478,9 @@ export function Layout(props: { children: React.ReactNode }) {
         "--key-surface-top": keyColors.keySurfaceTop,
         "--key-surface-bottom": keyColors.keySurfaceBottom,
         "--key-surface-alt": keyColors.keySurfaceAlt,
+        "--key-drawer-surface-top": keyColors.keyDrawerSurfaceTop,
+        "--key-drawer-surface-bottom": keyColors.keyDrawerSurfaceBottom,
+        "--key-drawer-surface-alt": keyColors.keyDrawerSurfaceAlt,
         "--key-text": keyColors.keyText,
         "--key-btn-grad-from": keyColors.keyBtnGradFrom,
         "--key-btn-grad-to": keyColors.keyBtnGradTo,
@@ -369,6 +497,19 @@ export function Layout(props: { children: React.ReactNode }) {
         "--key-app-bg-mid": keyColors.keyAppBgMid,
         "--key-app-bg-bottom": keyColors.keyAppBgBottom,
         "--key-app-bg-base": keyColors.keyAppBgBase,
+        "--key-topbar-glow": keyColors.keyTopbarGlow,
+        "--key-drawer-panel-glow-left": keyColors.keyDrawerPanelGlowLeft,
+        "--key-drawer-panel-glow-right": keyColors.keyDrawerPanelGlowRight,
+        "--key-drawer-panel-glow-bottom": keyColors.keyDrawerPanelGlowBottom,
+        "--key-drawer-ms-storyboard": keyColors.keyDrawerMsStoryboard,
+        "--key-drawer-ms-animatic": keyColors.keyDrawerMsAnimatic,
+        "--key-drawer-ms-feedback": keyColors.keyDrawerMsFeedback,
+        "--key-drawer-ms-prefinal": keyColors.keyDrawerMsPrefinal,
+        "--key-drawer-ms-final": keyColors.keyDrawerMsFinal,
+        "--key-drawer-ms-master": keyColors.keyDrawerMsMaster,
+        "--key-drawer-ms-onair": keyColors.keyDrawerMsOnair,
+        "--key-drawer-ms-start": keyColors.keyDrawerMsStart,
+        "--key-drawer-ms-default": keyColors.keyDrawerMsDefault,
         "--task-color-1": keyColors.taskColor1,
         "--task-color-2": keyColors.taskColor2,
         "--task-color-3": keyColors.taskColor3,
@@ -384,6 +525,28 @@ export function Layout(props: { children: React.ReactNode }) {
     [design, keyColors, smoothingValue, textRenderingValue]
   );
 
+  React.useEffect(() => {
+    if (typeof document === "undefined") return;
+    const target = document.body;
+    const cssVarEntries = Object.entries(layoutVarsStyle).filter(([key]) => key.startsWith("--"));
+    const previous = new Map<string, string>();
+
+    for (const [key] of cssVarEntries) {
+      previous.set(key, target.style.getPropertyValue(key));
+    }
+
+    for (const [key, value] of cssVarEntries) {
+      target.style.setProperty(key, String(value));
+    }
+
+    return () => {
+      for (const [key, value] of previous) {
+        if (value) target.style.setProperty(key, value);
+        else target.style.removeProperty(key);
+      }
+    };
+  }, [layoutVarsStyle]);
+
   return (
     <LayoutContext.Provider
       value={{
@@ -396,6 +559,8 @@ export function Layout(props: { children: React.ReactNode }) {
         setSortMode,
         filters,
         setFilters,
+        runtimeDefaults,
+        setRuntimeDefaults,
         snapshotState,
         design,
         setDesign,
@@ -410,16 +575,43 @@ export function Layout(props: { children: React.ReactNode }) {
         resetKeyColors,
       }}
     >
-      <div style={layoutVarsStyle}>
+      <div className="appShell" style={layoutVarsStyle}>
         <div className="topbar">
           <div className="nav">
             <div className="brand">
-              <strong>{ui.appTitle}</strong>
-              <span className="muted">{ui.appSubtitle}</span>
+              <button
+                type="button"
+                className="brandIconButton"
+                onClick={startLogoIntro}
+                aria-label="Play logo intro"
+              >
+                <img className="brandIcon" src="/dtm_ico_64x64.png" alt="" aria-hidden="true" />
+              </button>
+              <div className="brandText">
+                <strong>{ui.appTitle}</strong>
+                <span className="muted">{ui.appSubtitle}</span>
+              </div>
             </div>
           </div>
         </div>
         <div className="container">{props.children}</div>
+        {introState !== "idle" ? (
+          <div
+            className={`logoIntroOverlay ${introState === "exit" ? "isExit" : introOverlayActive ? "isActive" : ""}`}
+          >
+            <video
+              ref={introVideoRef}
+              className={`logoIntroVideo ${introState === "playing" ? "isVisible" : ""}`}
+              src="/DTM_lo.mp4"
+              preload="auto"
+              playsInline
+              muted
+              controls={false}
+              onEnded={() => setIntroState("exit")}
+              onError={() => setIntroState("exit")}
+            />
+          </div>
+        ) : null}
         <div className="controlDock">
           <ControlsWorkbench />
         </div>

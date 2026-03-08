@@ -26,6 +26,18 @@ export function FiltersBar() {
     setRefreshIntervalMs,
   } = snapshotState;
 
+  const formatMetaTs = (value?: string | null): string => {
+    if (!value) return "-";
+    const d = new Date(value);
+    if (Number.isNaN(d.getTime())) return "-";
+    const yy = String(d.getUTCFullYear()).slice(-2);
+    const mm = String(d.getUTCMonth() + 1).padStart(2, "0");
+    const dd = String(d.getUTCDate()).padStart(2, "0");
+    const hh = String(d.getUTCHours()).padStart(2, "0");
+    const mi = String(d.getUTCMinutes()).padStart(2, "0");
+    return `${yy}:${mm}:${dd}:${hh}:${mi}`;
+  };
+
   return (
     <div className="filters">
       <button onClick={() => { void reloadLocal(); }} disabled={isRefreshing}>
@@ -50,8 +62,8 @@ export function FiltersBar() {
 
       <span className="refreshMeta muted">
         {isRefreshing ? ui.filters.refreshing : ui.filters.ready} | {ui.filters.generated}:{" "}
-        {snapshot?.meta.generatedAt ?? "-"} | {ui.filters.updated}: {lastUpdatedAt ?? "-"} |{" "}
-        {ui.filters.attempt}: {lastRefreshAttemptAt ?? "-"}
+        {formatMetaTs(snapshot?.meta.generatedAt)} | {ui.filters.updated}: {formatMetaTs(lastUpdatedAt)} |{" "}
+        {ui.filters.attempt}: {formatMetaTs(lastRefreshAttemptAt)}
       </span>
 
       {error ? <span className="muted">Error: {String(error)}</span> : null}

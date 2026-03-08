@@ -1,25 +1,76 @@
-# DTM-front
+﻿# Спонсорские ТНТ
 
-Web frontend for the DTM (Designers Task Manager) system.
+Веб-интерфейс для планирования и навигации по спонсорским задачам ТНТ. Проект собирает snapshot из локального JSON или API, показывает задачи в виде плотного таймлайна и карточек по дизайнерам, а также даёт runtime-настройку визуальной системы без пересборки.
 
-## What it does
-- Fetches a DTM **snapshot** from the backend API (or local example JSON for MVP).
-- Renders two main views:
-  - **By Designers** (grouped timelines)
-  - **By Tasks** (table + timeline)
-- Provides filters (designer/status/search) and task details panel.
+## Что умеет продукт сейчас
 
-## Data
-- MVP can use `data/snapshot.example.json`.
-- Production will use the DTM API (`/api/v2/frontend` or a dedicated `/snapshot`) with auth.
+- Показывает две рабочие страницы: `Задачи` и `Дизайнеры`.
+- Загружает данные из локального snapshot, demo snapshot или API.
+- Поддерживает фильтрацию, группировку, масштабирование таймлайна и открытие карточки задачи.
+- Имеет встроенный workbench для настройки геометрии, цветов, milestones, анимаций и runtime defaults.
+- Сохраняет пользовательское состояние в браузере: режимы, пресеты, локальный кэш данных и текущие настройки.
 
-## Tech
-- React + TypeScript (Vite)
-- Shared schema/types under `packages/schema`
+## Основные режимы
 
-## Where to read next
-- System docs: `docs/README.md`
-- Deploy guide: `docs/DEPLOY.md`
-- Delivery/process (campaigns, now, roadmap, archive): `work/README.md`
+### `Задачи`
 
-License: see `LICENSE`.
+Основной рабочий экран: левый блок со строками, плотный таймлайн, pinned-шапки, zoom/filter dock, переключатели группировки, tooltip и карточка задачи.
+
+### `Дизайнеры`
+
+Экран с колонками по дизайнерам. Внутри каждой колонки лежат карточки задач с цветовой подкраской, а при наведении открывается tooltip с milestones, менеджером и history.
+
+## Ключевые особенности интерфейса
+
+- SVG-таймлайн с ручным управлением масштабом и прокруткой.
+- Отдельная карточка задачи с календарём, milestones и метаданными.
+- Workbench-крутилки для material, panels, timeline, milestones, drawer, palette и runtime defaults.
+- Поддержка локального, тестового и продового API-контуров.
+- Runtime-конфиг через `apps/web/config/public.yaml` и `apps/web/config/public.prod.yaml`.
+
+## Быстрый старт
+
+### Требования
+
+- Node.js 18+
+- npm
+
+### Установка
+
+```bash
+npm install
+```
+
+### Локальный запуск
+
+```bash
+cd apps/web
+npm run dev
+```
+
+По умолчанию приложение читает runtime-конфиг из `/config/public.yaml`, а fallback-конфиг берёт из:
+
+- [public.yaml](n:\PROJECTS\DTM\DTM-front\apps\web\config\public.yaml)
+- [public.prod.yaml](n:\PROJECTS\DTM\DTM-front\apps\web\config\public.prod.yaml)
+
+## Где читать дальше
+
+- Общая карта документации: [docs/README.md](n:\PROJECTS\DTM\DTM-front\docs\README.md)
+- Архитектура: [SYSTEM_ARCHITECTURE.md](n:\PROJECTS\DTM\DTM-front\docs\architecture\SYSTEM_ARCHITECTURE.md)
+- Контракты данных и runtime config: [RUNTIME_CONFIG.md](n:\PROJECTS\DTM\DTM-front\docs\contracts\RUNTIME_CONFIG.md)
+- Дизайн-система и workbench: [WORKBENCH_CONTROLS.md](n:\PROJECTS\DTM\DTM-front\docs\design\WORKBENCH_CONTROLS.md)
+- Deploy и эксплуатация: [DEPLOY.md](n:\PROJECTS\DTM\DTM-front\docs\operations\DEPLOY.md)
+
+## Технологии
+
+- React 18
+- TypeScript
+- Vite
+- SVG timeline rendering
+- LocalStorage persistence
+- YAML runtime config
+- Yandex Object Storage deploy
+
+## Теги
+
+`#react #typescript #vite #svg #gantt #design-system #runtime-config #localstorage #frontend #yandex-object-storage`

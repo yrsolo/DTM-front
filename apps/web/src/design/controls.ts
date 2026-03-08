@@ -52,6 +52,14 @@ export type DesignControls = {
   timelineWeekendFillOpacity: number;
   timelinePerfMinWeekPxDetailedX10: number;
   timelineShowMilestoneLabels: number;
+  timelineModeDockOffsetX: number;
+  timelineModeDockOffsetY: number;
+  timelineModeDockScale: number;
+  timelineTopControlDockOffsetX: number;
+  timelineTopControlDockOffsetY: number;
+  tooltipOffsetX: number;
+  tooltipOffsetY: number;
+  tooltipBubbleScale: number;
   barInsetY: number;
   barRadius: number;
   textRenderingMode: number;
@@ -60,10 +68,13 @@ export type DesignControls = {
   matBgPinkOpacity: number;
   matBgBlueOpacity: number;
   matBgMintOpacity: number;
+  sceneDimOpacity: number;
   matCardBorderOpacity: number;
   matCardShadowStrength: number;
   matCardInsetStrength: number;
   matTopbarBorderOpacity: number;
+  topbarGlowOpacity: number;
+  topbarBgOpacity: number;
   matActiveGlowStrength: number;
   matButtonGlowStrength: number;
   matBadgeGlowStrength: number;
@@ -72,6 +83,7 @@ export type DesignControls = {
   milestoneSizeScale: number;
   milestoneOpacity: number;
   taskColorMixPercent: number;
+  designersCardTintStrength: number;
   drawerWidth: number;
   drawerPadding: number;
   drawerTitleSize: number;
@@ -95,6 +107,22 @@ export type DesignControls = {
   drawerMilestoneDayShadowOpacity: number;
   drawerMilestoneCellDarkShadowOpacity: number;
   drawerMilestoneCellDarkShadowBlur: number;
+  drawerPanelBorderOpacity: number;
+  drawerPanelShadowStrength: number;
+  drawerPanelInsetStrength: number;
+  drawerPanelGlowOpacity: number;
+  animEnabled: number;
+  animDrawerDurationMs: number;
+  animDrawerEasePreset: number;
+  animReorderDurationMs: number;
+  animReorderEasePreset: number;
+  animReorderStaggerMs: number;
+  animReorderStaggerCapMs: number;
+  animReorderDistanceFactor: number;
+  animReorderDistanceMaxExtraMs: number;
+  animReorderViewportOnly: number;
+  animReorderViewportBufferPx: number;
+  animReorderAutoDisableRows: number;
   workbenchDockLeft: number;
   workbenchDockRight: number;
   workbenchDockBottom: number;
@@ -177,6 +205,14 @@ export const DEFAULT_DESIGN_CONTROLS: DesignControls = {
   timelineWeekendFillOpacity: 0.12,
   timelinePerfMinWeekPxDetailedX10: 40,
   timelineShowMilestoneLabels: 1,
+  timelineModeDockOffsetX: 0,
+  timelineModeDockOffsetY: 0,
+  timelineModeDockScale: 1,
+  timelineTopControlDockOffsetX: 0,
+  timelineTopControlDockOffsetY: 0,
+  tooltipOffsetX: 8,
+  tooltipOffsetY: 8,
+  tooltipBubbleScale: 1,
   barInsetY: 8,
   barRadius: 8,
   textRenderingMode: 0,
@@ -185,10 +221,13 @@ export const DEFAULT_DESIGN_CONTROLS: DesignControls = {
   matBgPinkOpacity: 0.24,
   matBgBlueOpacity: 0.28,
   matBgMintOpacity: 0.18,
+  sceneDimOpacity: 0,
   matCardBorderOpacity: 0.24,
   matCardShadowStrength: 0.45,
   matCardInsetStrength: 0.25,
   matTopbarBorderOpacity: 0.26,
+  topbarGlowOpacity: 0.09,
+  topbarBgOpacity: 0.95,
   matActiveGlowStrength: 0.28,
   matButtonGlowStrength: 0.25,
   matBadgeGlowStrength: 0.22,
@@ -197,6 +236,7 @@ export const DEFAULT_DESIGN_CONTROLS: DesignControls = {
   milestoneSizeScale: 1,
   milestoneOpacity: 0.95,
   taskColorMixPercent: 28,
+  designersCardTintStrength: 0.24,
   drawerWidth: 520,
   drawerPadding: 16,
   drawerTitleSize: 18,
@@ -220,6 +260,22 @@ export const DEFAULT_DESIGN_CONTROLS: DesignControls = {
   drawerMilestoneDayShadowOpacity: 0.55,
   drawerMilestoneCellDarkShadowOpacity: 0.38,
   drawerMilestoneCellDarkShadowBlur: 28,
+  drawerPanelBorderOpacity: 0.2,
+  drawerPanelShadowStrength: 0.2,
+  drawerPanelInsetStrength: 0.12,
+  drawerPanelGlowOpacity: 0.28,
+  animEnabled: 0,
+  animDrawerDurationMs: 220,
+  animDrawerEasePreset: 2,
+  animReorderDurationMs: 280,
+  animReorderEasePreset: 2,
+  animReorderStaggerMs: 8,
+  animReorderStaggerCapMs: 120,
+  animReorderDistanceFactor: 0.35,
+  animReorderDistanceMaxExtraMs: 180,
+  animReorderViewportOnly: 1,
+  animReorderViewportBufferPx: 160,
+  animReorderAutoDisableRows: 120,
   workbenchDockLeft: 12,
   workbenchDockRight: 12,
   workbenchDockBottom: 12,
@@ -313,13 +369,34 @@ export const DESIGN_CONTROL_ITEMS: DesignControlItem[] = [
   { key: "timelineWeekendFillOpacity", label: "Weekend fill opacity", min: 0, max: 0.35, step: 0.01 },
   { key: "timelinePerfMinWeekPxDetailedX10", label: "Perf: min week px for details (x10)", min: 1, max: 120, step: 1 },
   { key: "timelineShowMilestoneLabels", label: "Show milestone labels (0/1)", min: 0, max: 1, step: 1 },
+  { key: "timelineModeDockOffsetX", label: "Mode panel X", min: -500, max: 500, step: 1 },
+  { key: "timelineModeDockOffsetY", label: "Mode panel Y", min: -240, max: 240, step: 1 },
+  { key: "timelineModeDockScale", label: "Mode panel scale", min: 0.6, max: 2, step: 0.01 },
+  { key: "timelineTopControlDockOffsetX", label: "Zoom panel X", min: -500, max: 500, step: 1 },
+  { key: "timelineTopControlDockOffsetY", label: "Zoom panel Y", min: -240, max: 240, step: 1 },
+  { key: "tooltipOffsetX", label: "Tooltip offset X", min: -120, max: 180, step: 1 },
+  { key: "tooltipOffsetY", label: "Tooltip offset Y", min: -120, max: 180, step: 1 },
+  { key: "tooltipBubbleScale", label: "Tooltip bubbles size", min: 0.6, max: 2.2, step: 0.01 },
   { key: "barInsetY", label: "Bar inset Y", min: 2, max: 20, step: 1 },
   { key: "barRadius", label: "Bar radius", min: 2, max: 20, step: 1 },
+  { key: "animEnabled", label: "Animations enabled (0/1)", min: 0, max: 1, step: 1 },
+  { key: "animDrawerDurationMs", label: "Drawer animation ms", min: 0, max: 700, step: 1 },
+  { key: "animDrawerEasePreset", label: "Drawer easing preset (0..4)", min: 0, max: 4, step: 1 },
+  { key: "animReorderDurationMs", label: "Reorder animation ms", min: 0, max: 1000, step: 1 },
+  { key: "animReorderEasePreset", label: "Reorder easing preset (0..4)", min: 0, max: 4, step: 1 },
+  { key: "animReorderStaggerMs", label: "Reorder stagger ms", min: 0, max: 20, step: 1 },
+  { key: "animReorderStaggerCapMs", label: "Reorder stagger cap ms", min: 0, max: 200, step: 1 },
+  { key: "animReorderDistanceFactor", label: "Reorder distance factor", min: 0, max: 1, step: 0.01 },
+  { key: "animReorderDistanceMaxExtraMs", label: "Reorder distance max extra ms", min: 0, max: 400, step: 1 },
+  { key: "animReorderViewportOnly", label: "Reorder viewport-only (0/1)", min: 0, max: 1, step: 1 },
+  { key: "animReorderViewportBufferPx", label: "Reorder viewport buffer px", min: 0, max: 500, step: 1 },
+  { key: "animReorderAutoDisableRows", label: "Reorder auto-disable rows", min: 1, max: 1000, step: 1 },
   { key: "textRenderingMode", label: "Text rendering mode (0..3)", min: 0, max: 3, step: 1 },
   { key: "textSmoothingMode", label: "Text smoothing mode (0..2)", min: 0, max: 2, step: 1 },
   { key: "milestoneSizeScale", label: "Milestone size", min: 0.4, max: 2.5, step: 0.01 },
   { key: "milestoneOpacity", label: "Milestone opacity", min: 0.05, max: 1, step: 0.01 },
   { key: "taskColorMixPercent", label: "Task random color %", min: 0, max: 100, step: 1 },
+  { key: "designersCardTintStrength", label: "Designers cards tint strength", min: 0, max: 0.8, step: 0.01 },
   { key: "cardPadding", label: "Card padding", min: 8, max: 28, step: 1 },
   { key: "workbenchDockLeft", label: "Workbench dock left", min: 0, max: 80, step: 1 },
   { key: "workbenchDockRight", label: "Workbench dock right", min: 0, max: 80, step: 1 },
@@ -370,16 +447,23 @@ export const DESIGN_CONTROL_ITEMS: DesignControlItem[] = [
   { key: "drawerMilestoneDayShadowOpacity", label: "Day shadow opacity", min: 0, max: 1, step: 0.01 },
   { key: "drawerMilestoneCellDarkShadowOpacity", label: "Cell dark shadow", min: 0, max: 1, step: 0.01 },
   { key: "drawerMilestoneCellDarkShadowBlur", label: "Cell dark shadow blur", min: 0, max: 80, step: 1 },
+  { key: "drawerPanelBorderOpacity", label: "Drawer panel border", min: 0, max: 0.6, step: 0.01 },
+  { key: "drawerPanelShadowStrength", label: "Drawer panel shadow", min: 0, max: 0.8, step: 0.01 },
+  { key: "drawerPanelInsetStrength", label: "Drawer panel inset", min: 0, max: 0.6, step: 0.01 },
+  { key: "drawerPanelGlowOpacity", label: "Drawer panel glow", min: 0, max: 0.8, step: 0.01 },
 ];
 
 export const MATERIAL_CONTROL_ITEMS: DesignControlItem[] = [
-  { key: "matBgPinkOpacity", label: "BG pink opacity", min: 0, max: 0.5, step: 0.01 },
-  { key: "matBgBlueOpacity", label: "BG blue opacity", min: 0, max: 0.5, step: 0.01 },
-  { key: "matBgMintOpacity", label: "BG mint opacity", min: 0, max: 0.4, step: 0.01 },
+  { key: "matBgPinkOpacity", label: "Фон слева (розовый) / BG left pink", min: 0, max: 0.5, step: 0.01 },
+  { key: "matBgBlueOpacity", label: "Фон справа сверху (синий) / BG top-right blue", min: 0, max: 0.5, step: 0.01 },
+  { key: "matBgMintOpacity", label: "Фон снизу (мятный) / BG bottom mint", min: 0, max: 0.4, step: 0.01 },
+  { key: "sceneDimOpacity", label: "Общее затемнение сцены / Scene dim", min: 0, max: 0.8, step: 0.01 },
   { key: "matCardBorderOpacity", label: "Card border opacity", min: 0, max: 0.6, step: 0.01 },
   { key: "matCardShadowStrength", label: "Card shadow strength", min: 0, max: 0.8, step: 0.01 },
   { key: "matCardInsetStrength", label: "Card inset strength", min: 0, max: 0.6, step: 0.01 },
   { key: "matTopbarBorderOpacity", label: "Topbar border opacity", min: 0, max: 0.6, step: 0.01 },
+  { key: "topbarGlowOpacity", label: "Topbar glow opacity", min: 0, max: 0.5, step: 0.01 },
+  { key: "topbarBgOpacity", label: "Topbar background opacity", min: 0.5, max: 1, step: 0.01 },
   { key: "matActiveGlowStrength", label: "Active tab glow", min: 0, max: 0.6, step: 0.01 },
   { key: "matButtonGlowStrength", label: "Button glow", min: 0, max: 0.6, step: 0.01 },
   { key: "matBadgeGlowStrength", label: "Badge glow", min: 0, max: 0.6, step: 0.01 },
@@ -411,6 +495,10 @@ export const DRAWER_CONTROL_ITEMS: DesignControlItem[] = [
   { key: "drawerMilestoneDayShadowOpacity", label: "Day shadow", min: 0, max: 1, step: 0.01 },
   { key: "drawerMilestoneCellDarkShadowOpacity", label: "Cell dark shadow", min: 0, max: 1, step: 0.01 },
   { key: "drawerMilestoneCellDarkShadowBlur", label: "Cell dark blur", min: 0, max: 80, step: 1 },
+  { key: "drawerPanelBorderOpacity", label: "Panel border", min: 0, max: 0.6, step: 0.01 },
+  { key: "drawerPanelShadowStrength", label: "Panel shadow", min: 0, max: 0.8, step: 0.01 },
+  { key: "drawerPanelInsetStrength", label: "Panel inset", min: 0, max: 0.6, step: 0.01 },
+  { key: "drawerPanelGlowOpacity", label: "Panel glow", min: 0, max: 0.8, step: 0.01 },
 ];
 
 export function normalizeDesignControls(input: Partial<DesignControls>): DesignControls {
@@ -427,12 +515,35 @@ export function normalizeDesignControls(input: Partial<DesignControls>): DesignC
       ? Math.round((maybeLegacy.timelinePerfMinMonthPxDetailed * 7) / 30.44 / 10)
       : undefined);
 
-  return {
+  const merged = {
     ...DEFAULT_DESIGN_CONTROLS,
     ...input,
     ...(typeof normalizedWeekPxX10 === "number"
       ? { timelinePerfMinWeekPxDetailedX10: normalizedWeekPxX10 }
       : {}),
+  };
+
+  return {
+    ...merged,
+    animEnabled: Math.round(Math.max(0, Math.min(1, merged.animEnabled))),
+    animDrawerDurationMs: Math.max(0, Math.min(700, merged.animDrawerDurationMs)),
+    animDrawerEasePreset: Math.round(Math.max(0, Math.min(4, merged.animDrawerEasePreset))),
+    animReorderDurationMs: Math.max(0, Math.min(1000, merged.animReorderDurationMs)),
+    animReorderEasePreset: Math.round(Math.max(0, Math.min(4, merged.animReorderEasePreset))),
+    animReorderStaggerMs: Math.max(0, Math.min(20, merged.animReorderStaggerMs)),
+    animReorderStaggerCapMs: Math.max(0, Math.min(200, merged.animReorderStaggerCapMs)),
+    animReorderDistanceFactor: Math.max(0, Math.min(1, merged.animReorderDistanceFactor)),
+    animReorderDistanceMaxExtraMs: Math.max(0, Math.min(400, merged.animReorderDistanceMaxExtraMs)),
+    animReorderViewportOnly: Math.round(Math.max(0, Math.min(1, merged.animReorderViewportOnly))),
+    animReorderViewportBufferPx: Math.max(0, Math.min(500, merged.animReorderViewportBufferPx)),
+    animReorderAutoDisableRows: Math.max(1, Math.min(1000, Math.round(merged.animReorderAutoDisableRows))),
+    designersCardTintStrength: Math.max(0, Math.min(0.8, merged.designersCardTintStrength)),
+    timelineModeDockOffsetX: Math.max(-500, Math.min(500, Math.round(merged.timelineModeDockOffsetX))),
+    timelineModeDockOffsetY: Math.max(-240, Math.min(240, Math.round(merged.timelineModeDockOffsetY))),
+    timelineModeDockScale: Math.max(0.6, Math.min(2, merged.timelineModeDockScale)),
+    timelineTopControlDockOffsetX: Math.max(-500, Math.min(500, Math.round(merged.timelineTopControlDockOffsetX))),
+    timelineTopControlDockOffsetY: Math.max(-240, Math.min(240, Math.round(merged.timelineTopControlDockOffsetY))),
+    drawerCalendarCellHeight: Math.max(34, Math.min(62, merged.drawerCalendarCellHeight)),
   };
 }
 

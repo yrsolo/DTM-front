@@ -1,8 +1,9 @@
-# NOW - tasks
+﻿# NOW - tasks
 
 ## Active
 - [ ] CAM-API-V2-LOADING-SWR-CACHE - finalize manual evidence pack.
 - [x] CAM-SCHEMA-CONTRACT-GOVERNANCE - schema/types sync + validate:schema + guarantees.
+- [ ] CAM-DOCS-CANONICAL-REWRITE - rebuild root README and docs tree around current frontend state.
 
 ## SWR status
 - [x] SWR runtime implemented (cache + background refresh + stale_error).
@@ -18,4 +19,8 @@
   - screenshot of localStorage keys
   - screenshot/log snippet for timeout/retry
 
-See: `docs/system/SWR_SMOKE_CHECKLIST.md`
+See: `docs/operations/TROUBLESHOOTING.md`
+
+## Session 2026-03-07
+- [x] Milestone tone aliases: added resilient RU/EN mapping for card/calendar milestone colors using active API milestone names (work/pre_done/wait only).
+- [x] Timeline: added page switch (`Задачи` / `Дизайнеры`) and designer columns board view with task cards + milestone/manager hover tooltip.

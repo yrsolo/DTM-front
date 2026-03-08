@@ -1,4 +1,5 @@
 import rawPublicConfig from "../../config/public.yaml?raw";
+import rawPublicConfigProd from "../../config/public.prod.yaml?raw";
 
 type PublicConfig = {
   apiBaseUrl: string | null;
@@ -90,6 +91,19 @@ function buildConfig(parsed: Record<string, string>): PublicConfig {
   };
 }
 
+function pickFallbackYaml(): string {
+  if (typeof window === "undefined") return rawPublicConfig;
+  const host = window.location.hostname.toLowerCase();
+  const isLocal =
+    host === "localhost" ||
+    host === "127.0.0.1" ||
+    host === "::1" ||
+    host.endsWith(".local");
+  const isTestHost = host.includes("test");
+  if (isLocal || isTestHost) return rawPublicConfig;
+  return rawPublicConfigProd;
+}
+
 let cachedConfigPromise: Promise<PublicConfig> | null = null;
 
 export async function loadPublicConfig(): Promise<PublicConfig> {
@@ -97,19 +111,22 @@ export async function loadPublicConfig(): Promise<PublicConfig> {
 
   cachedConfigPromise = (async () => {
     try {
-      const res = await fetch("/config/public.yaml", {
-        headers: { accept: "text/yaml,text/plain" },
-        cache: "no-store",
-      });
-      if (res.ok) {
-        const yaml = await res.text();
-        return buildConfig(parseSimpleYaml(yaml));
+      const paths = ["/config/public.yaml", "/config/public.yam"];
+      for (const path of paths) {
+        const res = await fetch(path, {
+          headers: { accept: "text/yaml,text/plain" },
+          cache: "no-store",
+        });
+        if (res.ok) {
+          const yaml = await res.text();
+          return buildConfig(parseSimpleYaml(yaml));
+        }
       }
     } catch {
       // Runtime config is optional; fallback is applied below.
     }
 
-    return buildConfig(parseSimpleYaml(rawPublicConfig));
+    return buildConfig(parseSimpleYaml(pickFallbackYaml()));
   })();
 
   return cachedConfigPromise;

@@ -10,8 +10,15 @@ import {
 } from "./api";
 import { loadPublicConfig } from "../config/publicConfig";
 import { normalizeToSnapshotV1 } from "./normalize";
+import {
+  DEFAULT_RUNTIME_DEFAULTS,
+  RuntimeDefaults,
+  normalizeRuntimeDefaults,
+} from "./runtimeDefaults";
 
 type SnapshotStatus = "cold_loading" | "ready" | "refreshing" | "stale_error";
+const API_BASE_PROD = "https://dtm-api.solofarm.ru";
+const API_BASE_TEST = "https://dtm-api-test.solofarm.ru";
 
 type PersistedMeta = {
   generatedAt?: string;
@@ -24,12 +31,6 @@ type PersistedMeta = {
 const LOCAL_RAW_SNAPSHOT_STORAGE_KEY = "dtm.web.localSnapshotRaw.v1";
 const PERSISTED_SNAPSHOT_STORAGE_KEY = "dtm.snapshot.v1";
 const PERSISTED_META_STORAGE_KEY = "dtm.snapshot.meta";
-const SNAPSHOT_REFRESH_INTERVAL_STORAGE_KEY = "dtm.snapshot.refreshIntervalMs.v1";
-const SNAPSHOT_DATE_FILTER_STORAGE_KEY = "dtm.snapshot.dateFilter.v1";
-const SNAPSHOT_STATUS_FILTER_STORAGE_KEY = "dtm.snapshot.statusFilter.v1";
-const SNAPSHOT_LOAD_LIMIT_STORAGE_KEY = "dtm.snapshot.loadLimit.v1";
-const SNAPSHOT_DEMO_MODE_STORAGE_KEY = "dtm.snapshot.demoMode.v1";
-
 let memorySnapshot: SnapshotV1 | null = null;
 let memoryMeta: PersistedMeta | null = null;
 
@@ -51,33 +52,6 @@ function persistSnapshot(snapshot: SnapshotV1, meta: PersistedMeta) {
   memoryMeta = meta;
   localStorage.setItem(PERSISTED_SNAPSHOT_STORAGE_KEY, JSON.stringify(snapshot));
   localStorage.setItem(PERSISTED_META_STORAGE_KEY, JSON.stringify(meta));
-}
-
-function readRefreshIntervalOverride(): number | null {
-  try {
-    const raw = localStorage.getItem(SNAPSHOT_REFRESH_INTERVAL_STORAGE_KEY);
-    if (!raw) return null;
-    const parsed = Number(raw);
-    return Number.isFinite(parsed) && parsed >= 0 ? parsed : null;
-  } catch {
-    return null;
-  }
-}
-
-function readLoadLimitOverride(): number {
-  try {
-    const raw = localStorage.getItem(SNAPSHOT_LOAD_LIMIT_STORAGE_KEY);
-    if (!raw) return 30;
-    const parsed = Number(raw);
-    if (!Number.isFinite(parsed)) return 30;
-    return Math.max(1, Math.min(1000, Math.floor(parsed)));
-  } catch {
-    return 30;
-  }
-}
-
-function readDemoModeOverride(): boolean {
-  return true;
 }
 
 function toIsoDate(d: Date): string {
@@ -110,39 +84,18 @@ function defaultStatusFilter(): ApiStatusFilter {
 }
 
 function readDateFilterOverride(): ApiWindowFilter {
-  try {
-    const raw = localStorage.getItem(SNAPSHOT_DATE_FILTER_STORAGE_KEY);
-    if (!raw) return defaultDateFilter();
-    const parsed = JSON.parse(raw) as Partial<ApiWindowFilter>;
-    const base = defaultDateFilter();
-    return {
-      enabled: false,
-      start: typeof parsed.start === "string" ? parsed.start : base.start,
-      end: typeof parsed.end === "string" ? parsed.end : base.end,
-    };
-  } catch {
-    return defaultDateFilter();
-  }
+  return defaultDateFilter();
 }
 
 function readStatusFilterOverride(): ApiStatusFilter {
-  try {
-    const raw = localStorage.getItem(SNAPSHOT_STATUS_FILTER_STORAGE_KEY);
-    if (!raw) return defaultStatusFilter();
-    const parsed = JSON.parse(raw) as Partial<ApiStatusFilter>;
-    const base = defaultStatusFilter();
-    return {
-      work: typeof parsed.work === "boolean" ? parsed.work : base.work,
-      preDone: typeof parsed.preDone === "boolean" ? parsed.preDone : base.preDone,
-      done: typeof parsed.done === "boolean" ? parsed.done : base.done,
-      wait: typeof parsed.wait === "boolean" ? parsed.wait : base.wait,
-    };
-  } catch {
-    return defaultStatusFilter();
-  }
+  return defaultStatusFilter();
 }
 
-export function useSnapshot() {
+export function useSnapshot(initialRuntimeDefaults?: Partial<RuntimeDefaults>) {
+  const runtimeDefaultsRef = React.useRef<RuntimeDefaults>(
+    normalizeRuntimeDefaults(initialRuntimeDefaults ?? DEFAULT_RUNTIME_DEFAULTS)
+  );
+  const runtimeDefaults = runtimeDefaultsRef.current;
   const initialSnapshot = memorySnapshot;
   const initialMeta = memoryMeta;
 
@@ -155,11 +108,23 @@ export function useSnapshot() {
     initialMeta?.lastRefreshAttemptAt ?? null
   );
   const [lastError, setLastError] = React.useState<unknown>(null);
-  const [refreshIntervalMs, setRefreshIntervalMsState] = React.useState<number>(0);
-  const [loadLimit, setLoadLimitState] = React.useState<number>(30);
-  const [demoMode, setDemoModeState] = React.useState<boolean>(true);
-  const [dateFilter, setDateFilterState] = React.useState<ApiWindowFilter>(defaultDateFilter());
-  const [statusFilter, setStatusFilterState] = React.useState<ApiStatusFilter>(defaultStatusFilter());
+  const [refreshIntervalMs, setRefreshIntervalMsState] = React.useState<number>(
+    runtimeDefaults.refreshIntervalSec * 1000
+  );
+  const [loadLimit, setLoadLimitState] = React.useState<number>(runtimeDefaults.loadLimit);
+  const [demoMode, setDemoModeState] = React.useState<boolean>(runtimeDefaults.demoMode);
+  const [dateFilter, setDateFilterState] = React.useState<ApiWindowFilter>(() => ({
+    ...defaultDateFilter(),
+    enabled: runtimeDefaults.dateFilterEnabled,
+  }));
+  const [statusFilter, setStatusFilterState] = React.useState<ApiStatusFilter>(() => ({
+    ...defaultStatusFilter(),
+    work: runtimeDefaults.statusWork,
+    preDone: runtimeDefaults.statusPreDone,
+    done: runtimeDefaults.statusDone,
+    wait: runtimeDefaults.statusWait,
+  }));
+  const [useTestApi, setUseTestApiState] = React.useState<boolean>(false);
 
   const snapshotRef = React.useRef<SnapshotV1 | null>(snapshot);
   React.useEffect(() => {
@@ -214,11 +179,19 @@ export function useSnapshot() {
 
     try {
       const currentMeta = memoryMeta;
+      const apiStatusFilterAll: ApiStatusFilter = {
+        work: true,
+        preDone: true,
+        done: true,
+        wait: true,
+      };
+      const apiBaseOverride = useTestApi ? API_BASE_TEST : API_BASE_PROD;
       const { payload, etag, notModified } = await fetchApiSnapshotWithMeta(
         currentMeta?.etag ?? null,
         dateFilter,
-        statusFilter,
-        loadLimit
+        apiStatusFilterAll,
+        loadLimit,
+        apiBaseOverride
       );
       const nowIso = new Date().toISOString();
 
@@ -264,7 +237,7 @@ export function useSnapshot() {
       setLastError(error);
       setStatus(hasData ? "stale_error" : "cold_loading");
     }
-  }, [dateFilter, statusFilter, loadLimit, demoMode, loadDemo]);
+  }, [dateFilter, loadLimit, demoMode, loadDemo, useTestApi]);
 
   const reloadLocal = React.useCallback(async (opts?: { ignoreDemoMode?: boolean }) => {
     if (demoMode && !opts?.ignoreDemoMode) {
@@ -307,19 +280,15 @@ export function useSnapshot() {
   const setRefreshIntervalMs = React.useCallback((next: number) => {
     const normalized = Math.max(0, next);
     setRefreshIntervalMsState(normalized);
-    localStorage.setItem(SNAPSHOT_REFRESH_INTERVAL_STORAGE_KEY, String(normalized));
   }, []);
 
   const setLoadLimit = React.useCallback((next: number) => {
     const normalized = Math.max(1, Math.min(1000, Math.floor(next || 30)));
     setLoadLimitState(normalized);
-    localStorage.setItem(SNAPSHOT_LOAD_LIMIT_STORAGE_KEY, String(normalized));
   }, []);
 
-  const toggleDemoMode = React.useCallback(async () => {
-    const next = !demoMode;
+  const setDemoMode = React.useCallback(async (next: boolean) => {
     setDemoModeState(next);
-    localStorage.setItem(SNAPSHOT_DEMO_MODE_STORAGE_KEY, next ? "1" : "0");
     if (next) {
       await loadDemo();
       return;
@@ -330,29 +299,69 @@ export function useSnapshot() {
     } else {
       await reloadLocal({ ignoreDemoMode: true });
     }
-  }, [demoMode, loadDemo, refreshFromApi, reloadLocal]);
+  }, [loadDemo, refreshFromApi, reloadLocal]);
+
+  const toggleDemoMode = React.useCallback(async () => {
+    await setDemoMode(!demoMode);
+  }, [demoMode, setDemoMode]);
 
   const setDateFilter = React.useCallback((next: ApiWindowFilter) => {
     setDateFilterState(next);
-    localStorage.setItem(SNAPSHOT_DATE_FILTER_STORAGE_KEY, JSON.stringify(next));
   }, []);
 
   const setStatusFilter = React.useCallback((next: ApiStatusFilter) => {
     setStatusFilterState(next);
-    localStorage.setItem(SNAPSHOT_STATUS_FILTER_STORAGE_KEY, JSON.stringify(next));
   }, []);
+
+  const resetRuntimeDefaults = React.useCallback(async () => {
+    const nextDateFilter = {
+      ...defaultDateFilter(),
+      enabled: DEFAULT_RUNTIME_DEFAULTS.dateFilterEnabled,
+    };
+    const nextStatusFilter = {
+      work: DEFAULT_RUNTIME_DEFAULTS.statusWork,
+      preDone: DEFAULT_RUNTIME_DEFAULTS.statusPreDone,
+      done: DEFAULT_RUNTIME_DEFAULTS.statusDone,
+      wait: DEFAULT_RUNTIME_DEFAULTS.statusWait,
+    };
+    const nextLoadLimit = DEFAULT_RUNTIME_DEFAULTS.loadLimit;
+    const nextDemoMode = DEFAULT_RUNTIME_DEFAULTS.demoMode;
+    const nextRefreshInterval = DEFAULT_RUNTIME_DEFAULTS.refreshIntervalSec * 1000;
+
+    setRefreshIntervalMsState(nextRefreshInterval);
+    setLoadLimitState(nextLoadLimit);
+    setDateFilterState(nextDateFilter);
+    setStatusFilterState(nextStatusFilter);
+
+    if (demoMode !== nextDemoMode) {
+      await setDemoMode(nextDemoMode);
+      return;
+    }
+    if (nextDemoMode) {
+      await loadDemo();
+    }
+  }, [demoMode, loadDemo, setDemoMode]);
 
   React.useEffect(() => {
     let active = true;
 
     void (async () => {
       const cfg = await loadPublicConfig();
-      const overrideInterval = readRefreshIntervalOverride();
-      const overrideLoadLimit = readLoadLimitOverride();
-      const overrideDemoMode = readDemoModeOverride();
-      const overrideDateFilter = readDateFilterOverride();
-      const overrideStatusFilter = readStatusFilterOverride();
-      const initialInterval = overrideInterval ?? 0;
+      const overrideInterval = runtimeDefaults.refreshIntervalSec * 1000;
+      const overrideLoadLimit = runtimeDefaults.loadLimit;
+      const overrideDemoMode = runtimeDefaults.demoMode;
+      const overrideDateFilter = {
+        ...readDateFilterOverride(),
+        enabled: runtimeDefaults.dateFilterEnabled,
+      };
+      const overrideStatusFilter = {
+        ...readStatusFilterOverride(),
+        work: runtimeDefaults.statusWork,
+        preDone: runtimeDefaults.statusPreDone,
+        done: runtimeDefaults.statusDone,
+        wait: runtimeDefaults.statusWait,
+      };
+      const initialInterval = overrideInterval;
       if (active) {
         setRefreshIntervalMsState(initialInterval);
         setLoadLimitState(overrideLoadLimit);
@@ -384,7 +393,7 @@ export function useSnapshot() {
       }
 
       if (!active) return;
-      const apiOn = Boolean(cfg.apiBaseUrl);
+      const apiOn = Boolean(cfg.apiBaseUrl) || Boolean(API_BASE_PROD);
       if (apiOn) {
         await refreshFromApi({ manual: false });
       } else if (!memorySnapshot && !snapshotRef.current) {
@@ -409,6 +418,10 @@ export function useSnapshot() {
     };
   }, [refreshIntervalMs, refreshFromApi, demoMode]);
 
+  const setUseTestApi = React.useCallback((next: boolean) => {
+    setUseTestApiState(Boolean(next));
+  }, []);
+
   const isLoading = status === "cold_loading";
   const isRefreshing = status === "refreshing";
 
@@ -426,11 +439,15 @@ export function useSnapshot() {
     loadLimit,
     setLoadLimit,
     demoMode,
+    setDemoMode,
     toggleDemoMode,
+    useTestApi,
+    setUseTestApi,
     dateFilter,
     setDateFilter,
     statusFilter,
     setStatusFilter,
+    resetRuntimeDefaults,
     reloadLocal,
     syncFromApi,
   };

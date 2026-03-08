@@ -108,10 +108,17 @@ EOF
 echo "Uploading runtime config to /config/public.yaml ..."
 if [[ "$DRY_RUN" == "true" ]]; then
   echo "[DRY-RUN] aws s3 cp \"$CONFIG_PATH\" \"$BUCKET_URI/config/public.yaml\" --endpoint-url \"$YC_ENDPOINT\" --content-type text/yaml --cache-control no-cache"
+  echo "[DRY-RUN] aws s3 cp \"$CONFIG_PATH\" \"$BUCKET_URI/config/public.yam\" --endpoint-url \"$YC_ENDPOINT\" --content-type text/yaml --cache-control no-cache"
 else
   aws s3 cp \
     "$CONFIG_PATH" \
     "$BUCKET_URI/config/public.yaml" \
+    --endpoint-url "$YC_ENDPOINT" \
+    --content-type "text/yaml" \
+    --cache-control "no-cache"
+  aws s3 cp \
+    "$CONFIG_PATH" \
+    "$BUCKET_URI/config/public.yam" \
     --endpoint-url "$YC_ENDPOINT" \
     --content-type "text/yaml" \
     --cache-control "no-cache"

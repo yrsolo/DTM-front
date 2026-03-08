@@ -94,10 +94,12 @@ export async function fetchApiSnapshotWithMeta(
   lastEtag?: string | null,
   windowFilter?: ApiWindowFilter,
   statusFilter?: ApiStatusFilter,
-  loadLimit?: number
+  loadLimit?: number,
+  apiBaseUrlOverride?: string | null
 ): Promise<ApiSnapshotFetchResult> {
   const cfg = await loadPublicConfig();
-  if (!cfg.apiBaseUrl) {
+  const apiBaseUrl = (apiBaseUrlOverride ?? "").trim() || cfg.apiBaseUrl;
+  if (!apiBaseUrl) {
     throw new Error("API base URL is not configured. Set api_base_url in public config.");
   }
 
@@ -110,10 +112,12 @@ export async function fetchApiSnapshotWithMeta(
 
   const statuses = selectedStatuses.length ? selectedStatuses.join(",") : "work,pre_done";
 
+  // Query limit is bound to UI load-limit control.
+  // If for some reason loadLimit is invalid, fall back to a safe default (30), not config.
   const effectiveLimit =
     Number.isFinite(loadLimit) && Number(loadLimit) > 0
       ? Math.max(1, Math.min(1000, Math.floor(Number(loadLimit))))
-      : cfg.apiLimit;
+      : 30;
 
   const params = new URLSearchParams({
     statuses,
@@ -126,7 +130,7 @@ export async function fetchApiSnapshotWithMeta(
     params.set("window_mode", "intersects");
   }
 
-  const url = buildApiUrl(cfg.apiBaseUrl, cfg.apiFrontendPath, params);
+  const url = buildApiUrl(apiBaseUrl, cfg.apiFrontendPath, params);
   let lastError: unknown = null;
 
   for (let attempt = 0; attempt <= cfg.apiRetryCount; attempt++) {
