@@ -83,6 +83,7 @@ export type DesignControls = {
   milestoneSizeScale: number;
   milestoneOpacity: number;
   taskColorMixPercent: number;
+  designersCardTintStrength: number;
   drawerWidth: number;
   drawerPadding: number;
   drawerTitleSize: number;
@@ -235,6 +236,7 @@ export const DEFAULT_DESIGN_CONTROLS: DesignControls = {
   milestoneSizeScale: 1,
   milestoneOpacity: 0.95,
   taskColorMixPercent: 28,
+  designersCardTintStrength: 0.24,
   drawerWidth: 520,
   drawerPadding: 16,
   drawerTitleSize: 18,
@@ -394,6 +396,7 @@ export const DESIGN_CONTROL_ITEMS: DesignControlItem[] = [
   { key: "milestoneSizeScale", label: "Milestone size", min: 0.4, max: 2.5, step: 0.01 },
   { key: "milestoneOpacity", label: "Milestone opacity", min: 0.05, max: 1, step: 0.01 },
   { key: "taskColorMixPercent", label: "Task random color %", min: 0, max: 100, step: 1 },
+  { key: "designersCardTintStrength", label: "Designers cards tint strength", min: 0, max: 0.8, step: 0.01 },
   { key: "cardPadding", label: "Card padding", min: 8, max: 28, step: 1 },
   { key: "workbenchDockLeft", label: "Workbench dock left", min: 0, max: 80, step: 1 },
   { key: "workbenchDockRight", label: "Workbench dock right", min: 0, max: 80, step: 1 },
@@ -534,6 +537,7 @@ export function normalizeDesignControls(input: Partial<DesignControls>): DesignC
     animReorderViewportOnly: Math.round(Math.max(0, Math.min(1, merged.animReorderViewportOnly))),
     animReorderViewportBufferPx: Math.max(0, Math.min(500, merged.animReorderViewportBufferPx)),
     animReorderAutoDisableRows: Math.max(1, Math.min(1000, Math.round(merged.animReorderAutoDisableRows))),
+    designersCardTintStrength: Math.max(0, Math.min(0.8, merged.designersCardTintStrength)),
     timelineModeDockOffsetX: Math.max(-500, Math.min(500, Math.round(merged.timelineModeDockOffsetX))),
     timelineModeDockOffsetY: Math.max(-240, Math.min(240, Math.round(merged.timelineModeDockOffsetY))),
     timelineModeDockScale: Math.max(0.6, Math.min(2, merged.timelineModeDockScale)),

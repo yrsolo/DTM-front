@@ -8,6 +8,7 @@ export type WorkbenchTabId =
   | "panels"
   | "panelGuide"
   | "animation"
+  | "tasksPage"
   | "timeline"
   | "milestones"
   | "leftPanel"
@@ -149,6 +150,10 @@ export const WORKBENCH_LAYOUT: WorkbenchSectionConfig[] = [
         title: "Панели | Внутри карточки / Panels | Drawer inner colors",
         controls: [color("keyDrawerSurfaceTop"), color("keyDrawerSurfaceBottom"), color("keyDrawerSurfaceAlt")],
       },
+      {
+        title: "Панели | Страница дизайнеров / Panels | Designers page",
+        controls: [range("designersCardTintStrength")],
+      },
     ],
   },
   {
@@ -239,6 +244,56 @@ export const WORKBENCH_LAYOUT: WorkbenchSectionConfig[] = [
     ],
   },
   {
+    id: "tasksPage",
+    title: "Задачи / Tasks page",
+    groups: [
+      {
+        title: "Задачи | Основное / Tasks | Main",
+        controls: [
+          range("timelineWidth"),
+          range("timelineMinHeight"),
+          range("timelineTopOffset"),
+          range("timelineLabelWidth"),
+          range("tableRowHeight"),
+          range("desktopLeftColWidth"),
+        ],
+      },
+      {
+        title: "Задачи | Шапка и сетка / Tasks | Header and grid",
+        controls: [
+          range("timelineDateLabelY"),
+          range("timelineDateFontSize"),
+          range("timelineMonthFontSize"),
+          range("timelineGridOpacity"),
+          range("timelineGridLineWidth"),
+          range("timelineStripeOpacity"),
+        ],
+      },
+      {
+        title: "Задачи | Левый блок / Tasks | Left panel",
+        controls: [
+          range("timelineLeftOwnerFontSize"),
+          range("timelineLeftTaskFontSize"),
+          range("timelineLeftMetaFontSize"),
+          range("timelineLeftPillWidth"),
+          range("timelineLeftPillSizeScale"),
+          range("timelineLeftGroupFontSize"),
+        ],
+      },
+      {
+        title: "Задачи | Позиция / Tasks | Positioning",
+        controls: [
+          range("timelineModeDockOffsetX"),
+          range("timelineModeDockOffsetY"),
+          range("timelineModeDockScale"),
+          range("timelineTopControlDockOffsetX"),
+          range("timelineTopControlDockOffsetY"),
+          range("cardPadding"),
+        ],
+      },
+    ],
+  },
+  {
     id: "animation",
     title: "Анимация / Animation",
     groups: [
@@ -307,12 +362,16 @@ export const WORKBENCH_LAYOUT: WorkbenchSectionConfig[] = [
         title: "Майлстоуны | Цвета типов / Milestones | Type colors",
         controls: [
           color("keyDrawerMsFeedback"),
-          color("keyDrawerMsDraft"),
           color("keyDrawerMsPrefinal"),
           color("keyDrawerMsFinal"),
+          color("keyDrawerMsMaster"),
           color("keyDrawerMsOnair"),
           color("keyDrawerMsStart"),
         ],
+      },
+      {
+        title: "Майлстоуны | Прочее / Milestones | Other",
+        controls: [color("keyDrawerMsDefault")],
       },
     ],
   },

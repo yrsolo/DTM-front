@@ -5,6 +5,7 @@ import { fetchRuHolidayAndTransferDaysInRange } from "../calendar/ruNonWorkingDa
 import { fetchPersonNameByOwnerId } from "../data/api";
 import { getUiText } from "../i18n/uiText";
 import { formatTaskIdForUi } from "../utils/id";
+import { resolveDayTone, resolveMilestoneTone } from "../utils/milestoneTone";
 import { toShortPersonName } from "../utils/personName";
 import { LayoutContext } from "./Layout";
 
@@ -17,17 +18,6 @@ type DayCell = {
   monthLabel?: string;
   milestones: Array<{ type: string; label: string }>;
 };
-
-type MilestoneTone =
-  | "storyboard"
-  | "animatic"
-  | "feedback"
-  | "prefinal"
-  | "final"
-  | "onair"
-  | "draft"
-  | "start"
-  | "default";
 
 function parseIsoDate(value?: string | null): Date | null {
   if (!value) return null;
@@ -75,46 +65,6 @@ function addDays(d: Date, days: number): Date {
   const next = new Date(d);
   next.setDate(next.getDate() + days);
   return next;
-}
-
-function milestoneTone(type: string): MilestoneTone {
-  switch (type) {
-    case "storyboard":
-      return "storyboard";
-    case "animatic":
-      return "animatic";
-    case "feedback":
-      return "feedback";
-    case "prefinal":
-      return "prefinal";
-    case "final":
-      return "final";
-    case "onair":
-      return "onair";
-    case "draft":
-      return "draft";
-    case "start":
-      return "start";
-    default:
-      return "default";
-  }
-}
-
-function dayTone(milestones: Array<{ type: string }>): MilestoneTone {
-  if (!milestones.length) return "default";
-  const present = new Set(milestones.map((m) => milestoneTone(m.type)));
-  const priority: MilestoneTone[] = [
-    "onair",
-    "final",
-    "prefinal",
-    "animatic",
-    "storyboard",
-    "draft",
-    "feedback",
-    "start",
-    "default",
-  ];
-  return priority.find((tone) => present.has(tone)) ?? "default";
 }
 
 export function TaskDetailsDrawer(props: {
@@ -418,7 +368,7 @@ export function TaskDetailsDrawer(props: {
                 {milestoneColumns.left.map((m, i) => (
                   <div key={`${m.type}-${m.date}-l-${i}`} className="drawerMilestoneRow">
                     <span className="badge drawerDateBadge">{formatDdMm(m.date)}</span>
-                    <span className={`drawerMilestoneName msType-${milestoneTone(m.type)}`}>
+                    <span className={`drawerMilestoneName msType-${resolveMilestoneTone(m.type, m.label)}`}>
                       {m.label}
                     </span>
                   </div>
@@ -428,7 +378,7 @@ export function TaskDetailsDrawer(props: {
                 {milestoneColumns.right.map((m, i) => (
                   <div key={`${m.type}-${m.date}-r-${i}`} className="drawerMilestoneRow">
                     <span className="badge drawerDateBadge">{formatDdMm(m.date)}</span>
-                    <span className={`drawerMilestoneName msType-${milestoneTone(m.type)}`}>
+                    <span className={`drawerMilestoneName msType-${resolveMilestoneTone(m.type, m.label)}`}>
                       {m.label}
                     </span>
                   </div>
@@ -481,7 +431,7 @@ export function TaskDetailsDrawer(props: {
                         day.isWeekend ? "isWeekend" : "",
                         day.isHoliday ? "isHoliday" : "",
                         day.milestones.length ? "hasMilestone" : "",
-                        day.milestones.length ? `msTone-${dayTone(day.milestones)}` : "",
+                        day.milestones.length ? `msTone-${resolveDayTone(day.milestones)}` : "",
                       ]
                         .filter(Boolean)
                         .join(" ")}
@@ -501,7 +451,7 @@ export function TaskDetailsDrawer(props: {
                           {day.milestones.slice(0, 2).map((m, idx) => (
                             <span
                               key={`${day.iso}-${m.type}-${idx}`}
-                              className={`drawerCellMilestoneName msType-${milestoneTone(m.type)}`}
+                              className={`drawerCellMilestoneName msType-${resolveMilestoneTone(m.type, m.label)}`}
                               onMouseMove={(e) => {
                                 setCalendarHint({
                                   x: e.clientX + 8,

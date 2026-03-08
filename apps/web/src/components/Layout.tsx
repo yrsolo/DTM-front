@@ -123,6 +123,8 @@ function sanitizeRuntimeDefaultsForHost(input: RuntimeDefaults): RuntimeDefaults
 }
 
 export function Layout(props: { children: React.ReactNode }) {
+  const INTRO_FADE_MS = 3000;
+  const INTRO_VIDEO_DELAY_MS = 1000;
   const [locale, setLocale] = React.useState<AppLocale>("ru");
   const ui = getUiText(locale);
   const [runtimeDefaults, setRuntimeDefaults] = React.useState<RuntimeDefaults>(() => {
@@ -147,6 +149,9 @@ export function Layout(props: { children: React.ReactNode }) {
   const snapshotState = useSnapshot(runtimeDefaults);
   const [design, setDesign] = React.useState<DesignControls>(DEFAULT_DESIGN_CONTROLS);
   const [keyColors, setKeyColors] = React.useState<KeyColors>(DEFAULT_KEY_COLORS);
+  const [introState, setIntroState] = React.useState<"idle" | "enter" | "playing" | "exit">("idle");
+  const [introOverlayActive, setIntroOverlayActive] = React.useState(false);
+  const introVideoRef = React.useRef<HTMLVideoElement | null>(null);
   const textRenderingValue = React.useMemo(() => {
     const mode = Math.round(design.textRenderingMode);
     if (mode === 1) return "optimizeLegibility";
@@ -325,6 +330,60 @@ export function Layout(props: { children: React.ReactNode }) {
     setKeyColors(DEFAULT_KEY_COLORS);
   }, []);
 
+  const startLogoIntro = React.useCallback(() => {
+    if (introState !== "idle") return;
+    setIntroOverlayActive(false);
+    setIntroState("enter");
+  }, [introState]);
+
+  React.useEffect(() => {
+    if (introState !== "enter") return;
+    const raf = window.requestAnimationFrame(() => {
+      setIntroOverlayActive(true);
+    });
+    const startTimer = window.setTimeout(() => {
+      const video = introVideoRef.current;
+      if (video) {
+        video.currentTime = 0;
+        void video.play().catch(() => {
+          setIntroState("exit");
+        });
+      }
+      setIntroState("playing");
+    }, INTRO_VIDEO_DELAY_MS);
+    return () => {
+      window.cancelAnimationFrame(raf);
+      window.clearTimeout(startTimer);
+    };
+  }, [introState]);
+
+  React.useEffect(() => {
+    if (introState !== "exit") return;
+    setIntroOverlayActive(false);
+    const endTimer = window.setTimeout(() => {
+      const video = introVideoRef.current;
+      if (video) {
+        video.pause();
+        video.currentTime = 0;
+      }
+      setIntroOverlayActive(false);
+      setIntroState("idle");
+    }, INTRO_FADE_MS);
+    return () => window.clearTimeout(endTimer);
+  }, [introState]);
+
+  React.useEffect(() => {
+    if (introState === "idle") return;
+    const onKeyDown = () => setIntroState("exit");
+    const onMouseDown = () => setIntroState("exit");
+    window.addEventListener("keydown", onKeyDown);
+    window.addEventListener("mousedown", onMouseDown);
+    return () => {
+      window.removeEventListener("keydown", onKeyDown);
+      window.removeEventListener("mousedown", onMouseDown);
+    };
+  }, [introState]);
+
   const layoutVarsStyle = React.useMemo(
     () =>
       ({
@@ -350,6 +409,7 @@ export function Layout(props: { children: React.ReactNode }) {
         "--mat-badge-glow-a": String(design.matBadgeGlowStrength),
         "--mat-row-hover-a": String(design.matRowHoverStrength),
         "--mat-scrollbar-glow-a": String(design.matScrollbarGlowStrength),
+        "--designers-card-tint-a": String(design.designersCardTintStrength),
         "--drawer-width": `${design.drawerWidth}px`,
         "--drawer-padding": `${design.drawerPadding}px`,
         "--drawer-title-size": `${design.drawerTitleSize}px`,
@@ -444,11 +504,12 @@ export function Layout(props: { children: React.ReactNode }) {
         "--key-drawer-ms-storyboard": keyColors.keyDrawerMsStoryboard,
         "--key-drawer-ms-animatic": keyColors.keyDrawerMsAnimatic,
         "--key-drawer-ms-feedback": keyColors.keyDrawerMsFeedback,
-        "--key-drawer-ms-draft": keyColors.keyDrawerMsDraft,
         "--key-drawer-ms-prefinal": keyColors.keyDrawerMsPrefinal,
         "--key-drawer-ms-final": keyColors.keyDrawerMsFinal,
+        "--key-drawer-ms-master": keyColors.keyDrawerMsMaster,
         "--key-drawer-ms-onair": keyColors.keyDrawerMsOnair,
         "--key-drawer-ms-start": keyColors.keyDrawerMsStart,
+        "--key-drawer-ms-default": keyColors.keyDrawerMsDefault,
         "--task-color-1": keyColors.taskColor1,
         "--task-color-2": keyColors.taskColor2,
         "--task-color-3": keyColors.taskColor3,
@@ -518,12 +579,39 @@ export function Layout(props: { children: React.ReactNode }) {
         <div className="topbar">
           <div className="nav">
             <div className="brand">
-              <strong>{ui.appTitle}</strong>
-              <span className="muted">{ui.appSubtitle}</span>
+              <button
+                type="button"
+                className="brandIconButton"
+                onClick={startLogoIntro}
+                aria-label="Play logo intro"
+              >
+                <img className="brandIcon" src="/dtm_ico_64x64.png" alt="" aria-hidden="true" />
+              </button>
+              <div className="brandText">
+                <strong>{ui.appTitle}</strong>
+                <span className="muted">{ui.appSubtitle}</span>
+              </div>
             </div>
           </div>
         </div>
         <div className="container">{props.children}</div>
+        {introState !== "idle" ? (
+          <div
+            className={`logoIntroOverlay ${introState === "exit" ? "isExit" : introOverlayActive ? "isActive" : ""}`}
+          >
+            <video
+              ref={introVideoRef}
+              className={`logoIntroVideo ${introState === "playing" ? "isVisible" : ""}`}
+              src="/DTM_lo.mp4"
+              preload="auto"
+              playsInline
+              muted
+              controls={false}
+              onEnded={() => setIntroState("exit")}
+              onError={() => setIntroState("exit")}
+            />
+          </div>
+        ) : null}
         <div className="controlDock">
           <ControlsWorkbench />
         </div>

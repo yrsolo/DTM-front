@@ -147,6 +147,39 @@ a {
 
 .brand {
   display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+}
+
+.brandIcon {
+  width: 64px;
+  height: 64px;
+  object-fit: contain;
+  flex: 0 0 64px;
+}
+
+.brandIconButton {
+  width: 64px;
+  height: 64px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  border-radius: 12px;
+}
+
+.brandIconButton:hover {
+  filter: brightness(1.08);
+}
+
+.brandIconButton:focus-visible {
+  outline: 2px solid rgba(184, 161, 255, 0.95);
+  outline-offset: 2px;
+}
+
+.brandText {
+  display: flex;
   flex-direction: column;
   gap: 2px;
 }
@@ -223,6 +256,44 @@ a {
   line-height: 1.2;
   opacity: 0.86;
   white-space: nowrap;
+}
+
+.logoIntroOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  display: grid;
+  place-items: center;
+  background: rgba(0, 0, 0, 0);
+  transition: background 3000ms cubic-bezier(0.22, 1, 0.36, 1);
+  pointer-events: auto;
+}
+
+.logoIntroOverlay.isActive {
+  background: rgba(0, 0, 0, 0.75);
+}
+
+.logoIntroOverlay.isExit {
+  background: rgba(0, 0, 0, 0);
+}
+
+.logoIntroVideo {
+  width: min(74vw, 920px);
+  max-height: min(74vh, 640px);
+  border-radius: 14px;
+  box-shadow:
+    0 24px 80px rgba(0, 0, 0, 0.75),
+    0 0 0 1px rgba(207, 217, 255, 0.18);
+  opacity: 0;
+  transform: scale(0.98);
+  transition:
+    opacity 260ms ease-out,
+    transform 260ms ease-out;
+}
+
+.logoIntroVideo.isVisible {
+  opacity: 1;
+  transform: scale(1);
 }
 
 input,
@@ -1145,12 +1216,10 @@ button:hover {
 }
 
 .timelineTopControlDock {
-  position: absolute;
-  right: 10px;
-  top: 6px;
+  position: relative;
   z-index: 31;
   width: fit-content;
-  max-width: calc(100% - 20px);
+  max-width: 100%;
   min-width: 0;
   border: 1px solid rgba(130, 152, 216, 0.3);
   border-radius: 12px;
@@ -1163,6 +1232,15 @@ button:hover {
   will-change: transform;
 }
 
+.timelineTopControlDockExternal {
+  position: fixed;
+  top: 8px;
+  right: 12px;
+  z-index: 120;
+  margin: 0;
+  pointer-events: auto;
+}
+
 .timelineTopControlRow {
   display: flex;
   align-items: center;
@@ -1171,6 +1249,19 @@ button:hover {
   margin-bottom: 5px;
   width: max-content;
   max-width: 100%;
+}
+
+.pageSwitchCtl {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.pageSwitchCtl .modeMiniBtn {
+  min-width: 126px;
+  min-height: 34px;
+  padding: 6px 14px;
+  font-size: 13px;
 }
 
 .timelineTopControlDock .langCtl {
@@ -1372,6 +1463,153 @@ button:hover {
   display: inline-flex;
   align-items: center;
   gap: 6px;
+}
+
+.designersBoardScroll {
+  overflow: auto;
+}
+
+.designersBoard {
+  display: grid;
+  grid-template-columns: repeat(var(--designer-cols, 1), minmax(0, 1fr));
+  gap: 10px;
+  width: 100%;
+}
+
+.designerColumn {
+  border: 1px solid rgba(130, 152, 216, 0.28);
+  border-radius: 12px;
+  background: linear-gradient(165deg, rgba(10, 15, 30, 0.92) 0%, rgba(16, 13, 33, 0.92) 100%);
+  padding: 8px;
+  min-height: 220px;
+}
+
+.designerColumnHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.designerColumnName {
+  font-size: 17px;
+  font-weight: 700;
+  color: #e8eeff;
+  display: inline-grid;
+  gap: 1px;
+  line-height: 1.02;
+}
+
+.designerColumnNameLine {
+  display: block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.designerColumnCount {
+  min-width: 24px;
+}
+
+.designerColumnBody {
+  display: grid;
+  gap: 8px;
+}
+
+.designerTaskCard {
+  width: 100%;
+  text-align: left;
+  border: 1px solid
+    color-mix(
+      in srgb,
+      var(--designer-task-color, var(--key-blue, #6897ff)) calc(var(--designers-card-tint-a, 0.24) * 250%),
+      rgba(130, 152, 216, 0.28)
+    );
+  border-radius: 10px;
+  background:
+    radial-gradient(
+      circle at 92% 6%,
+      color-mix(
+        in srgb,
+        var(--designer-task-color, var(--key-blue, #6897ff)) calc(var(--designers-card-tint-a, 0.24) * 140%),
+        transparent
+      ),
+      transparent 62%
+    ),
+    linear-gradient(
+      150deg,
+      color-mix(
+        in srgb,
+        var(--designer-task-color, var(--key-blue, #6897ff)) calc(var(--designers-card-tint-a, 0.24) * 100%),
+        rgba(18, 28, 50, 0.92)
+      )
+      0%,
+      color-mix(
+        in srgb,
+        var(--designer-task-color, var(--key-blue, #6897ff)) calc(var(--designers-card-tint-a, 0.24) * 67%),
+        rgba(23, 19, 41, 0.92)
+      )
+      100%
+    );
+  color: #e8eeff;
+  padding: 8px;
+  box-shadow:
+    0 6px 16px
+      color-mix(
+        in srgb,
+        var(--designer-task-color, var(--key-blue, #6897ff)) calc(var(--designers-card-tint-a, 0.24) * 75%),
+        transparent
+      ),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.designerTaskCard:hover {
+  border-color: color-mix(
+    in srgb,
+    var(--designer-task-color, var(--key-blue, #6897ff)) calc(var(--designers-card-tint-a, 0.24) * 300%),
+    #ffffff 20%
+  );
+  box-shadow:
+    0 10px 24px
+      color-mix(
+        in srgb,
+        var(--designer-task-color, var(--key-blue, #6897ff)) calc(var(--designers-card-tint-a, 0.24) * 134%),
+        transparent
+      ),
+    0 0 0 1px
+      color-mix(
+        in srgb,
+        var(--designer-task-color, var(--key-blue, #6897ff)) calc(var(--designers-card-tint-a, 0.24) * 175%),
+        transparent
+      ),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+.designerTaskBrand {
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.2;
+  margin-bottom: 6px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.designerTaskMeta {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 8px;
+}
+
+.designerTaskShow {
+  font-size: 12px;
+  opacity: 0.86;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .timelineZoomCtl button {
@@ -1580,12 +1818,12 @@ button:hover {
 .drawerMilestoneName.msType-storyboard { color: var(--key-drawer-ms-storyboard, #9fd9ff); }
 .drawerMilestoneName.msType-animatic { color: var(--key-drawer-ms-animatic, #d4a6ff); }
 .drawerMilestoneName.msType-feedback { color: var(--key-drawer-ms-feedback, #98a0b8); }
-.drawerMilestoneName.msType-draft { color: var(--key-drawer-ms-draft, #b7beff); }
 .drawerMilestoneName.msType-prefinal { color: var(--key-drawer-ms-prefinal, #ffd08a); }
 .drawerMilestoneName.msType-final { color: var(--key-drawer-ms-final, #98f5b7); }
+.drawerMilestoneName.msType-master { color: var(--key-drawer-ms-master, #ffbf8f); }
 .drawerMilestoneName.msType-onair { color: var(--key-drawer-ms-onair, #ff9ea8); }
 .drawerMilestoneName.msType-start { color: var(--key-drawer-ms-start, #9adfd6); }
-.drawerMilestoneName.msType-default { color: #d7e3ff; }
+.drawerMilestoneName.msType-default { color: var(--key-drawer-ms-default, #d7e3ff); }
 
 .drawerCalendarWeekdays {
   display: grid;
@@ -1703,11 +1941,6 @@ button:hover {
   --drawer-ms-bg-tint: var(--key-drawer-ms-feedback, #68769c);
 }
 
-.drawerCalendarCell.hasMilestone.msTone-draft {
-  border-color: var(--key-drawer-ms-draft, #7786e6);
-  --drawer-ms-bg-tint: var(--key-drawer-ms-draft, #7786e6);
-}
-
 .drawerCalendarCell.hasMilestone.msTone-prefinal {
   border-color: var(--key-drawer-ms-prefinal, #cc8d41);
   --drawer-ms-bg-tint: var(--key-drawer-ms-prefinal, #cc8d41);
@@ -1716,6 +1949,11 @@ button:hover {
 .drawerCalendarCell.hasMilestone.msTone-final {
   border-color: var(--key-drawer-ms-final, #33a76b);
   --drawer-ms-bg-tint: var(--key-drawer-ms-final, #33a76b);
+}
+
+.drawerCalendarCell.hasMilestone.msTone-master {
+  border-color: var(--key-drawer-ms-master, #d27a34);
+  --drawer-ms-bg-tint: var(--key-drawer-ms-master, #d27a34);
 }
 
 .drawerCalendarCell.hasMilestone.msTone-onair {
@@ -1729,7 +1967,8 @@ button:hover {
 }
 
 .drawerCalendarCell.hasMilestone.msTone-default {
-  border-color: rgba(121, 220, 255, 0.45);
+  border-color: var(--key-drawer-ms-default, #7f8daa);
+  --drawer-ms-bg-tint: var(--key-drawer-ms-default, #7f8daa);
 }
 
 .drawerCalendarCell.hasMilestone .drawerCalendarDay {
@@ -1770,12 +2009,12 @@ button:hover {
 .drawerCellMilestoneName.msType-storyboard { color: var(--key-drawer-ms-storyboard, #a7ddff); }
 .drawerCellMilestoneName.msType-animatic { color: var(--key-drawer-ms-animatic, #dfb4ff); }
 .drawerCellMilestoneName.msType-feedback { color: var(--key-drawer-ms-feedback, #9ea8c2); }
-.drawerCellMilestoneName.msType-draft { color: var(--key-drawer-ms-draft, #b9c0ff); }
 .drawerCellMilestoneName.msType-prefinal { color: var(--key-drawer-ms-prefinal, #ffd89c); }
 .drawerCellMilestoneName.msType-final { color: var(--key-drawer-ms-final, #a7f9c4); }
+.drawerCellMilestoneName.msType-master { color: var(--key-drawer-ms-master, #ffd2ac); }
 .drawerCellMilestoneName.msType-onair { color: var(--key-drawer-ms-onair, #ffb0b8); }
 .drawerCellMilestoneName.msType-start { color: var(--key-drawer-ms-start, #a8e9e1); }
-.drawerCellMilestoneName.msType-default { color: #c9d9ff; }
+.drawerCellMilestoneName.msType-default { color: var(--key-drawer-ms-default, #c9d9ff); }
 
 .drawerCalendarCell.hasMilestone .drawerCellMilestoneName {
   color: #f5f8ff;
@@ -1791,8 +2030,12 @@ button:hover {
   padding: 8px 10px;
   border-radius: 10px;
   font-size: 12px;
-  max-width: 320px;
+  box-sizing: border-box;
+  width: max-content;
+  max-width: min(92vw, 760px);
   border: 1px solid rgba(144, 166, 223, 0.34);
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 @media (max-width: 800px) {

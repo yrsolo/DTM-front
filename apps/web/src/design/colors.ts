@@ -35,11 +35,12 @@ export type KeyColors = {
   keyDrawerMsStoryboard: string;
   keyDrawerMsAnimatic: string;
   keyDrawerMsFeedback: string;
-  keyDrawerMsDraft: string;
   keyDrawerMsPrefinal: string;
   keyDrawerMsFinal: string;
+  keyDrawerMsMaster: string;
   keyDrawerMsOnair: string;
   keyDrawerMsStart: string;
+  keyDrawerMsDefault: string;
   taskColor1: string;
   taskColor2: string;
   taskColor3: string;
@@ -87,11 +88,12 @@ export const DEFAULT_KEY_COLORS: KeyColors = {
   keyDrawerMsStoryboard: "#5ba9f5",
   keyDrawerMsAnimatic: "#a75ff8",
   keyDrawerMsFeedback: "#68769c",
-  keyDrawerMsDraft: "#7786e6",
   keyDrawerMsPrefinal: "#cc8d41",
   keyDrawerMsFinal: "#33a76b",
+  keyDrawerMsMaster: "#d27a34",
   keyDrawerMsOnair: "#c64868",
   keyDrawerMsStart: "#4aa096",
+  keyDrawerMsDefault: "#7f8daa",
   taskColor1: "#6bb8ff",
   taskColor2: "#7f8dff",
   taskColor3: "#5be2ce",
@@ -148,11 +150,12 @@ export const KEY_COLOR_ITEMS: Array<{ key: keyof KeyColors; label: string }> = [
   { key: "keyDrawerMsStoryboard", label: "Drawer ms storyboard" },
   { key: "keyDrawerMsAnimatic", label: "Drawer ms animatic" },
   { key: "keyDrawerMsFeedback", label: "Drawer ms feedback" },
-  { key: "keyDrawerMsDraft", label: "Drawer ms draft" },
   { key: "keyDrawerMsPrefinal", label: "Drawer ms prefinal" },
   { key: "keyDrawerMsFinal", label: "Drawer ms final" },
+  { key: "keyDrawerMsMaster", label: "Drawer ms master" },
   { key: "keyDrawerMsOnair", label: "Drawer ms onair" },
   { key: "keyDrawerMsStart", label: "Drawer ms start" },
+  { key: "keyDrawerMsDefault", label: "Drawer ms default" },
 ];
 
 export const TASK_PALETTE_ITEMS: Array<{ key: keyof KeyColors; label: string }> = [

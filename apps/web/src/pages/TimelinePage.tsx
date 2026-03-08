@@ -1,5 +1,7 @@
-import React from "react";
+﻿import React from "react";
 import { flushSync } from "react-dom";
+import { TaskV1 } from "@dtm/schema/snapshot";
+import { DesignersBoard } from "../components/DesignersBoard";
 import { ErrorBanner } from "../components/ErrorBanner";
 import { FiltersBar } from "../components/FiltersBar";
 import { LayoutContext } from "../components/Layout";
@@ -14,6 +16,9 @@ const ZOOM_PRESETS = [0.1, 0.2, 0.3, 0.4, 0.5, 0.75, 1, 1.25, 1.5, 2, 3, 4, 5, 6
 const DAY_MS = 24 * 60 * 60 * 1000;
 const MIN_ZOOM = 0.1;
 const MAX_ZOOM = 10;
+const TIMELINE_PAGE_VIEW_KEY = "dtm.timeline.pageView.v1";
+const PAGE_LABEL_TASKS = "\u0417\u0430\u0434\u0430\u0447\u0438";
+const PAGE_LABEL_DESIGNERS = "\u0414\u0438\u0437\u0430\u0439\u043d\u0435\u0440\u044b";
 
 function clamp(value: number, min: number, max: number) {
   return Math.max(min, Math.min(max, value));
@@ -59,6 +64,15 @@ export function TimelinePage() {
   const [isDraggingTimeline, setIsDraggingTimeline] = React.useState(false);
   const [isRefreshPanelOpen, setIsRefreshPanelOpen] = React.useState(false);
   const [isDateFilterPanelOpen, setIsDateFilterPanelOpen] = React.useState(false);
+  const [pageView, setPageView] = React.useState<"tasks" | "designers">(() => {
+    try {
+      const stored = localStorage.getItem(TIMELINE_PAGE_VIEW_KEY);
+      if (stored === "tasks" || stored === "designers") return stored;
+    } catch {
+      // ignore
+    }
+    return "tasks";
+  });
   const dateFromInputRef = React.useRef<HTMLInputElement | null>(null);
   const dateToInputRef = React.useRef<HTMLInputElement | null>(null);
   const dragStartRef = React.useRef<{
@@ -90,6 +104,14 @@ export function TimelinePage() {
       });
     });
   };
+
+  React.useEffect(() => {
+    try {
+      localStorage.setItem(TIMELINE_PAGE_VIEW_KEY, pageView);
+    } catch {
+      // ignore
+    }
+  }, [pageView]);
 
   if (!ctx) return null;
   const { viewMode, setViewMode, sortMode, setSortMode, filters, setFilters, snapshotState, design, setDesign, ui, locale, setLocale } = ctx;
@@ -276,7 +298,7 @@ export function TimelinePage() {
       x: e.clientX,
       y: e.clientY,
       content: (
-        <div style={{ minWidth: 280 }}>
+        <div style={{ width: "fit-content", maxWidth: "min(86vw, 560px)" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
             <span className="badge">{dateLabel}</span>
             {meta?.milestoneLabel ? (
@@ -300,6 +322,60 @@ export function TimelinePage() {
     });
   };
   const onLeave = () => setTooltip({ visible: false });
+
+  const onDesignerCardHover = (e: React.MouseEvent, task: TaskV1) => {
+    const manager = task.customer?.trim() || "-";
+    const history = task.history?.trim() || "-";
+    const milestones = [...(task.milestones ?? [])]
+      .map((m) => ({
+        label: snapshot.enums?.milestoneType?.[m.type] ?? m.type,
+        date: m.actual ?? m.planned ?? "",
+      }))
+      .sort((a, b) => (a.date || "").localeCompare(b.date || ""));
+    const half = Math.ceil(milestones.length / 2);
+    const columns = [milestones.slice(0, half), milestones.slice(half)];
+
+    setTooltip({
+      visible: true,
+      x: e.clientX,
+      y: e.clientY,
+      content: (
+        <div style={{ width: "fit-content", maxWidth: "min(90vw, 760px)" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+            {columns.map((column, colIdx) => (
+              <div key={`ms-col-${colIdx}`} style={{ display: "grid", gap: 4 }}>
+                {column.length ? (
+                  column.map((item, idx) => (
+                    <div key={`ms-${colIdx}-${idx}`} style={{ display: "grid", gridTemplateColumns: "auto 1fr", gap: 8 }}>
+                      <span className="badge">{item.date ? item.date.slice(5).replace("-", ".") : "--.--"}</span>
+                      <span
+                        style={{
+                          whiteSpace: "normal",
+                          overflow: "hidden",
+                          display: "-webkit-box",
+                          WebkitLineClamp: 2,
+                          WebkitBoxOrient: "vertical",
+                          lineHeight: 1.25,
+                        }}
+                      >
+                        {item.label}
+                      </span>
+                    </div>
+                  ))
+                ) : (
+                  <span className="muted">-</span>
+                )}
+              </div>
+            ))}
+          </div>
+          <div style={{ marginTop: 8, fontSize: 11, opacity: 0.78 }}>{manager}</div>
+          <div style={{ marginTop: 6, fontSize: 13, opacity: 0.94, whiteSpace: "pre-wrap", lineHeight: 1.25 }}>
+            {history}
+          </div>
+        </div>
+      ),
+    });
+  };
 
   const timelineWidth = Math.max(timelineHost.width, design.timelineWidth);
   const showMilestoneLabels = design.timelineShowMilestoneLabels >= 0.5;
@@ -327,7 +403,7 @@ export function TimelinePage() {
   };
 
   return (
-    <div className="card">
+    <>
       {status === "stale_error" && error ? (
         <ErrorBanner
           compact
@@ -337,122 +413,96 @@ export function TimelinePage() {
         />
       ) : null}
 
-      <div className="timelineFrame">
-        <div
-          className="timelineModeDock"
-          style={{
-            transform: `translate(${design.timelineModeDockOffsetX}px, ${design.timelineModeDockOffsetY}px)`,
-            ["--mode-scale" as string]: String(design.timelineModeDockScale),
-          }}
-        >
-          <button
-            type="button"
-            className={`modeMiniBtn ${viewMode === "designer_brand_show" ? "active" : ""}`}
-            onClick={() => setViewMode("designer_brand_show")}
-          >
-            {ui.modeByDesignerBrandShow}
-          </button>
-          <button
-            type="button"
-            className={`modeMiniBtn ${viewMode === "brand_designer_show" ? "active" : ""}`}
-            onClick={() => setViewMode("brand_designer_show")}
-          >
-            {ui.modeByBrandDesignerShow}
-          </button>
-          <button
-            type="button"
-            className={`modeMiniBtn ${viewMode === "format_brand_show" ? "active" : ""}`}
-            onClick={() => setViewMode("format_brand_show")}
-          >
-            {ui.modeByFormatBrandShow}
-          </button>
-          <button
-            type="button"
-            className={`modeMiniBtn ${viewMode === "show_brand_designer" ? "active" : ""}`}
-            onClick={() => setViewMode("show_brand_designer")}
-          >
-            {ui.modeByShowBrandDesigner}
-          </button>
-          <button
-            type="button"
-            className={`modeMiniBtn ${viewMode === "flat_brand_show" ? "active" : ""}`}
-            onClick={() => setViewMode("flat_brand_show")}
-          >
-            {ui.modeFlatBrandShow}
-          </button>
-        </div>
-
-        <div
-          className="timelineTopControlDock"
-          style={{
-            transform: `translate(${design.timelineTopControlDockOffsetX}px, ${design.timelineTopControlDockOffsetY}px)`,
-          }}
-        >
-          <div className="timelineTopControlRow">
-            <div className="timelineZoomCtl">
-              <button
-                type="button"
-                onClick={() => {
-                  const idx = ZOOM_PRESETS.findIndex((v) => Math.abs(v - zoom) < 0.001);
-                  const nextIdx = idx <= 0 ? 0 : idx - 1;
-                  setZoom(ZOOM_PRESETS[nextIdx]);
-                }}
-              >
-                -
-              </button>
-              <select
-                value={zoomPresetValue}
-                onChange={(e) => {
-                  if (e.target.value === "__custom__") return;
-                  setZoom(clamp(Number(e.target.value), MIN_ZOOM, MAX_ZOOM));
-                }}
-                aria-label={ui.timeline.zoomAria}
-              >
-                {zoomPresetValue === "__custom__" ? (
-                  <option value="__custom__">{Math.round(zoom * 100)}%</option>
-                ) : null}
-                {ZOOM_PRESETS.map((z) => (
-                  <option key={z} value={String(z)}>
-                    {Math.round(z * 100)}%
-                  </option>
-                ))}
-              </select>
-              <button
-                type="button"
-                onClick={() => {
-                  const idx = ZOOM_PRESETS.findIndex((v) => Math.abs(v - zoom) < 0.001);
-                  const nextIdx = idx < 0 ? 2 : Math.min(ZOOM_PRESETS.length - 1, idx + 1);
-                  setZoom(ZOOM_PRESETS[nextIdx]);
-                }}
-              >
-                +
-              </button>
-            </div>
+      <div
+        className="timelineTopControlDock timelineTopControlDockExternal"
+        style={{
+          transform: `translate(${design.timelineTopControlDockOffsetX}px, ${design.timelineTopControlDockOffsetY}px)`,
+        }}
+      >
+        <div className="timelineTopControlRow">
+          <div className="pageSwitchCtl">
             <button
               type="button"
-              className={`iconCtlBtn ${demoMode ? "active" : ""}`}
+              className={`modeMiniBtn ${pageView === "tasks" ? "active" : ""}`}
+              onClick={() => setPageView("tasks")}
+            >
+              {PAGE_LABEL_TASKS}
+            </button>
+            <button
+              type="button"
+              className={`modeMiniBtn ${pageView === "designers" ? "active" : ""}`}
+              onClick={() => setPageView("designers")}
+            >
+              {PAGE_LABEL_DESIGNERS}
+            </button>
+          </div>
+          {pageView === "tasks" ? (
+          <div className="timelineZoomCtl">
+            <button
+              type="button"
               onClick={() => {
-                void toggleDemoMode();
+                const idx = ZOOM_PRESETS.findIndex((v) => Math.abs(v - zoom) < 0.001);
+                const nextIdx = idx <= 0 ? 0 : idx - 1;
+                setZoom(ZOOM_PRESETS[nextIdx]);
               }}
-              title={ui.filters.demoMode}
-              aria-label={ui.filters.demoMode}
             >
-              {ui.filters.demoMode}
+              -
             </button>
+            <select
+              value={zoomPresetValue}
+              onChange={(e) => {
+                if (e.target.value === "__custom__") return;
+                setZoom(clamp(Number(e.target.value), MIN_ZOOM, MAX_ZOOM));
+              }}
+              aria-label={ui.timeline.zoomAria}
+            >
+              {zoomPresetValue === "__custom__" ? (
+                <option value="__custom__">{Math.round(zoom * 100)}%</option>
+              ) : null}
+              {ZOOM_PRESETS.map((z) => (
+                <option key={z} value={String(z)}>
+                  {Math.round(z * 100)}%
+                </option>
+              ))}
+            </select>
             <button
               type="button"
-              className={`iconCtlBtn ${design.animEnabled >= 0.5 ? "active" : ""}`}
-              onClick={() =>
-                setDesign((prev) => ({
-                  ...prev,
-                  animEnabled: prev.animEnabled >= 0.5 ? 0 : 1,
-                }))
-              }
-              title={locale === "ru" ? "Анимация" : "Animation"}
-              aria-label={locale === "ru" ? "Анимация" : "Animation"}
+              onClick={() => {
+                const idx = ZOOM_PRESETS.findIndex((v) => Math.abs(v - zoom) < 0.001);
+                const nextIdx = idx < 0 ? 2 : Math.min(ZOOM_PRESETS.length - 1, idx + 1);
+                setZoom(ZOOM_PRESETS[nextIdx]);
+              }}
             >
-              ✦
+              +
             </button>
+          </div>
+          ) : null}
+          <button
+            type="button"
+            className={`iconCtlBtn ${demoMode ? "active" : ""}`}
+            onClick={() => {
+              void toggleDemoMode();
+            }}
+            title={ui.filters.demoMode}
+            aria-label={ui.filters.demoMode}
+          >
+            {ui.filters.demoMode}
+          </button>
+          <button
+            type="button"
+            className={`iconCtlBtn ${design.animEnabled >= 0.5 ? "active" : ""}`}
+            onClick={() =>
+              setDesign((prev) => ({
+                ...prev,
+                animEnabled: prev.animEnabled >= 0.5 ? 0 : 1,
+              }))
+            }
+            title={locale === "ru" ? "Анимация" : "Animation"}
+            aria-label={locale === "ru" ? "Анимация" : "Animation"}
+          >
+            {"\u2726"}
+          </button>
+          {pageView === "tasks" ? (
             <button
               type="button"
               className="iconCtlBtn"
@@ -474,358 +524,422 @@ export function TimelinePage() {
             >
               {sortMode === "last_milestone_desc" ? "↑" : "↓"}
             </button>
-            <button
-              type="button"
-              className={`iconCtlBtn ${isRefreshPanelOpen ? "active" : ""}`}
-              onClick={() => setIsRefreshPanelOpen((s) => !s)}
-              title={ui.filters.updateFromApi}
-              aria-label={ui.filters.updateFromApi}
+          ) : null}
+          <button
+            type="button"
+            className={`iconCtlBtn ${isRefreshPanelOpen ? "active" : ""}`}
+            onClick={() => setIsRefreshPanelOpen((s) => !s)}
+            title={ui.filters.updateFromApi}
+            aria-label={ui.filters.updateFromApi}
+          >
+            {"\u27f3"}
+          </button>
+          <button
+            type="button"
+            className={`iconCtlBtn filterCtlBtn ${isDateFilterPanelOpen || dateFilter.enabled ? "active" : ""}`}
+            onClick={() => setIsDateFilterPanelOpen((s) => !s)}
+            title={ui.filters.dateFilterTitle}
+            aria-label={ui.filters.dateFilterTitle}
+          >
+            {locale === "ru" ? "Ф" : "F"}
+          </button>
+          <label className="langCtl">
+            <select
+              value={locale}
+              onChange={(e) => setLocale(e.target.value as typeof locale)}
+              aria-label={ui.localeLabel}
             >
-              ⟳
-            </button>
-            <button
-              type="button"
-              className={`iconCtlBtn filterCtlBtn ${isDateFilterPanelOpen || dateFilter.enabled ? "active" : ""}`}
-              onClick={() => setIsDateFilterPanelOpen((s) => !s)}
-              title={ui.filters.dateFilterTitle}
-              aria-label={ui.filters.dateFilterTitle}
-            >
-              Ф
-            </button>
-            <label className="langCtl">
-              <select
-                value={locale}
-                onChange={(e) => setLocale(e.target.value as typeof locale)}
-                aria-label={ui.localeLabel}
-              >
-                <option value="ru">{ui.localeRu}</option>
-                <option value="en">{ui.localeEn}</option>
-              </select>
-            </label>
-          </div>
-          {isRefreshPanelOpen ? <FiltersBar /> : null}
-          {isDateFilterPanelOpen ? (
-            <div className="timelineDateFilterPanel">
-              <div className="timelineDateFilterLayout">
-                <div className="timelineDateFilterLeft">
-                  <div className="timelineDateFilterRow">
-                    {dateFilter.enabled ? (
-                      <>
-                        <label>
-                          <span>{ui.filters.dateFrom}</span>
-                          <div className="datePickerField">
-                            <input
-                              ref={dateFromInputRef}
-                              type="date"
-                              value={dateFilter.start}
-                              onChange={(e) =>
-                                setDateFilter({
-                                  ...dateFilter,
-                                  start: e.target.value,
-                                })
+              <option value="ru">{ui.localeRu}</option>
+              <option value="en">{ui.localeEn}</option>
+            </select>
+          </label>
+        </div>
+        {isRefreshPanelOpen ? <FiltersBar /> : null}
+        {isDateFilterPanelOpen ? (
+          <div className="timelineDateFilterPanel">
+            <div className="timelineDateFilterLayout">
+              <div className="timelineDateFilterLeft">
+                <div className="timelineDateFilterRow">
+                  {dateFilter.enabled ? (
+                    <>
+                      <label>
+                        <span>{ui.filters.dateFrom}</span>
+                        <div className="datePickerField">
+                          <input
+                            ref={dateFromInputRef}
+                            type="date"
+                            value={dateFilter.start}
+                            onChange={(e) =>
+                              setDateFilter({
+                                ...dateFilter,
+                                start: e.target.value,
+                              })
+                            }
+                          />
+                          <button
+                            type="button"
+                            className="datePickerBtn"
+                            onClick={() => {
+                              const input = dateFromInputRef.current;
+                              if (!input) return;
+                              const maybeShowPicker = (input as HTMLInputElement & {
+                                showPicker?: () => void;
+                              }).showPicker;
+                              if (typeof maybeShowPicker === "function") {
+                                maybeShowPicker.call(input);
+                              } else {
+                                input.focus();
                               }
-                            />
-                            <button
-                              type="button"
-                              className="datePickerBtn"
-                              onClick={() => {
-                                const input = dateFromInputRef.current;
-                                if (!input) return;
-                                const maybeShowPicker = (input as HTMLInputElement & {
-                                  showPicker?: () => void;
-                                }).showPicker;
-                                if (typeof maybeShowPicker === "function") {
-                                  maybeShowPicker.call(input);
-                                } else {
-                                  input.focus();
-                                }
-                              }}
-                              aria-label={`${ui.filters.dateFrom} calendar`}
-                            >
-                              📅
-                            </button>
-                          </div>
-                        </label>
-                        <label>
-                          <span>{ui.filters.dateTo}</span>
-                          <div className="datePickerField">
-                            <input
-                              ref={dateToInputRef}
-                              type="date"
-                              value={dateFilter.end}
-                              onChange={(e) =>
-                                setDateFilter({
-                                  ...dateFilter,
-                                  end: e.target.value,
-                                })
+                            }}
+                            aria-label={`${ui.filters.dateFrom} calendar`}
+                          >
+                            {"\ud83d\udcc5"}
+                          </button>
+                        </div>
+                      </label>
+                      <label>
+                        <span>{ui.filters.dateTo}</span>
+                        <div className="datePickerField">
+                          <input
+                            ref={dateToInputRef}
+                            type="date"
+                            value={dateFilter.end}
+                            onChange={(e) =>
+                              setDateFilter({
+                                ...dateFilter,
+                                end: e.target.value,
+                              })
+                            }
+                          />
+                          <button
+                            type="button"
+                            className="datePickerBtn"
+                            onClick={() => {
+                              const input = dateToInputRef.current;
+                              if (!input) return;
+                              const maybeShowPicker = (input as HTMLInputElement & {
+                                showPicker?: () => void;
+                              }).showPicker;
+                              if (typeof maybeShowPicker === "function") {
+                                maybeShowPicker.call(input);
+                              } else {
+                                input.focus();
                               }
-                            />
-                            <button
-                              type="button"
-                              className="datePickerBtn"
-                              onClick={() => {
-                                const input = dateToInputRef.current;
-                                if (!input) return;
-                                const maybeShowPicker = (input as HTMLInputElement & {
-                                  showPicker?: () => void;
-                                }).showPicker;
-                                if (typeof maybeShowPicker === "function") {
-                                  maybeShowPicker.call(input);
-                                } else {
-                                  input.focus();
-                                }
-                              }}
-                              aria-label={`${ui.filters.dateTo} calendar`}
-                            >
-                              📅
-                            </button>
-                          </div>
-                        </label>
-                      </>
-                    ) : null}
-                    <label className="timelineLimitCtl">
-                      <span>
-                        {ui.filters.displayLimitLabel}: {safeLimit}
-                      </span>
-                      <input
-                        type="range"
-                        min={1}
-                        max={200}
-                        step={1}
-                        value={safeLimit}
-                        onChange={(e) => {
-                          const next = Number(e.target.value);
-                          setFilters((prev) => ({
-                            ...prev,
-                            displayLimit: Number.isFinite(next) && next > 0 ? next : 30,
-                          }));
-                        }}
-                      />
-                    </label>
-                    <label className="timelineLimitCtl">
-                      <span>
-                        {ui.filters.loadLimitLabel}: {safeLoadLimit}
-                      </span>
-                      <input
-                        type="range"
-                        min={1}
-                        max={200}
-                        step={1}
-                        value={safeLoadLimit}
-                        onChange={(e) => {
-                          const next = Number(e.target.value);
-                          const normalized = Number.isFinite(next) && next > 0 ? next : 30;
-                          setLoadLimit(normalized);
-                          setFilters((prev) => ({ ...prev, loadLimit: normalized }));
-                        }}
-                      />
-                    </label>
-                    <div className="limitMeta muted">
-                      {snapshot.tasks.length} / {limitedTasks.length}
-                    </div>
+                            }}
+                            aria-label={`${ui.filters.dateTo} calendar`}
+                          >
+                            {"\ud83d\udcc5"}
+                          </button>
+                        </div>
+                      </label>
+                    </>
+                  ) : null}
+                  <label className="timelineLimitCtl">
+                    <span>
+                      {ui.filters.displayLimitLabel}: {safeLimit}
+                    </span>
+                    <input
+                      type="range"
+                      min={1}
+                      max={200}
+                      step={1}
+                      value={safeLimit}
+                      onChange={(e) => {
+                        const next = Number(e.target.value);
+                        setFilters((prev) => ({
+                          ...prev,
+                          displayLimit: Number.isFinite(next) && next > 0 ? next : 30,
+                        }));
+                      }}
+                    />
+                  </label>
+                  <label className="timelineLimitCtl">
+                    <span>
+                      {ui.filters.loadLimitLabel}: {safeLoadLimit}
+                    </span>
+                    <input
+                      type="range"
+                      min={1}
+                      max={200}
+                      step={1}
+                      value={safeLoadLimit}
+                      onChange={(e) => {
+                        const next = Number(e.target.value);
+                        const normalized = Number.isFinite(next) && next > 0 ? next : 30;
+                        setLoadLimit(normalized);
+                        setFilters((prev) => ({ ...prev, loadLimit: normalized }));
+                      }}
+                    />
+                  </label>
+                  <div className="limitMeta muted">
+                    {snapshot.tasks.length} / {limitedTasks.length}
                   </div>
                 </div>
+              </div>
 
-                <div className="timelineStatusButtons">
-                  <button
-                    type="button"
-                    className={`toggleBtn ${dateFilter.enabled ? "active" : ""}`}
-                    onClick={() =>
-                      setDateFilter({
-                        ...dateFilter,
-                        enabled: !dateFilter.enabled,
-                      })
-                    }
-                  >
-                    Дата
-                  </button>
-                  <button
-                    type="button"
-                    className={`toggleBtn ${statusFilter.work ? "active" : ""}`}
-                    onClick={() => toggleStatusFilter("work")}
-                  >
-                    В работе
-                  </button>
-                  <button
-                    type="button"
-                    className={`toggleBtn ${statusFilter.preDone ? "active" : ""}`}
-                    onClick={() => toggleStatusFilter("preDone")}
-                  >
-                    Почти готово
-                  </button>
-                  <button
-                    type="button"
-                    className={`toggleBtn ${statusFilter.done ? "active" : ""}`}
-                    onClick={() => toggleStatusFilter("done")}
-                  >
-                    Готово
-                  </button>
-                  <button
-                    type="button"
-                    className={`toggleBtn ${statusFilter.wait ? "active" : ""}`}
-                    onClick={() => toggleStatusFilter("wait")}
-                  >
-                    Ждёт
-                  </button>
-                </div>
+              <div className="timelineStatusButtons">
+                <button
+                  type="button"
+                  className={`toggleBtn ${dateFilter.enabled ? "active" : ""}`}
+                  onClick={() =>
+                    setDateFilter({
+                      ...dateFilter,
+                      enabled: !dateFilter.enabled,
+                    })
+                  }
+                >
+                  {locale === "ru" ? "Дата" : "Date"}
+                </button>
+                <button
+                  type="button"
+                  className={`toggleBtn ${statusFilter.work ? "active" : ""}`}
+                  onClick={() => toggleStatusFilter("work")}
+                >
+                  {locale === "ru" ? "В работе" : "Work"}
+                </button>
+                <button
+                  type="button"
+                  className={`toggleBtn ${statusFilter.preDone ? "active" : ""}`}
+                  onClick={() => toggleStatusFilter("preDone")}
+                >
+                  {locale === "ru" ? "Почти готово" : "Pre done"}
+                </button>
+                <button
+                  type="button"
+                  className={`toggleBtn ${statusFilter.done ? "active" : ""}`}
+                  onClick={() => toggleStatusFilter("done")}
+                >
+                  {locale === "ru" ? "Готово" : "Done"}
+                </button>
+                <button
+                  type="button"
+                  className={`toggleBtn ${statusFilter.wait ? "active" : ""}`}
+                  onClick={() => toggleStatusFilter("wait")}
+                >
+                  {locale === "ru" ? "Ждёт" : "Wait"}
+                </button>
               </div>
             </div>
-          ) : null}
-        </div>
+          </div>
+        ) : null}
+      </div>
 
-        <div
-          className="card timelineScroll"
-          ref={timelineHost.ref}
-          style={{
-            overflow: "auto",
-            cursor: isDraggingTimeline ? "grabbing" : "grab",
-            userSelect: isDraggingTimeline ? "none" : "auto",
-          }}
-          onMouseDown={(e) => {
-            if (e.button !== 0) return;
-            const el = e.currentTarget;
-            e.preventDefault();
-            dragStartRef.current = {
-              x: e.clientX,
-              y: e.clientY,
-              left: el.scrollLeft,
-              top: el.scrollTop,
-            };
-            setIsDraggingTimeline(true);
-          }}
-          onMouseMove={(e) => {
-            const drag = dragStartRef.current;
-            if (!drag) return;
-            const el = e.currentTarget;
-            const dx = e.clientX - drag.x;
-            const dy = e.clientY - drag.y;
-            el.scrollLeft = drag.left - dx;
-            el.scrollTop = drag.top - dy;
-          }}
-          onMouseUp={() => {
-            if (!dragStartRef.current) return;
-            dragStartRef.current = null;
-            setIsDraggingTimeline(false);
-          }}
-          onMouseLeave={() => {
-            if (!dragStartRef.current) return;
-            dragStartRef.current = null;
-            setIsDraggingTimeline(false);
-          }}
-          onScroll={(e) => {
-            const target = e.currentTarget;
-            flushSync(() => {
-              setTimelineScrollLeft(target.scrollLeft);
-              setTimelineScrollTop(target.scrollTop);
-              setTimelineViewportHeight(target.clientHeight);
-            });
-          }}
-        >
-          <UnifiedTimeline
-            mode={viewMode}
-            sortMode={sortMode}
-            locale={locale}
-            people={snapshot.people}
-            groups={snapshot.groups}
-            tasks={limitedTasks}
-            statusLabels={statusLabels}
-            unassignedLabel={ui.common.unassigned}
-            width={timelineWidth}
-            viewportWidth={timelineHost.width}
-            leftPinOffset={timelineScrollLeft}
-            rowH={rowH}
-            labelW={Math.max(320, design.desktopLeftColWidth)}
-            topOffset={design.timelineTopOffset}
-            dateLabelY={design.timelineDateLabelY}
-            dateFontSize={design.timelineDateFontSize}
-            dateIdleOpacity={design.timelineDateIdleOpacity}
-            dateHoverOpacity={design.timelineDateHoverOpacity}
-            monthFontSize={design.timelineMonthFontSize}
-            monthOffsetY={design.timelineMonthOffsetY}
-            monthOffsetX={design.timelineMonthOffsetX}
-            todayLineOpacity={design.timelineTodayLineOpacity}
-            todayLineWidth={design.timelineTodayLineWidth}
-            cursorTrailDays={design.timelineCursorTrailDays}
-            cursorTrailOpacity={design.timelineCursorTrailOpacity}
-            holidayFillOpacity={design.timelineHolidayFillOpacity}
-            perfMinWeekPxDetailedX10={design.timelinePerfMinWeekPxDetailedX10}
-            leftOwnerFontSize={design.timelineLeftOwnerFontSize}
-            leftOwnerXOffset={design.timelineLeftOwnerXOffset}
-            leftOwnerTextOffsetY={design.timelineLeftOwnerTextOffsetY}
-            leftOwnerCropLeft={design.timelineLeftOwnerCropLeft}
-            leftTaskFontSize={design.timelineLeftTaskFontSize}
-            leftTaskXOffset={design.timelineLeftTaskXOffset}
-            leftTaskTextOffsetY={design.timelineLeftTaskTextOffsetY}
-            leftTaskCropLeft={design.timelineLeftTaskCropLeft}
-            leftMetaFontSize={design.timelineLeftMetaFontSize}
-            leftMetaTextOffsetY={design.timelineLeftMetaTextOffsetY}
-            leftPillOffsetY={design.timelineLeftPillOffsetY}
-            leftPillXOffset={design.timelineLeftPillXOffset}
-            leftPillWidth={design.timelineLeftPillWidth}
-            leftPillSizeScale={design.timelineLeftPillSizeScale}
-            leftGroupOffsetY={design.timelineLeftGroupOffsetY}
-            leftGroupXOffset={design.timelineLeftGroupXOffset}
-            leftGroupCropLeft={design.timelineLeftGroupCropLeft}
-            leftGroupFontSize={design.timelineLeftGroupFontSize}
-            badgeHeight={design.badgeHeight}
-            badgeFontSize={design.badgeFontSize}
-            textRenderingMode={design.textRenderingMode}
-            animEnabled={design.animEnabled >= 0.5}
-            reorderDurationMs={design.animReorderDurationMs}
-            reorderEasePreset={design.animReorderEasePreset}
-            reorderStaggerMs={design.animReorderStaggerMs}
-            reorderStaggerCapMs={design.animReorderStaggerCapMs}
-            reorderDistanceFactor={design.animReorderDistanceFactor}
-            reorderDistanceMaxExtraMs={design.animReorderDistanceMaxExtraMs}
-            reorderViewportOnly={design.animReorderViewportOnly >= 0.5}
-            reorderViewportBufferPx={design.animReorderViewportBufferPx}
-            reorderAutoDisableRows={design.animReorderAutoDisableRows}
-            viewportTop={timelineScrollTop}
-            viewportHeight={timelineViewportHeight}
-            disableReorderAnimation={isDraggingTimeline}
-            onScaleChange={({ rangeStartMs, pxPerDay, labelW }) => {
-              scaleInfoRef.current = { rangeStartMs, pxPerDay, labelW };
-              const host = timelineHost.ref.current;
-              if (!host) return;
-
-              const zoomAnchor = pendingZoomAnchorRef.current;
-              if (zoomAnchor) {
-                const x =
-                  labelW +
-                  ((zoomAnchor.dateMs - rangeStartMs) / DAY_MS) * pxPerDay -
-                  zoomAnchor.clientX;
-                host.scrollLeft = Math.max(0, x);
-                pendingZoomAnchorRef.current = null;
-              }
-
-              const dateAnchor = pendingDateAnchorRef.current;
-              if (dateAnchor !== null) {
-                const x =
-                  labelW +
-                  ((dateAnchor - rangeStartMs) / DAY_MS) * pxPerDay -
-                  host.clientWidth * 0.5;
-                host.scrollLeft = Math.max(0, x);
-                pendingDateAnchorRef.current = null;
-              }
+      <div className="card">
+      <div className="timelineFrame">
+        {pageView === "tasks" ? (
+          <div
+            className="timelineModeDock"
+            style={{
+              transform: `translate(${design.timelineModeDockOffsetX}px, ${design.timelineModeDockOffsetY}px)`,
+              ["--mode-scale" as string]: String(design.timelineModeDockScale),
             }}
-            zoom={zoom}
-            stripeOpacity={design.timelineStripeOpacity}
-            gridOpacity={design.timelineGridOpacity}
-            gridLineWidth={design.timelineGridLineWidth}
-            barInsetY={design.barInsetY}
-            barRadius={design.barRadius}
-            labelEveryDay={labelEveryDay}
-            weekendFillMode={weekendFillMode}
-            weekendFillOpacity={design.timelineWeekendFillOpacity}
-            milestoneSizeScale={design.milestoneSizeScale}
-            milestoneOpacity={design.milestoneOpacity}
-            showMilestoneLabels={showMilestoneLabels}
-            taskColorMixPercent={design.taskColorMixPercent}
-            onHover={onHover}
-            onLeave={onLeave}
-            onClick={(t) => setSelectedId(t.id)}
-          />
-        </div>
+          >
+            <button
+              type="button"
+              className={`modeMiniBtn ${viewMode === "designer_brand_show" ? "active" : ""}`}
+              onClick={() => setViewMode("designer_brand_show")}
+            >
+              {ui.modeByDesignerBrandShow}
+            </button>
+            <button
+              type="button"
+              className={`modeMiniBtn ${viewMode === "brand_designer_show" ? "active" : ""}`}
+              onClick={() => setViewMode("brand_designer_show")}
+            >
+              {ui.modeByBrandDesignerShow}
+            </button>
+            <button
+              type="button"
+              className={`modeMiniBtn ${viewMode === "format_brand_show" ? "active" : ""}`}
+              onClick={() => setViewMode("format_brand_show")}
+            >
+              {ui.modeByFormatBrandShow}
+            </button>
+            <button
+              type="button"
+              className={`modeMiniBtn ${viewMode === "show_brand_designer" ? "active" : ""}`}
+              onClick={() => setViewMode("show_brand_designer")}
+            >
+              {ui.modeByShowBrandDesigner}
+            </button>
+            <button
+              type="button"
+              className={`modeMiniBtn ${viewMode === "flat_brand_show" ? "active" : ""}`}
+              onClick={() => setViewMode("flat_brand_show")}
+            >
+              {ui.modeFlatBrandShow}
+            </button>
+          </div>
+        ) : null}
+
+        {pageView === "tasks" ? (
+          <div
+            className="card timelineScroll"
+            ref={timelineHost.ref}
+            style={{
+              overflow: "auto",
+              cursor: isDraggingTimeline ? "grabbing" : "grab",
+              userSelect: isDraggingTimeline ? "none" : "auto",
+            }}
+            onMouseDown={(e) => {
+              if (e.button !== 0) return;
+              const el = e.currentTarget;
+              e.preventDefault();
+              dragStartRef.current = {
+                x: e.clientX,
+                y: e.clientY,
+                left: el.scrollLeft,
+                top: el.scrollTop,
+              };
+              setIsDraggingTimeline(true);
+            }}
+            onMouseMove={(e) => {
+              const drag = dragStartRef.current;
+              if (!drag) return;
+              const el = e.currentTarget;
+              const dx = e.clientX - drag.x;
+              const dy = e.clientY - drag.y;
+              el.scrollLeft = drag.left - dx;
+              el.scrollTop = drag.top - dy;
+            }}
+            onMouseUp={() => {
+              if (!dragStartRef.current) return;
+              dragStartRef.current = null;
+              setIsDraggingTimeline(false);
+            }}
+            onMouseLeave={() => {
+              if (!dragStartRef.current) return;
+              dragStartRef.current = null;
+              setIsDraggingTimeline(false);
+            }}
+            onScroll={(e) => {
+              const target = e.currentTarget;
+              flushSync(() => {
+                setTimelineScrollLeft(target.scrollLeft);
+                setTimelineScrollTop(target.scrollTop);
+                setTimelineViewportHeight(target.clientHeight);
+              });
+            }}
+          >
+            <UnifiedTimeline
+              mode={viewMode}
+              sortMode={sortMode}
+              locale={locale}
+              people={snapshot.people}
+              groups={snapshot.groups}
+              tasks={limitedTasks}
+              statusLabels={statusLabels}
+              unassignedLabel={ui.common.unassigned}
+              width={timelineWidth}
+              viewportWidth={timelineHost.width}
+              leftPinOffset={timelineScrollLeft}
+              rowH={rowH}
+              labelW={Math.max(320, design.desktopLeftColWidth)}
+              topOffset={design.timelineTopOffset}
+              dateLabelY={design.timelineDateLabelY}
+              dateFontSize={design.timelineDateFontSize}
+              dateIdleOpacity={design.timelineDateIdleOpacity}
+              dateHoverOpacity={design.timelineDateHoverOpacity}
+              monthFontSize={design.timelineMonthFontSize}
+              monthOffsetY={design.timelineMonthOffsetY}
+              monthOffsetX={design.timelineMonthOffsetX}
+              todayLineOpacity={design.timelineTodayLineOpacity}
+              todayLineWidth={design.timelineTodayLineWidth}
+              cursorTrailDays={design.timelineCursorTrailDays}
+              cursorTrailOpacity={design.timelineCursorTrailOpacity}
+              holidayFillOpacity={design.timelineHolidayFillOpacity}
+              perfMinWeekPxDetailedX10={design.timelinePerfMinWeekPxDetailedX10}
+              leftOwnerFontSize={design.timelineLeftOwnerFontSize}
+              leftOwnerXOffset={design.timelineLeftOwnerXOffset}
+              leftOwnerTextOffsetY={design.timelineLeftOwnerTextOffsetY}
+              leftOwnerCropLeft={design.timelineLeftOwnerCropLeft}
+              leftTaskFontSize={design.timelineLeftTaskFontSize}
+              leftTaskXOffset={design.timelineLeftTaskXOffset}
+              leftTaskTextOffsetY={design.timelineLeftTaskTextOffsetY}
+              leftTaskCropLeft={design.timelineLeftTaskCropLeft}
+              leftMetaFontSize={design.timelineLeftMetaFontSize}
+              leftMetaTextOffsetY={design.timelineLeftMetaTextOffsetY}
+              leftPillOffsetY={design.timelineLeftPillOffsetY}
+              leftPillXOffset={design.timelineLeftPillXOffset}
+              leftPillWidth={design.timelineLeftPillWidth}
+              leftPillSizeScale={design.timelineLeftPillSizeScale}
+              leftGroupOffsetY={design.timelineLeftGroupOffsetY}
+              leftGroupXOffset={design.timelineLeftGroupXOffset}
+              leftGroupCropLeft={design.timelineLeftGroupCropLeft}
+              leftGroupFontSize={design.timelineLeftGroupFontSize}
+              badgeHeight={design.badgeHeight}
+              badgeFontSize={design.badgeFontSize}
+              textRenderingMode={design.textRenderingMode}
+              animEnabled={design.animEnabled >= 0.5}
+              reorderDurationMs={design.animReorderDurationMs}
+              reorderEasePreset={design.animReorderEasePreset}
+              reorderStaggerMs={design.animReorderStaggerMs}
+              reorderStaggerCapMs={design.animReorderStaggerCapMs}
+              reorderDistanceFactor={design.animReorderDistanceFactor}
+              reorderDistanceMaxExtraMs={design.animReorderDistanceMaxExtraMs}
+              reorderViewportOnly={design.animReorderViewportOnly >= 0.5}
+              reorderViewportBufferPx={design.animReorderViewportBufferPx}
+              reorderAutoDisableRows={design.animReorderAutoDisableRows}
+              viewportTop={timelineScrollTop}
+              viewportHeight={timelineViewportHeight}
+              disableReorderAnimation={isDraggingTimeline}
+              onScaleChange={({ rangeStartMs, pxPerDay, labelW }) => {
+                scaleInfoRef.current = { rangeStartMs, pxPerDay, labelW };
+                const host = timelineHost.ref.current;
+                if (!host) return;
+
+                const zoomAnchor = pendingZoomAnchorRef.current;
+                if (zoomAnchor) {
+                  const x =
+                    labelW +
+                    ((zoomAnchor.dateMs - rangeStartMs) / DAY_MS) * pxPerDay -
+                    zoomAnchor.clientX;
+                  host.scrollLeft = Math.max(0, x);
+                  pendingZoomAnchorRef.current = null;
+                }
+
+                const dateAnchor = pendingDateAnchorRef.current;
+                if (dateAnchor !== null) {
+                  const x =
+                    labelW +
+                    ((dateAnchor - rangeStartMs) / DAY_MS) * pxPerDay -
+                    host.clientWidth * 0.5;
+                  host.scrollLeft = Math.max(0, x);
+                  pendingDateAnchorRef.current = null;
+                }
+              }}
+              zoom={zoom}
+              stripeOpacity={design.timelineStripeOpacity}
+              gridOpacity={design.timelineGridOpacity}
+              gridLineWidth={design.timelineGridLineWidth}
+              barInsetY={design.barInsetY}
+              barRadius={design.barRadius}
+              labelEveryDay={labelEveryDay}
+              weekendFillMode={weekendFillMode}
+              weekendFillOpacity={design.timelineWeekendFillOpacity}
+              milestoneSizeScale={design.milestoneSizeScale}
+              milestoneOpacity={design.milestoneOpacity}
+              showMilestoneLabels={showMilestoneLabels}
+              taskColorMixPercent={design.taskColorMixPercent}
+              onHover={onHover}
+              onLeave={onLeave}
+              onClick={(t) => setSelectedId(t.id)}
+            />
+          </div>
+        ) : (
+          <div className="card timelineScroll" style={{ overflow: "auto", paddingTop: 56 }}>
+            <DesignersBoard
+              tasks={limitedTasks}
+              people={snapshot.people}
+              groups={snapshot.groups}
+              unassignedLabel={ui.common.unassigned}
+              onTaskClick={(task) => setSelectedId(task.id)}
+              onTaskHover={onDesignerCardHover}
+              onTaskLeave={onLeave}
+            />
+          </div>
+        )}
+      </div>
       </div>
 
       <Tooltip state={tooltip} offsetX={design.tooltipOffsetX} offsetY={design.tooltipOffsetY} />
@@ -837,6 +951,9 @@ export function TimelinePage() {
         milestoneTypeLabels={snapshot.enums?.milestoneType}
         onClose={() => setSelectedId(null)}
       />
-    </div>
+    </>
   );
 }
+
+
+
