@@ -1,31 +1,26 @@
-# Tasks (Now)
+﻿# NOW - tasks
 
-Campaign: `CAM-MVP-DEPLOY-FRONTEND-OBJECT-STORAGE`
+## Active
+- [ ] CAM-API-V2-LOADING-SWR-CACHE - finalize manual evidence pack.
+- [x] CAM-SCHEMA-CONTRACT-GOVERNANCE - schema/types sync + validate:schema + guarantees.
+- [ ] CAM-DOCS-CANONICAL-REWRITE - rebuild root README and docs tree around current frontend state.
 
-## P01 Discovery & Alignment
-- [x] CAM-MVP-DEPLOY-FRONTEND-OBJECT-STORAGE-P01-T001 Проверить текущие runtime пути (`/config/public.yaml`, `/data/snapshot.example.json`, build output `apps/web/dist`).
-- [ ] CAM-MVP-DEPLOY-FRONTEND-OBJECT-STORAGE-P01-T002 Согласовать итоговый список env для деплой-скриптов (без секретов в git).
+## SWR status
+- [x] SWR runtime implemented (cache + background refresh + stale_error).
+- [x] Timeout/retry implemented.
+- [x] Conditional 304 path implemented.
+- [x] Build is green.
+- [ ] Collect manual evidence (video/screenshot/devtools/logs).
 
-## P02 Deploy Artifacts
-- [x] CAM-MVP-DEPLOY-FRONTEND-OBJECT-STORAGE-P02-T001 Создать `docs/DEPLOY.md` (PowerShell-first, optional bash).
-- [x] CAM-MVP-DEPLOY-FRONTEND-OBJECT-STORAGE-P02-T002 Создать `scripts/deploy_env.example`.
-- [x] CAM-MVP-DEPLOY-FRONTEND-OBJECT-STORAGE-P02-T003 Реализовать `scripts/deploy_frontend.ps1`.
-- [x] CAM-MVP-DEPLOY-FRONTEND-OBJECT-STORAGE-P02-T004 (Optional) Реализовать `scripts/deploy_frontend.sh`.
-- [x] CAM-MVP-DEPLOY-FRONTEND-OBJECT-STORAGE-P02-T005 Обновить `README.md` ссылкой на `docs/DEPLOY.md`.
+## Blocked
+- Manual evidence capture requires browser actions:
+  - video for instant second launch + Updating...
+  - screenshot of stale banner when API is offline
+  - screenshot of localStorage keys
+  - screenshot/log snippet for timeout/retry
 
-## P03 Validation & Handover
-- [ ] CAM-MVP-DEPLOY-FRONTEND-OBJECT-STORAGE-P03-T001 Прогнать dry-run деплоя без публикации секретов в логи.
-- [ ] CAM-MVP-DEPLOY-FRONTEND-OBJECT-STORAGE-P03-T002 Проверить cache policy (`index.html=no-cache`, assets=immutable).
-- [ ] CAM-MVP-DEPLOY-FRONTEND-OBJECT-STORAGE-P03-T003 Сформировать evidence/результаты и финальный checklist DoD.
+See: `docs/operations/TROUBLESHOOTING.md`
 
-Blocked:
-- (none)
-
-Done:
-- (none)
-
-## Ad-hoc UI
-- [x] CAM-ADHOC-GANTT-UI-REFRESH-T001 Refresh grant/gantt charts design in `apps/web` (Designers/Tasks pages, table visuals, timeline visuals, responsive polish).
-- [x] CAM-ADHOC-LOCAL-FIRST-SNAPSHOT-T001 Default data load from local JSON, add actions to reload local JSON and update local JSON from API.
-- [x] CAM-ADHOC-DESIGN-CONTROLS-T001 Add in-browser design controls panel for size/offset tuning with save/load/reset presets in local storage.
-- [x] CAM-ADHOC-TIMELINE-FINETUNE-T001 Add date-label offset control, wheel zoom, dd-mm labels, themed scrollbar, remove KPI blocks, and simplify tasks table to title+status.
+## Session 2026-03-07
+- [x] Milestone tone aliases: added resilient RU/EN mapping for card/calendar milestone colors using active API milestone names (work/pre_done/wait only).
+- [x] Timeline: added page switch (`Задачи` / `Дизайнеры`) and designer columns board view with task cards + milestone/manager hover tooltip.

@@ -1,19 +1,13 @@
 # Roadmap
 
-List of planned campaigns (not started yet).
+Active campaign priorities are defined in `work/now/*`.
 
-Columns (suggested):
-- CAM
-- Goal
-- Priority (P0/P1/P2)
-- Status (planned/designed/blocked)
-- Link to charter/plan
-
-Add detailed campaign plans under `work/roadmap/campaigns/<CAM>/`.
-
-## Campaigns
+## In priority
 
 | CAM | Goal | Priority | Status | Link |
 |---|---|---|---|---|
-| CAM-MVP-DEPLOY-FRONTEND-OBJECT-STORAGE | MVP one-command deploy фронта в Yandex Object Storage static hosting | P0 | active-now | `work/roadmap/campaigns/CAM-MVP-DEPLOY-FRONTEND-OBJECT-STORAGE/` |
-| CAM-ADHOC-GANTT-UI-REFRESH | Visual refresh for grant/gantt charts UI in web frontend | P1 | done | n/a |
+| CAM-API-V2-LOADING-SWR-CACHE | Stale-while-revalidate loading and local cache UX | P0 | active-now | `work/roadmap/campaigns/CAM-API-V2-LOADING-SWR-CACHE/` |
+| CAM-SCHEMA-CONTRACT-GOVERNANCE | Align snapshot types/schema + add validation and guarantees | P1 | done | `work/roadmap/campaigns/CAM-SCHEMA-CONTRACT-GOVERNANCE/` |
+
+## Deferred
+- CDN/CI/layout campaigns are intentionally deprioritized for now.

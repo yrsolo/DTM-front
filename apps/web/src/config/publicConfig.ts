@@ -1,4 +1,5 @@
 import rawPublicConfig from "../../config/public.yaml?raw";
+import rawPublicConfigProd from "../../config/public.prod.yaml?raw";
 
 type PublicConfig = {
   apiBaseUrl: string | null;
@@ -6,6 +7,10 @@ type PublicConfig = {
   apiStatuses: string;
   apiIncludePeople: boolean;
   apiLimit: number;
+  apiTimeoutMs: number;
+  apiRetryCount: number;
+  apiRetryDelayMs: number;
+  apiRefreshIntervalMs: number;
   localSnapshotPath: string;
 };
 
@@ -15,6 +20,10 @@ const DEFAULT_CONFIG: PublicConfig = {
   apiStatuses: "work,pre_done",
   apiIncludePeople: true,
   apiLimit: 200,
+  apiTimeoutMs: 12000,
+  apiRetryCount: 1,
+  apiRetryDelayMs: 500,
+  apiRefreshIntervalMs: 60000,
   localSnapshotPath: "/data/snapshot.example.json",
 };
 
@@ -70,9 +79,29 @@ function buildConfig(parsed: Record<string, string>): PublicConfig {
       DEFAULT_CONFIG.apiIncludePeople
     ),
     apiLimit: toNumber(parsed.api_limit, DEFAULT_CONFIG.apiLimit),
+    apiTimeoutMs: toNumber(parsed.api_timeout_ms, DEFAULT_CONFIG.apiTimeoutMs),
+    apiRetryCount: toNumber(parsed.api_retry_count, DEFAULT_CONFIG.apiRetryCount),
+    apiRetryDelayMs: toNumber(parsed.api_retry_delay_ms, DEFAULT_CONFIG.apiRetryDelayMs),
+    apiRefreshIntervalMs: toNumber(
+      parsed.api_refresh_interval_ms,
+      DEFAULT_CONFIG.apiRefreshIntervalMs
+    ),
     localSnapshotPath:
       parsed.local_snapshot_path || DEFAULT_CONFIG.localSnapshotPath,
   };
+}
+
+function pickFallbackYaml(): string {
+  if (typeof window === "undefined") return rawPublicConfig;
+  const host = window.location.hostname.toLowerCase();
+  const isLocal =
+    host === "localhost" ||
+    host === "127.0.0.1" ||
+    host === "::1" ||
+    host.endsWith(".local");
+  const isTestHost = host.includes("test");
+  if (isLocal || isTestHost) return rawPublicConfig;
+  return rawPublicConfigProd;
 }
 
 let cachedConfigPromise: Promise<PublicConfig> | null = null;
@@ -82,19 +111,22 @@ export async function loadPublicConfig(): Promise<PublicConfig> {
 
   cachedConfigPromise = (async () => {
     try {
-      const res = await fetch("/config/public.yaml", {
-        headers: { accept: "text/yaml,text/plain" },
-        cache: "no-store",
-      });
-      if (res.ok) {
-        const yaml = await res.text();
-        return buildConfig(parseSimpleYaml(yaml));
+      const paths = ["/config/public.yaml", "/config/public.yam"];
+      for (const path of paths) {
+        const res = await fetch(path, {
+          headers: { accept: "text/yaml,text/plain" },
+          cache: "no-store",
+        });
+        if (res.ok) {
+          const yaml = await res.text();
+          return buildConfig(parseSimpleYaml(yaml));
+        }
       }
     } catch {
       // Runtime config is optional; fallback is applied below.
     }
 
-    return buildConfig(parseSimpleYaml(rawPublicConfig));
+    return buildConfig(parseSimpleYaml(pickFallbackYaml()));
   })();
 
   return cachedConfigPromise;

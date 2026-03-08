@@ -56,7 +56,26 @@ function normalizeV2(payload: any): SnapshotV1 {
     tasks: (payload.tasks || []).map((t: any) => ({
       id: t.id,
       title: t.title || "Untitled",
-      ownerId: t.ownerId,
+      ownerId:
+        t.ownerId ??
+        t.owner_id ??
+        t.designerId ??
+        (typeof t.owner === "string" ? t.owner : null) ??
+        null,
+      ownerName:
+        t.ownerName ??
+        t.designer ??
+        (typeof t.owner === "string" ? t.owner : null) ??
+        null,
+      brand: t.brand ?? null,
+      customer:
+        t.customer ??
+        t.customerName ??
+        t.manager ??
+        t.managerName ??
+        null,
+      format_: t.format_ ?? null,
+      type: t.type ?? null,
       status: t.status,
       start: t.date?.start || t.start,
       end: t.date?.end || t.end,
@@ -66,6 +85,7 @@ function normalizeV2(payload: any): SnapshotV1 {
       links: t.links
         ? { sheetRowUrl: t.links.sheetRowUrl, self: t.links.self }
         : undefined,
+      history: t.history ?? null,
       milestones: Array.isArray(t.milestones)
         ? t.milestones.map((m: any) => ({
             type: m.type,

@@ -1,0 +1,87 @@
+name: Deploy Frontend
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Run build and print upload commands without publishing"
+        required: true
+        default: true
+        type: boolean
+      release_id:
+        description: "Optional explicit release id"
+        required: false
+        default: ""
+        type: string
+  push:
+    branches:
+      - dev
+      - main
+    paths:
+      - "apps/web/**"
+      - "packages/**"
+      - "scripts/deploy_frontend.sh"
+      - "scripts/deploy_frontend.ps1"
+      - "scripts/deploy.yaml"
+      - ".github/workflows/deploy_frontend.yml"
+
+concurrency:
+  group: deploy-frontend-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    env:
+      YC_BUCKET_NAME: ${{ vars.YC_BUCKET_NAME }}
+      YC_ENDPOINT: ${{ vars.YC_ENDPOINT || 'https://storage.yandexcloud.net' }}
+      AWS_DEFAULT_REGION: ${{ vars.AWS_DEFAULT_REGION || 'ru-central1' }}
+      DTM_WEB_PUBLIC_CONFIG_PATH: ${{ vars.DTM_WEB_PUBLIC_CONFIG_PATH || 'apps/web/config/public.yaml' }}
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install AWS CLI
+        run: |
+          aws --version || {
+            sudo apt-get update
+            sudo apt-get install -y awscli
+          }
+
+      - name: Validate required deploy config
+        run: |
+          test -n "$YC_BUCKET_NAME"
+          test -n "$YC_ENDPOINT"
+          test -n "$AWS_DEFAULT_REGION"
+          test -n "$DTM_WEB_PUBLIC_CONFIG_PATH"
+
+      - name: Build release id
+        id: release_id
+        run: |
+          DATE_PART="$(date -u +%Y%m%d-%H%M%S)"
+          SHA_PART="$(echo "${GITHUB_SHA}" | cut -c1-7)"
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ -n "${{ inputs.release_id }}" ]; then
+            echo "value=${{ inputs.release_id }}" >> "$GITHUB_OUTPUT"
+          elif [ "${GITHUB_REF_NAME}" = "main" ]; then
+            echo "value=main-${DATE_PART}-${SHA_PART}" >> "$GITHUB_OUTPUT"
+          else
+            echo "value=dev-${DATE_PART}-${SHA_PART}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Deploy (dry-run)
+        if: ${{ (github.event_name == 'workflow_dispatch' && inputs.dry_run) || (github.event_name == 'push' && github.ref_name == 'dev') }}
+        run: bash scripts/deploy_frontend.sh --dry-run --release-id "${{ steps.release_id.outputs.value }}"
+
+      - name: Deploy (release)
+        if: ${{ (github.event_name == 'push' && github.ref_name == 'main') || (github.event_name == 'workflow_dispatch' && !inputs.dry_run) }}
+        run: bash scripts/deploy_frontend.sh --release-id "${{ steps.release_id.outputs.value }}"

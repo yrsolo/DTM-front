@@ -1,89 +1,1067 @@
 {
-  "meta": {
-    "artifact": "dtm_frontend_api_v2",
-    "contractVersion": "2.0.1",
-    "generatedAt": "2026-03-02T12:00:00Z",
-    "syncedAt": "2026-03-02T11:00:00Z",
-    "source": {
-      "env": "test",
-      "sourceId": "sheet:example:sheet:1",
-      "sheetName": "Example Sheet",
-      "sheetUrl": "https://example.local"
+    "meta": {
+        "artifact": "dtm_frontend_api_v2",
+        "contractVersion": "2.0.1",
+        "generatedAt": "2026-03-04T01:31:43Z",
+        "syncedAt": "2026-03-04T01:31:43Z",
+        "source": {
+            "env": "test",
+            "sourceId": "Спонсорские ТНТ",
+            "sheetName": "Спонсорские ТНТ",
+            "sheetUrl": null
+        },
+        "hash": "3c65ab73f03aafb0237c5d5e75799c7e7f04c95b43fa65c8c9248bdec12ee0f6",
+        "features": {
+            "taskHash": true,
+            "taskRevision": true,
+            "entities": true,
+            "milestonesDefault": true,
+            "timeWindowFilter": true
+        },
+        "paging": {
+            "limit": 200,
+            "nextCursor": null
+        }
     },
-    "hash": "sha256:example",
-    "features": {
-      "milestonesDefault": true,
-      "timeWindowFilter": true
+    "filters": {
+        "statuses": [
+            "work",
+            "pre_done"
+        ],
+        "designer": null,
+        "limit": 200,
+        "include_people": true,
+        "window": {
+            "enabled": false,
+            "start": null,
+            "end": null,
+            "mode": "intersects"
+        }
     },
-    "paging": {
-      "limit": 200,
-      "nextCursor": null
-    }
-  },
-  "filters": {
-    "statuses": ["work","pre_done"],
-    "designer": null,
-    "limit": 200,
-    "include_people": true,
-    "window": {
-      "enabled": false,
-      "start": null,
-      "end": null,
-      "mode": "intersects"
-    }
-  },
-  "summary": {
-    "tasksTotal": 1,
-    "tasksReturned": 1,
-    "peopleTotal": 1,
-    "groupsTotal": 1,
-    "milestonesTotal": 2
-  },
-  "entities": {
-    "people": [
-      { "id": "p1", "name": "Designer A", "position": null, "links": { "self": "/api/v2/frontend/people/p1" } }
-    ],
-    "groups": [
-      { "id": "g1", "name": "Project X", "links": { "self": "/api/v2/frontend/groups/g1" } }
-    ],
-    "tags": [],
-    "enums": {
-      "status": {
-        "work": "Work",
-        "pre_done": "Pre-done",
-        "done": "Done"
-      },
-      "statusGroups": {
-        "active": ["work","pre_done"],
-        "done": ["done"]
-      },
-      "milestoneType": {
-        "storyboard": "раскадровка",
-        "animatic": "аниматик"
-      },
-      "milestoneStatus": {
-        "planned": "Запланировано",
-        "done": "Готово",
-        "unknown": "Неизвестно"
-      }
-    }
-  },
-  "tasks": [
-    {
-      "id": "14",
-      "title": "Homepage hero concept",
-      "ownerId": "p1",
-      "groupId": "g1",
-      "status": "work",
-      "date": { "start": "2026-02-13", "end": "2026-04-07", "nextDue": "2026-03-06" },
-      "tags": [],
-      "hash": null,
-      "revision": null,
-      "links": { "sheetRowUrl": null, "self": "/api/v2/frontend/tasks/14" },
-      "milestones": [
-        { "type": "storyboard", "planned": "2026-03-03", "actual": null, "status": "planned" },
-        { "type": "animatic", "planned": "2026-03-11", "actual": null, "status": "planned" }
-      ]
-    }
-  ]
+    "summary": {
+        "tasksTotal": 11,
+        "tasksReturned": 11,
+        "peopleTotal": 24,
+        "groupsTotal": 5,
+        "milestonesTotal": 85
+    },
+    "entities": {
+        "people": [
+            {
+                "id": "1",
+                "name": "Баранов Артем",
+                "position": "дизайнер",
+                "links": {
+                    "self": "/api/v2/frontend/entities/people/1"
+                }
+            },
+            {
+                "id": "10",
+                "name": "Соловьев Юра",
+                "position": "дизайнер",
+                "links": {
+                    "self": "/api/v2/frontend/entities/people/10"
+                }
+            },
+            {
+                "id": "11",
+                "name": "Козлов Дима",
+                "position": "дизайнер",
+                "links": {
+                    "self": "/api/v2/frontend/entities/people/11"
+                }
+            },
+            {
+                "id": "12",
+                "name": "Попов Володя",
+                "position": "дизайнер",
+                "links": {
+                    "self": "/api/v2/frontend/entities/people/12"
+                }
+            },
+            {
+                "id": "13",
+                "name": "Айгуль Зиннурова",
+                "position": "менеджер проектов",
+                "links": {
+                    "self": "/api/v2/frontend/entities/people/13"
+                }
+            },
+            {
+                "id": "14",
+                "name": "Муратов Эдуард",
+                "position": "дизайнер",
+                "links": {
+                    "self": "/api/v2/frontend/entities/people/14"
+                }
+            },
+            {
+                "id": "15",
+                "name": "Алемасов Никита",
+                "position": "дизайнер",
+                "links": {
+                    "self": "/api/v2/frontend/entities/people/15"
+                }
+            },
+            {
+                "id": "16",
+                "name": "PROJECT MANAGEMENT",
+                "position": null,
+                "links": {
+                    "self": "/api/v2/frontend/entities/people/16"
+                }
+            },
+            {
+                "id": "17",
+                "name": "test",
+                "position": null,
+                "links": {
+                    "self": "/api/v2/frontend/entities/people/17"
+                }
+            },
+            {
+                "id": "18",
+                "name": "Шадрин Саша",
+                "position": "дизайнер",
+                "links": {
+                    "self": "/api/v2/frontend/entities/people/18"
+                }
+            },
+            {
+                "id": "19",
+                "name": "Левашова Лера",
+                "position": "дизайнер",
+                "links": {
+                    "self": "/api/v2/frontend/entities/people/19"
+                }
+            },
+            {
+                "id": "2",
+                "name": "Грибцов Родион",
+                "position": "дизайнер",
+                "links": {
+                    "self": "/api/v2/frontend/entities/people/2"
+                }
+            },
+            {
+                "id": "20",
+                "name": "Упадышев Денис",
+                "position": "дизайнер",
+                "links": {
+                    "self": "/api/v2/frontend/entities/people/20"
+                }
+            },
+            {
+                "id": "21",
+                "name": "Мартынов Рома",
+                "position": "дизайнер",
+                "links": {
+                    "self": "/api/v2/frontend/entities/people/21"
+                }
+            },
+            {
+                "id": "22",
+                "name": "Статкевич Андрей",
+                "position": "дизайнер",
+                "links": {
+                    "self": "/api/v2/frontend/entities/people/22"
+                }
+            },
+            {
+                "id": "23",
+                "name": "Чуфаров Влад",
+                "position": "дизайнер",
+                "links": {
+                    "self": "/api/v2/frontend/entities/people/23"
+                }
+            },
+            {
+                "id": "24",
+                "name": "Жигалов Сергей",
+                "position": "дизайнер",
+                "links": {
+                    "self": "/api/v2/frontend/entities/people/24"
+                }
+            },
+            {
+                "id": "3",
+                "name": "Салопин Алексей",
+                "position": "дизайнер",
+                "links": {
+                    "self": "/api/v2/frontend/entities/people/3"
+                }
+            },
+            {
+                "id": "4",
+                "name": "Соколов Саша",
+                "position": "дизайнер",
+                "links": {
+                    "self": "/api/v2/frontend/entities/people/4"
+                }
+            },
+            {
+                "id": "5",
+                "name": "Казарин Миша",
+                "position": "дизайнер",
+                "links": {
+                    "self": "/api/v2/frontend/entities/people/5"
+                }
+            },
+            {
+                "id": "6",
+                "name": "Вишневская Наташа",
+                "position": "дизайнер",
+                "links": {
+                    "self": "/api/v2/frontend/entities/people/6"
+                }
+            },
+            {
+                "id": "7",
+                "name": "Карнаухов Иван",
+                "position": "дизайнер",
+                "links": {
+                    "self": "/api/v2/frontend/entities/people/7"
+                }
+            },
+            {
+                "id": "8",
+                "name": "Рыбкин Сергей",
+                "position": "дизайнер",
+                "links": {
+                    "self": "/api/v2/frontend/entities/people/8"
+                }
+            },
+            {
+                "id": "9",
+                "name": "Кожина Вика",
+                "position": "дизайнер",
+                "links": {
+                    "self": "/api/v2/frontend/entities/people/9"
+                }
+            }
+        ],
+        "groups": [
+            {
+                "id": "2801d361097513f1",
+                "name": "Битва экстрасенсов",
+                "links": {
+                    "self": "/api/v2/frontend/entities/groups/2801d361097513f1"
+                }
+            },
+            {
+                "id": "5fdfb6491d246502",
+                "name": "Сокровища Императора",
+                "links": {
+                    "self": "/api/v2/frontend/entities/groups/5fdfb6491d246502"
+                }
+            },
+            {
+                "id": "8d89bd4c3f184d16",
+                "name": "Битва Экстрасенсов",
+                "links": {
+                    "self": "/api/v2/frontend/entities/groups/8d89bd4c3f184d16"
+                }
+            },
+            {
+                "id": "928e6ac63bebd6c8",
+                "name": "Женский стендап",
+                "links": {
+                    "self": "/api/v2/frontend/entities/groups/928e6ac63bebd6c8"
+                }
+            },
+            {
+                "id": "e3b7a53f18d3c9a7",
+                "name": "Выжить в Стамбуле",
+                "links": {
+                    "self": "/api/v2/frontend/entities/groups/e3b7a53f18d3c9a7"
+                }
+            }
+        ],
+        "tags": [],
+        "enums": {
+            "status": {
+                "work": "In work",
+                "pre_done": "Pre done",
+                "wait": "Waiting",
+                "done": "Done"
+            },
+            "statusGroups": {
+                "active": [
+                    "work",
+                    "pre_done"
+                ],
+                "final": [
+                    "done"
+                ]
+            },
+            "milestoneType": {
+                "animatic": "animatic",
+                "draft": "draft",
+                "feedback": "feedback",
+                "final": "final",
+                "onair": "onair",
+                "prefinal": "prefinal",
+                "stage_02bb3ce4": "все ключевые стилшоты",
+                "stage_327d7918": "все ключевые стилы",
+                "stage_42dbf1df": "полная анимация ролика",
+                "stage_48751d60": "внесение правок в стилшот",
+                "stage_49aba8b8": "сдача",
+                "stage_82508100": "внесение правок в сценарий",
+                "stage_a88bd3c4": "общий стил ключевой сцены",
+                "stage_ae603fd8": "полная анимация ролика с вариантами музыки",
+                "stage_b656c3cc": "визуальный сценарий (сториборд в скетче)",
+                "stage_ffda0077": "стилшот одного кадра, с учетом нового сториборда",
+                "storyboard": "storyboard"
+            },
+            "milestoneStatus": {
+                "planned": "Planned",
+                "done": "Done",
+                "unknown": "Unknown",
+                "skipped": "Skipped"
+            }
+        }
+    },
+    "tasks": [
+        {
+            "id": "6",
+            "title": "Гигачат [ЖC] граф.ролик",
+            "ownerId": "36596789c8cc73cb",
+            "groupId": "928e6ac63bebd6c8",
+            "status": "work",
+            "date": {
+                "start": "2026-03-03",
+                "end": "2026-03-21",
+                "nextDue": "2026-03-04"
+            },
+            "tags": [],
+            "hash": null,
+            "revision": null,
+            "links": {
+                "sheetRowUrl": null,
+                "self": "/api/v2/frontend/tasks/6"
+            },
+            "milestones": [
+                {
+                    "type": "storyboard",
+                    "planned": "2026-03-03",
+                    "actual": null,
+                    "status": "planned"
+                },
+                {
+                    "type": "feedback",
+                    "planned": "2026-03-04",
+                    "actual": null,
+                    "status": "planned"
+                },
+                {
+                    "type": "animatic",
+                    "planned": "2026-03-11",
+                    "actual": null,
+                    "status": "planned"
+                },
+                {
+                    "type": "feedback",
+                    "planned": "2026-03-12",
+                    "actual": null,
+                    "status": "planned"
+                },
+                {
+                    "type": "final",
+                    "planned": "2026-03-16",
+                    "actual": null,
+                    "status": "planned"
+                },
+                {
+                    "type": "feedback",
+                    "planned": "2026-03-17",
+                    "actual": null,
+                    "status": "planned"
+                },
+                {
+                    "type": "final",
+                    "planned": "2026-03-18",
+                    "actual": null,
+                    "status": "planned"
+                },
+                {
+                    "type": "onair",
+                    "planned": "2026-03-21",
+                    "actual": null,
+                    "status": "planned"
+                }
+            ]
+        },
+        {
+            "id": "3",
+            "title": "Момат рино  [СТАМБУЛ] граф.ролик",
+            "ownerId": "588e62c641ec2012",
+            "groupId": "e3b7a53f18d3c9a7",
+            "status": "work",
+            "date": {
+                "start": "2026-03-04",
+                "end": "2026-03-17",
+                "nextDue": "2026-03-04"
+            },
+            "tags": [],
+            "hash": null,
+            "revision": null,
+            "links": {
+                "sheetRowUrl": null,
+                "self": "/api/v2/frontend/tasks/3"
+            },
+            "milestones": [
+                {
+                    "type": "storyboard",
+                    "planned": "2026-03-04",
+                    "actual": null,
+                    "status": "planned"
+                },
+                {
+                    "type": "feedback",
+                    "planned": "2026-03-05",
+                    "actual": null,
+                    "status": "planned"
+                },
+                {
+                    "type": "animatic",
+                    "planned": "2026-03-11",
+                    "actual": null,
+                    "status": "planned"
+                },
+                {
+                    "type": "feedback",
+                    "planned": "2026-03-12",
+                    "actual": null,
+                    "status": "planned"
+                },
+                {
+                    "type": "prefinal",
+                    "planned": "2026-03-13",
+                    "actual": null,
+                    "status": "planned"
+                },
+                {
+                    "type": "feedback",
+                    "planned": "2026-03-16",
+                    "actual": null,
+                    "status": "planned"
+                },
+                {
+                    "type": "final",
+                    "planned": "2026-03-17",
+                    "actual": null,
+                    "status": "planned"
+                }
+            ]
+        },
+        {
+            "id": "7",
+            "title": "Момат рино  [СТАМБУЛ] дин лого",
+            "ownerId": "d514a94759ce3a18",
+            "groupId": "e3b7a53f18d3c9a7",
+            "status": "work",
+            "date": {
+                "start": "2026-02-25",
+                "end": "2026-03-10",
+                "nextDue": "2026-03-04"
+            },
+            "tags": [],
+            "hash": null,
+            "revision": null,
+            "links": {
+                "sheetRowUrl": null,
+                "self": "/api/v2/frontend/tasks/7"
+            },
+            "milestones": [
+                {
+                    "type": "storyboard",
+                    "planned": "2026-02-25",
+                    "actual": null,
+                    "status": "planned"
+                },
+                {
+                    "type": "feedback",
+                    "planned": "2026-02-26",
+                    "actual": null,
+                    "status": "planned"
+                },
+                {
+                    "type": "animatic",
+                    "planned": "2026-03-04",
+                    "actual": null,
+                    "status": "planned"
+                },
+                {
+                    "type": "feedback",
+                    "planned": "2026-03-05",
+                    "actual": null,
+                    "status": "planned"
+                },
+                {
+                    "type": "final",
+                    "planned": "2026-03-10",
+                    "actual": null,
+                    "status": "planned"
+                }
+            ]
+        },
+        {
+            "id": "5",
+            "title": "Озон банк  [Б_ЭКСТР] дин лого",
+            "ownerId": "70d169be891bb94f",
+            "groupId": "2801d361097513f1",
+            "status": "work",
+            "date": {
+                "start": "2026-02-27",
+                "end": "2026-03-05",
+                "nextDue": "2026-03-04"
+            },
+            "tags": [],
+            "hash": null,
+            "revision": null,
+            "links": {
+                "sheetRowUrl": null,
+                "self": "/api/v2/frontend/tasks/5"
+            },
+            "milestones": [
+                {
+                    "type": "storyboard",
+                    "planned": "2026-02-27",
+                    "actual": null,
+                    "status": "planned"
+                },
+                {
+                    "type": "feedback",
+                    "planned": "2026-03-02",
+                    "actual": null,
+                    "status": "planned"
+                },
+                {
+                    "type": "animatic",
+                    "planned": "2026-03-03",
+                    "actual": null,
+                    "status": "planned"
+                },
+                {
+                    "type": "feedback",
+                    "planned": "2026-03-04",
+                    "actual": null,
+                    "status": "planned"
+                },
+                {
+                    "type": "final",
+                    "planned": "2026-03-05",
+                    "actual": null,
+                    "status": "planned"
+                }
+            ]
+        },
+        {
+            "id": "4",
+            "title": "Гигачат [ЖC] устник",
+            "ownerId": "70d169be891bb94f",
+            "groupId": "928e6ac63bebd6c8",
+            "status": "work",
+            "date": {
+                "start": "2026-03-05",
+                "end": "2026-03-05",
+                "nextDue": "2026-03-05"
+            },
+            "tags": [],
+            "hash": null,
+            "revision": null,
+            "links": {
+                "sheetRowUrl": null,
+                "self": "/api/v2/frontend/tasks/4"
+            },
+            "milestones": [
+                {
+                    "type": "stage_49aba8b8",
+                    "planned": "2026-03-05",
+                    "actual": null,
+                    "status": "planned"
+                }
+            ]
+        },
+        {
+            "id": "8",
+            "title": "Озон [Битва Экстрасенсов] граф. ролик",
+            "ownerId": "29c52d5de94e8ca2",
+            "groupId": "8d89bd4c3f184d16",
+            "status": "work",
+            "date": {
+                "start": "2026-02-25",
+                "end": "2026-04-04",
+                "nextDue": "2026-03-05"
+            },
+            "tags": [],
+            "hash": null,
+            "revision": null,
+            "links": {
+                "sheetRowUrl": null,
+                "self": "/api/v2/frontend/tasks/8"
+            },
+            "milestones": [
+                {
+                    "type": "storyboard",
+                    "planned": "2026-02-25",
+                    "actual": null,
+                    "status": "planned"
+                },
+                {
+                    "type": "animatic",
+                    "planned": "2026-02-27",
+                    "actual": null,
+                    "status": "planned"
+                },
+                {
+                    "type": "feedback",
+                    "planned": "2026-03-02",
+                    "actual": null,
+                    "status": "planned"
+                },
+                {
+                    "type": "prefinal",
+                    "planned": "2026-03-03",
+                    "actual": null,
+                    "status": "planned"
+                },
+                {
+                    "type": "final",
+                    "planned": "2026-03-05",
+                    "actual": null,
+                    "status": "planned"
+                },
+                {
+                    "type": "onair",
+                    "planned": "2026-03-07",
+                    "actual": null,
+                    "status": "planned"
+                },
+                {
+                    "type": "feedback",
+                    "planned": "2026-04-04",
+                    "actual": null,
+                    "status": "planned"
+                }
+            ]
+        },
+        {
+            "id": "12",
+            "title": "Cool Cola [СОКР ИМП] граф. ролик",
+            "ownerId": "2dee1770d57bb881",
+            "groupId": "5fdfb6491d246502",
+            "status": "work",
+            "date": {
+                "start": "2026-02-13",
+                "end": "2026-04-07",
+                "nextDue": "2026-03-06"
+            },
+            "tags": [],
+            "hash": null,
+            "revision": null,
+            "links": {
+                "sheetRowUrl": null,
+                "self": "/api/v2/frontend/tasks/12"
+            },
+            "milestones": [
+                {
+                    "type": "stage_b656c3cc",
+                    "planned": "2026-02-13",
+                    "actual": null,
+                    "status": "planned"
+                },
+                {
+                    "type": "feedback",
+                    "planned": "2026-02-18",
+                    "actual": null,
+                    "status": "planned"
+                },
+                {
+                    "type": "stage_82508100",
+                    "planned": "2026-02-20",
+                    "actual": null,
+                    "status": "planned"
+                },
+                {
+                    "type": "feedback",
+                    "planned": "2026-02-25",
+                    "actual": null,
+                    "status": "planned"
+                },
+                {
+                    "type": "stage_a88bd3c4",
+                    "planned": "2026-03-06",
+                    "actual": null,
+                    "status": "planned"
+                },
+                {
+                    "type": "feedback",
+                    "planned": "2026-03-11",
+                    "actual": null,
+                    "status": "planned"
+                },
+                {
+                    "type": "draft",
+                    "planned": "2026-03-13",
+                    "actual": null,
+                    "status": "planned"
+                },
+                {
+                    "type": "feedback",
+                    "planned": "2026-03-18",
+                    "actual": null,
+                    "status": "planned"
+                },
+                {
+                    "type": "stage_327d7918",
+                    "planned": "2026-03-23",
+                    "actual": null,
+                    "status": "planned"
+                },
+                {
+                    "type": "feedback",
+                    "planned": "2026-03-25",
+                    "actual": null,
+                    "status": "planned"
+                },
+                {
+                    "type": "stage_ae603fd8",
+                    "planned": "2026-03-30",
+                    "actual": null,
+                    "status": "planned"
+                },
+                {
+                    "type": "feedback",
+                    "planned": "2026-04-02",
+                    "actual": null,
+                    "status": "planned"
+                },
+                {
+                    "type": "final",
+                    "planned": "2026-04-06",
+                    "actual": null,
+                    "status": "planned"
+                },
+                {
+                    "type": "onair",
+                    "planned": "2026-04-07",
+                    "actual": null,
+                    "status": "planned"
+                }
+            ]
+        },
+        {
+            "id": "13",
+            "title": "Альфа банк  [СОКР ИМП] 3D",
+            "ownerId": "2dee1770d57bb881",
+            "groupId": "5fdfb6491d246502",
+            "status": "work",
+            "date": {
+                "start": "2026-02-25",
+                "end": "2026-04-12",
+                "nextDue": "2026-03-06"
+            },
+            "tags": [],
+            "hash": null,
+            "revision": null,
+            "links": {
+                "sheetRowUrl": null,
+                "self": "/api/v2/frontend/tasks/13"
+            },
+            "milestones": [
+                {
+                    "type": "stage_ffda0077",
+                    "planned": "2026-02-25",
+                    "actual": null,
+                    "status": "planned"
+                },
+                {
+                    "type": "feedback",
+                    "planned": "2026-03-02",
+                    "actual": null,
+                    "status": "planned"
+                },
+                {
+                    "type": "stage_48751d60",
+                    "planned": "2026-03-06",
+                    "actual": null,
+                    "status": "planned"
+                },
+                {
+                    "type": "feedback",
+                    "planned": "2026-03-11",
+                    "actual": null,
+                    "status": "planned"
+                },
+                {
+                    "type": "draft",
+                    "planned": "2026-03-13",
+                    "actual": null,
+                    "status": "planned"
+                },
+                {
+                    "type": "feedback",
+                    "planned": "2026-03-17",
+                    "actual": null,
+                    "status": "planned"
+                },
+                {
+                    "type": "stage_02bb3ce4",
+                    "planned": "2026-03-20",
+                    "actual": null,
+                    "status": "planned"
+                },
+                {
+                    "type": "feedback",
+                    "planned": "2026-03-24",
+                    "actual": null,
+                    "status": "planned"
+                },
+                {
+                    "type": "stage_42dbf1df",
+                    "planned": "2026-03-26",
+                    "actual": null,
+                    "status": "planned"
+                },
+                {
+                    "type": "feedback",
+                    "planned": "2026-03-30",
+                    "actual": null,
+                    "status": "planned"
+                },
+                {
+                    "type": "final",
+                    "planned": "2026-04-01",
+                    "actual": null,
+                    "status": "planned"
+                },
+                {
+                    "type": "final",
+                    "planned": "2026-04-03",
+                    "actual": null,
+                    "status": "planned"
+                },
+                {
+                    "type": "onair",
+                    "planned": "2026-04-12",
+                    "actual": null,
+                    "status": "planned"
+                }
+            ]
+        },
+        {
+            "id": "9",
+            "title": "Bombbar  [СОКР ИМП] дин лого",
+            "ownerId": "1a2c143445dfe7d0",
+            "groupId": "5fdfb6491d246502",
+            "status": "work",
+            "date": {
+                "start": "2026-02-20",
+                "end": "2026-04-12",
+                "nextDue": "2026-03-10"
+            },
+            "tags": [],
+            "hash": null,
+            "revision": null,
+            "links": {
+                "sheetRowUrl": null,
+                "self": "/api/v2/frontend/tasks/9"
+            },
+            "milestones": [
+                {
+                    "type": "storyboard",
+                    "planned": "2026-02-20",
+                    "actual": null,
+                    "status": "planned"
+                },
+                {
+                    "type": "feedback",
+                    "planned": "2026-02-27",
+                    "actual": null,
+                    "status": "planned"
+                },
+                {
+                    "type": "animatic",
+                    "planned": "2026-03-10",
+                    "actual": null,
+                    "status": "planned"
+                },
+                {
+                    "type": "feedback",
+                    "planned": "2026-03-16",
+                    "actual": null,
+                    "status": "planned"
+                },
+                {
+                    "type": "final",
+                    "planned": "2026-03-19",
+                    "actual": null,
+                    "status": "planned"
+                },
+                {
+                    "type": "feedback",
+                    "planned": "2026-03-23",
+                    "actual": null,
+                    "status": "planned"
+                },
+                {
+                    "type": "final",
+                    "planned": "2026-03-26",
+                    "actual": null,
+                    "status": "planned"
+                },
+                {
+                    "type": "stage_49aba8b8",
+                    "planned": "2026-03-27",
+                    "actual": null,
+                    "status": "planned"
+                },
+                {
+                    "type": "onair",
+                    "planned": "2026-04-12",
+                    "actual": null,
+                    "status": "planned"
+                }
+            ]
+        },
+        {
+            "id": "10",
+            "title": "М8 [СОКР ИМП] граф. ролик",
+            "ownerId": "5776c917534e48ff",
+            "groupId": "5fdfb6491d246502",
+            "status": "work",
+            "date": {
+                "start": "2026-02-20",
+                "end": "2026-04-12",
+                "nextDue": "2026-03-11"
+            },
+            "tags": [],
+            "hash": null,
+            "revision": null,
+            "links": {
+                "sheetRowUrl": null,
+                "self": "/api/v2/frontend/tasks/10"
+            },
+            "milestones": [
+                {
+                    "type": "storyboard",
+                    "planned": "2026-02-20",
+                    "actual": null,
+                    "status": "planned"
+                },
+                {
+                    "type": "feedback",
+                    "planned": "2026-02-25",
+                    "actual": null,
+                    "status": "planned"
+                },
+                {
+                    "type": "animatic",
+                    "planned": "2026-03-11",
+                    "actual": null,
+                    "status": "planned"
+                },
+                {
+                    "type": "feedback",
+                    "planned": "2026-03-16",
+                    "actual": null,
+                    "status": "planned"
+                },
+                {
+                    "type": "final",
+                    "planned": "2026-03-23",
+                    "actual": null,
+                    "status": "planned"
+                },
+                {
+                    "type": "feedback",
+                    "planned": "2026-03-26",
+                    "actual": null,
+                    "status": "planned"
+                },
+                {
+                    "type": "final",
+                    "planned": "2026-03-30",
+                    "actual": null,
+                    "status": "planned"
+                },
+                {
+                    "type": "onair",
+                    "planned": "2026-04-12",
+                    "actual": null,
+                    "status": "planned"
+                }
+            ]
+        },
+        {
+            "id": "11",
+            "title": "Пломбир  [СОКР ИМП] граф. ролик",
+            "ownerId": "b3de4ebc5ad5c3f4",
+            "groupId": "5fdfb6491d246502",
+            "status": "work",
+            "date": {
+                "start": "2026-02-20",
+                "end": "2026-04-12",
+                "nextDue": "2026-03-13"
+            },
+            "tags": [],
+            "hash": null,
+            "revision": null,
+            "links": {
+                "sheetRowUrl": null,
+                "self": "/api/v2/frontend/tasks/11"
+            },
+            "milestones": [
+                {
+                    "type": "storyboard",
+                    "planned": "2026-02-20",
+                    "actual": null,
+                    "status": "planned"
+                },
+                {
+                    "type": "feedback",
+                    "planned": "2026-02-25",
+                    "actual": null,
+                    "status": "planned"
+                },
+                {
+                    "type": "animatic",
+                    "planned": "2026-03-13",
+                    "actual": null,
+                    "status": "planned"
+                },
+                {
+                    "type": "feedback",
+                    "planned": "2026-03-17",
+                    "actual": null,
+                    "status": "planned"
+                },
+                {
+                    "type": "final",
+                    "planned": "2026-03-25",
+                    "actual": null,
+                    "status": "planned"
+                },
+                {
+                    "type": "feedback",
+                    "planned": "2026-03-27",
+                    "actual": null,
+                    "status": "planned"
+                },
+                {
+                    "type": "stage_49aba8b8",
+                    "planned": "2026-04-03",
+                    "actual": null,
+                    "status": "planned"
+                },
+                {
+                    "type": "onair",
+                    "planned": "2026-04-12",
+                    "actual": null,
+                    "status": "planned"
+                }
+            ]
+        }
+    ]
 }

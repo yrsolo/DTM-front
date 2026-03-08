@@ -1,0 +1,2322 @@
+{
+    "entities": {
+        "enums": {
+            "milestoneStatus": {
+                "done": "Done",
+                "planned": "Planned",
+                "skipped": "Skipped",
+                "unknown": "Unknown"
+            },
+            "milestoneType": {
+                "animatic": "animatic",
+                "draft": "draft",
+                "feedback": "feedback",
+                "final": "final",
+                "onair": "onair",
+                "prefinal": "prefinal",
+                "stage_01025ffe": "сдача в гпм",
+                "stage_02042116": "сдача к 3 программе",
+                "stage_02bb3ce4": "все ключевые стилшоты",
+                "stage_0447bae9": "эскиз",
+                "stage_044c57be": "сдача диджитал",
+                "stage_0598a6cf": "отправляем предфина",
+                "stage_05fc5dd8": "сдача 15 сек с промокодом",
+                "stage_0623a66e": "съёмка/выбор дубля",
+                "stage_0639df39": "презентация стиллов по мячу",
+                "stage_063c034e": "съемка дублей",
+                "stage_0a89e0b6": "старт выхода анонсов",
+                "stage_0aca938d": "– генерации улицы, котов, крупного плана",
+                "stage_0b6815ab": "баннеры",
+                "stage_0c019805": "в работе, предварительно первый имидж до 6 ноября, след 11-14 ноября",
+                "stage_0c3ba7b2": "подбор и согласование музыки",
+                "stage_0cb6796f": "правки клиента по стиллам мяча",
+                "stage_0d172de6": "сдача ролика в гпм",
+                "stage_0d96e4f0": "сдача 2-х",
+                "stage_0ed21dd8": "апдейт дин лого",
+                "stage_0ee0dcec": "внутренний колл с продакшном",
+                "stage_0fc52693": ". - съёмка",
+                "stage_115941b7": "внесение правок",
+                "stage_11d2dd82": "програминг 09.10-20.10",
+                "stage_13c1f77e": "утверждение",
+                "stage_1551aa4c": "конец сентября - съемки",
+                "stage_16587efa": "сдача всех баннеров (в идеале)",
+                "stage_16b147c6": "выбор монтажей и согласование граф оформления (анимация)",
+                "stage_17153840": "сдача фотопоста 1",
+                "stage_175b0ecb": "презентация предмастера",
+                "stage_1833233f": "сдача к 4 программе",
+                "stage_196fac11": "анимация + статичные кадры",
+                "stage_19d1f1df": "цветокор",
+                "stage_1bb67809": "дизайн",
+                "stage_1dc65686": "анимация всего ролика",
+                "stage_1efcfa36": "показ концепт-дизайна",
+                "stage_1fa2a6c0": "съемка",
+                "stage_1fb134eb": "день/вечер - сдача в продакшн.",
+                "stage_1feddea8": "эскизы,",
+                "stage_202c45fe": "сдача гпм",
+                "stage_20611e71": "сдача усник 5 (шкуро)",
+                "stage_22a88455": "до 14:00 - сдача в гпм",
+                "stage_25c025ee": "– предоставление мудбордов грим/костюм. предоставление локации",
+                "stage_26580bcb": "– отдаем статику десктопных баннеров на размещение",
+                "stage_268721b5": "– сдача",
+                "stage_26bee1ed": "взяли в работу, сдать",
+                "stage_28e8d8d2": "сценарий",
+                "stage_29569622": "сдача четверг",
+                "stage_29d28d33": "апдейт",
+                "stage_2a9225d2": "анимация от тнт",
+                "stage_2bc77ca2": "сдача двух баннеров",
+                "stage_2cd495a6": "до сюда посчитал",
+                "stage_2cfea967": "– согласование с продакшном",
+                "stage_2faa8ed7": "монтажи 20 сек без графики",
+                "stage_2fca6def": "сдать ролик в гпм",
+                "stage_3070f021": "– комментарии единым пулом",
+                "stage_31ae0448": "сдача 15 сек",
+                "stage_31c4eaf8": "– согласование ролика и сдача ролика на канал",
+                "stage_327a1288": "согласование клиента",
+                "stage_327d7918": "все ключевые стилы",
+                "stage_3297341f": "согласование сценария",
+                "stage_32e0c10b": "утверждение цк (до 19.00)",
+                "stage_33a640bb": "– съёмка",
+                "stage_348d9817": "правки",
+                "stage_351bdcb5": "анимация выбранного варианта",
+                "stage_35273811": "дизайн баннеров",
+                "stage_357fd56b": "преносится на ноябрь",
+                "stage_363842c0": "утверждение сцен",
+                "stage_36aa877f": "макеты",
+                "stage_37048629": "отдаем в продакшн",
+                "stage_387fc29f": "согласование брендинга",
+                "stage_3962d365": "июня - сдача ролика в гпм",
+                "stage_396b7484": "отдаем final в продакш.",
+                "stage_39bd4c2c": "– сдача в продакшн в монтаж программы",
+                "stage_3a0eeb5f": "цк (до 14.00, удаленно)",
+                "stage_3a308bcc": ". - анимация",
+                "stage_3b4d2040": "сдача всех баннеров",
+                "stage_3b926a29": "сдача скринкастов 4 шт",
+                "stage_3c2cc795": "выбор музыки",
+                "stage_3cde825a": "скринкаст строки (тревел и лайв берем из анонсов с абармовым)",
+                "stage_3d6691ab": "коммент клиента",
+                "stage_3e06f72d": "утверждение креатива",
+                "stage_3edf9c3b": "– согласование с продакшеном",
+                "stage_3f90f574": "сдача до 12:00",
+                "stage_4004d3b1": "стилы",
+                "stage_41814015": "утверждение монтажа",
+                "stage_41865046": "сдача а гпм",
+                "stage_425feda1": "показ апдейта по концепт-дизайну",
+                "stage_4296253f": "старт",
+                "stage_42dbf1df": "полная анимация ролика",
+                "stage_4315646f": "покрасить хилькевич",
+                "stage_43d1efba": "получение материала от продакшна",
+                "stage_4474b481": "съёмки",
+                "stage_44bf0c17": "– подбор музыки",
+                "stage_44e8b7f7": "– комментарии клиента",
+                "stage_4503987f": "– сдача в продакшн",
+                "stage_4550e4c0": "сдача усник 3 (бебур)",
+                "stage_465f78ba": "передача утвержденного лендинга разработчикам",
+                "stage_48751d60": "внесение правок в стилшот",
+                "stage_48cc0304": "получение дублей",
+                "stage_49aba8b8": "сдача",
+                "stage_4b4ff018": "эскизы",
+                "stage_4c11735e": "асап сдача в четверг",
+                "stage_4c67159e": "– согласование видеоряда, выбор музыки",
+                "stage_4c79e958": "съемка_",
+                "stage_4d4f5abc": "внесение правок/анимация",
+                "stage_4d60bc54": "мастеринг и сдача",
+                "stage_4dc6443f": "съемка устника спецагент",
+                "stage_4dcd4340": "сдача 10 сек",
+                "stage_4e453b3f": "утверждение рендера",
+                "stage_4e6f7b39": "сектчи",
+                "stage_4ea1c1a9": "сведение звука",
+                "stage_4f1082a8": "– отдаем ресайзы мобильных баннеров на размещение",
+                "stage_50e0e15d": "показать апдейт",
+                "stage_5301e38d": "переносится на ноябрь",
+                "stage_535bec52": "сдача в продакшн на монтаж 20 февраля.",
+                "stage_5364ff93": "покажем оверлап со звуком",
+                "stage_53debd71": "– ppm",
+                "stage_54850072": "овтет",
+                "stage_54893ba5": "сдача первого креатива",
+                "stage_56708afc": "отправили насте и алине",
+                "stage_586233ae": "– согласование",
+                "stage_59292545": "предоставление монтажа",
+                "stage_5969016b": "сдать 51 дубль",
+                "stage_59808466": "сдача юристам",
+                "stage_5abb17ff": "сдача в гпм заставки 10 сек",
+                "stage_5b64772c": "показ стоков",
+                "stage_5bd6ccf6": "музыка",
+                "stage_5c516b51": "согласование",
+                "stage_5d258f1d": "ppm (12.00-13.00)",
+                "stage_5d99411e": "сведение музыки",
+                "stage_5e239f57": "– превью одной из сцен (общее понимание)",
+                "stage_5e2c38d7": "– цветокоррекция",
+                "stage_5f223616": "сдача в продакшн",
+                "stage_5fba8c2e": "сдача в прод",
+                "stage_60494ec1": "ждем от клиента вводные",
+                "stage_6163ac18": "анимация брендинга.",
+                "stage_636e5b1c": "ppm в 10.00",
+                "stage_639f642e": "сдача устник 1 (воля)",
+                "stage_653aa46d": "(все креативы роликов +дин.лого)",
+                "stage_67a34b98": "еженедельная задача",
+                "stage_6831b25c": "2025 сдача",
+                "stage_695b14cb": "макет",
+                "stage_69abac6c": "тракт_",
+                "stage_69d99a7c": "алиса на черном фоне",
+                "stage_6a709510": "отрисовка и согласование макетов 25.09-06.10",
+                "stage_6b2fc466": "сдача новых баннеров",
+                "stage_6c249185": "показ стиллов",
+                "stage_6c691368": "доп версия телефона",
+                "stage_6cec0e0c": "– дизайн-макеты для десктопных баннеров",
+                "stage_6d078e98": "с сырболлом клиент хотел бы стартовать уже с 25 мая.",
+                "stage_6de300c2": "– выбор дублей",
+                "stage_6e199d08": "вносим правки/отдаем обложки на площадки",
+                "stage_6f45036a": "сдача до 15.00",
+                "stage_7101d006": "сдача в гпм 16 февраля.",
+                "stage_72778c1b": "(все креативы роликов + дин.лого)",
+                "stage_7316431a": "анимация / сдача в продакшн",
+                "stage_74e46a43": "раскадр",
+                "stage_77d048b2": "анмиматик",
+                "stage_786ae624": "сдача второй креатив",
+                "stage_78916aca": "показ анимации (условная анимация)",
+                "stage_7b5564b5": "с сытопузом - 20 июля.",
+                "stage_7b994604": "материалы",
+                "stage_7be02e90": "утверждение композа",
+                "stage_7bf27f2e": "съемки",
+                "stage_7df74b37": "показ мудборда",
+                "stage_7f26fd22": "апдейт эскизов",
+                "stage_81dd82e7": "готовая презентация, возможно примерка",
+                "stage_8247c3d1": "– анимация",
+                "stage_82508100": "внесение правок в сценарий",
+                "stage_82763ebc": "сдача абрамова",
+                "stage_82cc115f": "комментарии от клиента",
+                "stage_83241ee4": "подтверждение клиентом мастера (точка невозврата)",
+                "stage_83bb0969": "превью с графикой на согласование клиенту",
+                "stage_83fe64e8": "сдача усник 4 (шкуро)",
+                "stage_8605ceb8": ". - макет",
+                "stage_86305be8": "старт кампании",
+                "stage_86994f4b": "сдача до 18.00",
+                "stage_86f7e437": "a",
+                "stage_87e43229": "до 14:00 передача брендинга в продакшн",
+                "stage_87f4a918": "вводный зум с группой",
+                "stage_88635f6e": "– сдача ролика в гпм",
+                "stage_89cf1272": "сдача ролика в гпм на постановку в монтажные листы",
+                "stage_8aac8405": "– согласование и сдача в продакшн",
+                "stage_8ab96a03": "сдача ролика в гпм на проверку",
+                "stage_8b6b0083": "сентября",
+                "stage_8c61ce93": "показ монтажей",
+                "stage_8df3d5d5": "сдача фотопоста 4",
+                "stage_91375c13": "показать апдейт с сердцем",
+                "stage_91c2b318": ".24 - сдача",
+                "stage_928670d8": "правки клиента по предмастеру (точка невозврата)",
+                "stage_956ee3e5": "– превью площадки",
+                "stage_97f923bf": "показ рендера",
+                "stage_99f6e0c9": "правки клиента по стиллам",
+                "stage_9a5ffd9c": "2й пост",
+                "stage_9b0282d4": "крайний срок сдачи по тз",
+                "stage_9b3fb189": "все стилшоты",
+                "stage_9cb56d38": "плюс",
+                "stage_9cdf9fc0": "показ сцен",
+                "stage_9d6a9ce7": "показ склейки (чем раньше, тем лучше)",
+                "stage_9db31d7a": "отправили сценарий клиенту",
+                "stage_9eee3d19": "стилшот",
+                "stage_9fb69287": "тракт",
+                "stage_a010b179": "утверждение коцепт-дизайна",
+                "stage_a09b4652": "ждем обратную связь от клиента по материалам (все эти элементы, которые мы планируем анимировать. если эти элементы есть в 3d, например корабль, пальмы, монетки потому что нам они тоже нужны в 3d) и сценариям",
+                "stage_a0d867a3": "пост, цветокорр, графика, фин согласования",
+                "stage_a0ffa69c": "сдача до 16.00",
+                "stage_a1fe3b4c": "сдача с графикой проекта",
+                "stage_a25694ac": "выбор варианта музыки / согласование",
+                "stage_a2631084": "сцену подснимут 10.02",
+                "stage_a29d8e96": "согласование и сдача в продакшн",
+                "stage_a3e9dbfc": "получение утверждённого сценария",
+                "stage_a454fb08": "сроки участия: 15 октября - 18 ноября 2023",
+                "stage_a501a790": "выбор клиентом нужного дубля",
+                "stage_a524b9f0": "утверждение видеоряда, выбор музыки",
+                "stage_a5371ee2": "дизайн-макет",
+                "stage_a551236f": "передача готово материала в продакшн",
+                "stage_a5a71dfd": "тест 23.10-27.10",
+                "stage_a6738a62": "съемки проекта",
+                "stage_a68d474b": "до 12:00",
+                "stage_a811e5b7": "сдача фотопоста 3",
+                "stage_a88bd3c4": "общий стил ключевой сцены",
+                "stage_a8dbad40": "показ стилшотов",
+                "stage_a937f8c1": "показ фонов",
+                "stage_a98fe425": "алиса",
+                "stage_a9992af6": "сдача до 17.00",
+                "stage_abeb4439": "26.07 - съемка",
+                "stage_ac4a07fb": "– примерка и утверждение костюма",
+                "stage_ac6be4c7": "вносим правки/отдаем баннеры на площадки",
+                "stage_ae077608": "комментарии клиента",
+                "stage_ae603fd8": "полная анимация ролика с вариантами музыки",
+                "stage_afb31ff3": "сдача до 14.00",
+                "stage_b10552a2": "сдача первого устника",
+                "stage_b1e5b627": "презентация мастера с вариантами музыки",
+                "stage_b22a7312": "сдача в продакшн на тест.",
+                "stage_b246266f": "дизайн-макеты",
+                "stage_b31cc218": "мая - съемка.",
+                "stage_b3542a98": "– превью сцены",
+                "stage_b4d37305": "сдача второго устника",
+                "stage_b5f5f2fa": "– утверждение мудбордов грим/костюм",
+                "stage_b656c3cc": "визуальный сценарий (сториборд в скетче)",
+                "stage_b696c50f": "утверждение стилистики",
+                "stage_b7bb5bbe": "сдача фотопоста 2",
+                "stage_b83ad2f1": "повторяющаяся задача на протяжении трех выпусков",
+                "stage_b88c10e0": "отправляем варианты дин.лого заказчику",
+                "stage_b88e9d64": "встреча с клиентом",
+                "stage_bbca37d6": "показ композа",
+                "stage_bc07c0d6": "подбор музыки",
+                "stage_bc587d41": ". - дизайн-макет",
+                "stage_bcb2e779": "предварительные эскизы",
+                "stage_bd2e9f22": "– обновление генераций (при необходимости)",
+                "stage_bdfa81ae": "показ апдейта по стилшотам",
+                "stage_beb72cef": "материалы для скринкаста от мтс",
+                "stage_bfc89d2c": "мая - старт ролика 15 сек в диджитал",
+                "stage_bfca69f0": "сдача второго креатива",
+                "stage_bfee5050": "гпм",
+                "stage_c05696c9": "августа - подготовка к съемкам",
+                "stage_c08bcfbf": "– превью первой сцены",
+                "stage_c15847e8": "цк",
+                "stage_c1bab4ed": "обновить логотип р",
+                "stage_c2033fbf": "сдача ко 2 программе",
+                "stage_c22d7325": "комментарии клиента единым пулом",
+                "stage_c250d322": "пей",
+                "stage_c3425c8c": "статичный эскиз",
+                "stage_c3a957d4": "сдача для gi",
+                "stage_c49fa258": "сдача усник 7 (бутусов)",
+                "stage_c57a68ed": "получение съёмочного видео",
+                "stage_c7c15325": "сдача до 13.00",
+                "stage_ca7bce5d": "сдача тнт-online",
+                "stage_cab00526": "апдейт стилшота",
+                "stage_cb398fa9": "превью пришлют",
+                "stage_cbe397fe": "апдейт по комментариям",
+                "stage_cd8c40d3": "подтверждение клиентом мастера до 12.00 (точка невозврата)",
+                "stage_cddf4c80": "сдача усник 6 (бутусов)",
+                "stage_cec254ab": "старт лэндинга с",
+                "stage_cee22038": "– превью анимации баннеров для согласования",
+                "stage_cfe27bca": "показ графического оформления",
+                "stage_d1299817": "утверждение сценария",
+                "stage_d1913f21": "показ апдейта по моделингу",
+                "stage_d24dd4ad": "выбор дубля",
+                "stage_d342fb13": "сдача до 14",
+                "stage_d580f273": "работа со звуком",
+                "stage_d63af036": "дата съёмки",
+                "stage_d813f39e": "превью",
+                "stage_d9624153": "утверждение и сдача на канал",
+                "stage_d98047f3": "превью персонажей",
+                "stage_db4eaaa2": "сдача первого скринкаста в гпм до 17.00",
+                "stage_dba5d5f5": "правки клиента по стиллам (точка невозврата)",
+                "stage_dc00c267": "сдача поста музыки",
+                "stage_dd8de11d": "сдача третьего поста",
+                "stage_dda498e6": "апдейт эскиза пэкшота",
+                "stage_de8b5a59": "показ моделинга",
+                "stage_de91143b": "утверждение стилшотов",
+                "stage_decd48a6": "августа - бриф от клиент",
+                "stage_df568f79": "выбор дубля клиентом",
+                "stage_df751795": "анимация",
+                "stage_e04c8f6c": "получение материала",
+                "stage_e06f81ad": "сдача в четверг",
+                "stage_e07dd5e8": "утверждение ролика клиентом",
+                "stage_e29ceb76": "утверждение моделинга",
+                "stage_e2bce5ec": "– съемки",
+                "stage_e2bebd17": "получение монтажа/трекинг",
+                "stage_e2c42174": "мастер-баннеры",
+                "stage_e4a8374d": "сдача кругов и полосок с жирным текстом",
+                "stage_e60809c1": "саунд-дизайн, согласование с клиентом",
+                "stage_e92007a1": "ресайзы",
+                "stage_ea5c7dfe": "сдача до 12.00",
+                "stage_ea6cee50": "сдача усник 2 (бебур)",
+                "stage_eb5960ca": "сдача 10 сек без промокода",
+                "stage_eb90cce9": "убираем фото паши",
+                "stage_eb962a16": "маркет",
+                "stage_ef760c40": "анимация динамическото логотип",
+                "stage_efc57121": "предоставление сценариев клиенту",
+                "stage_f1ea4438": "ppm",
+                "stage_f40f1040": "съёмка брендинга экрана 10 февраля",
+                "stage_f4607b36": "– комментарии клиента единым пулом",
+                "stage_f49a908a": "сводим новый гзк",
+                "stage_f572eb33": "постпродакшн",
+                "stage_f6324b68": "сдача в диджитал",
+                "stage_f6647761": "апдейт персонажей",
+                "stage_f76b9bab": "съёмка",
+                "stage_f811d496": "садача 1 креатива",
+                "stage_f84c0c07": "скетчи",
+                "stage_f96c3404": "статичные эскизы брендинга.",
+                "stage_fcfcabb7": "сдача второго поста",
+                "stage_feb0cbee": "передача в продакшн",
+                "stage_feb25fa6": "– превью, с учетом комментариев клиента по эскизу",
+                "stage_fed6c25d": "– съемки/предоставление монтажа",
+                "stage_ff4cb28d": "презентация стиллов",
+                "stage_ffcada7e": "– цк онлайн",
+                "stage_ffda0077": "стилшот одного кадра, с учетом нового сториборда",
+                "start": "start",
+                "storyboard": "storyboard"
+            },
+            "status": {
+                "done": "Done",
+                "pre_done": "Pre done",
+                "wait": "Waiting",
+                "work": "In work"
+            },
+            "statusGroups": {
+                "active": [
+                    "work",
+                    "pre_done"
+                ],
+                "final": [
+                    "done"
+                ]
+            }
+        },
+        "groups": [
+            {
+                "id": "039c42fb9526a774",
+                "links": {
+                    "self": "/api/v2/frontend/entities/groups/039c42fb9526a774"
+                },
+                "name": "Сокровища императора"
+            },
+            {
+                "id": "2801d361097513f1",
+                "links": {
+                    "self": "/api/v2/frontend/entities/groups/2801d361097513f1"
+                },
+                "name": "Битва экстрасенсов"
+            },
+            {
+                "id": "3b0ab551484b78aa",
+                "links": {
+                    "self": "/api/v2/frontend/entities/groups/3b0ab551484b78aa"
+                },
+                "name": "Время завтраков"
+            },
+            {
+                "id": "5fdfb6491d246502",
+                "links": {
+                    "self": "/api/v2/frontend/entities/groups/5fdfb6491d246502"
+                },
+                "name": "Сокровища Императора"
+            },
+            {
+                "id": "7334a4c4aa518a49",
+                "links": {
+                    "self": "/api/v2/frontend/entities/groups/7334a4c4aa518a49"
+                },
+                "name": "90 сек"
+            },
+            {
+                "id": "79b43c7f183c613d",
+                "links": {
+                    "self": "/api/v2/frontend/entities/groups/79b43c7f183c613d"
+                },
+                "name": "Шоу Воли"
+            },
+            {
+                "id": "8890848608274b03",
+                "links": {
+                    "self": "/api/v2/frontend/entities/groups/8890848608274b03"
+                },
+                "name": "Эфир"
+            },
+            {
+                "id": "8d89bd4c3f184d16",
+                "links": {
+                    "self": "/api/v2/frontend/entities/groups/8d89bd4c3f184d16"
+                },
+                "name": "Битва Экстрасенсов"
+            },
+            {
+                "id": "928e6ac63bebd6c8",
+                "links": {
+                    "self": "/api/v2/frontend/entities/groups/928e6ac63bebd6c8"
+                },
+                "name": "Женский стендап"
+            },
+            {
+                "id": "99551e6aab02f988",
+                "links": {
+                    "self": "/api/v2/frontend/entities/groups/99551e6aab02f988"
+                },
+                "name": "шоу Воли"
+            },
+            {
+                "id": "b145658d6220cfbf",
+                "links": {
+                    "self": "/api/v2/frontend/entities/groups/b145658d6220cfbf"
+                },
+                "name": "Stand up"
+            },
+            {
+                "id": "b8e9270fedf49272",
+                "links": {
+                    "self": "/api/v2/frontend/entities/groups/b8e9270fedf49272"
+                },
+                "name": "Титаны"
+            },
+            {
+                "id": "cc986cf48dfdb96d",
+                "links": {
+                    "self": "/api/v2/frontend/entities/groups/cc986cf48dfdb96d"
+                },
+                "name": "Конфетка"
+            },
+            {
+                "id": "e3b7a53f18d3c9a7",
+                "links": {
+                    "self": "/api/v2/frontend/entities/groups/e3b7a53f18d3c9a7"
+                },
+                "name": "Выжить в Стамбуле"
+            },
+            {
+                "id": "ec5ec0f9267eba85",
+                "links": {
+                    "self": "/api/v2/frontend/entities/groups/ec5ec0f9267eba85"
+                },
+                "name": "Камеди клаб"
+            },
+            {
+                "id": "group:default",
+                "links": {
+                    "self": "/api/v2/frontend/entities/groups/group:default"
+                },
+                "name": "Default"
+            }
+        ],
+        "people": [
+            {
+                "id": "1a2c143445dfe7d0",
+                "links": {
+                    "self": "/api/v2/frontend/entities/people/1a2c143445dfe7d0"
+                },
+                "name": "Вишневская Наташа",
+                "position": "designer"
+            },
+            {
+                "id": "29c52d5de94e8ca2",
+                "links": {
+                    "self": "/api/v2/frontend/entities/people/29c52d5de94e8ca2"
+                },
+                "name": "Чуфаров Влад",
+                "position": "designer"
+            },
+            {
+                "id": "2dee1770d57bb881",
+                "links": {
+                    "self": "/api/v2/frontend/entities/people/2dee1770d57bb881"
+                },
+                "name": "студия Громко",
+                "position": "designer"
+            },
+            {
+                "id": "36596789c8cc73cb",
+                "links": {
+                    "self": "/api/v2/frontend/entities/people/36596789c8cc73cb"
+                },
+                "name": "Левашова Лера",
+                "position": "designer"
+            },
+            {
+                "id": "5776c917534e48ff",
+                "links": {
+                    "self": "/api/v2/frontend/entities/people/5776c917534e48ff"
+                },
+                "name": "Мартынов Рома",
+                "position": "designer"
+            },
+            {
+                "id": "588e62c641ec2012",
+                "links": {
+                    "self": "/api/v2/frontend/entities/people/588e62c641ec2012"
+                },
+                "name": "Муратов Эдуард",
+                "position": "designer"
+            },
+            {
+                "id": "67c0911977404d51",
+                "links": {
+                    "self": "/api/v2/frontend/entities/people/67c0911977404d51"
+                },
+                "name": "Козлов Дима",
+                "position": "designer"
+            },
+            {
+                "id": "70d169be891bb94f",
+                "links": {
+                    "self": "/api/v2/frontend/entities/people/70d169be891bb94f"
+                },
+                "name": "Алемасов Никита",
+                "position": "designer"
+            },
+            {
+                "id": "b3de4ebc5ad5c3f4",
+                "links": {
+                    "self": "/api/v2/frontend/entities/people/b3de4ebc5ad5c3f4"
+                },
+                "name": "Упадышев Денис",
+                "position": "designer"
+            },
+            {
+                "id": "d514a94759ce3a18",
+                "links": {
+                    "self": "/api/v2/frontend/entities/people/d514a94759ce3a18"
+                },
+                "name": "Статкевич Андрей",
+                "position": "designer"
+            },
+            {
+                "id": "ea2363d14b7d0c4d",
+                "links": {
+                    "self": "/api/v2/frontend/entities/people/ea2363d14b7d0c4d"
+                },
+                "name": "[Не назначен]",
+                "position": "designer"
+            }
+        ],
+        "tags": []
+    },
+    "filters": {
+        "designer": null,
+        "include_people": true,
+        "limit": 30,
+        "statuses": [
+            "work",
+            "pre_done",
+            "done",
+            "wait"
+        ],
+        "window": {
+            "enabled": false,
+            "start": null,
+            "end": null,
+            "mode": "intersects"
+        }
+    },
+    "meta": {
+        "artifact": "dtm_frontend_api_v2",
+        "contractVersion": "2.0.1",
+        "features": {
+            "apiReadmodelOnly": true,
+            "entities": true,
+            "milestonesDefault": true,
+            "readmodelStored": true,
+            "taskHash": true,
+            "taskRevision": true,
+            "timeWindowFilter": true
+        },
+        "generatedAt": "2026-03-05T14:44:47Z",
+        "hash": "cb1a9ec12a28e3d2f1be92c34651fe9a775dabc3c443d01bda732d88319556d7",
+        "paging": {
+            "limit": 1028,
+            "nextCursor": ""
+        },
+        "source": {
+            "env": "dev",
+            "sheetName": "Спонсорские ТНТ",
+            "sheetUrl": null,
+            "sourceId": "sheet:Спонсорские ТНТ:ТАБЛИЧКА:A1:Z2000"
+        },
+        "syncedAt": "2026-03-05T14:25:24Z",
+        "readmodelSource": "ydb",
+        "readmodelId": "frontend_v2:default",
+        "readmodelHash": "sha256:b8cce8e477e32db7f36de437e825ff264024211114e2de0d13ef7391c7bd7619",
+        "builtFromSourceHash": "623032b43ff982fec6fe2638b8a2b221837840e41fe4b0e5e14d9becf5545a67",
+        "queryFilterApplied": true,
+        "queryFilterNote": ""
+    },
+    "summary": {
+        "groupsTotal": 16,
+        "milestonesTotal": 172,
+        "peopleTotal": 11,
+        "tasksReturned": 30,
+        "tasksTotal": 1028
+    },
+    "tasks": [
+        {
+            "brand": "М8",
+            "customer": "Носенко Василий",
+            "date": {
+                "end": "2026-04-12",
+                "nextDue": "2026-03-05",
+                "start": "2026-03-05"
+            },
+            "format_": "эл.лого",
+            "groupId": "039c42fb9526a774",
+            "history": "04.02 - отдали превью \n11.02 - комментарии, финал",
+            "id": "d92f8536-095f-4d64-865d-fb72b9fd05c1",
+            "links": {
+                "self": "/api/v2/frontend/tasks/d92f8536-095f-4d64-865d-fb72b9fd05c1"
+            },
+            "milestones": [
+                {
+                    "actual": null,
+                    "planned": "2026-03-05",
+                    "status": "planned",
+                    "type": "start"
+                },
+                {
+                    "actual": null,
+                    "planned": "2026-03-30",
+                    "status": "planned",
+                    "type": "stage_49aba8b8"
+                },
+                {
+                    "actual": null,
+                    "planned": "2026-04-12",
+                    "status": "planned",
+                    "type": "onair"
+                }
+            ],
+            "ownerId": "588e62c641ec2012",
+            "status": "done",
+            "tags": [],
+            "title": "М8 [СОКР ИМП ] эл.лого"
+        },
+        {
+            "brand": "Joonies",
+            "customer": "Носенко Василий",
+            "date": {
+                "end": "2026-04-12",
+                "nextDue": "2026-03-05",
+                "start": "2026-03-05"
+            },
+            "format_": "дин лого",
+            "groupId": "5fdfb6491d246502",
+            "history": "27.02 - отдали аниматик\n03.03 - отдали финал",
+            "id": "a822ef8a-8864-49f6-80ca-84ab37a7571f",
+            "links": {
+                "self": "/api/v2/frontend/tasks/a822ef8a-8864-49f6-80ca-84ab37a7571f"
+            },
+            "milestones": [
+                {
+                    "actual": null,
+                    "planned": "2026-03-05",
+                    "status": "planned",
+                    "type": "start"
+                },
+                {
+                    "actual": null,
+                    "planned": "2026-03-23",
+                    "status": "planned",
+                    "type": "stage_49aba8b8"
+                },
+                {
+                    "actual": null,
+                    "planned": "2026-04-12",
+                    "status": "planned",
+                    "type": "onair"
+                }
+            ],
+            "ownerId": "1a2c143445dfe7d0",
+            "status": "done",
+            "tags": [],
+            "title": "Joonies  [СОКР ИМП] дин лого"
+        },
+        {
+            "brand": "Альфа банк",
+            "customer": "Носенко Василий",
+            "date": {
+                "end": "2026-04-12",
+                "nextDue": "2026-03-06",
+                "start": "2026-02-25"
+            },
+            "format_": "3D",
+            "groupId": "5fdfb6491d246502",
+            "history": "фонари \n13.03 - забрали проект у студии",
+            "id": "f21625ef-7348-4377-9bb7-0678c15b7d35",
+            "links": {
+                "self": "/api/v2/frontend/tasks/f21625ef-7348-4377-9bb7-0678c15b7d35"
+            },
+            "milestones": [
+                {
+                    "actual": null,
+                    "planned": "2026-02-25",
+                    "status": "planned",
+                    "type": "stage_ffda0077"
+                },
+                {
+                    "actual": null,
+                    "planned": "2026-03-02",
+                    "status": "planned",
+                    "type": "feedback"
+                },
+                {
+                    "actual": null,
+                    "planned": "2026-03-06",
+                    "status": "planned",
+                    "type": "stage_48751d60"
+                },
+                {
+                    "actual": null,
+                    "planned": "2026-03-11",
+                    "status": "planned",
+                    "type": "feedback"
+                },
+                {
+                    "actual": null,
+                    "planned": "2026-03-13",
+                    "status": "planned",
+                    "type": "draft"
+                },
+                {
+                    "actual": null,
+                    "planned": "2026-03-17",
+                    "status": "planned",
+                    "type": "feedback"
+                },
+                {
+                    "actual": null,
+                    "planned": "2026-03-20",
+                    "status": "planned",
+                    "type": "stage_02bb3ce4"
+                },
+                {
+                    "actual": null,
+                    "planned": "2026-03-24",
+                    "status": "planned",
+                    "type": "feedback"
+                },
+                {
+                    "actual": null,
+                    "planned": "2026-03-26",
+                    "status": "planned",
+                    "type": "stage_42dbf1df"
+                },
+                {
+                    "actual": null,
+                    "planned": "2026-03-30",
+                    "status": "planned",
+                    "type": "feedback"
+                },
+                {
+                    "actual": null,
+                    "planned": "2026-04-01",
+                    "status": "planned",
+                    "type": "final"
+                },
+                {
+                    "actual": null,
+                    "planned": "2026-04-03",
+                    "status": "planned",
+                    "type": "final"
+                },
+                {
+                    "actual": null,
+                    "planned": "2026-04-12",
+                    "status": "planned",
+                    "type": "onair"
+                }
+            ],
+            "ownerId": "2dee1770d57bb881",
+            "status": "work",
+            "tags": [],
+            "title": "Альфа банк  [СОКР ИМП] 3D"
+        },
+        {
+            "brand": "М8",
+            "customer": "Носенко Василий",
+            "date": {
+                "end": "2026-04-12",
+                "nextDue": "2026-03-11",
+                "start": "2026-02-20"
+            },
+            "format_": "граф. ролик",
+            "groupId": "5fdfb6491d246502",
+            "history": "19.02 - отправили раскадровку \n20.02 - вернулись комментарии, апдейт раскадровки  \n26.02 - согл., отдали аниматик",
+            "id": "a4e6f6fe-dbdd-4853-bb4f-ee06055ee4eb",
+            "links": {
+                "self": "/api/v2/frontend/tasks/a4e6f6fe-dbdd-4853-bb4f-ee06055ee4eb"
+            },
+            "milestones": [
+                {
+                    "actual": null,
+                    "planned": "2026-02-20",
+                    "status": "planned",
+                    "type": "storyboard"
+                },
+                {
+                    "actual": null,
+                    "planned": "2026-02-25",
+                    "status": "planned",
+                    "type": "feedback"
+                },
+                {
+                    "actual": null,
+                    "planned": "2026-03-11",
+                    "status": "planned",
+                    "type": "animatic"
+                },
+                {
+                    "actual": null,
+                    "planned": "2026-03-16",
+                    "status": "planned",
+                    "type": "feedback"
+                },
+                {
+                    "actual": null,
+                    "planned": "2026-03-23",
+                    "status": "planned",
+                    "type": "final"
+                },
+                {
+                    "actual": null,
+                    "planned": "2026-03-26",
+                    "status": "planned",
+                    "type": "feedback"
+                },
+                {
+                    "actual": null,
+                    "planned": "2026-03-30",
+                    "status": "planned",
+                    "type": "final"
+                },
+                {
+                    "actual": null,
+                    "planned": "2026-04-12",
+                    "status": "planned",
+                    "type": "onair"
+                }
+            ],
+            "ownerId": "5776c917534e48ff",
+            "status": "work",
+            "tags": [],
+            "title": "М8 [СОКР ИМП] граф. ролик"
+        },
+        {
+            "brand": "Bombbar",
+            "customer": "Носенко Василий",
+            "date": {
+                "end": "2026-04-12",
+                "nextDue": "2026-03-10",
+                "start": "2026-02-20"
+            },
+            "format_": "дин лого",
+            "groupId": "5fdfb6491d246502",
+            "history": "18.02 - отдали раскадровку \n20.02 - согласовали, перешли к аниматику \n02.03 - отдали аниматики",
+            "id": "7de843ff-4369-4a0f-ab6c-dd0d09b3f897",
+            "links": {
+                "self": "/api/v2/frontend/tasks/7de843ff-4369-4a0f-ab6c-dd0d09b3f897"
+            },
+            "milestones": [
+                {
+                    "actual": null,
+                    "planned": "2026-02-20",
+                    "status": "planned",
+                    "type": "storyboard"
+                },
+                {
+                    "actual": null,
+                    "planned": "2026-02-27",
+                    "status": "planned",
+                    "type": "feedback"
+                },
+                {
+                    "actual": null,
+                    "planned": "2026-03-10",
+                    "status": "planned",
+                    "type": "animatic"
+                },
+                {
+                    "actual": null,
+                    "planned": "2026-03-16",
+                    "status": "planned",
+                    "type": "feedback"
+                },
+                {
+                    "actual": null,
+                    "planned": "2026-03-19",
+                    "status": "planned",
+                    "type": "final"
+                },
+                {
+                    "actual": null,
+                    "planned": "2026-03-23",
+                    "status": "planned",
+                    "type": "feedback"
+                },
+                {
+                    "actual": null,
+                    "planned": "2026-03-26",
+                    "status": "planned",
+                    "type": "final"
+                },
+                {
+                    "actual": null,
+                    "planned": "2026-03-27",
+                    "status": "planned",
+                    "type": "stage_49aba8b8"
+                },
+                {
+                    "actual": null,
+                    "planned": "2026-04-12",
+                    "status": "planned",
+                    "type": "onair"
+                }
+            ],
+            "ownerId": "1a2c143445dfe7d0",
+            "status": "work",
+            "tags": [],
+            "title": "Bombbar  [СОКР ИМП] дин лого"
+        },
+        {
+            "brand": "Вологодский пломбир",
+            "customer": "Носенко Василий",
+            "date": {
+                "end": "2026-04-12",
+                "nextDue": "2026-03-13",
+                "start": "2026-02-20"
+            },
+            "format_": "граф. ролик",
+            "groupId": "5fdfb6491d246502",
+            "history": "20.02 - отдали раскадровку, вернулись комментарии \n25.02 - отдали апдейт раскадровки, комментарии \n26.02 - отдали апдейт",
+            "id": "61baabb2-ef03-4593-a6c0-82bf6bfcedb8",
+            "links": {
+                "self": "/api/v2/frontend/tasks/61baabb2-ef03-4593-a6c0-82bf6bfcedb8"
+            },
+            "milestones": [
+                {
+                    "actual": null,
+                    "planned": "2026-02-20",
+                    "status": "planned",
+                    "type": "storyboard"
+                },
+                {
+                    "actual": null,
+                    "planned": "2026-02-25",
+                    "status": "planned",
+                    "type": "feedback"
+                },
+                {
+                    "actual": null,
+                    "planned": "2026-03-13",
+                    "status": "planned",
+                    "type": "animatic"
+                },
+                {
+                    "actual": null,
+                    "planned": "2026-03-17",
+                    "status": "planned",
+                    "type": "feedback"
+                },
+                {
+                    "actual": null,
+                    "planned": "2026-03-25",
+                    "status": "planned",
+                    "type": "final"
+                },
+                {
+                    "actual": null,
+                    "planned": "2026-03-27",
+                    "status": "planned",
+                    "type": "feedback"
+                },
+                {
+                    "actual": null,
+                    "planned": "2026-04-03",
+                    "status": "planned",
+                    "type": "stage_49aba8b8"
+                },
+                {
+                    "actual": null,
+                    "planned": "2026-04-12",
+                    "status": "planned",
+                    "type": "onair"
+                }
+            ],
+            "ownerId": "b3de4ebc5ad5c3f4",
+            "status": "work",
+            "tags": [],
+            "title": "Пломбир  [СОКР ИМП] граф. ролик"
+        },
+        {
+            "brand": "Cool Cola",
+            "customer": "Носенко Василий",
+            "date": {
+                "end": "2026-04-07",
+                "nextDue": "2026-03-06",
+                "start": "2026-02-13"
+            },
+            "format_": "граф. ролик",
+            "groupId": "5fdfb6491d246502",
+            "history": "13.02 - отправили сториборд",
+            "id": "00017f0b-b9b2-44b6-8c7f-9efd5df5bf7a",
+            "links": {
+                "self": "/api/v2/frontend/tasks/00017f0b-b9b2-44b6-8c7f-9efd5df5bf7a"
+            },
+            "milestones": [
+                {
+                    "actual": null,
+                    "planned": "2026-02-13",
+                    "status": "planned",
+                    "type": "stage_b656c3cc"
+                },
+                {
+                    "actual": null,
+                    "planned": "2026-02-18",
+                    "status": "planned",
+                    "type": "feedback"
+                },
+                {
+                    "actual": null,
+                    "planned": "2026-02-20",
+                    "status": "planned",
+                    "type": "stage_82508100"
+                },
+                {
+                    "actual": null,
+                    "planned": "2026-02-25",
+                    "status": "planned",
+                    "type": "feedback"
+                },
+                {
+                    "actual": null,
+                    "planned": "2026-03-06",
+                    "status": "planned",
+                    "type": "stage_a88bd3c4"
+                },
+                {
+                    "actual": null,
+                    "planned": "2026-03-11",
+                    "status": "planned",
+                    "type": "feedback"
+                },
+                {
+                    "actual": null,
+                    "planned": "2026-03-13",
+                    "status": "planned",
+                    "type": "draft"
+                },
+                {
+                    "actual": null,
+                    "planned": "2026-03-18",
+                    "status": "planned",
+                    "type": "feedback"
+                },
+                {
+                    "actual": null,
+                    "planned": "2026-03-23",
+                    "status": "planned",
+                    "type": "stage_327d7918"
+                },
+                {
+                    "actual": null,
+                    "planned": "2026-03-25",
+                    "status": "planned",
+                    "type": "feedback"
+                },
+                {
+                    "actual": null,
+                    "planned": "2026-03-30",
+                    "status": "planned",
+                    "type": "stage_ae603fd8"
+                },
+                {
+                    "actual": null,
+                    "planned": "2026-04-02",
+                    "status": "planned",
+                    "type": "feedback"
+                },
+                {
+                    "actual": null,
+                    "planned": "2026-04-06",
+                    "status": "planned",
+                    "type": "final"
+                },
+                {
+                    "actual": null,
+                    "planned": "2026-04-07",
+                    "status": "planned",
+                    "type": "onair"
+                }
+            ],
+            "ownerId": "2dee1770d57bb881",
+            "status": "work",
+            "tags": [],
+            "title": "Cool Cola [СОКР ИМП] граф. ролик"
+        },
+        {
+            "brand": "Альфа банк",
+            "customer": "Носенко Василий",
+            "date": {
+                "end": "2026-04-06",
+                "nextDue": "2026-03-16",
+                "start": "2026-03-01"
+            },
+            "format_": "3D",
+            "groupId": "5fdfb6491d246502",
+            "history": "лодка",
+            "id": "98766ee6-bef2-4d33-bab4-918638a14b56",
+            "links": {
+                "self": "/api/v2/frontend/tasks/98766ee6-bef2-4d33-bab4-918638a14b56"
+            },
+            "milestones": [
+                {
+                    "actual": null,
+                    "planned": "2026-03-01",
+                    "status": "planned",
+                    "type": "stage_9b3fb189"
+                },
+                {
+                    "actual": null,
+                    "planned": "2026-03-16",
+                    "status": "planned",
+                    "type": "draft"
+                },
+                {
+                    "actual": null,
+                    "planned": "2026-03-18",
+                    "status": "planned",
+                    "type": "feedback"
+                },
+                {
+                    "actual": null,
+                    "planned": "2026-03-20",
+                    "status": "planned",
+                    "type": "draft"
+                },
+                {
+                    "actual": null,
+                    "planned": "2026-03-23",
+                    "status": "planned",
+                    "type": "feedback"
+                },
+                {
+                    "actual": null,
+                    "planned": "2026-03-25",
+                    "status": "planned",
+                    "type": "stage_9eee3d19"
+                },
+                {
+                    "actual": null,
+                    "planned": "2026-03-27",
+                    "status": "planned",
+                    "type": "feedback"
+                },
+                {
+                    "actual": null,
+                    "planned": "2026-03-30",
+                    "status": "planned",
+                    "type": "stage_cab00526"
+                },
+                {
+                    "actual": null,
+                    "planned": "2026-04-03",
+                    "status": "planned",
+                    "type": "final"
+                },
+                {
+                    "actual": null,
+                    "planned": "2026-04-06",
+                    "status": "planned",
+                    "type": "final"
+                }
+            ],
+            "ownerId": "2dee1770d57bb881",
+            "status": "work",
+            "tags": [],
+            "title": "Альфа банк  [СОКР ИМП] 3D"
+        },
+        {
+            "brand": "Озон",
+            "customer": "Иванкова Екатерина",
+            "date": {
+                "end": "2026-04-04",
+                "nextDue": "2026-03-05",
+                "start": "2026-02-25"
+            },
+            "format_": "граф. ролик",
+            "groupId": "8d89bd4c3f184d16",
+            "history": "17.02 - отдали раскадровку \n24.02 - апдейт тайминга \n25.02 - отдали раскадровку \n26.02 - вернулись комментарии \n27.02 - отдали апдейт, ГЗК, перешли к аниматику",
+            "id": "889bc270-8ce1-4a73-8991-2dda8204ec12",
+            "links": {
+                "self": "/api/v2/frontend/tasks/889bc270-8ce1-4a73-8991-2dda8204ec12"
+            },
+            "milestones": [
+                {
+                    "actual": null,
+                    "planned": "2026-02-25",
+                    "status": "planned",
+                    "type": "storyboard"
+                },
+                {
+                    "actual": null,
+                    "planned": "2026-02-27",
+                    "status": "planned",
+                    "type": "animatic"
+                },
+                {
+                    "actual": null,
+                    "planned": "2026-03-02",
+                    "status": "planned",
+                    "type": "feedback"
+                },
+                {
+                    "actual": null,
+                    "planned": "2026-03-03",
+                    "status": "planned",
+                    "type": "prefinal"
+                },
+                {
+                    "actual": null,
+                    "planned": "2026-03-05",
+                    "status": "planned",
+                    "type": "final"
+                },
+                {
+                    "actual": null,
+                    "planned": "2026-03-07",
+                    "status": "planned",
+                    "type": "onair"
+                },
+                {
+                    "actual": null,
+                    "planned": "2026-04-04",
+                    "status": "planned",
+                    "type": "feedback"
+                }
+            ],
+            "ownerId": "29c52d5de94e8ca2",
+            "status": "work",
+            "tags": [],
+            "title": "Озон [Битва Экстрасенсов] граф. ролик"
+        },
+        {
+            "brand": "Joonies",
+            "customer": "Носенко Василий",
+            "date": {
+                "end": "2026-04-03",
+                "nextDue": "2026-03-12",
+                "start": "2026-02-20"
+            },
+            "format_": "граф. ролик",
+            "groupId": "5fdfb6491d246502",
+            "history": "16.02 - отдали раскадровку \n26.02 - прислали ГЗК, отдали аниматики \n03.02 - отдали финал",
+            "id": "1aab054a-b39e-414c-b377-11b769fb11d0",
+            "links": {
+                "self": "/api/v2/frontend/tasks/1aab054a-b39e-414c-b377-11b769fb11d0"
+            },
+            "milestones": [
+                {
+                    "actual": null,
+                    "planned": "2026-02-20",
+                    "status": "planned",
+                    "type": "storyboard"
+                },
+                {
+                    "actual": null,
+                    "planned": "2026-02-27",
+                    "status": "planned",
+                    "type": "feedback"
+                },
+                {
+                    "actual": null,
+                    "planned": "2026-03-12",
+                    "status": "planned",
+                    "type": "animatic"
+                },
+                {
+                    "actual": null,
+                    "planned": "2026-03-18",
+                    "status": "planned",
+                    "type": "feedback"
+                },
+                {
+                    "actual": null,
+                    "planned": "2026-03-25",
+                    "status": "planned",
+                    "type": "final"
+                },
+                {
+                    "actual": null,
+                    "planned": "2026-03-30",
+                    "status": "planned",
+                    "type": "feedback"
+                },
+                {
+                    "actual": null,
+                    "planned": "2026-04-03",
+                    "status": "planned",
+                    "type": "final"
+                }
+            ],
+            "ownerId": "36596789c8cc73cb",
+            "status": "done",
+            "tags": [],
+            "title": "Joonies  [СОКР ИМП] граф. ролик"
+        },
+        {
+            "brand": "Гигачат",
+            "customer": "Русина Александра",
+            "date": {
+                "end": "2026-03-21",
+                "nextDue": "2026-03-11",
+                "start": "2026-03-03"
+            },
+            "format_": "граф.ролик",
+            "groupId": "928e6ac63bebd6c8",
+            "history": "27.02 - отдали раскадрвоку\n02.03 - комментарии, отдали аниматик\n03.03 - комментарии, отдали апдейт",
+            "id": "e93dfb64-4cad-40c6-8063-1c1b0763d69c",
+            "links": {
+                "self": "/api/v2/frontend/tasks/e93dfb64-4cad-40c6-8063-1c1b0763d69c"
+            },
+            "milestones": [
+                {
+                    "actual": null,
+                    "planned": "2026-03-03",
+                    "status": "planned",
+                    "type": "storyboard"
+                },
+                {
+                    "actual": null,
+                    "planned": "2026-03-04",
+                    "status": "planned",
+                    "type": "feedback"
+                },
+                {
+                    "actual": null,
+                    "planned": "2026-03-11",
+                    "status": "planned",
+                    "type": "animatic"
+                },
+                {
+                    "actual": null,
+                    "planned": "2026-03-12",
+                    "status": "planned",
+                    "type": "feedback"
+                },
+                {
+                    "actual": null,
+                    "planned": "2026-03-16",
+                    "status": "planned",
+                    "type": "final"
+                },
+                {
+                    "actual": null,
+                    "planned": "2026-03-17",
+                    "status": "planned",
+                    "type": "feedback"
+                },
+                {
+                    "actual": null,
+                    "planned": "2026-03-18",
+                    "status": "planned",
+                    "type": "final"
+                },
+                {
+                    "actual": null,
+                    "planned": "2026-03-21",
+                    "status": "planned",
+                    "type": "onair"
+                }
+            ],
+            "ownerId": "36596789c8cc73cb",
+            "status": "work",
+            "tags": [],
+            "title": "Гигачат [ЖC] граф.ролик"
+        },
+        {
+            "brand": "Момат рино",
+            "customer": "Русина Александра",
+            "date": {
+                "end": "2026-03-17",
+                "nextDue": "2026-03-05",
+                "start": "2026-03-04"
+            },
+            "format_": "граф.ролик",
+            "groupId": "e3b7a53f18d3c9a7",
+            "history": "04.03 - отдали арскадровку",
+            "id": "54d23f38-c554-4b32-b5cd-7cf5e5a0de28",
+            "links": {
+                "self": "/api/v2/frontend/tasks/54d23f38-c554-4b32-b5cd-7cf5e5a0de28"
+            },
+            "milestones": [
+                {
+                    "actual": null,
+                    "planned": "2026-03-04",
+                    "status": "planned",
+                    "type": "storyboard"
+                },
+                {
+                    "actual": null,
+                    "planned": "2026-03-05",
+                    "status": "planned",
+                    "type": "feedback"
+                },
+                {
+                    "actual": null,
+                    "planned": "2026-03-11",
+                    "status": "planned",
+                    "type": "animatic"
+                },
+                {
+                    "actual": null,
+                    "planned": "2026-03-12",
+                    "status": "planned",
+                    "type": "feedback"
+                },
+                {
+                    "actual": null,
+                    "planned": "2026-03-13",
+                    "status": "planned",
+                    "type": "prefinal"
+                },
+                {
+                    "actual": null,
+                    "planned": "2026-03-16",
+                    "status": "planned",
+                    "type": "feedback"
+                },
+                {
+                    "actual": null,
+                    "planned": "2026-03-17",
+                    "status": "planned",
+                    "type": "final"
+                }
+            ],
+            "ownerId": "588e62c641ec2012",
+            "status": "work",
+            "tags": [],
+            "title": "Момат рино  [СТАМБУЛ] граф.ролик"
+        },
+        {
+            "brand": "Момат рино",
+            "customer": "Русина Александра",
+            "date": {
+                "end": "2026-03-10",
+                "nextDue": "2026-03-05",
+                "start": "2026-02-25"
+            },
+            "format_": "дин лого",
+            "groupId": "e3b7a53f18d3c9a7",
+            "history": "26.02 - отдали раскадровку \n04.03 - вернулись комментарии",
+            "id": "0a4a86d3-457c-4eb6-8028-720b3593b3b9",
+            "links": {
+                "self": "/api/v2/frontend/tasks/0a4a86d3-457c-4eb6-8028-720b3593b3b9"
+            },
+            "milestones": [
+                {
+                    "actual": null,
+                    "planned": "2026-02-25",
+                    "status": "planned",
+                    "type": "storyboard"
+                },
+                {
+                    "actual": null,
+                    "planned": "2026-02-26",
+                    "status": "planned",
+                    "type": "feedback"
+                },
+                {
+                    "actual": null,
+                    "planned": "2026-03-04",
+                    "status": "planned",
+                    "type": "animatic"
+                },
+                {
+                    "actual": null,
+                    "planned": "2026-03-05",
+                    "status": "planned",
+                    "type": "feedback"
+                },
+                {
+                    "actual": null,
+                    "planned": "2026-03-10",
+                    "status": "planned",
+                    "type": "final"
+                }
+            ],
+            "ownerId": "d514a94759ce3a18",
+            "status": "work",
+            "tags": [],
+            "title": "Момат рино  [СТАМБУЛ] дин лого"
+        },
+        {
+            "brand": "",
+            "customer": "",
+            "date": {
+                "end": "2026-03-05",
+                "nextDue": "2026-03-05",
+                "start": "2026-03-05"
+            },
+            "format_": "",
+            "groupId": "group:default",
+            "history": "wait",
+            "id": "feef4d80-9e65-4e29-9c56-2fa096ea4e11",
+            "links": {
+                "self": "/api/v2/frontend/tasks/feef4d80-9e65-4e29-9c56-2fa096ea4e11"
+            },
+            "milestones": [
+                {
+                    "actual": null,
+                    "planned": "2026-03-05",
+                    "status": "planned",
+                    "type": "start"
+                }
+            ],
+            "ownerId": "ea2363d14b7d0c4d",
+            "status": "wait",
+            "tags": [],
+            "title": "[]"
+        },
+        {
+            "brand": "Капитан вкусов",
+            "customer": "Калачёва Анастасия",
+            "date": {
+                "end": "2026-03-05",
+                "nextDue": "2026-03-05",
+                "start": "2026-03-05"
+            },
+            "format_": "адаптация",
+            "groupId": "8890848608274b03",
+            "history": "02.03 - отдали превью, финал",
+            "id": "ea59a9ea-324c-4461-ad8b-aace7ac28c4c",
+            "links": {
+                "self": "/api/v2/frontend/tasks/ea59a9ea-324c-4461-ad8b-aace7ac28c4c"
+            },
+            "milestones": [
+                {
+                    "actual": null,
+                    "planned": "2026-03-05",
+                    "status": "planned",
+                    "type": "stage_49aba8b8"
+                }
+            ],
+            "ownerId": "67c0911977404d51",
+            "status": "done",
+            "tags": [],
+            "title": "КАПИТАН [Эфир] адаптация"
+        },
+        {
+            "brand": "Гигачат",
+            "customer": "Русина Александра",
+            "date": {
+                "end": "2026-03-05",
+                "nextDue": "2026-03-05",
+                "start": "2026-03-05"
+            },
+            "format_": "устник",
+            "groupId": "928e6ac63bebd6c8",
+            "history": "1 устник\n27.02 - отдали раскадровку \n03.03 - отдали превью",
+            "id": "b8310854-5b37-4197-8c15-bc4461f757cc",
+            "links": {
+                "self": "/api/v2/frontend/tasks/b8310854-5b37-4197-8c15-bc4461f757cc"
+            },
+            "milestones": [
+                {
+                    "actual": null,
+                    "planned": "2026-03-05",
+                    "status": "planned",
+                    "type": "stage_49aba8b8"
+                }
+            ],
+            "ownerId": "70d169be891bb94f",
+            "status": "work",
+            "tags": [],
+            "title": "Гигачат [ЖC] устник"
+        },
+        {
+            "brand": "Озон банк",
+            "customer": "Иванкова Екатерина",
+            "date": {
+                "end": "2026-03-05",
+                "nextDue": "2026-03-05",
+                "start": "2026-02-27"
+            },
+            "format_": "дин лого",
+            "groupId": "2801d361097513f1",
+            "history": "27.02 - отдали раскадрвоку \n02.03 - вернулись комментарии, отдали апдейт \n03.03 - вернулись комментарии \n04.03 - отдали аниматики",
+            "id": "48354672-f972-443f-a3e1-46c10cc1cf78",
+            "links": {
+                "self": "/api/v2/frontend/tasks/48354672-f972-443f-a3e1-46c10cc1cf78"
+            },
+            "milestones": [
+                {
+                    "actual": null,
+                    "planned": "2026-02-27",
+                    "status": "planned",
+                    "type": "storyboard"
+                },
+                {
+                    "actual": null,
+                    "planned": "2026-03-02",
+                    "status": "planned",
+                    "type": "feedback"
+                },
+                {
+                    "actual": null,
+                    "planned": "2026-03-03",
+                    "status": "planned",
+                    "type": "animatic"
+                },
+                {
+                    "actual": null,
+                    "planned": "2026-03-04",
+                    "status": "planned",
+                    "type": "feedback"
+                },
+                {
+                    "actual": null,
+                    "planned": "2026-03-05",
+                    "status": "planned",
+                    "type": "final"
+                }
+            ],
+            "ownerId": "70d169be891bb94f",
+            "status": "work",
+            "tags": [],
+            "title": "Озон банк  [Б_ЭКСТР] дин лого"
+        },
+        {
+            "brand": "Метадоксил",
+            "customer": "Калачёва Анастасия",
+            "date": {
+                "end": "2026-03-03",
+                "nextDue": "2026-03-03",
+                "start": "2026-02-18"
+            },
+            "format_": "граф. ролик",
+            "groupId": "ec5ec0f9267eba85",
+            "history": "18.02 - отдали раскадровку \n19.02 - комментарии, отдали апдейт \n20.02 - согласовали, апдейт ГЗК\n24.02 - отдали аниматик \n25.02 - согласовали анимацию, отдали финал",
+            "id": "350912e1-4d99-4d8c-95aa-c4b53430fc98",
+            "links": {
+                "self": "/api/v2/frontend/tasks/350912e1-4d99-4d8c-95aa-c4b53430fc98"
+            },
+            "milestones": [
+                {
+                    "actual": null,
+                    "planned": "2026-02-18",
+                    "status": "planned",
+                    "type": "storyboard"
+                },
+                {
+                    "actual": null,
+                    "planned": "2026-02-19",
+                    "status": "planned",
+                    "type": "feedback"
+                },
+                {
+                    "actual": null,
+                    "planned": "2026-02-25",
+                    "status": "planned",
+                    "type": "animatic"
+                },
+                {
+                    "actual": null,
+                    "planned": "2026-02-26",
+                    "status": "planned",
+                    "type": "feedback"
+                },
+                {
+                    "actual": null,
+                    "planned": "2026-03-02",
+                    "status": "planned",
+                    "type": "prefinal"
+                },
+                {
+                    "actual": null,
+                    "planned": "2026-03-03",
+                    "status": "planned",
+                    "type": "final"
+                }
+            ],
+            "ownerId": "588e62c641ec2012",
+            "status": "done",
+            "tags": [],
+            "title": "Метадоксил  [Камеди клаб ] граф. ролик"
+        },
+        {
+            "brand": "Латифа",
+            "customer": "Русина Александра",
+            "date": {
+                "end": "2026-03-01",
+                "nextDue": "2026-03-01",
+                "start": "2026-01-22"
+            },
+            "format_": "дин лого",
+            "groupId": "e3b7a53f18d3c9a7",
+            "history": "20.01 - отдали аниматики \n21.01 - вернулись коммметарии \n22.01 - отдали апдейт антиматиков \n26.01 - комментарии, отдали апдейт \n27.01 - отдали финал",
+            "id": "e3d37618-b1d5-4d42-9592-04f28e200b55",
+            "links": {
+                "self": "/api/v2/frontend/tasks/e3d37618-b1d5-4d42-9592-04f28e200b55"
+            },
+            "milestones": [
+                {
+                    "actual": null,
+                    "planned": "2026-01-22",
+                    "status": "planned",
+                    "type": "animatic"
+                },
+                {
+                    "actual": null,
+                    "planned": "2026-01-26",
+                    "status": "planned",
+                    "type": "feedback"
+                },
+                {
+                    "actual": null,
+                    "planned": "2026-01-28",
+                    "status": "planned",
+                    "type": "final"
+                },
+                {
+                    "actual": null,
+                    "planned": "2026-02-02",
+                    "status": "planned",
+                    "type": "stage_49aba8b8"
+                },
+                {
+                    "actual": null,
+                    "planned": "2026-03-01",
+                    "status": "planned",
+                    "type": "onair"
+                }
+            ],
+            "ownerId": "1a2c143445dfe7d0",
+            "status": "done",
+            "tags": [],
+            "title": "Латифа  [СТАМБУЛ] дин лого"
+        },
+        {
+            "brand": "Боржоми",
+            "customer": "Михалкина Ирина",
+            "date": {
+                "end": "2026-02-28",
+                "nextDue": "2026-02-28",
+                "start": "2026-02-25"
+            },
+            "format_": "дин лого",
+            "groupId": "3b0ab551484b78aa",
+            "history": "17.02 - отдали драфт анимации \n18.02 - пришли комментарии \n19.02 - апдейт \n20.02 - комментарии \n24.02 - отдали аниматики\n25.02 - комментарии, апдейт \n26.02 - комментарии, апдейт, финал",
+            "id": "1226b90f-cebb-46b9-8e7e-9dbf546f123e",
+            "links": {
+                "self": "/api/v2/frontend/tasks/1226b90f-cebb-46b9-8e7e-9dbf546f123e"
+            },
+            "milestones": [
+                {
+                    "actual": null,
+                    "planned": "2026-02-25",
+                    "status": "planned",
+                    "type": "stage_49aba8b8"
+                },
+                {
+                    "actual": null,
+                    "planned": "2026-02-28",
+                    "status": "planned",
+                    "type": "onair"
+                }
+            ],
+            "ownerId": "67c0911977404d51",
+            "status": "done",
+            "tags": [],
+            "title": "Боржоми  [Время завтраков ] дин лого"
+        },
+        {
+            "brand": "Артрофиш",
+            "customer": "Немсицверидзе\nЖанна",
+            "date": {
+                "end": "2026-02-28",
+                "nextDue": "2026-02-28",
+                "start": "2026-01-15"
+            },
+            "format_": "граф.ролик",
+            "groupId": "b8e9270fedf49272",
+            "history": "12.01 - апдейт  ТЗ\n15.01 - отдали раскадровку, вернулись комментарии \n16.01 - отдали апдейт \n19.01 - выбрали 3 вариант, перешли к аниматику \n21.01 - отдали аниматик \n22.01 - вернулись комментарии \n23.01 - отдали апдейт \n26.01 - сведенка, отдали финал \n27.01 - апдейт финала \n04.02- апдейт ГЗК, текст на пэкшоте, отдали финалы",
+            "id": "641bb23b-6aa4-439c-8c52-f13b7f90b794",
+            "links": {
+                "self": "/api/v2/frontend/tasks/641bb23b-6aa4-439c-8c52-f13b7f90b794"
+            },
+            "milestones": [
+                {
+                    "actual": null,
+                    "planned": "2026-01-15",
+                    "status": "planned",
+                    "type": "storyboard"
+                },
+                {
+                    "actual": null,
+                    "planned": "2026-01-16",
+                    "status": "planned",
+                    "type": "feedback"
+                },
+                {
+                    "actual": null,
+                    "planned": "2026-01-21",
+                    "status": "planned",
+                    "type": "animatic"
+                },
+                {
+                    "actual": null,
+                    "planned": "2026-01-22",
+                    "status": "planned",
+                    "type": "feedback"
+                },
+                {
+                    "actual": null,
+                    "planned": "2026-01-26",
+                    "status": "planned",
+                    "type": "final"
+                },
+                {
+                    "actual": null,
+                    "planned": "2026-01-27",
+                    "status": "planned",
+                    "type": "feedback"
+                },
+                {
+                    "actual": null,
+                    "planned": "2026-01-28",
+                    "status": "planned",
+                    "type": "stage_49aba8b8"
+                },
+                {
+                    "actual": null,
+                    "planned": "2026-02-28",
+                    "status": "planned",
+                    "type": "onair"
+                }
+            ],
+            "ownerId": "588e62c641ec2012",
+            "status": "done",
+            "tags": [],
+            "title": "Артрофиш [Титаны ] граф.ролик"
+        },
+        {
+            "brand": "Папа может",
+            "customer": "Калачёва Анастасия",
+            "date": {
+                "end": "2026-02-21",
+                "nextDue": "2026-02-21",
+                "start": "2026-01-16"
+            },
+            "format_": "граф ролик",
+            "groupId": "7334a4c4aa518a49",
+            "history": "19.01 - отдали раскадровку сосиски, ГЗК, отдали аниматик \n20.01 - пришли комментарии, отдали апдейт, отдали финал сосисок\n21.01 - комментарии к финалу, отдали апдейт сосисок \n\nКолбаса\n22.01 - отправили аниматики, комментарии,апдейт \n27.01 - замена упаковки, отдали апдейт \n28.01 - отдали финал",
+            "id": "c0eaaf6d-dd99-40bf-9b8d-082f778890a2",
+            "links": {
+                "self": "/api/v2/frontend/tasks/c0eaaf6d-dd99-40bf-9b8d-082f778890a2"
+            },
+            "milestones": [
+                {
+                    "actual": null,
+                    "planned": "2026-01-16",
+                    "status": "planned",
+                    "type": "storyboard"
+                },
+                {
+                    "actual": null,
+                    "planned": "2026-01-19",
+                    "status": "planned",
+                    "type": "animatic"
+                },
+                {
+                    "actual": null,
+                    "planned": "2026-01-22",
+                    "status": "planned",
+                    "type": "storyboard"
+                },
+                {
+                    "actual": null,
+                    "planned": "2026-01-26",
+                    "status": "planned",
+                    "type": "feedback"
+                },
+                {
+                    "actual": null,
+                    "planned": "2026-01-28",
+                    "status": "planned",
+                    "type": "animatic"
+                },
+                {
+                    "actual": null,
+                    "planned": "2026-01-29",
+                    "status": "planned",
+                    "type": "feedback"
+                },
+                {
+                    "actual": null,
+                    "planned": "2026-01-30",
+                    "status": "planned",
+                    "type": "final"
+                },
+                {
+                    "actual": null,
+                    "planned": "2026-02-02",
+                    "status": "planned",
+                    "type": "final"
+                },
+                {
+                    "actual": null,
+                    "planned": "2026-02-20",
+                    "status": "planned",
+                    "type": "prefinal"
+                },
+                {
+                    "actual": null,
+                    "planned": "2026-02-21",
+                    "status": "planned",
+                    "type": "final"
+                }
+            ],
+            "ownerId": "1a2c143445dfe7d0",
+            "status": "done",
+            "tags": [],
+            "title": "Папа может  [90 сек ] граф ролик"
+        },
+        {
+            "brand": "Метадоксил",
+            "customer": "Калачёва Анастасия",
+            "date": {
+                "end": "2026-02-20",
+                "nextDue": "2026-02-20",
+                "start": "2026-02-20"
+            },
+            "format_": "брендинг",
+            "groupId": "ec5ec0f9267eba85",
+            "history": "18.02 - отдали раскадровку, комментарии, апдейт \n19.02 - комментарии, апдейт, комментарии\n20.02 - отдали аниматик, финал",
+            "id": "4b9b3bfa-8259-4802-a617-0088f9b0d203",
+            "links": {
+                "self": "/api/v2/frontend/tasks/4b9b3bfa-8259-4802-a617-0088f9b0d203"
+            },
+            "milestones": [
+                {
+                    "actual": null,
+                    "planned": "2026-02-20",
+                    "status": "planned",
+                    "type": "stage_49aba8b8"
+                }
+            ],
+            "ownerId": "70d169be891bb94f",
+            "status": "done",
+            "tags": [],
+            "title": "Метадоксил  [Камеди клаб ] брендинг"
+        },
+        {
+            "brand": "Магуро",
+            "customer": "Калачёва Анастасия",
+            "date": {
+                "end": "2026-02-15",
+                "nextDue": "2026-02-15",
+                "start": "2026-01-27"
+            },
+            "format_": "брендинг экрана",
+            "groupId": "79b43c7f183c613d",
+            "history": "26.01 - отдали аниматики\n06.02 - добавили ТЗ на соус Терияки, отдали превью \n11.02 - комментарии, отдали финал центр.экр. \n12.02 - отдали апдейт, отдали финал новых экранов",
+            "id": "f8cdf982-5de8-42da-977a-8e43ebd54ca4",
+            "links": {
+                "self": "/api/v2/frontend/tasks/f8cdf982-5de8-42da-977a-8e43ebd54ca4"
+            },
+            "milestones": [
+                {
+                    "actual": null,
+                    "planned": "2026-01-27",
+                    "status": "planned",
+                    "type": "animatic"
+                },
+                {
+                    "actual": null,
+                    "planned": "2026-01-30",
+                    "status": "planned",
+                    "type": "feedback"
+                },
+                {
+                    "actual": null,
+                    "planned": "2026-02-03",
+                    "status": "planned",
+                    "type": "final"
+                },
+                {
+                    "actual": null,
+                    "planned": "2026-02-05",
+                    "status": "planned",
+                    "type": "feedback"
+                },
+                {
+                    "actual": null,
+                    "planned": "2026-02-09",
+                    "status": "planned",
+                    "type": "final"
+                },
+                {
+                    "actual": null,
+                    "planned": "2026-02-10",
+                    "status": "planned",
+                    "type": "feedback"
+                },
+                {
+                    "actual": null,
+                    "planned": "2026-02-15",
+                    "status": "planned",
+                    "type": "onair"
+                }
+            ],
+            "ownerId": "1a2c143445dfe7d0",
+            "status": "done",
+            "tags": [],
+            "title": "Магуро  [ШВ ] брендинг экрана"
+        },
+        {
+            "brand": "Оки раствор",
+            "customer": "Калачёва Анастасия",
+            "date": {
+                "end": "2026-02-13",
+                "nextDue": "2026-02-13",
+                "start": "2026-02-11"
+            },
+            "format_": "брендинг",
+            "groupId": "99551e6aab02f988",
+            "history": "10.02 - согласовали стилы \n11.02 - аниматик \n12.02 - отдали финал центрального, превью новых \n17.02 - финал новых экранов",
+            "id": "92ced258-12ec-4b14-af3b-c8d00bbc68c8",
+            "links": {
+                "self": "/api/v2/frontend/tasks/92ced258-12ec-4b14-af3b-c8d00bbc68c8"
+            },
+            "milestones": [
+                {
+                    "actual": null,
+                    "planned": "2026-02-11",
+                    "status": "planned",
+                    "type": "stage_49aba8b8"
+                },
+                {
+                    "actual": null,
+                    "planned": "2026-02-13",
+                    "status": "planned",
+                    "type": "stage_f76b9bab"
+                }
+            ],
+            "ownerId": "70d169be891bb94f",
+            "status": "done",
+            "tags": [],
+            "title": "Оки раствор  [шоу Воли ] брендинг"
+        },
+        {
+            "brand": "Оки акт",
+            "customer": "Калачёва Анастасия",
+            "date": {
+                "end": "2026-02-13",
+                "nextDue": "2026-02-13",
+                "start": "2026-02-11"
+            },
+            "format_": "брендинг",
+            "groupId": "99551e6aab02f988",
+            "history": "10.02 - согласовали стилы \n11.02 - аниматики, отдали финал",
+            "id": "44bc2602-46d1-4787-9135-814ebec79455",
+            "links": {
+                "self": "/api/v2/frontend/tasks/44bc2602-46d1-4787-9135-814ebec79455"
+            },
+            "milestones": [
+                {
+                    "actual": null,
+                    "planned": "2026-02-11",
+                    "status": "planned",
+                    "type": "stage_49aba8b8"
+                },
+                {
+                    "actual": null,
+                    "planned": "2026-02-13",
+                    "status": "planned",
+                    "type": "stage_f76b9bab"
+                }
+            ],
+            "ownerId": "70d169be891bb94f",
+            "status": "done",
+            "tags": [],
+            "title": "Оки акт  [шоу Воли ] брендинг"
+        },
+        {
+            "brand": "Cosmetime",
+            "customer": "Немсицверидзе\nЖанна",
+            "date": {
+                "end": "2026-02-13",
+                "nextDue": "2026-02-13",
+                "start": "2026-02-02"
+            },
+            "format_": "стоп кадр",
+            "groupId": "b8e9270fedf49272",
+            "history": "29.01 - отдали раскадрвоку \n02.02 - вернулись комментарии\n05.02 - ГЗК для аниматика \n06.02 - отдали аниматик \n13.02 - прислали сведёнку, отдали финал",
+            "id": "4d47df17-dfc0-428a-b4fb-5f4ef3d3d2c3",
+            "links": {
+                "self": "/api/v2/frontend/tasks/4d47df17-dfc0-428a-b4fb-5f4ef3d3d2c3"
+            },
+            "milestones": [
+                {
+                    "actual": null,
+                    "planned": "2026-02-02",
+                    "status": "planned",
+                    "type": "storyboard"
+                },
+                {
+                    "actual": null,
+                    "planned": "2026-02-04",
+                    "status": "planned",
+                    "type": "feedback"
+                },
+                {
+                    "actual": null,
+                    "planned": "2026-02-09",
+                    "status": "planned",
+                    "type": "animatic"
+                },
+                {
+                    "actual": null,
+                    "planned": "2026-02-10",
+                    "status": "planned",
+                    "type": "feedback"
+                },
+                {
+                    "actual": null,
+                    "planned": "2026-02-11",
+                    "status": "planned",
+                    "type": "final"
+                },
+                {
+                    "actual": null,
+                    "planned": "2026-02-12",
+                    "status": "planned",
+                    "type": "feedback"
+                },
+                {
+                    "actual": null,
+                    "planned": "2026-02-13",
+                    "status": "planned",
+                    "type": "final"
+                }
+            ],
+            "ownerId": "36596789c8cc73cb",
+            "status": "done",
+            "tags": [],
+            "title": "Cosmetime [Титаны ] стоп кадр"
+        },
+        {
+            "brand": "Купер",
+            "customer": "Носенко Василий",
+            "date": {
+                "end": "2026-02-13",
+                "nextDue": "2026-02-13",
+                "start": "2026-01-28"
+            },
+            "format_": "дин лого",
+            "groupId": "cc986cf48dfdb96d",
+            "history": "28.01 - отправили аниматики, комментарии, апдейт отдали \n09.02 - отдали финал",
+            "id": "280c5bba-fa43-44e8-931d-458000f6bdd0",
+            "links": {
+                "self": "/api/v2/frontend/tasks/280c5bba-fa43-44e8-931d-458000f6bdd0"
+            },
+            "milestones": [
+                {
+                    "actual": null,
+                    "planned": "2026-01-28",
+                    "status": "planned",
+                    "type": "animatic"
+                },
+                {
+                    "actual": null,
+                    "planned": "2026-01-30",
+                    "status": "planned",
+                    "type": "feedback"
+                },
+                {
+                    "actual": null,
+                    "planned": "2026-02-04",
+                    "status": "planned",
+                    "type": "prefinal"
+                },
+                {
+                    "actual": null,
+                    "planned": "2026-02-05",
+                    "status": "planned",
+                    "type": "feedback"
+                },
+                {
+                    "actual": null,
+                    "planned": "2026-02-09",
+                    "status": "planned",
+                    "type": "final"
+                },
+                {
+                    "actual": null,
+                    "planned": "2026-02-13",
+                    "status": "planned",
+                    "type": "onair"
+                }
+            ],
+            "ownerId": "29c52d5de94e8ca2",
+            "status": "done",
+            "tags": [],
+            "title": "Купер  [КОНФ] дин лого"
+        },
+        {
+            "brand": "WB",
+            "customer": "Иванкова Екатерина",
+            "date": {
+                "end": "2026-02-11",
+                "nextDue": "2026-02-11",
+                "start": "2026-02-05"
+            },
+            "format_": "скринкаст",
+            "groupId": "cc986cf48dfdb96d",
+            "history": "04.02 - отправили аниматик \n05.02 - комментарии, апдейт, финал \n06.02 - апдейт финала",
+            "id": "83995bf2-df22-45fc-8f2e-7233736195da",
+            "links": {
+                "self": "/api/v2/frontend/tasks/83995bf2-df22-45fc-8f2e-7233736195da"
+            },
+            "milestones": [
+                {
+                    "actual": null,
+                    "planned": "2026-02-05",
+                    "status": "planned",
+                    "type": "animatic"
+                },
+                {
+                    "actual": null,
+                    "planned": "2026-02-06",
+                    "status": "planned",
+                    "type": "feedback"
+                },
+                {
+                    "actual": null,
+                    "planned": "2026-02-09",
+                    "status": "planned",
+                    "type": "final"
+                },
+                {
+                    "actual": null,
+                    "planned": "2026-02-10",
+                    "status": "planned",
+                    "type": "feedback"
+                },
+                {
+                    "actual": null,
+                    "planned": "2026-02-11",
+                    "status": "planned",
+                    "type": "final"
+                }
+            ],
+            "ownerId": "5776c917534e48ff",
+            "status": "done",
+            "tags": [],
+            "title": "WB [КОНФ ] скринкаст"
+        },
+        {
+            "brand": "Купер",
+            "customer": "Носенко Василий",
+            "date": {
+                "end": "2026-02-10",
+                "nextDue": "2026-02-10",
+                "start": "2026-02-10"
+            },
+            "format_": "скринкаст",
+            "groupId": "b145658d6220cfbf",
+            "history": "06.02 - отдали Абрамова(остался Атлас)\n09.02 - комментарии к Абрамову\n10.02 - отдали апдейт, финал Абрамов, аниматик Атлас \n11.02 - отдали финал",
+            "id": "57463de5-416b-4e60-af08-0529613a5e0e",
+            "links": {
+                "self": "/api/v2/frontend/tasks/57463de5-416b-4e60-af08-0529613a5e0e"
+            },
+            "milestones": [
+                {
+                    "actual": null,
+                    "planned": "2026-02-10",
+                    "status": "planned",
+                    "type": "stage_49aba8b8"
+                }
+            ],
+            "ownerId": "67c0911977404d51",
+            "status": "done",
+            "tags": [],
+            "title": "Купер  [Stand up ] скринкаст"
+        }
+    ]
+}

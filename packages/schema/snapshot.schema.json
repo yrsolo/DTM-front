@@ -9,19 +9,10 @@
       "type": "object",
       "required": ["version", "generatedAt"],
       "properties": {
-        "version": {
-          "type": "string",
-          "const": "v1"
-        },
-        "generatedAt": {
-          "type": "string"
-        },
-        "source": {
-          "type": "string"
-        },
-        "hash": {
-          "type": "string"
-        }
+        "version": { "type": "string", "const": "v1" },
+        "generatedAt": { "type": "string", "format": "date-time" },
+        "source": { "type": "string" },
+        "hash": { "type": "string" }
       },
       "additionalProperties": false
     },
@@ -31,70 +22,9 @@
         "type": "object",
         "required": ["id", "name"],
         "properties": {
-          "id": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          }
-        },
-        "additionalProperties": false
-      }
-    },
-    "tasks": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "required": ["id", "title", "status"],
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "title": {
-            "type": "string"
-          },
-          "ownerId": {
-            "type": "string"
-          },
-          "status": {
-            "type": "string"
-          },
-          "start": {
-            "type": "string"
-          },
-          "end": {
-            "type": "string"
-          },
-          "tags": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "groupId": {
-            "type": "string"
-          },
-          "deps": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "links": {
-            "type": "object",
-            "properties": {
-              "sheetRowUrl": {
-                "type": "string"
-              },
-              "externalUrl": {
-                "type": "string"
-              }
-            },
-            "additionalProperties": false
-          },
-          "notes": {
-            "type": "string"
-          }
+          "id": { "type": "string" },
+          "name": { "type": "string" },
+          "position": { "type": ["string", "null"] }
         },
         "additionalProperties": false
       }
@@ -105,11 +35,59 @@
         "type": "object",
         "required": ["id", "name"],
         "properties": {
-          "id": {
-            "type": "string"
+          "id": { "type": "string" },
+          "name": { "type": "string" }
+        },
+        "additionalProperties": false
+      }
+    },
+    "tasks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "title", "status"],
+        "properties": {
+          "id": { "type": "string" },
+          "title": { "type": "string" },
+          "ownerId": { "type": ["string", "null"] },
+          "ownerName": { "type": ["string", "null"] },
+          "brand": { "type": ["string", "null"] },
+          "customer": { "type": ["string", "null"] },
+          "format_": { "type": ["string", "null"] },
+          "type": { "type": ["string", "null"] },
+          "status": { "type": "string" },
+          "start": { "type": "string", "format": "date" },
+          "end": { "type": "string", "format": "date" },
+          "nextDue": { "type": ["string", "null"], "format": "date" },
+          "tags": { "type": "array", "items": { "type": "string" } },
+          "groupId": { "type": "string" },
+          "deps": { "type": "array", "items": { "type": "string" } },
+          "links": {
+            "type": "object",
+            "properties": {
+              "sheetRowUrl": { "type": ["string", "null"] },
+              "externalUrl": { "type": "string" },
+              "self": { "type": "string" }
+            },
+            "additionalProperties": false
           },
-          "name": {
-            "type": "string"
+          "notes": { "type": "string" },
+          "history": { "type": ["string", "null"] },
+          "hash": { "type": ["string", "null"] },
+          "revision": { "type": ["string", "null"] },
+          "milestones": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["type", "status"],
+              "properties": {
+                "type": { "type": "string" },
+                "planned": { "type": "string", "format": "date" },
+                "actual": { "type": ["string", "null"], "format": "date" },
+                "status": { "type": "string" }
+              },
+              "additionalProperties": false
+            }
           }
         },
         "additionalProperties": false
@@ -118,12 +96,16 @@
     "enums": {
       "type": "object",
       "properties": {
-        "status": {
+        "status": { "type": "object", "additionalProperties": { "type": "string" } },
+        "statusGroups": {
           "type": "object",
           "additionalProperties": {
-            "type": "string"
+            "type": "array",
+            "items": { "type": "string" }
           }
-        }
+        },
+        "milestoneType": { "type": "object", "additionalProperties": { "type": "string" } },
+        "milestoneStatus": { "type": "object", "additionalProperties": { "type": "string" } }
       },
       "additionalProperties": false
     }
