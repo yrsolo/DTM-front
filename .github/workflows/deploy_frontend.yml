@@ -79,12 +79,10 @@ jobs:
             test)
               TARGET_PREFIX="test"
               CONFIG_PATH="apps/web/config/public.yaml"
-              CLEAR_SITE="true"
               ;;
             prod)
               TARGET_PREFIX=""
               CONFIG_PATH="apps/web/config/public.prod.yaml"
-              CLEAR_SITE="false"
               ;;
             *)
               echo "Unsupported target: $TARGET" >&2
@@ -108,7 +106,6 @@ jobs:
           echo "target=$TARGET" >> "$GITHUB_OUTPUT"
           echo "target_prefix=$TARGET_PREFIX" >> "$GITHUB_OUTPUT"
           echo "config_path=$CONFIG_PATH" >> "$GITHUB_OUTPUT"
-          echo "clear_site=$CLEAR_SITE" >> "$GITHUB_OUTPUT"
           echo "release_id=$RELEASE_ID" >> "$GITHUB_OUTPUT"
           echo "dry_run=$DRY_RUN" >> "$GITHUB_OUTPUT"
           echo "site_path=$SITE_PATH" >> "$GITHUB_OUTPUT"
@@ -174,7 +171,10 @@ jobs:
         with:
           root: .deploy/site
           include: "**"
-          clear: ${{ steps.vars.outputs.clear_site }}
+          # Shared bucket safety: never use destructive clear from Actions.
+          # Test deploys must touch only `test/`, and prod deploys must not wipe
+          # unrelated prefixes or release metadata.
+          clear: "false"
           bucket: ${{ env.YC_BUCKET_NAME }}
           prefix: ${{ steps.vars.outputs.target_prefix }}
           yc-sa-json-credentials: ${{ secrets.YC_SA_JSON_CREDENTIALS }}

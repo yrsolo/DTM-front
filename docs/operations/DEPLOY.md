@@ -55,7 +55,8 @@ Deploy включает:
 GitHub Actions deploy:
 - `push` в `dev` -> автоматически публикует `test`
 - `workflow_dispatch` -> ручной deploy в `prod` или `test`
-- для Actions используется OIDC через `yandex-cloud/yc-obj-storage-upload`, без AWS access keys как обязательной схемы
+- для Actions используется OIDC через `yc-actions/yc-obj-storage-upload`, без AWS access keys как обязательной схемы
+- Actions-upload работает в недеструктивном режиме: `clear=false` для всех target, потому что bucket общий для `prod` и `test`, и очистка через action не считается безопасной для shared bucket
 
 ## Runtime config в deploy
 
@@ -77,6 +78,15 @@ Runtime-переключение между продовым и тестовым
 4. На `https://dtm.solofarm.ru/` и `https://dtm.solofarm.ru/test/` грузятся данные и runtime config.
 5. Demo mode по умолчанию соответствует ожидаемому runtime default.
 6. Проверены базовые страницы: `Задачи`, `Дизайнеры`, drawer, workbench.
+
+## Важное ограничение текущего GitHub deploy
+
+GitHub Actions сейчас не делает очистку старых файлов в target-path. Это сознательное решение:
+- bucket один и общий для `prod` и `test`;
+- destructive clear в upload-action может затронуть не только свой префикс;
+- поэтому автоматический deploy в CI только добавляет/обновляет файлы внутри своего target.
+
+Если потребуется безопасная очистка только `test/` или только корня `prod`, её нужно делать отдельным target-aware sync-скриптом, а не флагом `clear` в shared-bucket upload action.
 
 ## Rollback
 
