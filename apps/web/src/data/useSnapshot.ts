@@ -17,8 +17,6 @@ import {
 } from "./runtimeDefaults";
 
 type SnapshotStatus = "cold_loading" | "ready" | "refreshing" | "stale_error";
-const API_BASE_PROD = "https://dtm-api.solofarm.ru";
-const API_BASE_TEST = "https://dtm-api-test.solofarm.ru";
 
 type PersistedMeta = {
   generatedAt?: string;
@@ -178,6 +176,7 @@ export function useSnapshot(initialRuntimeDefaults?: Partial<RuntimeDefaults>) {
     }
 
     try {
+      const cfg = await loadPublicConfig();
       const currentMeta = memoryMeta;
       const apiStatusFilterAll: ApiStatusFilter = {
         work: true,
@@ -185,7 +184,9 @@ export function useSnapshot(initialRuntimeDefaults?: Partial<RuntimeDefaults>) {
         done: true,
         wait: true,
       };
-      const apiBaseOverride = useTestApi ? API_BASE_TEST : API_BASE_PROD;
+      const apiBaseOverride = useTestApi
+        ? cfg.apiBaseUrlTest || cfg.apiBaseUrl
+        : cfg.apiBaseUrlProd || cfg.apiBaseUrl;
       const { payload, etag, notModified } = await fetchApiSnapshotWithMeta(
         currentMeta?.etag ?? null,
         dateFilter,
@@ -393,7 +394,7 @@ export function useSnapshot(initialRuntimeDefaults?: Partial<RuntimeDefaults>) {
       }
 
       if (!active) return;
-      const apiOn = Boolean(cfg.apiBaseUrl) || Boolean(API_BASE_PROD);
+      const apiOn = Boolean(cfg.apiBaseUrl || cfg.apiBaseUrlProd || cfg.apiBaseUrlTest);
       if (apiOn) {
         await refreshFromApi({ manual: false });
       } else if (!memorySnapshot && !snapshotRef.current) {

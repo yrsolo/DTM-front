@@ -31,6 +31,8 @@ Source of truth в коде:
 
 Типичные параметры:
 - `api_base_url`
+- `api_base_url_prod`
+- `api_base_url_test`
 - `api_frontend_path`
 - `api_statuses`
 - `api_include_people`
@@ -77,11 +79,11 @@ Workbench-вкладка `По умолчанию` должна задавать
 
 ## Переключение API-контуров
 
-`useSnapshot.ts` использует runtime toggle `useTestApi` и умеет переключаться между:
-- `https://dtm-api.solofarm.ru`
-- `https://dtm-api-test.solofarm.ru`
+`useSnapshot.ts` использует runtime toggle `useTestApi`, но сами URL теперь берутся из публичного конфига:
+- `api_base_url_prod`
+- `api_base_url_test`
 
-Это runtime-переключение, а не отдельная сборка.
+`api_base_url` остаётся backward-compatible общим полем и fallback-значением, если отдельные prod/test поля не заданы.
 
 ## Browser storage keys
 

@@ -3,6 +3,8 @@ import rawPublicConfigProd from "../../config/public.prod.yaml?raw";
 
 type PublicConfig = {
   apiBaseUrl: string | null;
+  apiBaseUrlProd: string | null;
+  apiBaseUrlTest: string | null;
   apiFrontendPath: string;
   apiStatuses: string;
   apiIncludePeople: boolean;
@@ -16,6 +18,8 @@ type PublicConfig = {
 
 const DEFAULT_CONFIG: PublicConfig = {
   apiBaseUrl: null,
+  apiBaseUrlProd: null,
+  apiBaseUrlTest: null,
   apiFrontendPath: "/api/v2/frontend",
   apiStatuses: "work,pre_done",
   apiIncludePeople: true,
@@ -69,9 +73,13 @@ function toNumber(value: string | undefined, fallback: number): number {
 
 function buildConfig(parsed: Record<string, string>): PublicConfig {
   const apiBaseUrl = parsed.api_base_url?.trim() || null;
+  const apiBaseUrlProd = parsed.api_base_url_prod?.trim() || apiBaseUrl;
+  const apiBaseUrlTest = parsed.api_base_url_test?.trim() || apiBaseUrl;
 
   return {
     apiBaseUrl,
+    apiBaseUrlProd,
+    apiBaseUrlTest,
     apiFrontendPath: parsed.api_frontend_path || DEFAULT_CONFIG.apiFrontendPath,
     apiStatuses: parsed.api_statuses || DEFAULT_CONFIG.apiStatuses,
     apiIncludePeople: toBoolean(
