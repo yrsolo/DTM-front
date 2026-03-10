@@ -62,6 +62,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 WEB_DIR="$REPO_ROOT/apps/web"
 DIST_DIR="$WEB_DIR/dist"
+PUBLIC_CONFIG_DIR="$WEB_DIR/public/config"
 CONFIG_PATH="${DTM_WEB_PUBLIC_CONFIG_PATH:-$REPO_ROOT/apps/web/config/public.yaml}"
 if [[ "$CONFIG_PATH" != /* ]]; then
   CONFIG_PATH="$REPO_ROOT/$CONFIG_PATH"
@@ -84,6 +85,10 @@ fi
 
 if [[ ! -f "$CONFIG_PATH" ]]; then
   echo "Runtime config file not found: $CONFIG_PATH"
+  exit 1
+fi
+if [[ ! -d "$PUBLIC_CONFIG_DIR" ]]; then
+  echo "Public config directory not found: $PUBLIC_CONFIG_DIR"
   exit 1
 fi
 
@@ -165,7 +170,19 @@ else
     --cache-control "public, max-age=31536000, immutable"
 fi
 
-echo "Uploading runtime config to ${SITE_PATH_LABEL}config/public.yaml ..."
+echo "Syncing public config directory to ${SITE_PATH_LABEL}config/ ..."
+if [[ "$DRY_RUN" == "true" ]]; then
+  echo "[DRY-RUN] aws s3 sync \"$PUBLIC_CONFIG_DIR\" \"s3://$YC_BUCKET_NAME/$CONFIG_PREFIX\" --delete --endpoint-url \"$YC_ENDPOINT\" --cache-control no-cache"
+else
+  aws s3 sync \
+    "$PUBLIC_CONFIG_DIR" \
+    "s3://$YC_BUCKET_NAME/$CONFIG_PREFIX" \
+    --delete \
+    --endpoint-url "$YC_ENDPOINT" \
+    --cache-control "no-cache"
+fi
+
+echo "Uploading runtime config aliases to ${SITE_PATH_LABEL}config/public.yaml ..."
 if [[ "$DRY_RUN" == "true" ]]; then
   echo "[DRY-RUN] aws s3 cp \"$CONFIG_PATH\" \"s3://$YC_BUCKET_NAME/$CONFIG_PREFIX/public.yaml\" --endpoint-url \"$YC_ENDPOINT\" --content-type text/yaml --cache-control no-cache"
   echo "[DRY-RUN] aws s3 cp \"$CONFIG_PATH\" \"s3://$YC_BUCKET_NAME/$CONFIG_PREFIX/public.yam\" --endpoint-url \"$YC_ENDPOINT\" --content-type text/yaml --cache-control no-cache"

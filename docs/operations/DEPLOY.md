@@ -26,8 +26,8 @@ Frontend собирается как статический сайт и выкл
 
 Deploy включает:
 - `dist/`
-- runtime config `config/public.yaml`
-- fallback `config/public.yam`
+- всю папку `apps/web/public/config/` как публичный каталог `config/`
+- runtime config aliases `config/public.yaml` и `config/public.yam` поверх общего `config/`
 - пример snapshot `data/snapshot.example.json`
 - `index.html`
 - release metadata в `releases/prod/*` или `releases/test/*`
@@ -65,6 +65,8 @@ GitHub Actions deploy:
 - `config/public.yam`
 
 Это сделано, потому что фронт поддерживает fallback на оба пути и уже встречался реальный прод, где браузер просил `.yam`.
+
+При этом deploy больше не перечисляет конфиги вручную. Публикуется весь каталог `apps/web/public/config/`, поэтому такие файлы как `config/design-controls.json` и будущие вложенные конфиги попадают в сайт автоматически без правки deploy-скриптов.
 
 ## Production vs test API
 

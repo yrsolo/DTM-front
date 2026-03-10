@@ -165,6 +165,7 @@ function Get-ReleaseId {
 $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
 $webDir = Join-Path $repoRoot "apps/web"
 $distDir = Join-Path $webDir "dist"
+$publicConfigDir = Join-Path $webDir "public/config"
 $defaultRuntimeConfigPath = Join-Path $repoRoot "apps/web/config/public.yaml"
 
 if ([string]::IsNullOrWhiteSpace($EnvFile)) {
@@ -232,6 +233,9 @@ if (-not $DryRun) {
 if (-not (Test-Path $runtimeConfigPath)) {
   throw "Runtime config file not found: $runtimeConfigPath"
 }
+if (-not (Test-Path $publicConfigDir)) {
+  throw "Public config directory not found: $publicConfigDir"
+}
 
 $siteBucketUri = if ([string]::IsNullOrWhiteSpace($sitePrefix)) { "s3://$bucket" } else { "s3://$bucket/$sitePrefix" }
 $releaseRootUri = "s3://$bucket/releases/$deployTarget"
@@ -296,7 +300,22 @@ if ($DryRun) {
   }
 }
 
-Write-Host "Uploading runtime config to $sitePrefixLabel config/public.yaml ..."
+Write-Host "Syncing public config directory to $sitePrefixLabel config/ ..."
+if ($DryRun) {
+  Write-Host "[DRY-RUN] aws s3 sync `"$publicConfigDir`" `"s3://$bucket/$configPrefix`" --delete --endpoint-url `"$endpoint`" --cache-control `"no-cache`""
+} else {
+  $configSyncArgs = @(
+    "s3", "sync", $publicConfigDir, "s3://$bucket/$configPrefix",
+    "--delete",
+    "--endpoint-url", $endpoint,
+    "--cache-control", "no-cache"
+  )
+  Invoke-Checked {
+    & aws @configSyncArgs
+  }
+}
+
+Write-Host "Uploading runtime config aliases to $sitePrefixLabel config/public.yaml ..."
 if ($DryRun) {
   Write-Host "[DRY-RUN] aws s3 cp `"$runtimeConfigPath`" `"s3://$bucket/$configPrefix/public.yaml`" --endpoint-url `"$endpoint`" --content-type text/yaml --cache-control no-cache"
   Write-Host "[DRY-RUN] aws s3 cp `"$runtimeConfigPath`" `"s3://$bucket/$configPrefix/public.yam`" --endpoint-url `"$endpoint`" --content-type text/yaml --cache-control no-cache"

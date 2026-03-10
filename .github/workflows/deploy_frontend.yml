@@ -138,6 +138,7 @@ jobs:
           mkdir -p "$SITE_DIR" "$SITE_DIR/config" "$SITE_DIR/data" "$RELEASE_DIR"
 
           cp -R apps/web/dist/. "$SITE_DIR/"
+          cp -R apps/web/public/config/. "$SITE_DIR/config/"
           cp "${{ steps.vars.outputs.config_path }}" "$SITE_DIR/config/public.yaml"
           cp "${{ steps.vars.outputs.config_path }}" "$SITE_DIR/config/public.yam"
           cp data/snapshot.example.json "$SITE_DIR/data/snapshot.example.json"
