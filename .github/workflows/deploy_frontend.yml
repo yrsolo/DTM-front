@@ -42,14 +42,13 @@ concurrency:
 
 env:
   YC_BUCKET_NAME: dtm-front
-  YC_SERVICE_ACCOUNT_ID: aje1kqd422vq2vefkbbl
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    environment: ${{ github.event_name == 'push' && 'test' || inputs.target }}
     permissions:
       contents: read
-      id-token: write
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -117,9 +116,9 @@ jobs:
         run: |
           set -euo pipefail
           test -n "$YC_BUCKET_NAME"
-          test -n "$YC_SERVICE_ACCOUNT_ID"
           test -f "${{ steps.vars.outputs.config_path }}"
           test -f "data/snapshot.example.json"
+          test -n "${{ secrets.YC_SA_JSON_CREDENTIALS }}"
 
       - name: Install dependencies
         run: npm ci
@@ -169,25 +168,25 @@ jobs:
 
       - name: Upload site package
         if: ${{ steps.vars.outputs.dry_run != 'true' }}
-        uses: yandex-cloud/yc-obj-storage-upload@v3
+        uses: yc-actions/yc-obj-storage-upload@v3
         with:
           root: .deploy/site
           include: "**"
           clear: ${{ steps.vars.outputs.clear_site }}
           bucket: ${{ env.YC_BUCKET_NAME }}
           prefix: ${{ steps.vars.outputs.target_prefix }}
-          yc-sa-id: ${{ env.YC_SERVICE_ACCOUNT_ID }}
+          yc-sa-json-credentials: ${{ secrets.YC_SA_JSON_CREDENTIALS }}
 
       - name: Upload release metadata
         if: ${{ steps.vars.outputs.dry_run != 'true' }}
-        uses: yandex-cloud/yc-obj-storage-upload@v3
+        uses: yc-actions/yc-obj-storage-upload@v3
         with:
           root: .deploy/release
           include: "**"
           clear: "false"
           bucket: ${{ env.YC_BUCKET_NAME }}
           prefix: releases/${{ steps.vars.outputs.target }}
-          yc-sa-id: ${{ env.YC_SERVICE_ACCOUNT_ID }}
+          yc-sa-json-credentials: ${{ secrets.YC_SA_JSON_CREDENTIALS }}
 
       - name: Deploy summary
         if: ${{ steps.vars.outputs.dry_run != 'true' }}
@@ -198,4 +197,3 @@ jobs:
           echo "Bucket: $YC_BUCKET_NAME"
           echo "Site path: ${{ steps.vars.outputs.site_path }}"
           echo "Release ID: ${{ steps.vars.outputs.release_id }}"
-
