@@ -10,4 +10,4 @@ api_timeout_ms: 12000
 api_retry_count: 1
 api_retry_delay_ms: 500
 api_refresh_interval_ms: 60000
-local_snapshot_path: /data/snapshot.example.json
+local_snapshot_path: data/snapshot.example.json

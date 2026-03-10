@@ -1,5 +1,6 @@
 import rawPublicConfig from "../../config/public.yaml?raw";
 import rawPublicConfigProd from "../../config/public.prod.yaml?raw";
+import { resolvePublicAssetUrl } from "./publicPaths";
 
 type PublicConfig = {
   apiBaseUrl: string | null;
@@ -28,7 +29,7 @@ const DEFAULT_CONFIG: PublicConfig = {
   apiRetryCount: 1,
   apiRetryDelayMs: 500,
   apiRefreshIntervalMs: 60000,
-  localSnapshotPath: "/data/snapshot.example.json",
+  localSnapshotPath: "data/snapshot.example.json",
 };
 
 function parseSimpleYaml(yaml: string): Record<string, string> {
@@ -102,13 +103,14 @@ function buildConfig(parsed: Record<string, string>): PublicConfig {
 function pickFallbackYaml(): string {
   if (typeof window === "undefined") return rawPublicConfig;
   const host = window.location.hostname.toLowerCase();
+  const path = window.location.pathname.toLowerCase();
   const isLocal =
     host === "localhost" ||
     host === "127.0.0.1" ||
     host === "::1" ||
     host.endsWith(".local");
-  const isTestHost = host.includes("test");
-  if (isLocal || isTestHost) return rawPublicConfig;
+  const isTestRuntime = path === "/test" || path.startsWith("/test/");
+  if (isLocal || isTestRuntime) return rawPublicConfig;
   return rawPublicConfigProd;
 }
 
@@ -119,7 +121,10 @@ export async function loadPublicConfig(): Promise<PublicConfig> {
 
   cachedConfigPromise = (async () => {
     try {
-      const paths = ["/config/public.yaml", "/config/public.yam"];
+      const paths = [
+        resolvePublicAssetUrl("config/public.yaml"),
+        resolvePublicAssetUrl("config/public.yam"),
+      ];
       for (const path of paths) {
         const res = await fetch(path, {
           headers: { accept: "text/yaml,text/plain" },

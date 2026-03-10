@@ -2,4 +2,5 @@
 yc_bucket_name: dtm-front
 yc_endpoint: https://storage.yandexcloud.net
 aws_default_region: ru-central1
+dtm_web_deploy_target: test
 dtm_web_public_config_path: apps/web/config/public.yaml

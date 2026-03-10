@@ -17,13 +17,13 @@ Source of truth в коде:
 ## 1. Загрузка runtime-конфига
 
 `publicConfig.ts` читает конфиг в таком порядке:
-1. `/config/public.yaml`
-2. `/config/public.yam`
+1. `config/public.yaml`
+2. `config/public.yam`
 3. встроенный fallback YAML
 
-Fallback выбирается по host:
-- production host использует `public.prod.yaml`
-- остальные окружения используют `public.yaml`
+Fallback выбирается по runtime path:
+- root runtime использует `public.prod.yaml`
+- локальный режим и `/test/` используют `public.yaml`
 
 Из runtime-конфига приходят:
 - базовый URL API;

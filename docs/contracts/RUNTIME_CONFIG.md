@@ -19,13 +19,13 @@ Source of truth в коде:
 - [public.yaml](n:\PROJECTS\DTM\DTM-front\apps\web\config\public.yaml)
 - [public.prod.yaml](n:\PROJECTS\DTM\DTM-front\apps\web\config\public.prod.yaml)
 
-`publicConfig.ts` сначала пытается загрузить runtime-файл с хоста:
-1. `/config/public.yaml`
-2. `/config/public.yam`
+`publicConfig.ts` сначала пытается загрузить runtime-файл относительно текущего app base:
+1. `config/public.yaml`
+2. `config/public.yam`
 
 Если обе попытки неуспешны, используется встроенный YAML:
-- production host -> `public.prod.yaml`
-- остальные хосты -> `public.yaml`
+- root runtime -> `public.prod.yaml`
+- локальный режим и `/test/` runtime -> `public.yaml`
 
 ## Что лежит в runtime config
 
@@ -42,6 +42,9 @@ Source of truth в коде:
 - `api_retry_delay_ms`
 - `api_refresh_interval_ms`
 - `local_snapshot_path`
+
+Для subpath-safe запуска значения публичных asset paths должны быть относительными, например:
+- `local_snapshot_path: data/snapshot.example.json`
 
 ## Runtime defaults
 
@@ -111,4 +114,5 @@ Workbench-вкладка `По умолчанию` должна задавать
 - runtime-конфиг должен читаться из одного конфигурационного модуля;
 - host-specific логика не должна расползаться по rendering-компонентам;
 - persisted browser state не должен подменять собой API-контракт, только дополнять его;
-- fallback на `/config/public.yam` сохранён как совместимость с уже развернутым окружением.
+- fallback на `config/public.yam` сохранён как совместимость с уже развернутым окружением.
+- runtime asset paths должны корректно работать и из `/`, и из `/test/`.

@@ -1,4 +1,5 @@
 import { loadPublicConfig } from "../config/publicConfig";
+import { resolvePublicAssetUrl } from "../config/publicPaths";
 
 const MIN_API_INTERVAL_MS = 5000;
 let apiRateChain: Promise<void> = Promise.resolve();
@@ -71,7 +72,7 @@ export async function fetchLocalSnapshot(): Promise<any> {
 }
 
 export async function fetchDemoSnapshot(): Promise<any> {
-  const demoPath = "/data/snapshot.test.json";
+  const demoPath = resolvePublicAssetUrl("data/snapshot.test.json");
   const res = await fetch(demoPath, {
     headers: { accept: "application/json" },
     cache: "no-store",

@@ -1,3 +1,5 @@
+import { resolvePublicAssetUrl } from "../config/publicPaths";
+
 export type DesignControls = {
   desktopLeftColWidth: number;
   tableRowHeight: number;
@@ -305,7 +307,7 @@ export const DEFAULT_DESIGN_CONTROLS: DesignControls = {
 };
 
 export const DESIGN_CONTROLS_STORAGE_KEY = "dtm.web.designControls.v1";
-export const DESIGN_CONTROLS_PUBLIC_PATH = "/config/design-controls.json";
+export const DESIGN_CONTROLS_PUBLIC_PATH = resolvePublicAssetUrl("config/design-controls.json");
 
 export type DesignControlItem = {
   key: keyof DesignControls;

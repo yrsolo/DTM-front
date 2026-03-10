@@ -15,7 +15,7 @@ Source of truth в коде:
 ## Симптом: пустой экран или пустой timeline
 
 Проверьте:
-1. Загружается ли `/config/public.yaml` или `/config/public.yam`.
+1. Загружается ли `config/public.yaml` или `config/public.yam` относительно текущего app base.
 2. Есть ли успешный snapshot request в Network.
 3. Есть ли данные в `dtm.snapshot.v1`.
 4. Не установлен ли слишком маленький display limit.
@@ -45,11 +45,19 @@ Source of truth в коде:
 ## Симптом: runtime config не загрузился
 
 `publicConfig.ts` пробует:
-1. `/config/public.yaml`
-2. `/config/public.yam`
+1. `config/public.yaml`
+2. `config/public.yam`
 3. встроенный fallback
 
 Если в Network виден `404` на `.yaml`, это ещё не значит окончательную ошибку: приложение может продолжить работать через `.yam` или встроенный fallback.
+
+## Симптом: сайт в `/test/` открывается, но не подхватывает данные или config
+
+Проверьте:
+1. Что сборка опубликована под `test/`, а не в корень.
+2. Что в `test/config/` лежат `public.yaml` и `public.yam`.
+3. Что `local_snapshot_path` в runtime-конфиге относительный, а не абсолютный.
+4. Что в коде не осталось абсолютных ссылок вида `/config/...`, `/data/...`, `/favicon.ico`, `/DTM_lo.mp4`.
 
 ## Симптом: проблемы с локальной разработкой
 

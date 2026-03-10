@@ -20,7 +20,7 @@ Source of truth в коде:
 ## Runtime topology
 
 1. Браузер загружает статический frontend.
-2. `publicConfig.ts` читает runtime-конфиг из `/config/public.yaml`, затем из `/config/public.yam`, затем использует встроенный fallback YAML.
+2. `publicConfig.ts` читает runtime-конфиг из `config/public.yaml`, затем из `config/public.yam`, относительно текущего app base, а затем использует встроенный fallback YAML.
 3. `Layout.tsx` поднимает runtime hub: locale, режим страницы, view mode, sort mode, фильтры, runtime defaults, design controls и key colors.
 4. `useSnapshot.ts` читает локальный snapshot или делает запрос в API.
 5. `normalize.ts` приводит данные к UI-совместимой snapshot-модели.

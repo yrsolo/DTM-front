@@ -1,5 +1,6 @@
 import React from "react";
 import { useSnapshot } from "../data/useSnapshot";
+import { resolvePublicAssetUrl } from "../config/publicPaths";
 import { AppLocale, getUiText, UiText } from "../i18n/uiText";
 import {
   DEFAULT_DESIGN_CONTROLS,
@@ -125,6 +126,8 @@ function sanitizeRuntimeDefaultsForHost(input: RuntimeDefaults): RuntimeDefaults
 export function Layout(props: { children: React.ReactNode }) {
   const INTRO_FADE_MS = 3000;
   const INTRO_VIDEO_DELAY_MS = 1000;
+  const brandIconUrl = React.useMemo(() => resolvePublicAssetUrl("dtm_ico_64x64.png"), []);
+  const introVideoUrl = React.useMemo(() => resolvePublicAssetUrl("DTM_lo.mp4"), []);
   const [locale, setLocale] = React.useState<AppLocale>("ru");
   const ui = getUiText(locale);
   const [runtimeDefaults, setRuntimeDefaults] = React.useState<RuntimeDefaults>(() => {
@@ -585,7 +588,7 @@ export function Layout(props: { children: React.ReactNode }) {
                 onClick={startLogoIntro}
                 aria-label="Play logo intro"
               >
-                <img className="brandIcon" src="/dtm_ico_64x64.png" alt="" aria-hidden="true" />
+                <img className="brandIcon" src={brandIconUrl} alt="" aria-hidden="true" />
               </button>
               <div className="brandText">
                 <strong>{ui.appTitle}</strong>
@@ -602,7 +605,7 @@ export function Layout(props: { children: React.ReactNode }) {
             <video
               ref={introVideoRef}
               className={`logoIntroVideo ${introState === "playing" ? "isVisible" : ""}`}
-              src="/DTM_lo.mp4"
+              src={introVideoUrl}
               preload="auto"
               playsInline
               muted
