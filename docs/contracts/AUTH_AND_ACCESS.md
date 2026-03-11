@@ -92,7 +92,10 @@ JSON endpoints:
 V1 endpoints:
 - `GET /admin/overview`
 - `POST /admin/users/:id/approve`
-- `POST /admin/users/:id/block`
+- `POST /admin/users/:id/reject`
+- `POST /admin/users/:id/revoke`
+- `POST /admin/users/:id/make-admin`
+- `POST /admin/users/:id/remove-admin`
 - `POST /admin/allowlist`
 - `DELETE /admin/allowlist?email=...`
 

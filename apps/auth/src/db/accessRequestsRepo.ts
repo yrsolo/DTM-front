@@ -114,3 +114,14 @@ export async function listOpenAccessRequests(): Promise<AccessRequestRecord[]> {
   );
   return rows.map(mapRecord);
 }
+
+export async function listAccessRequests(): Promise<AccessRequestRecord[]> {
+  const rows = await executeQuery<AccessRequestRow>(
+    `
+      SELECT id, user_id, email, state, requested_at, note
+      FROM ${AUTH_TABLES.accessRequests}
+      ORDER BY requested_at DESC;
+    `
+  );
+  return rows.map(mapRecord);
+}

@@ -1,6 +1,15 @@
 import { getAuthRuntimeConfig } from "./config";
 import { badRequest, json, notFound } from "./http";
-import { addAllowlistEmailHandler, approveUserHandler, blockUserHandler, listAdminData, removeAllowlistEmailHandler } from "./handlers/adminHandlers";
+import {
+  addAllowlistEmailHandler,
+  approveUserHandler,
+  listAdminData,
+  makeAdminHandler,
+  rejectUserHandler,
+  removeAdminHandler,
+  removeAllowlistEmailHandler,
+  revokeApprovedUserHandler,
+} from "./handlers/adminHandlers";
 import { callback, login, logout, me } from "./handlers/authHandlers";
 import { proxyApiRequest } from "./handlers/apiProxy";
 import type { HttpResult, NormalizedRequest } from "./types";
@@ -44,9 +53,24 @@ export async function routeRequest(req: NormalizedRequest): Promise<HttpResult> 
       return approveUserHandler(req, approveMatch[1]);
     }
 
-    const blockMatch = req.routePath.match(/^\/admin\/users\/([^/]+)\/block$/);
-    if (req.method === "POST" && blockMatch) {
-      return blockUserHandler(req, blockMatch[1]);
+    const rejectMatch = req.routePath.match(/^\/admin\/users\/([^/]+)\/reject$/);
+    if (req.method === "POST" && rejectMatch) {
+      return rejectUserHandler(req, rejectMatch[1]);
+    }
+
+    const revokeMatch = req.routePath.match(/^\/admin\/users\/([^/]+)\/revoke$/);
+    if (req.method === "POST" && revokeMatch) {
+      return revokeApprovedUserHandler(req, revokeMatch[1]);
+    }
+
+    const makeAdminMatch = req.routePath.match(/^\/admin\/users\/([^/]+)\/make-admin$/);
+    if (req.method === "POST" && makeAdminMatch) {
+      return makeAdminHandler(req, makeAdminMatch[1]);
+    }
+
+    const removeAdminMatch = req.routePath.match(/^\/admin\/users\/([^/]+)\/remove-admin$/);
+    if (req.method === "POST" && removeAdminMatch) {
+      return removeAdminHandler(req, removeAdminMatch[1]);
     }
 
     return notFound(`Unknown auth route: ${req.routePath}`);

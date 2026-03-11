@@ -1,9 +1,9 @@
 import { badRequest, forbidden, json } from "../http";
 import { listAllowlistEntries, addAllowlistEmail, removeAllowlistEmail } from "../db/allowlistRepo";
-import { closeAccessRequestsForUser, listOpenAccessRequests } from "../db/accessRequestsRepo";
+import { closeAccessRequestsForUser, listAccessRequests } from "../db/accessRequestsRepo";
 import { writeAuditLog } from "../db/auditRepo";
-import { blockAndRevoke, ensureAdminRole, resolveSession } from "../middleware/auth";
-import { getUserById, listUsersByStatus, approveUser } from "../db/usersRepo";
+import { ensureAdminRole, resolveSession } from "../middleware/auth";
+import { incrementSessionVersion, listUsersByStatus, setUserStatus, upsertRole } from "../db/usersRepo";
 import type { NormalizedRequest } from "../types";
 
 async function requireAdmin(req: NormalizedRequest) {
@@ -23,20 +23,43 @@ function parseJsonBody(req: NormalizedRequest): any {
   }
 }
 
+function getAvatarUrl(yandexUid: string): string {
+  return `https://avatars.yandex.net/get-yapic/${encodeURIComponent(yandexUid)}/islands-200`;
+}
+
 export async function listAdminData(req: NormalizedRequest) {
   const auth = await requireAdmin(req);
   if (auth.error) return auth.error;
 
-  const [pendingUsers, allowlist, openRequests] = await Promise.all([
+  const [pendingUsers, approvedUsers, allowlist, accessRequests] = await Promise.all([
     listUsersByStatus("pending"),
+    listUsersByStatus("approved"),
     listAllowlistEntries(),
-    listOpenAccessRequests(),
+    listAccessRequests(),
   ]);
 
+  const latestRequestByUserId = new Map<string, string>();
+  for (const request of accessRequests) {
+    if (!latestRequestByUserId.has(request.userId)) {
+      latestRequestByUserId.set(request.userId, request.requestedAt);
+    }
+  }
+
+  const mapUserCard = (user: Awaited<ReturnType<typeof listUsersByStatus>>[number]) => ({
+    id: user.id,
+    yandexUid: user.yandexUid,
+    email: user.email,
+    displayName: user.displayName,
+    status: user.status,
+    role: user.role,
+    requestedAt: latestRequestByUserId.get(user.id) ?? user.createdAt,
+    avatarUrl: getAvatarUrl(user.yandexUid),
+  });
+
   return json(200, {
-    pendingUsers,
+    pendingUsers: pendingUsers.map(mapUserCard),
+    approvedUsers: approvedUsers.map(mapUserCard),
     allowlist,
-    openRequests,
   });
 }
 
@@ -44,7 +67,7 @@ export async function approveUserHandler(req: NormalizedRequest, userId: string)
   const auth = await requireAdmin(req);
   if (auth.error) return auth.error;
 
-  await approveUser(userId);
+  await setUserStatus(userId, "approved");
   await closeAccessRequestsForUser(userId, "approved");
   await writeAuditLog({
     actorUserId: auth.user.id,
@@ -55,16 +78,67 @@ export async function approveUserHandler(req: NormalizedRequest, userId: string)
   return json(200, { ok: true });
 }
 
-export async function blockUserHandler(req: NormalizedRequest, userId: string) {
+export async function rejectUserHandler(req: NormalizedRequest, userId: string) {
   const auth = await requireAdmin(req);
   if (auth.error) return auth.error;
 
-  await blockAndRevoke(userId);
-  await closeAccessRequestsForUser(userId, "closed");
+  await setUserStatus(userId, "pending");
+  await closeAccessRequestsForUser(userId, "rejected");
   await writeAuditLog({
     actorUserId: auth.user.id,
     targetUserId: userId,
-    action: "admin.block_user",
+    action: "admin.reject_user",
+  });
+
+  return json(200, { ok: true });
+}
+
+export async function revokeApprovedUserHandler(req: NormalizedRequest, userId: string) {
+  const auth = await requireAdmin(req);
+  if (auth.error) return auth.error;
+  if (auth.user.id === userId) {
+    return forbidden("You cannot revoke your own approved access");
+  }
+
+  await upsertRole(userId, "viewer");
+  await setUserStatus(userId, "pending");
+  await incrementSessionVersion(userId);
+  await writeAuditLog({
+    actorUserId: auth.user.id,
+    targetUserId: userId,
+    action: "admin.revoke_user",
+  });
+
+  return json(200, { ok: true });
+}
+
+export async function makeAdminHandler(req: NormalizedRequest, userId: string) {
+  const auth = await requireAdmin(req);
+  if (auth.error) return auth.error;
+
+  await ensureAdminRole(userId);
+  await setUserStatus(userId, "approved");
+  await writeAuditLog({
+    actorUserId: auth.user.id,
+    targetUserId: userId,
+    action: "admin.make_admin",
+  });
+
+  return json(200, { ok: true });
+}
+
+export async function removeAdminHandler(req: NormalizedRequest, userId: string) {
+  const auth = await requireAdmin(req);
+  if (auth.error) return auth.error;
+  if (auth.user.id === userId) {
+    return forbidden("You cannot remove your own admin role");
+  }
+
+  await upsertRole(userId, "viewer");
+  await writeAuditLog({
+    actorUserId: auth.user.id,
+    targetUserId: userId,
+    action: "admin.remove_admin",
   });
 
   return json(200, { ok: true });

@@ -6,10 +6,23 @@ import { getAuthRequestBase } from "../config/runtimeContour";
 type AdminOverview = {
   pendingUsers: Array<{
     id: string;
+    yandexUid: string;
     email: string | null;
     displayName: string | null;
     status: string;
     role: string;
+    requestedAt: string;
+    avatarUrl: string;
+  }>;
+  approvedUsers: Array<{
+    id: string;
+    yandexUid: string;
+    email: string | null;
+    displayName: string | null;
+    status: string;
+    role: string;
+    requestedAt: string;
+    avatarUrl: string;
   }>;
   allowlist: Array<{
     email: string;
@@ -17,16 +30,47 @@ type AdminOverview = {
     comment: string | null;
     createdAt: string;
   }>;
-  openRequests: Array<{
-    id: string;
-    userId: string;
-    email: string | null;
-    requestedAt: string;
-  }>;
 };
 
 function buildAuthUrl(path: string): string {
   return `${getAuthRequestBase()}${path}`;
+}
+
+function formatRequestedAt(value: string): string {
+  const date = new Date(value);
+  if (!Number.isFinite(date.getTime())) return value;
+  const yy = String(date.getFullYear()).slice(-2);
+  const mm = String(date.getMonth() + 1).padStart(2, "0");
+  const dd = String(date.getDate()).padStart(2, "0");
+  const hh = String(date.getHours()).padStart(2, "0");
+  const min = String(date.getMinutes()).padStart(2, "0");
+  return `${yy}-${mm}-${dd} ${hh}:${min}`;
+}
+
+function initials(name: string | null, email: string | null): string {
+  const source = name?.trim() || email?.trim() || "?";
+  const parts = source.split(/\s+/).filter(Boolean);
+  if (parts.length >= 2) {
+    return `${parts[0][0] ?? ""}${parts[1][0] ?? ""}`.toUpperCase();
+  }
+  return source.slice(0, 2).toUpperCase();
+}
+
+function UserAvatar(props: { name: string | null; email: string | null; avatarUrl: string }) {
+  const [failed, setFailed] = React.useState(false);
+
+  if (failed || !props.avatarUrl) {
+    return <div className="adminUserAvatar adminUserAvatarFallback">{initials(props.name, props.email)}</div>;
+  }
+
+  return (
+    <img
+      className="adminUserAvatar"
+      src={props.avatarUrl}
+      alt={props.name || props.email || "User avatar"}
+      onError={() => setFailed(true)}
+    />
+  );
 }
 
 export function AdminPage() {
@@ -127,6 +171,70 @@ export function AdminPage() {
     [loadOverview]
   );
 
+  const reject = React.useCallback(
+    async (userId: string) => {
+      setActionError(null);
+      const res = await fetch(buildAuthUrl(`/admin/users/${encodeURIComponent(userId)}/reject`), {
+        method: "POST",
+        credentials: "include",
+      });
+      if (!res.ok) {
+        throw new Error(`Не удалось отклонить заявку (HTTP ${res.status})`);
+      }
+      await loadOverview();
+      await authSession?.reload();
+    },
+    [authSession, loadOverview]
+  );
+
+  const revoke = React.useCallback(
+    async (userId: string) => {
+      setActionError(null);
+      const res = await fetch(buildAuthUrl(`/admin/users/${encodeURIComponent(userId)}/revoke`), {
+        method: "POST",
+        credentials: "include",
+      });
+      if (!res.ok) {
+        throw new Error(`Не удалось удалить пользователя из одобренных (HTTP ${res.status})`);
+      }
+      await loadOverview();
+      await authSession?.reload();
+    },
+    [authSession, loadOverview]
+  );
+
+  const makeAdmin = React.useCallback(
+    async (userId: string) => {
+      setActionError(null);
+      const res = await fetch(buildAuthUrl(`/admin/users/${encodeURIComponent(userId)}/make-admin`), {
+        method: "POST",
+        credentials: "include",
+      });
+      if (!res.ok) {
+        throw new Error(`Не удалось назначить администратора (HTTP ${res.status})`);
+      }
+      await loadOverview();
+      await authSession?.reload();
+    },
+    [authSession, loadOverview]
+  );
+
+  const removeAdmin = React.useCallback(
+    async (userId: string) => {
+      setActionError(null);
+      const res = await fetch(buildAuthUrl(`/admin/users/${encodeURIComponent(userId)}/remove-admin`), {
+        method: "POST",
+        credentials: "include",
+      });
+      if (!res.ok) {
+        throw new Error(`Не удалось снять права администратора (HTTP ${res.status})`);
+      }
+      await loadOverview();
+      await authSession?.reload();
+    },
+    [authSession, loadOverview]
+  );
+
   const runAdminAction = React.useCallback(async (action: () => Promise<void>) => {
     try {
       await action();
@@ -181,15 +289,19 @@ export function AdminPage() {
 
       <div className="grid2" style={{ alignItems: "start" }}>
         <div className="card">
-          <h4 className="pageTitle" style={{ fontSize: 22 }}>Пользователи на одобрение</h4>
-          <div style={{ display: "grid", gap: 10 }}>
+          <h4 className="pageTitle" style={{ fontSize: 22 }}>Ожидают одобрения</h4>
+          <div className="adminUserGrid">
             {(overview?.pendingUsers ?? []).map((user) => (
-              <div key={user.id} className="tableRowGhost">
-                <div><strong>{user.displayName || user.email || user.id}</strong></div>
-                <div className="muted">{user.email || "Email не указан"}</div>
-                <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
+              <div key={user.id} className="adminUserCard">
+                <UserAvatar name={user.displayName} email={user.email} avatarUrl={user.avatarUrl} />
+                <div className="adminUserBody">
+                  <div className="adminUserName">{user.displayName || user.email || user.id}</div>
+                  <div className="muted">{user.email || "Email не указан"}</div>
+                  <div className="muted">Заявка: {formatRequestedAt(user.requestedAt)}</div>
+                </div>
+                <div className="adminUserActions">
                   <button className="btn" type="button" onClick={() => void runAdminAction(() => approve(user.id))}>Одобрить</button>
-                  <button className="btn btnGhost" type="button" onClick={() => void runAdminAction(() => block(user.id))}>Заблокировать</button>
+                  <button className="btn btnGhost" type="button" onClick={() => void runAdminAction(() => reject(user.id))}>Отклонить</button>
                 </div>
               </div>
             ))}
@@ -198,46 +310,79 @@ export function AdminPage() {
         </div>
 
         <div className="card">
-          <h4 className="pageTitle" style={{ fontSize: 22 }}>Allowlist</h4>
-          <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
-            <input
-              className="input"
-              type="email"
-              placeholder="email@example.com"
-              value={newEmail}
-              onChange={(e) => setNewEmail(e.target.value)}
-            />
-            <button className="btn" type="button" onClick={() => void runAdminAction(addAllowlistEmail)}>
-              Добавить в allowlist
-            </button>
-          </div>
-          <div style={{ display: "grid", gap: 10 }}>
-            {(overview?.allowlist ?? []).map((entry) => (
-              <div key={entry.email} className="tableRowGhost" style={{ display: "flex", justifyContent: "space-between", gap: 12 }}>
-                <div>
-                  <div><strong>{entry.email}</strong></div>
-                  <div className="muted">{entry.comment || entry.source}</div>
+          <h4 className="pageTitle" style={{ fontSize: 22 }}>Одобренные пользователи</h4>
+          <div className="adminUserGrid">
+            {(overview?.approvedUsers ?? []).map((user) => (
+              <div key={user.id} className="adminUserCard">
+                <UserAvatar name={user.displayName} email={user.email} avatarUrl={user.avatarUrl} />
+                <div className="adminUserBody">
+                  <div className="adminUserName">{user.displayName || user.email || user.id}</div>
+                  <div className="muted">{user.email || "Email не указан"}</div>
+                  <div className="muted">Заявка: {formatRequestedAt(user.requestedAt)}</div>
+                  <div className="adminUserRole">
+                    {user.role === "admin" ? "Администратор" : "Пользователь"}
+                  </div>
                 </div>
-                <button className="btn btnGhost" type="button" onClick={() => void runAdminAction(() => removeAllowlistEmail(entry.email))}>
-                  Удалить
-                </button>
+                <div className="adminUserActions">
+                  <button
+                    className="btn btnGhost"
+                    type="button"
+                    onClick={() => void runAdminAction(() => revoke(user.id))}
+                    disabled={authSession.state.user?.id === user.id}
+                  >
+                    Удалить
+                  </button>
+                  <button
+                    className="btn"
+                    type="button"
+                    onClick={() => void runAdminAction(() => makeAdmin(user.id))}
+                    disabled={user.role === "admin"}
+                  >
+                    Сделать админом
+                  </button>
+                  <button
+                    className="btn btnGhost"
+                    type="button"
+                    onClick={() => void runAdminAction(() => removeAdmin(user.id))}
+                    disabled={user.role !== "admin" || authSession.state.user?.id === user.id}
+                  >
+                    Удалить из админов
+                  </button>
+                </div>
               </div>
             ))}
-            {!overview?.allowlist?.length ? <div className="muted">Allowlist пуст.</div> : null}
+            {!overview?.approvedUsers?.length ? <div className="muted">Нет одобренных пользователей.</div> : null}
           </div>
         </div>
       </div>
 
       <div className="card" style={{ marginTop: 16 }}>
-        <h4 className="pageTitle" style={{ fontSize: 22 }}>Открытые запросы</h4>
+        <h4 className="pageTitle" style={{ fontSize: 22 }}>Allowlist</h4>
+        <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
+          <input
+            className="input"
+            type="email"
+            placeholder="email@example.com"
+            value={newEmail}
+            onChange={(e) => setNewEmail(e.target.value)}
+          />
+          <button className="btn" type="button" onClick={() => void runAdminAction(addAllowlistEmail)}>
+            Добавить в allowlist
+          </button>
+        </div>
         <div style={{ display: "grid", gap: 10 }}>
-          {(overview?.openRequests ?? []).map((request) => (
-            <div key={request.id} className="tableRowGhost">
-              <div><strong>{request.email || request.userId}</strong></div>
-              <div className="muted">{request.requestedAt}</div>
+          {(overview?.allowlist ?? []).map((entry) => (
+            <div key={entry.email} className="tableRowGhost" style={{ display: "flex", justifyContent: "space-between", gap: 12 }}>
+              <div>
+                <div><strong>{entry.email}</strong></div>
+                <div className="muted">{entry.comment || entry.source}</div>
+              </div>
+              <button className="btn btnGhost" type="button" onClick={() => void runAdminAction(() => removeAllowlistEmail(entry.email))}>
+                Удалить
+              </button>
             </div>
           ))}
-          {!overview?.openRequests?.length ? <div className="muted">Нет открытых запросов.</div> : null}
+          {!overview?.allowlist?.length ? <div className="muted">Allowlist пуст.</div> : null}
         </div>
       </div>
     </div>

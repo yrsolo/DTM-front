@@ -2186,6 +2186,66 @@ button:hover {
   background: linear-gradient(180deg, rgba(10, 17, 34, 0.9) 0%, rgba(19, 21, 49, 0.82) 100%);
 }
 
+.adminUserGrid {
+  display: grid;
+  gap: 10px;
+}
+
+.adminUserCard {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 12px;
+  align-items: start;
+  padding: 14px;
+  border-radius: 16px;
+  border: 1px solid rgba(135, 159, 225, 0.24);
+  background: linear-gradient(180deg, rgba(10, 17, 34, 0.94) 0%, rgba(19, 21, 49, 0.84) 100%);
+}
+
+.adminUserAvatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid rgba(160, 183, 244, 0.34);
+  background: rgba(6, 10, 22, 0.78);
+}
+
+.adminUserAvatarFallback {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #eef4ff;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  background: linear-gradient(135deg, rgba(96, 128, 255, 0.42), rgba(255, 123, 197, 0.38));
+}
+
+.adminUserBody {
+  min-width: 0;
+  display: grid;
+  gap: 4px;
+}
+
+.adminUserName {
+  font-size: 16px;
+  font-weight: 700;
+  color: #f0f5ff;
+}
+
+.adminUserRole {
+  margin-top: 2px;
+  font-size: 12px;
+  color: #c8d8ff;
+}
+
+.adminUserActions {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
 @media (max-width: 800px) {
   .kpiGrid {
     grid-template-columns: 1fr;
