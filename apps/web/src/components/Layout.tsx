@@ -1,5 +1,4 @@
 import React from "react";
-import { Link } from "react-router-dom";
 import { useSnapshot } from "../data/useSnapshot";
 import { resolvePublicAssetUrl } from "../config/publicPaths";
 import { AppLocale, getUiText, UiText } from "../i18n/uiText";
@@ -599,42 +598,6 @@ export function Layout(props: { children: React.ReactNode }) {
                 <strong>{ui.appTitle}</strong>
                 <span className="muted">{ui.appSubtitle}</span>
               </div>
-            </div>
-            <div className="authNav">
-              {authSession.state.available ? (
-                authSession.state.authenticated ? (
-                  <>
-                    <span className="authBadge">
-                      {authSession.state.user?.displayName || authSession.state.user?.email || "User"}
-                    </span>
-                    <span className={`authBadge ${authSession.state.accessMode === "full" ? "isFull" : ""}`}>
-                      {authSession.state.accessMode === "full" ? "Полный доступ" : "Маскировка"}
-                    </span>
-                    {authSession.state.user?.status === "pending" ? (
-                      <span className="authBadge">Ожидает одобрения</span>
-                    ) : null}
-                    {authSession.state.user?.role === "admin" ? (
-                      <Link className="btn btnGhost" to={authSession.adminHref}>
-                        Admin
-                      </Link>
-                    ) : null}
-                    <button type="button" className="btn btnGhost" onClick={() => void authSession.logout()}>
-                      Выйти
-                    </button>
-                  </>
-                ) : authSession.state.loading ? (
-                  <span className="authBadge">Проверка доступа...</span>
-                ) : (
-                  <>
-                    <span className="authBadge">Гостевой режим</span>
-                    <a className="btn btnGhost" href={authSession.loginHref}>
-                      Войти через Яндекс
-                    </a>
-                  </>
-                )
-              ) : (
-                <span className="authBadge">Локальный режим</span>
-              )}
             </div>
           </div>
         </div>
