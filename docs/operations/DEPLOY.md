@@ -49,6 +49,25 @@ Deploy включает:
 ### `scripts/deploy_frontend_prod.cmd`
 Локальный prod deploy в bucket `dtm-front`.
 
+### `scripts/deploy_stack.ps1` / `scripts/deploy_stack.sh`
+Комбинированный deploy контура:
+- сначала frontend;
+- затем auth function;
+- один и тот же `Target`.
+
+Поддерживаемые флаги:
+- `-Target test|prod` / `--target test|prod`
+- `-DryRun` / `--dry-run`
+- `-ReleaseId <id>` / `--release-id <id>`
+- `-SkipFrontend` / `--skip-frontend`
+- `-SkipAuth` / `--skip-auth`
+
+### `scripts/deploy_test.cmd`
+Локальный combined deploy для test-контура.
+
+### `scripts/deploy_prod.cmd`
+Локальный combined deploy для prod-контура.
+
 ### `.github/workflows/deploy_frontend.yml`
 GitHub Actions deploy:
 - `push` в `dev` -> автоматически публикует `test`

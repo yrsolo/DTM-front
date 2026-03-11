@@ -65,6 +65,22 @@ scripts\deploy_auth_function_prod.cmd
 powershell -ExecutionPolicy Bypass -File scripts/deploy_auth_function.ps1 -Target prod
 ```
 
+## Combined contour deploy
+
+Если нужно задеплоить frontend и auth вместе:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts/deploy_stack.ps1 -Target test
+powershell -ExecutionPolicy Bypass -File scripts/deploy_stack.ps1 -Target prod
+```
+
+Windows wrappers:
+
+```bat
+scripts\deploy_test.cmd
+scripts\deploy_prod.cmd
+```
+
 ## Gateway update
 
 Unified gateway должен:
