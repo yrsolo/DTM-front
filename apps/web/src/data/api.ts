@@ -1,6 +1,6 @@
 import { loadPublicConfig } from "../config/publicConfig";
 import { resolvePublicAssetUrl } from "../config/publicPaths";
-import { getApiProxyRequestBase } from "../config/runtimeContour";
+import { getApiProxyRequestBase, isLocalFrontendRuntime } from "../config/runtimeContour";
 import { isMaskingForced } from "../auth/maskingMode";
 
 const MIN_API_INTERVAL_MS = 5000;
@@ -48,6 +48,7 @@ function shouldIncludeCredentials(baseUrl: string): boolean {
   try {
     const base = new URL(baseUrl, window.location.origin);
     if (base.origin === window.location.origin) return true;
+    if (isLocalFrontendRuntime()) return false;
     if (
       base.origin === "https://dtm.solofarm.ru" &&
       (base.pathname.startsWith("/test/ops/api") || base.pathname.startsWith("/ops/api"))

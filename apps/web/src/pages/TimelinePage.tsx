@@ -378,22 +378,22 @@ export function TimelinePage() {
       ? (locale === "ru" ? "Проверка доступа" : "Checking access")
       : (locale === "ru" ? "Войти через Яндекс" : "Sign in with Yandex");
 
-  const handleMaskToggle = React.useCallback(() => {
+  const handleMaskToggle = () => {
     if (maskingLockedByAccess) return;
     const nextMode = maskingForced ? "auto" : "forced";
     writeMaskingMode(nextMode);
     setMaskingMode(nextMode);
     void syncFromApi();
-  }, [maskingForced, maskingLockedByAccess, syncFromApi]);
+  };
 
-  const handleAuthButtonClick = React.useCallback(() => {
+  const handleAuthButtonClick = () => {
     if (authSession.state.loading) return;
     if (!authSession.state.authenticated) {
       window.location.assign(authSession.loginHref);
       return;
     }
     setIsAuthPanelOpen((prev) => !prev);
-  }, [authSession.loginHref, authSession.state.authenticated, authSession.state.loading]);
+  };
 
   const onDesignerCardHover = (e: React.MouseEvent, task: TaskV1) => {
     const manager = task.customer?.trim() || "-";
