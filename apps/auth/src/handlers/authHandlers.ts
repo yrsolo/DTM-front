@@ -45,9 +45,7 @@ function normalizeReturnTo(raw: string | null | undefined): string {
 export async function login(req: NormalizedRequest) {
   const returnTo = normalizeReturnTo(req.query.get("return_to"));
   const { cookie, state } = createOAuthStateCookie(returnTo);
-  return redirect(buildAuthorizeUrl(state), {
-    "set-cookie": cookie,
-  });
+  return appendSetCookie(redirect(buildAuthorizeUrl(state)), cookie);
 }
 
 export async function callback(req: NormalizedRequest) {
@@ -123,23 +121,18 @@ export async function callback(req: NormalizedRequest) {
     exp: now + 60 * 60 * 12,
   });
 
-  return redirect(oauthState.returnTo, {
-    "set-cookie": `${sessionCookie}, ${clearOAuthStateCookie()}`,
-  });
+  return appendSetCookie(
+    appendSetCookie(redirect(oauthState.returnTo), sessionCookie),
+    clearOAuthStateCookie()
+  );
 }
 
 export async function me(req: NormalizedRequest) {
   const { user, clearCookie } = await resolveSession(req.headers.cookie);
-  const headers = clearCookie ? { "set-cookie": clearSessionCookie() } : undefined;
-  return json(200, buildMePayload(user), headers);
+  const result = json(200, buildMePayload(user));
+  return clearCookie ? appendSetCookie(result, clearSessionCookie()) : result;
 }
 
 export async function logout() {
-  return json(
-    200,
-    { ok: true },
-    {
-      "set-cookie": clearSessionCookie(),
-    }
-  );
+  return appendSetCookie(json(200, { ok: true }), clearSessionCookie());
 }

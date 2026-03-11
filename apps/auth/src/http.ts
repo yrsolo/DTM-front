@@ -72,15 +72,19 @@ export function internalError(message = "Internal error"): HttpResult {
 }
 
 export function appendSetCookie(
-  headers: Record<string, string>,
+  result: HttpResult,
   cookieValue: string
-): Record<string, string> {
-  const next = { ...headers };
-  if (!next["set-cookie"]) {
-    next["set-cookie"] = cookieValue;
-    return next;
-  }
+): HttpResult {
+  const nextHeaders = { ...(result.headers ?? {}) };
+  const nextMultiValueHeaders = { ...(result.multiValueHeaders ?? {}) };
+  const existing = nextMultiValueHeaders["set-cookie"] ?? [];
+  nextMultiValueHeaders["set-cookie"] = [...existing, cookieValue];
 
-  next["set-cookie"] = `${next["set-cookie"]}, ${cookieValue}`;
-  return next;
+  delete nextHeaders["set-cookie"];
+
+  return {
+    ...result,
+    headers: nextHeaders,
+    multiValueHeaders: nextMultiValueHeaders,
+  };
 }

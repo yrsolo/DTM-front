@@ -57,24 +57,23 @@ export async function proxyApiRequest(req: NormalizedRequest) {
     if (HOP_BY_HOP_HEADERS.has(normalizedKey) || STRIP_RESPONSE_HEADERS.has(normalizedKey)) return;
     responseHeaders[key] = value;
   });
-  if (clearCookie) {
-    responseHeaders["set-cookie"] = clearSessionCookie();
-  }
 
   const contentType = upstreamRes.headers.get("content-type") || "";
   if (!contentType.includes("application/json")) {
-    return {
+    const result = {
       statusCode: upstreamRes.status,
       headers: responseHeaders,
       body: await upstreamRes.text(),
     };
+    return clearCookie ? { ...result, multiValueHeaders: { "set-cookie": [clearSessionCookie()] } } : result;
   }
 
   const payload = await upstreamRes.json();
   const finalPayload = effectiveAccessMode === "full" ? payload : maskSnapshotPayload(payload, cfg.maskingSalt);
-  return {
+  const result = {
     statusCode: upstreamRes.status,
     headers: responseHeaders,
     body: JSON.stringify(finalPayload),
   };
+  return clearCookie ? { ...result, multiValueHeaders: { "set-cookie": [clearSessionCookie()] } } : result;
 }

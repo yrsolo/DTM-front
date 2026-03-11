@@ -44,6 +44,7 @@ export type NormalizedRequest = {
 export type HttpResult = {
   statusCode: number;
   headers?: Record<string, string>;
+  multiValueHeaders?: Record<string, string[]>;
   body?: string;
   isBase64Encoded?: boolean;
 };

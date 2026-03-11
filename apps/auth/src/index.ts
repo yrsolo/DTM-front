@@ -9,6 +9,8 @@ type YcHttpEvent = {
   path?: string;
   rawPath?: string;
   headers?: Record<string, string | undefined>;
+  multiValueHeaders?: Record<string, string[] | undefined>;
+  cookies?: string[];
   queryStringParameters?: Record<string, string | undefined>;
   pathParameters?: Record<string, string | undefined>;
   pathParams?: Record<string, string | undefined>;
@@ -88,6 +90,36 @@ function contourFromPath(pathname: string): { contour: Contour; routeKind: "auth
 
 function normalizeRequest(event: YcHttpEvent): NormalizedRequest {
   const headers = normalizeHeaders(event.headers);
+  const cookieValues: string[] = [];
+
+  const directCookieHeader = headers.cookie?.trim();
+  if (directCookieHeader) {
+    cookieValues.push(directCookieHeader);
+  }
+
+  const multiHeaderCookies = event.multiValueHeaders?.cookie ?? event.multiValueHeaders?.Cookie;
+  if (Array.isArray(multiHeaderCookies)) {
+    for (const value of multiHeaderCookies) {
+      if (typeof value === "string" && value.trim()) {
+        cookieValues.push(value.trim());
+      }
+    }
+  }
+
+  if (Array.isArray(event.cookies)) {
+    const joinedCookies = event.cookies
+      .map((value) => (typeof value === "string" ? value.trim() : ""))
+      .filter(Boolean)
+      .join("; ");
+    if (joinedCookies) {
+      cookieValues.push(joinedCookies);
+    }
+  }
+
+  if (cookieValues.length > 0) {
+    headers.cookie = cookieValues.join("; ");
+  }
+
   const method = (event.httpMethod || "GET").toUpperCase();
   const originalPath = resolveEventPath(event);
   const { contour, routeKind, routePath } = contourFromPath(originalPath);

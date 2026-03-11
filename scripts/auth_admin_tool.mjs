@@ -240,12 +240,13 @@ async function main() {
           driver,
           `
             DECLARE $id AS Utf8;
+            DECLARE $status AS Utf8;
             UPSERT INTO users
-            SELECT id, yandex_uid, email, display_name, "approved" AS status, role, session_version, created_at, last_login_at
+            SELECT id, yandex_uid, email, display_name, $status AS status, role, session_version, created_at, last_login_at
             FROM users
             WHERE id = $id;
           `,
-          { $id: utf8(args.userId) }
+          { $id: utf8(args.userId), $status: utf8("approved") }
         );
         await executeVoid(
           driver,
@@ -274,13 +275,14 @@ async function main() {
           driver,
           `
             DECLARE $id AS Utf8;
+            DECLARE $status AS Utf8;
             DECLARE $session_version AS Int32;
             UPSERT INTO users
-            SELECT id, yandex_uid, email, display_name, "blocked" AS status, role, $session_version AS session_version, created_at, last_login_at
+            SELECT id, yandex_uid, email, display_name, $status AS status, role, $session_version AS session_version, created_at, last_login_at
             FROM users
             WHERE id = $id;
           `,
-          { $id: utf8(args.userId), $session_version: int32(nextVersion) }
+          { $id: utf8(args.userId), $status: utf8("blocked"), $session_version: int32(nextVersion) }
         );
         await executeVoid(
           driver,
@@ -303,12 +305,25 @@ async function main() {
           driver,
           `
             DECLARE $id AS Utf8;
+            DECLARE $status AS Utf8;
             UPSERT INTO users
-            SELECT id, yandex_uid, email, display_name, "approved" AS status, "admin" AS role, session_version, created_at, last_login_at
+            SELECT id, yandex_uid, email, display_name, $status AS status, role, session_version, created_at, last_login_at
             FROM users
             WHERE id = $id;
           `,
-          { $id: utf8(args.userId) }
+          { $id: utf8(args.userId), $status: utf8("approved") }
+        );
+        await executeVoid(
+          driver,
+          `
+            DECLARE $id AS Utf8;
+            DECLARE $role AS Utf8;
+            UPSERT INTO users
+            SELECT id, yandex_uid, email, display_name, status, $role AS role, session_version, created_at, last_login_at
+            FROM users
+            WHERE id = $id;
+          `,
+          { $id: utf8(args.userId), $role: utf8("admin") }
         );
         console.log(`User promoted to admin: ${args.userId}`);
         break;
