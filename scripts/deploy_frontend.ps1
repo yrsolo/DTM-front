@@ -55,7 +55,6 @@ function Import-DotEnv {
     $name = $line.Substring(0, $idx).Trim()
     $value = $line.Substring($idx + 1)
 
-    # Keep JSON credentials and quoted values intact.
     if (
       $name -ne "YC_SA_JSON_CREDENTIALS" -and
       -not ($value.StartsWith('"') -and $value.EndsWith('"')) -and
@@ -78,29 +77,44 @@ function Parse-SimpleYaml {
   param([string]$Path)
 
   $result = @{}
+  $currentSection = $null
   if (-not (Test-Path $Path)) {
     return $result
   }
 
   Get-Content $Path | ForEach-Object {
-    $line = $_.Trim()
+    $rawLine = $_
+    $line = $rawLine.Trim()
     if (-not $line -or $line.StartsWith("#")) {
       return
     }
 
-    $idx = $line.IndexOf(":")
-    if ($idx -lt 1) {
+    $match = [regex]::Match($rawLine, '^(\s*)([A-Za-z0-9_]+):\s*(.*)$')
+    if (-not $match.Success) {
       return
     }
 
-    $key = $line.Substring(0, $idx).Trim()
-    $value = $line.Substring($idx + 1).Trim()
+    $indent = $match.Groups[1].Value.Length
+    $key = $match.Groups[2].Value.Trim()
+    $value = $match.Groups[3].Value.Trim()
     if (
       ($value.StartsWith('"') -and $value.EndsWith('"')) -or
       ($value.StartsWith("'") -and $value.EndsWith("'"))
     ) {
       $value = $value.Substring(1, $value.Length - 2)
     }
+
+    if ($indent -eq 0 -and [string]::IsNullOrWhiteSpace($value)) {
+      $result[$key] = @{}
+      $currentSection = $key
+      return
+    }
+
+    if ($indent -gt 0 -and $null -ne $currentSection) {
+      $result[$currentSection][$key] = $value
+      return
+    }
+
     if (-not [string]::IsNullOrWhiteSpace($key)) {
       $result[$key] = $value
     }
@@ -167,6 +181,7 @@ $webDir = Join-Path $repoRoot "apps/web"
 $distDir = Join-Path $webDir "dist"
 $publicConfigDir = Join-Path $webDir "public/config"
 $defaultRuntimeConfigPath = Join-Path $repoRoot "apps/web/config/public.yaml"
+$deployInfraConfigPath = Join-Path $repoRoot "config/deploy.yaml"
 
 if ([string]::IsNullOrWhiteSpace($EnvFile)) {
   $EnvFile = Join-Path $repoRoot ".env"
@@ -183,6 +198,12 @@ if ([string]::IsNullOrWhiteSpace($DeployConfigFile)) {
 Import-DotEnv -Path $EnvFile
 
 $deployYaml = Parse-SimpleYaml -Path $DeployConfigFile
+$infraYaml = Parse-SimpleYaml -Path $deployInfraConfigPath
+$ycInfra = $infraYaml["yandex_cloud"]
+if (-not $ycInfra) {
+  throw "Missing yandex_cloud section in config/deploy.yaml"
+}
+
 Set-EnvIfMissing -Name "YC_BUCKET_NAME" -Value $deployYaml["yc_bucket_name"]
 Set-EnvIfMissing -Name "YC_ENDPOINT" -Value $deployYaml["yc_endpoint"]
 Set-EnvIfMissing -Name "AWS_DEFAULT_REGION" -Value $deployYaml["aws_default_region"]
@@ -209,10 +230,19 @@ $deployTargetSource = if (-not [string]::IsNullOrWhiteSpace($Target)) {
   [Environment]::GetEnvironmentVariable("DTM_WEB_DEPLOY_TARGET")
 }
 $deployTarget = Normalize-DeployTarget -Value $deployTargetSource
-$sitePrefix = if ($deployTarget -eq "test") { "test" } else { "" }
-$sitePrefixLabel = if ([string]::IsNullOrWhiteSpace($sitePrefix)) { "/" } else { "/$sitePrefix/" }
-$configPrefix = if ([string]::IsNullOrWhiteSpace($sitePrefix)) { "config" } else { "$sitePrefix/config" }
-$dataPrefix = if ([string]::IsNullOrWhiteSpace($sitePrefix)) { "data" } else { "$sitePrefix/data" }
+
+$bucket = if ($deployTarget -eq "test") { $ycInfra["frontend_bucket_test"] } else { $ycInfra["frontend_bucket_prod"] }
+if ([string]::IsNullOrWhiteSpace($bucket)) {
+  throw "Missing frontend bucket for target=$deployTarget in config/deploy.yaml"
+}
+[Environment]::SetEnvironmentVariable("YC_BUCKET_NAME", $bucket, "Process")
+
+$sitePrefix = ""
+$sitePrefixLabel = if ($deployTarget -eq "test") { "/test/" } else { "/" }
+$configPrefix = "config"
+$dataPrefix = "data"
+$siteBucketUri = "s3://$bucket"
+$releaseRootUri = "s3://$bucket/releases/$deployTarget"
 
 Write-Host "Validating required commands..."
 Require-Command "node"
@@ -222,7 +252,6 @@ if (-not $DryRun) {
 }
 
 Write-Host "Validating required environment variables..."
-$bucket = Require-Env "YC_BUCKET_NAME"
 $endpoint = Require-Env "YC_ENDPOINT"
 [void](Require-Env "AWS_DEFAULT_REGION")
 if (-not $DryRun) {
@@ -236,9 +265,6 @@ if (-not (Test-Path $runtimeConfigPath)) {
 if (-not (Test-Path $publicConfigDir)) {
   throw "Public config directory not found: $publicConfigDir"
 }
-
-$siteBucketUri = if ([string]::IsNullOrWhiteSpace($sitePrefix)) { "s3://$bucket" } else { "s3://$bucket/$sitePrefix" }
-$releaseRootUri = "s3://$bucket/releases/$deployTarget"
 
 if (-not (Test-Path (Join-Path $repoRoot "data/snapshot.example.json"))) {
   Write-Host "Warning: data/snapshot.example.json not found, fallback snapshot upload will be skipped."
@@ -274,18 +300,15 @@ $releaseMetadataPath = Join-Path $repoRoot ".tmp.release.json"
 $releaseMetadata = @{
   release_id = $resolvedReleaseId
   deploy_target = $deployTarget
-  site_prefix = $sitePrefix
   generated_at_utc = (Get-Date).ToUniversalTime().ToString("o")
   git_ref = $env:GITHUB_REF
   git_sha = $env:GITHUB_SHA
+  frontend_bucket = $bucket
 }
 $releaseMetadata | ConvertTo-Json -Depth 4 | Set-Content -Path $releaseMetadataPath -Encoding UTF8
 
 Write-Host "Syncing dist assets (excluding index.html) ..."
-$syncExcludeArgs = @("--exclude", "index.html", "--exclude", "config/*", "--exclude", "data/*")
-if ($deployTarget -eq "prod") {
-  $syncExcludeArgs += @("--exclude", "test/*", "--exclude", "releases/*")
-}
+$syncExcludeArgs = @("--exclude", "index.html", "--exclude", "config/*", "--exclude", "data/*", "--exclude", "releases/*")
 if ($DryRun) {
   Write-Host "[DRY-RUN] aws s3 sync `"$distDir`" `"$siteBucketUri`" --delete $($syncExcludeArgs -join ' ') --endpoint-url `"$endpoint`" --cache-control `"public, max-age=31536000, immutable`""
 } else {
@@ -320,22 +343,8 @@ if ($DryRun) {
   Write-Host "[DRY-RUN] aws s3 cp `"$runtimeConfigPath`" `"s3://$bucket/$configPrefix/public.yaml`" --endpoint-url `"$endpoint`" --content-type text/yaml --cache-control no-cache"
   Write-Host "[DRY-RUN] aws s3 cp `"$runtimeConfigPath`" `"s3://$bucket/$configPrefix/public.yam`" --endpoint-url `"$endpoint`" --content-type text/yaml --cache-control no-cache"
 } else {
-  Invoke-Checked {
-    aws s3 cp `
-      $runtimeConfigPath `
-      "s3://$bucket/$configPrefix/public.yaml" `
-      --endpoint-url $endpoint `
-      --content-type "text/yaml" `
-      --cache-control "no-cache"
-  }
-  Invoke-Checked {
-    aws s3 cp `
-      $runtimeConfigPath `
-      "s3://$bucket/$configPrefix/public.yam" `
-      --endpoint-url $endpoint `
-      --content-type "text/yaml" `
-      --cache-control "no-cache"
-  }
+  Invoke-Checked { aws s3 cp $runtimeConfigPath "s3://$bucket/$configPrefix/public.yaml" --endpoint-url $endpoint --content-type "text/yaml" --cache-control "no-cache" }
+  Invoke-Checked { aws s3 cp $runtimeConfigPath "s3://$bucket/$configPrefix/public.yam" --endpoint-url $endpoint --content-type "text/yaml" --cache-control "no-cache" }
 }
 
 if (Test-Path $snapshotPath) {
@@ -343,30 +352,16 @@ if (Test-Path $snapshotPath) {
   if ($DryRun) {
     Write-Host "[DRY-RUN] aws s3 cp `"$snapshotPath`" `"s3://$bucket/$dataPrefix/snapshot.example.json`" --endpoint-url `"$endpoint`" --content-type application/json --cache-control no-cache"
   } else {
-    Invoke-Checked {
-      aws s3 cp `
-        $snapshotPath `
-        "s3://$bucket/$dataPrefix/snapshot.example.json" `
-        --endpoint-url $endpoint `
-        --content-type "application/json" `
-        --cache-control "no-cache"
-    }
+    Invoke-Checked { aws s3 cp $snapshotPath "s3://$bucket/$dataPrefix/snapshot.example.json" --endpoint-url $endpoint --content-type "application/json" --cache-control "no-cache" }
   }
 }
 
-$indexTarget = if ([string]::IsNullOrWhiteSpace($sitePrefix)) { "s3://$bucket/index.html" } else { "s3://$bucket/$sitePrefix/index.html" }
+$indexTarget = "s3://$bucket/index.html"
 Write-Host "Uploading index.html with no-cache to $sitePrefixLabel ..."
 if ($DryRun) {
-  Write-Host "[DRY-RUN] aws s3 cp `"$((Join-Path $distDir "index.html"))`" `"$indexTarget`" --endpoint-url `"$endpoint`" --content-type `"text/html; charset=utf-8`" --cache-control no-cache"
+  Write-Host "[DRY-RUN] aws s3 cp `"$distDir/index.html`" `"$indexTarget`" --endpoint-url `"$endpoint`" --content-type `"text/html; charset=utf-8`" --cache-control no-cache"
 } else {
-  Invoke-Checked {
-    aws s3 cp `
-      (Join-Path $distDir "index.html") `
-      $indexTarget `
-      --endpoint-url $endpoint `
-      --content-type "text/html; charset=utf-8" `
-      --cache-control "no-cache"
-  }
+  Invoke-Checked { aws s3 cp (Join-Path $distDir "index.html") $indexTarget --endpoint-url $endpoint --content-type "text/html; charset=utf-8" --cache-control "no-cache" }
 }
 
 Write-Host "Uploading release metadata ..."
@@ -374,22 +369,8 @@ if ($DryRun) {
   Write-Host "[DRY-RUN] aws s3 cp `"$releaseMetadataPath`" `"$releasePrefix/release.json`" --endpoint-url `"$endpoint`" --content-type application/json --cache-control no-cache"
   Write-Host "[DRY-RUN] aws s3 cp `"$releaseMetadataPath`" `"$latestReleasePath`" --endpoint-url `"$endpoint`" --content-type application/json --cache-control no-cache"
 } else {
-  Invoke-Checked {
-    aws s3 cp `
-      $releaseMetadataPath `
-      "$releasePrefix/release.json" `
-      --endpoint-url $endpoint `
-      --content-type "application/json" `
-      --cache-control "no-cache"
-  }
-  Invoke-Checked {
-    aws s3 cp `
-      $releaseMetadataPath `
-      $latestReleasePath `
-      --endpoint-url $endpoint `
-      --content-type "application/json" `
-      --cache-control "no-cache"
-  }
+  Invoke-Checked { aws s3 cp $releaseMetadataPath "$releasePrefix/release.json" --endpoint-url $endpoint --content-type "application/json" --cache-control "no-cache" }
+  Invoke-Checked { aws s3 cp $releaseMetadataPath $latestReleasePath --endpoint-url $endpoint --content-type "application/json" --cache-control "no-cache" }
 }
 
 Write-Host ""
@@ -402,8 +383,3 @@ Write-Host "Bucket: $bucket"
 Write-Host "Target: $deployTarget"
 Write-Host "Site path: $sitePrefixLabel"
 Write-Host "ReleaseId: $resolvedReleaseId"
-Write-Host "Open endpoint in Yandex Cloud Console:"
-Write-Host "Object Storage -> $bucket -> Website hosting -> Endpoint"
-Write-Host "Typical format: https://<bucket>.website.yandexcloud.net"
-
-Remove-Item -Path $releaseMetadataPath -ErrorAction SilentlyContinue

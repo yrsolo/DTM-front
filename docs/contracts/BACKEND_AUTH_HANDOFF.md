@@ -1,55 +1,72 @@
 ﻿# Backend Auth Handoff
 
 Назначение:
-- передать backend-команде browser-facing contract для auth/data контуров.
+- передать backend-команде browser-facing контракт авторизации и data access mode.
 
-## Browser-facing contract
-
-Frontend не должен ходить в upstream API напрямую.
+## Browser-facing public contract
 
 ### Test
-- browser data path -> `/test/api/v2/frontend`
-- auth/session -> `/test/auth/*`
+- frontend: `https://dtm.solofarm.ru/test/`
+- browser data path: `/test/ops/api/v2/frontend`
+- auth/session: `/test/ops/auth/*`
 
 ### Prod
-- browser data path -> `/api/v2/frontend`
-- auth/session -> `/auth/*`
+- frontend: `https://dtm.solofarm.ru/`
+- browser data path: `/ops/api/v2/frontend`
+- auth/session: `/ops/auth/*`
 
-## Ownership boundaries
+## Reserved service namespace
 
-Эта кампания не реализует backend paths:
-- `/api/*`
-- `/info/*`
-- `/test/api/*`
-- `/test/info/*`
+Backend-owned service routes:
+- `/ops/api/*`
+- `/ops/admin/*`
+- `/ops/telegram*`
+- `/ops/grafana/*`
+- `/test/ops/api/*`
+- `/test/ops/admin/*`
+- `/test/ops/telegram*`
 
-Frontend и auth layer только адресуют эти пути как публичный контракт.
+Frontend SPA routes остаются только:
+- `/`
+- `/admin`
+- `/test`
+- `/test/admin`
 
 ## Access modes
 
-Система различает два режима:
+Требуемые режимы данных:
 - `masked`
 - `full`
 
-Backend later phase должен уметь уважать access mode и возвращать snapshot той же формы.
+### Anonymous / pending
+- backend может отдавать masked payload
+- структура snapshot должна оставаться валидной
+- timeline и карточки должны продолжать работать
 
-## Recommended upstream contract
+### Approved
+- backend отдаёт полный payload
 
-Рекомендуемый trusted-proxy header:
-- `X-DTM-Access-Mode: masked|full`
+## Sensitive fields
 
-Backend later phase должен:
-- принимать этот заголовок от trusted proxy layer
-- возвращать валидный snapshot той же формы
-- сохранять shape/ids/dates/statuses
-- менять только чувствительные текстовые поля
+В masked mode должны скрываться реальные бизнесовые значения, минимум:
+- task title
+- brand
+- customer
+- group/show name
+- person/designer names
+- другие свободные текстовые поля, по которым можно восстановить реальные кампании
 
-## Что не должно ломаться
+## Stable parts of payload
 
-- snapshot shape
-- task ids
-- group ids
-- people ids
-- timeline dates
+Даже в masked mode желательно сохранять:
+- ids
+- dates
 - statuses
-- milestones array shape
+- milestone sequence
+- summary/meta structure
+- общую форму `frontend v2` payload
+
+## OAuth callbacks
+
+- test callback: `https://dtm.solofarm.ru/test/ops/auth/callback`
+- prod callback: `https://dtm.solofarm.ru/ops/auth/callback`

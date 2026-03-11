@@ -1,5 +1,5 @@
 # Non-secret deploy settings for frontend upload
-yc_bucket_name: dtm-front
+yc_bucket_name: dtm-front-test
 yc_endpoint: https://storage.yandexcloud.net
 aws_default_region: ru-central1
 dtm_web_deploy_target: test

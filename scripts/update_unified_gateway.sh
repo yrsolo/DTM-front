@@ -29,6 +29,9 @@ NODE
 
 folder_id="$(node -e "const cfg=$CONFIG_JSON; process.stdout.write(cfg.yandex_cloud.folder_id)")"
 service_account_id="$(node -e "const cfg=$CONFIG_JSON; process.stdout.write(cfg.yandex_cloud.service_account_id)")"
+frontend_bucket_prod="$(node -e "const cfg=$CONFIG_JSON; process.stdout.write(cfg.yandex_cloud.frontend_bucket_prod)")"
+frontend_bucket_test="$(node -e "const cfg=$CONFIG_JSON; process.stdout.write(cfg.yandex_cloud.frontend_bucket_test)")"
+latest_tag='\$latest'
 
 temp_dir=""
 cleanup() {
@@ -60,13 +63,13 @@ cat > "$spec_path" <<EOF
 openapi: 3.0.0
 info:
   title: DTM Unified API
-  version: 1.1.0
+  version: 1.2.0
 
 servers:
   - url: https://dtm.solofarm.ru
 
 paths:
-  /test/auth/{proxy+}:
+  /test/ops/auth/{proxy+}:
     x-yc-apigateway-any-method:
       parameters:
         - name: proxy
@@ -77,38 +80,10 @@ paths:
       x-yc-apigateway-integration:
         type: cloud_functions
         function_id: ${auth_test_id}
-        tag: \$latest
+        tag: ${latest_tag}
         service_account_id: ${service_account_id}
 
-  /test/api/{proxy+}:
-    x-yc-apigateway-any-method:
-      parameters:
-        - name: proxy
-          in: path
-          required: true
-          schema:
-            type: string
-      x-yc-apigateway-integration:
-        type: cloud_functions
-        function_id: ${test_backend_id}
-        tag: \$latest
-        service_account_id: ${service_account_id}
-
-  /test/info/{proxy+}:
-    x-yc-apigateway-any-method:
-      parameters:
-        - name: proxy
-          in: path
-          required: true
-          schema:
-            type: string
-      x-yc-apigateway-integration:
-        type: cloud_functions
-        function_id: ${test_backend_id}
-        tag: \$latest
-        service_account_id: ${service_account_id}
-
-  /auth/{proxy+}:
+  /ops/auth/{proxy+}:
     x-yc-apigateway-any-method:
       parameters:
         - name: proxy
@@ -119,10 +94,24 @@ paths:
       x-yc-apigateway-integration:
         type: cloud_functions
         function_id: ${auth_prod_id}
-        tag: \$latest
+        tag: ${latest_tag}
         service_account_id: ${service_account_id}
 
-  /api/{proxy+}:
+  /test/ops/api/{proxy+}:
+    x-yc-apigateway-any-method:
+      parameters:
+        - name: proxy
+          in: path
+          required: true
+          schema:
+            type: string
+      x-yc-apigateway-integration:
+        type: cloud_functions
+        function_id: ${test_backend_id}
+        tag: ${latest_tag}
+        service_account_id: ${service_account_id}
+
+  /ops/api/{proxy+}:
     x-yc-apigateway-any-method:
       parameters:
         - name: proxy
@@ -133,10 +122,40 @@ paths:
       x-yc-apigateway-integration:
         type: cloud_functions
         function_id: ${prod_backend_id}
-        tag: \$latest
+        tag: ${latest_tag}
         service_account_id: ${service_account_id}
 
-  /info/{proxy+}:
+  /test/ops/admin:
+    x-yc-apigateway-any-method:
+      x-yc-apigateway-integration:
+        type: cloud_functions
+        function_id: ${test_backend_id}
+        tag: ${latest_tag}
+        service_account_id: ${service_account_id}
+
+  /test/ops/admin/{proxy+}:
+    x-yc-apigateway-any-method:
+      parameters:
+        - name: proxy
+          in: path
+          required: true
+          schema:
+            type: string
+      x-yc-apigateway-integration:
+        type: cloud_functions
+        function_id: ${test_backend_id}
+        tag: ${latest_tag}
+        service_account_id: ${service_account_id}
+
+  /ops/admin:
+    x-yc-apigateway-any-method:
+      x-yc-apigateway-integration:
+        type: cloud_functions
+        function_id: ${prod_backend_id}
+        tag: ${latest_tag}
+        service_account_id: ${service_account_id}
+
+  /ops/admin/{proxy+}:
     x-yc-apigateway-any-method:
       parameters:
         - name: proxy
@@ -147,10 +166,54 @@ paths:
       x-yc-apigateway-integration:
         type: cloud_functions
         function_id: ${prod_backend_id}
-        tag: \$latest
+        tag: ${latest_tag}
         service_account_id: ${service_account_id}
 
-  /grafana:
+  /test/ops/telegram:
+    x-yc-apigateway-any-method:
+      x-yc-apigateway-integration:
+        type: cloud_functions
+        function_id: ${test_backend_id}
+        tag: ${latest_tag}
+        service_account_id: ${service_account_id}
+
+  /test/ops/telegram/{proxy+}:
+    x-yc-apigateway-any-method:
+      parameters:
+        - name: proxy
+          in: path
+          required: true
+          schema:
+            type: string
+      x-yc-apigateway-integration:
+        type: cloud_functions
+        function_id: ${test_backend_id}
+        tag: ${latest_tag}
+        service_account_id: ${service_account_id}
+
+  /ops/telegram:
+    x-yc-apigateway-any-method:
+      x-yc-apigateway-integration:
+        type: cloud_functions
+        function_id: ${prod_backend_id}
+        tag: ${latest_tag}
+        service_account_id: ${service_account_id}
+
+  /ops/telegram/{proxy+}:
+    x-yc-apigateway-any-method:
+      parameters:
+        - name: proxy
+          in: path
+          required: true
+          schema:
+            type: string
+      x-yc-apigateway-integration:
+        type: cloud_functions
+        function_id: ${prod_backend_id}
+        tag: ${latest_tag}
+        service_account_id: ${service_account_id}
+
+  /ops/grafana:
     x-yc-apigateway-any-method:
       x-yc-apigateway-integration:
         type: http
@@ -165,7 +228,7 @@ paths:
           connect: 1
           read: 30
 
-  /grafana/:
+  /ops/grafana/:
     x-yc-apigateway-any-method:
       x-yc-apigateway-integration:
         type: http
@@ -180,7 +243,7 @@ paths:
           connect: 1
           read: 30
 
-  /grafana/{path+}:
+  /ops/grafana/{path+}:
     x-yc-apigateway-any-method:
       parameters:
         - name: path
@@ -205,43 +268,55 @@ paths:
     x-yc-apigateway-any-method:
       x-yc-apigateway-integration:
         type: http
-        url: https://dtm-front.website.yandexcloud.net/index.html
+        url: https://${frontend_bucket_prod}.website.yandexcloud.net/index.html
 
   /admin/:
     x-yc-apigateway-any-method:
       x-yc-apigateway-integration:
         type: http
-        url: https://dtm-front.website.yandexcloud.net/index.html
+        url: https://${frontend_bucket_prod}.website.yandexcloud.net/index.html
 
   /test:
     x-yc-apigateway-any-method:
       x-yc-apigateway-integration:
         type: http
-        url: https://dtm-front.website.yandexcloud.net/test/index.html
+        url: https://${frontend_bucket_test}.website.yandexcloud.net/index.html
 
   /test/:
     x-yc-apigateway-any-method:
       x-yc-apigateway-integration:
         type: http
-        url: https://dtm-front.website.yandexcloud.net/test/index.html
+        url: https://${frontend_bucket_test}.website.yandexcloud.net/index.html
 
   /test/admin:
     x-yc-apigateway-any-method:
       x-yc-apigateway-integration:
         type: http
-        url: https://dtm-front.website.yandexcloud.net/test/index.html
+        url: https://${frontend_bucket_test}.website.yandexcloud.net/index.html
 
   /test/admin/:
     x-yc-apigateway-any-method:
       x-yc-apigateway-integration:
         type: http
-        url: https://dtm-front.website.yandexcloud.net/test/index.html
+        url: https://${frontend_bucket_test}.website.yandexcloud.net/index.html
+
+  /test/{path+}:
+    x-yc-apigateway-any-method:
+      parameters:
+        - name: path
+          in: path
+          required: true
+          schema:
+            type: string
+      x-yc-apigateway-integration:
+        type: http
+        url: https://${frontend_bucket_test}.website.yandexcloud.net/{path}
 
   /:
     get:
       x-yc-apigateway-integration:
         type: http
-        url: https://dtm-front.website.yandexcloud.net/
+        url: https://${frontend_bucket_prod}.website.yandexcloud.net/
 
   /{path+}:
     x-yc-apigateway-any-method:
@@ -253,7 +328,7 @@ paths:
             type: string
       x-yc-apigateway-integration:
         type: http
-        url: https://dtm-front.website.yandexcloud.net/{path}
+        url: https://${frontend_bucket_prod}.website.yandexcloud.net/{path}
 EOF
 
 if [[ "$DRY_RUN" == "true" ]]; then

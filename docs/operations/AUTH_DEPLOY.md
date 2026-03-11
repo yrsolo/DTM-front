@@ -27,16 +27,14 @@ Shared endpoint:
 ### Test
 - frontend: `https://dtm.solofarm.ru/test/`
 - admin SPA: `https://dtm.solofarm.ru/test/admin`
-- auth endpoints: `https://dtm.solofarm.ru/test/auth/*`
-- backend-owned API: `https://dtm.solofarm.ru/test/api/*`
-- backend-owned info: `https://dtm.solofarm.ru/test/info/*`
+- auth endpoints: `https://dtm.solofarm.ru/test/ops/auth/*`
+- backend-owned API: `https://dtm.solofarm.ru/test/ops/api/*`
 
 ### Prod
 - frontend: `https://dtm.solofarm.ru/`
 - admin SPA: `https://dtm.solofarm.ru/admin`
-- auth endpoints: `https://dtm.solofarm.ru/auth/*`
-- backend-owned API: `https://dtm.solofarm.ru/api/*`
-- backend-owned info: `https://dtm.solofarm.ru/info/*`
+- auth endpoints: `https://dtm.solofarm.ru/ops/auth/*`
+- backend-owned API: `https://dtm.solofarm.ru/ops/api/*`
 
 ## Auto-deploy
 
@@ -70,12 +68,12 @@ powershell -ExecutionPolicy Bypass -File scripts/deploy_auth_function.ps1 -Targe
 ## Gateway update
 
 Unified gateway должен:
-- направлять `/auth/*` в `auth-prod`
-- направлять `/test/auth/*` в `auth-test`
-- не отправлять `/api/*`, `/info/*`, `/test/api/*`, `/test/info/*` в SPA fallback
-- отдавать `/admin` из root SPA и `/test/admin` из test SPA
+- направлять `/ops/auth/*` в `auth-prod`
+- направлять `/test/ops/auth/*` в `auth-test`
+- не отправлять `/ops/*` и `/test/ops/*` в SPA fallback
+- отправлять `/admin` в prod SPA и `/test/admin` в test SPA
 
-Обновление spec:
+Обновить spec:
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File scripts/update_unified_gateway.ps1
@@ -89,7 +87,7 @@ powershell -ExecutionPolicy Bypass -File scripts/update_unified_gateway.ps1 -Dry
 
 ## Bootstrap without `ADMIN_BOOTSTRAP_UID`
 
-Пока bootstrap UID не добавлен, используйте локальную утилиту:
+Если bootstrap UID ещё не задан, первого администратора можно поднять вручную:
 
 ```bash
 node scripts/auth_admin_tool.mjs --target test --command list-users
@@ -99,11 +97,11 @@ node scripts/auth_admin_tool.mjs --target test --command make-admin --user-id <U
 node scripts/auth_admin_tool.mjs --target test --command block-user --user-id <USER_ID>
 ```
 
-Для production используйте `--target prod`.
+Для production используется `--target prod`.
 
 ## Secrets contract
 
-Contour-specific OAuth credentials являются canonical:
+Contour-specific OAuth credentials считаются canonical:
 - `YANDEX_CLIENT_ID_TEST`
 - `YANDEX_CLIENT_SECRET_TEST`
 - `YANDEX_CLIENT_ID_PROD`
@@ -119,7 +117,7 @@ Contour-specific OAuth credentials являются canonical:
 - `MASKING_SALT_TEST`
 - `MASKING_SALT_PROD`
 
-Fallback-keys `YANDEX_CLIENT_ID` и `YANDEX_CLIENT_SECRET` оставлены только для совместимости со старыми версиями функции.
+Fallback-keys `YANDEX_CLIENT_ID` и `YANDEX_CLIENT_SECRET` допустимы только как временный переходный слой.
 
 ## Runtime env
 

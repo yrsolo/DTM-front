@@ -33,9 +33,7 @@ function Require-YcAuth {
   $tempKeyPath = Join-Path $tempDir "sa-key.json"
   Set-Content -Path $tempKeyPath -Value $env:YC_SA_JSON_CREDENTIALS -NoNewline
   $env:YC_CONFIG_DIR = Join-Path $tempDir ".config"
-  try {
-    yc config profile create gateway-update 2>$null | Out-Null
-  } catch {}
+  try { yc config profile create gateway-update 2>$null | Out-Null } catch {}
   yc config set service-account-key $tempKeyPath | Out-Null
   return $tempDir
 }
@@ -53,6 +51,9 @@ try {
   $authTestId = (yc serverless function get --name $yc.auth_function_name_test --format json | ConvertFrom-Json).id
   $authProdId = (yc serverless function get --name $yc.auth_function_name_prod --format json | ConvertFrom-Json).id
 
+  $prodFrontend = "https://$($yc.frontend_bucket_prod).website.yandexcloud.net"
+  $testFrontend = "https://$($yc.frontend_bucket_test).website.yandexcloud.net"
+
   $specPath = Join-Path $repoRoot ".deploy/unified-gateway.openapi.yaml"
   New-Item -ItemType Directory -Path (Split-Path $specPath -Parent) -Force | Out-Null
 
@@ -60,13 +61,13 @@ try {
 openapi: 3.0.0
 info:
   title: DTM Unified API
-  version: 1.1.0
+  version: 1.2.0
 
 servers:
   - url: https://dtm.solofarm.ru
 
 paths:
-  /test/auth/{proxy+}:
+  /test/ops/auth/{proxy+}:
     x-yc-apigateway-any-method:
       parameters:
         - name: proxy
@@ -77,38 +78,10 @@ paths:
       x-yc-apigateway-integration:
         type: cloud_functions
         function_id: $authTestId
-        tag: '$latest'
+        tag: __LATEST__
         service_account_id: $($yc.service_account_id)
 
-  /test/api/{proxy+}:
-    x-yc-apigateway-any-method:
-      parameters:
-        - name: proxy
-          in: path
-          required: true
-          schema:
-            type: string
-      x-yc-apigateway-integration:
-        type: cloud_functions
-        function_id: $testBackendId
-        tag: '$latest'
-        service_account_id: $($yc.service_account_id)
-
-  /test/info/{proxy+}:
-    x-yc-apigateway-any-method:
-      parameters:
-        - name: proxy
-          in: path
-          required: true
-          schema:
-            type: string
-      x-yc-apigateway-integration:
-        type: cloud_functions
-        function_id: $testBackendId
-        tag: '$latest'
-        service_account_id: $($yc.service_account_id)
-
-  /auth/{proxy+}:
+  /ops/auth/{proxy+}:
     x-yc-apigateway-any-method:
       parameters:
         - name: proxy
@@ -119,10 +92,24 @@ paths:
       x-yc-apigateway-integration:
         type: cloud_functions
         function_id: $authProdId
-        tag: '$latest'
+        tag: __LATEST__
         service_account_id: $($yc.service_account_id)
 
-  /api/{proxy+}:
+  /test/ops/api/{proxy+}:
+    x-yc-apigateway-any-method:
+      parameters:
+        - name: proxy
+          in: path
+          required: true
+          schema:
+            type: string
+      x-yc-apigateway-integration:
+        type: cloud_functions
+        function_id: $testBackendId
+        tag: __LATEST__
+        service_account_id: $($yc.service_account_id)
+
+  /ops/api/{proxy+}:
     x-yc-apigateway-any-method:
       parameters:
         - name: proxy
@@ -133,10 +120,40 @@ paths:
       x-yc-apigateway-integration:
         type: cloud_functions
         function_id: $prodBackendId
-        tag: '$latest'
+        tag: __LATEST__
         service_account_id: $($yc.service_account_id)
 
-  /info/{proxy+}:
+  /test/ops/admin:
+    x-yc-apigateway-any-method:
+      x-yc-apigateway-integration:
+        type: cloud_functions
+        function_id: $testBackendId
+        tag: __LATEST__
+        service_account_id: $($yc.service_account_id)
+
+  /test/ops/admin/{proxy+}:
+    x-yc-apigateway-any-method:
+      parameters:
+        - name: proxy
+          in: path
+          required: true
+          schema:
+            type: string
+      x-yc-apigateway-integration:
+        type: cloud_functions
+        function_id: $testBackendId
+        tag: __LATEST__
+        service_account_id: $($yc.service_account_id)
+
+  /ops/admin:
+    x-yc-apigateway-any-method:
+      x-yc-apigateway-integration:
+        type: cloud_functions
+        function_id: $prodBackendId
+        tag: __LATEST__
+        service_account_id: $($yc.service_account_id)
+
+  /ops/admin/{proxy+}:
     x-yc-apigateway-any-method:
       parameters:
         - name: proxy
@@ -147,10 +164,54 @@ paths:
       x-yc-apigateway-integration:
         type: cloud_functions
         function_id: $prodBackendId
-        tag: '$latest'
+        tag: __LATEST__
         service_account_id: $($yc.service_account_id)
 
-  /grafana:
+  /test/ops/telegram:
+    x-yc-apigateway-any-method:
+      x-yc-apigateway-integration:
+        type: cloud_functions
+        function_id: $testBackendId
+        tag: __LATEST__
+        service_account_id: $($yc.service_account_id)
+
+  /test/ops/telegram/{proxy+}:
+    x-yc-apigateway-any-method:
+      parameters:
+        - name: proxy
+          in: path
+          required: true
+          schema:
+            type: string
+      x-yc-apigateway-integration:
+        type: cloud_functions
+        function_id: $testBackendId
+        tag: __LATEST__
+        service_account_id: $($yc.service_account_id)
+
+  /ops/telegram:
+    x-yc-apigateway-any-method:
+      x-yc-apigateway-integration:
+        type: cloud_functions
+        function_id: $prodBackendId
+        tag: __LATEST__
+        service_account_id: $($yc.service_account_id)
+
+  /ops/telegram/{proxy+}:
+    x-yc-apigateway-any-method:
+      parameters:
+        - name: proxy
+          in: path
+          required: true
+          schema:
+            type: string
+      x-yc-apigateway-integration:
+        type: cloud_functions
+        function_id: $prodBackendId
+        tag: __LATEST__
+        service_account_id: $($yc.service_account_id)
+
+  /ops/grafana:
     x-yc-apigateway-any-method:
       x-yc-apigateway-integration:
         type: http
@@ -165,7 +226,7 @@ paths:
           connect: 1
           read: 30
 
-  /grafana/:
+  /ops/grafana/:
     x-yc-apigateway-any-method:
       x-yc-apigateway-integration:
         type: http
@@ -180,7 +241,7 @@ paths:
           connect: 1
           read: 30
 
-  /grafana/{path+}:
+  /ops/grafana/{path+}:
     x-yc-apigateway-any-method:
       parameters:
         - name: path
@@ -205,43 +266,55 @@ paths:
     x-yc-apigateway-any-method:
       x-yc-apigateway-integration:
         type: http
-        url: https://dtm-front.website.yandexcloud.net/index.html
+        url: $prodFrontend/index.html
 
   /admin/:
     x-yc-apigateway-any-method:
       x-yc-apigateway-integration:
         type: http
-        url: https://dtm-front.website.yandexcloud.net/index.html
+        url: $prodFrontend/index.html
 
   /test:
     x-yc-apigateway-any-method:
       x-yc-apigateway-integration:
         type: http
-        url: https://dtm-front.website.yandexcloud.net/test/index.html
+        url: $testFrontend/index.html
 
   /test/:
     x-yc-apigateway-any-method:
       x-yc-apigateway-integration:
         type: http
-        url: https://dtm-front.website.yandexcloud.net/test/index.html
+        url: $testFrontend/index.html
 
   /test/admin:
     x-yc-apigateway-any-method:
       x-yc-apigateway-integration:
         type: http
-        url: https://dtm-front.website.yandexcloud.net/test/index.html
+        url: $testFrontend/index.html
 
   /test/admin/:
     x-yc-apigateway-any-method:
       x-yc-apigateway-integration:
         type: http
-        url: https://dtm-front.website.yandexcloud.net/test/index.html
+        url: $testFrontend/index.html
+
+  /test/{path+}:
+    x-yc-apigateway-any-method:
+      parameters:
+        - name: path
+          in: path
+          required: true
+          schema:
+            type: string
+      x-yc-apigateway-integration:
+        type: http
+        url: $testFrontend/{path}
 
   /:
     get:
       x-yc-apigateway-integration:
         type: http
-        url: https://dtm-front.website.yandexcloud.net/
+        url: $prodFrontend/
 
   /{path+}:
     x-yc-apigateway-any-method:
@@ -253,17 +326,14 @@ paths:
             type: string
       x-yc-apigateway-integration:
         type: http
-        url: https://dtm-front.website.yandexcloud.net/{path}
+        url: $prodFrontend/{path}
 "@
 
+  $spec = $spec.Replace("__LATEST__", '$latest')
   Set-Content -Path $specPath -Value $spec -Encoding UTF8
 
   if ($DryRun) {
     Write-Host "Gateway spec generated: $specPath"
-    Write-Host "Auth test function: $authTestId"
-    Write-Host "Auth prod function: $authProdId"
-    Write-Host "Legacy test backend: $testBackendId"
-    Write-Host "Legacy prod backend: $prodBackendId"
     exit 0
   }
 

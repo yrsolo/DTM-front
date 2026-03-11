@@ -1,7 +1,7 @@
 # Public frontend config (non-secret)
-api_base_url: https://dtm.solofarm.ru/test
-api_base_url_prod: https://dtm.solofarm.ru
-api_base_url_test: https://dtm.solofarm.ru/test
+api_base_url: https://dtm.solofarm.ru/test/ops
+api_base_url_prod: https://dtm.solofarm.ru/ops
+api_base_url_test: https://dtm.solofarm.ru/test/ops
 api_frontend_path: /api/v2/frontend
 api_statuses: work,pre_done
 api_include_people: true

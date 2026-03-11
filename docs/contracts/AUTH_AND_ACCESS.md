@@ -13,34 +13,34 @@ Source of truth:
 ### Test
 - frontend: `https://dtm.solofarm.ru/test/`
 - admin SPA: `https://dtm.solofarm.ru/test/admin`
-- auth endpoints: `https://dtm.solofarm.ru/test/auth/*`
-- browser-facing API path: `https://dtm.solofarm.ru/test/api/*`
+- auth endpoints: `https://dtm.solofarm.ru/test/ops/auth/*`
+- browser-facing API path: `https://dtm.solofarm.ru/test/ops/api/*`
 - local frontend runtime тоже использует `test` contour для auth/api:
   - local SPA base остаётся `/`
-  - auth requests идут в `https://dtm.solofarm.ru/test/auth/*`
-  - data requests идут в `https://dtm.solofarm.ru/test/api/*`
+  - auth requests идут в `https://dtm.solofarm.ru/test/ops/auth/*`
+  - data requests идут в `https://dtm.solofarm.ru/test/ops/api/*`
 
 ### Prod
 - frontend: `https://dtm.solofarm.ru/`
 - admin SPA: `https://dtm.solofarm.ru/admin`
-- auth endpoints: `https://dtm.solofarm.ru/auth/*`
-- browser-facing API path: `https://dtm.solofarm.ru/api/*`
+- auth endpoints: `https://dtm.solofarm.ru/ops/auth/*`
+- browser-facing API path: `https://dtm.solofarm.ru/ops/api/*`
 
 ## Модель доступа
 
 ### Anonymous
 - frontend открывается без логина
-- `/auth/me` возвращает `authenticated=false`
+- `/ops/auth/me` возвращает `authenticated=false`
 - data path работает в режиме, который определяет backend/auth contour
 
 ### Authenticated + pending
 - пользователь прошёл Yandex login
 - учётная запись есть, но не одобрена
-- `/auth/me` возвращает `authenticated=true`, `status=pending`
+- `/ops/auth/me` возвращает `authenticated=true`, `status=pending`
 
 ### Authenticated + approved
 - пользователь одобрен через admin UI или allowlist
-- `/auth/me` возвращает `authenticated=true`, `status=approved`, `accessMode=full`
+- `/ops/auth/me` возвращает `authenticated=true`, `status=approved`, `accessMode=full`
 
 ### Blocked
 - user status `blocked`
@@ -68,8 +68,8 @@ React routes:
 - local: `/admin` against `test` contour
 
 JSON endpoints:
-- prod: `/auth/admin/*`
-- test: `/test/auth/admin/*`
+- prod: `/ops/auth/admin/*`
+- test: `/test/ops/auth/admin/*`
 
 V1 endpoints:
 - `GET /admin/overview`
@@ -94,8 +94,8 @@ V1 endpoints:
 ## OAuth apps
 
 Используются две отдельные Yandex OAuth apps:
-- test -> callback `https://dtm.solofarm.ru/test/auth/callback`
-- prod -> callback `https://dtm.solofarm.ru/auth/callback`
+- test -> callback `https://dtm.solofarm.ru/test/ops/auth/callback`
+- prod -> callback `https://dtm.solofarm.ru/ops/auth/callback`
 
 Canonical env contract:
 - `YANDEX_CLIENT_ID_TEST`

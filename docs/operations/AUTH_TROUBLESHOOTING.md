@@ -5,43 +5,43 @@
 Public test URLs:
 - `https://dtm.solofarm.ru/test/`
 - `https://dtm.solofarm.ru/test/admin`
-- `https://dtm.solofarm.ru/test/auth/health`
-- `https://dtm.solofarm.ru/test/auth/me`
+- `https://dtm.solofarm.ru/test/ops/auth/health`
+- `https://dtm.solofarm.ru/test/ops/auth/me`
 
 Expected baseline:
 - `/test/` -> `200`
 - `/test/admin` -> `200`
-- `/test/auth/health` -> `{"ok":true,"contour":"test","kind":"auth"}`
-- `/test/auth/me` without cookie -> anonymous auth state
+- `/test/ops/auth/health` -> `{"ok":true,"contour":"test","kind":"auth"}`
+- `/test/ops/auth/me` without cookie -> anonymous auth state
 
 ## Frontend opens, but auth status stays guest
 
 Check:
-- `https://dtm.solofarm.ru/test/auth/health` returns `200`
-- `https://dtm.solofarm.ru/test/auth/me` returns JSON, not HTML and not `404`
+- `https://dtm.solofarm.ru/test/ops/auth/health` returns `200`
+- `https://dtm.solofarm.ru/test/ops/auth/me` returns JSON, not HTML and not `404`
 - browser is opening deployed frontend, not local dev server
-- gateway still routes `/test/auth/*` to `auth-test`
+- gateway still routes `/test/ops/auth/*` to `auth-test`
 
 ## Local dev mode for interactive design work
 
 Local Vite frontend is allowed to use the public test auth contour:
 - local app -> `http://localhost:5173`
-- auth -> `https://dtm.solofarm.ru/test/auth/*`
-- data path -> `https://dtm.solofarm.ru/test/api/*`
+- auth -> `https://dtm.solofarm.ru/test/ops/auth/*`
+- data path -> `https://dtm.solofarm.ru/test/ops/api/*`
 
 Expected behavior:
-- `/auth/me` from localhost returns credentialed CORS with exact origin
-- login button opens `https://dtm.solofarm.ru/test/auth/login?...`, not `/auth/...`
+- `/ops/auth/me` from localhost returns credentialed CORS with exact origin
+- login button opens `https://dtm.solofarm.ru/test/ops/auth/login?...`, not `/ops/auth/...`
 - Yandex login may redirect back to `http://localhost:5173/...`
 
 Quick checks:
 
 ```powershell
-curl.exe -i -H "Origin: http://localhost:5173" https://dtm.solofarm.ru/test/auth/me
-curl.exe -i -H "Origin: http://localhost:5173" "https://dtm.solofarm.ru/test/api/v2/frontend?statuses=work,pre_done&include_people=true&limit=2"
+curl.exe -i -H "Origin: http://localhost:5173" https://dtm.solofarm.ru/test/ops/auth/me
+curl.exe -i -H "Origin: http://localhost:5173" "https://dtm.solofarm.ru/test/ops/api/v2/frontend?statuses=work,pre_done&include_people=true&limit=2"
 ```
 
-If localhost opens `/auth/...` instead of `/test/auth/...`:
+If localhost opens `/ops/auth/...` instead of `/test/ops/auth/...`:
 - check `apps/web/src/config/runtimeContour.ts`
 - local hosts must resolve to `test` contour but keep SPA base path `/`
 

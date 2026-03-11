@@ -1,6 +1,8 @@
 yandex_cloud:
   folder_id: b1g42qj26s1u7gv7bufm
   service_account_id: aje1kqd422vq2vefkbbl
+  frontend_bucket_prod: dtm-front
+  frontend_bucket_test: dtm-front-test
   function_entrypoint: index.handler
   function_runtime: nodejs22
   function_timeout: 240s

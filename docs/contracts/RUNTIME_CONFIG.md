@@ -58,10 +58,10 @@ Canonical поведение:
 - prod -> contour `prod`, frontend base `/`
 
 Из contour выводятся browser-facing пути:
-- test auth -> `/test/auth`
-- prod auth -> `/auth`
-- test data path -> `/test/api`
-- prod data path -> `/api`
+- test auth -> `/test/ops/auth`
+- prod auth -> `/ops/auth`
+- test data path -> `/test/ops/api`
+- prod data path -> `/ops/api`
 
 ## Browser storage keys
 

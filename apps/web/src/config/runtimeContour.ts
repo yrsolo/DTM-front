@@ -36,11 +36,11 @@ export function getFrontendBasePath(pathname = currentPathname()): string {
 }
 
 export function getAuthBasePath(pathname = currentPathname()): string {
-  return getRuntimeContour(pathname) === "test" ? "/test/auth" : "/auth";
+  return getRuntimeContour(pathname) === "test" ? "/test/ops/auth" : "/ops/auth";
 }
 
 export function getApiProxyBasePath(pathname = currentPathname()): string {
-  return getRuntimeContour(pathname) === "test" ? "/test/api" : "/api";
+  return getRuntimeContour(pathname) === "test" ? "/test/ops/api" : "/ops/api";
 }
 
 export function getAdminRoute(pathname = currentPathname()): string {

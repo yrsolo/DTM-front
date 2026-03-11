@@ -4,7 +4,7 @@
 - [ ] CAM-API-V2-LOADING-SWR-CACHE - finalize manual evidence pack.
 - [x] CAM-SCHEMA-CONTRACT-GOVERNANCE - schema/types sync + validate:schema + guarantees.
 - [ ] CAM-DOCS-CANONICAL-REWRITE - rebuild root README and docs tree around current frontend state.
-- [ ] CAM-AUTH-YANDEX-MASKED-PROXY-ADMIN-V1 - auth function, masked access mode, admin SPA, YDB test/prod contours. Routing contract updated to `prod=/`, `test=/test`; test contour is live; prod contour and bootstrap/admin rollout remain.
+- [ ] CAM-AUTH-YANDEX-MASKED-PROXY-ADMIN-V1 - auth function, masked access mode, admin SPA, YDB test/prod contours. Routing contract updated to `prod=/`, `test=/test`, service namespace moved to `/ops/*`, frontend buckets split to `dtm-front` and `dtm-front-test`; test contour remains the active rollout target.
 
 ## SWR status
 - [x] SWR runtime implemented (cache + background refresh + stale_error).

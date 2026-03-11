@@ -27,6 +27,7 @@ on:
     paths:
       - "apps/web/**"
       - "packages/**"
+      - "config/deploy.yaml"
       - "scripts/deploy_frontend.sh"
       - "scripts/deploy_frontend.ps1"
       - "scripts/deploy_frontend.cmd"
@@ -39,9 +40,6 @@ on:
 concurrency:
   group: deploy-frontend-${{ github.ref_name }}-${{ github.event_name == 'workflow_dispatch' && inputs.target || 'test' }}
   cancel-in-progress: true
-
-env:
-  YC_BUCKET_NAME: dtm-front
 
 jobs:
   deploy:
@@ -77,12 +75,14 @@ jobs:
 
           case "$TARGET" in
             test)
-              TARGET_PREFIX="test"
+              BUCKET_NAME="dtm-front-test"
               CONFIG_PATH="apps/web/config/public.yaml"
+              SITE_PATH="/test/"
               ;;
             prod)
-              TARGET_PREFIX=""
+              BUCKET_NAME="dtm-front"
               CONFIG_PATH="apps/web/config/public.prod.yaml"
+              SITE_PATH="/"
               ;;
             *)
               echo "Unsupported target: $TARGET" >&2
@@ -98,13 +98,8 @@ jobs:
             RELEASE_ID="${TARGET}-${DATE_PART}-${SHA_PART}"
           fi
 
-          SITE_PATH="/"
-          if [ -n "$TARGET_PREFIX" ]; then
-            SITE_PATH="/$TARGET_PREFIX/"
-          fi
-
           echo "target=$TARGET" >> "$GITHUB_OUTPUT"
-          echo "target_prefix=$TARGET_PREFIX" >> "$GITHUB_OUTPUT"
+          echo "bucket_name=$BUCKET_NAME" >> "$GITHUB_OUTPUT"
           echo "config_path=$CONFIG_PATH" >> "$GITHUB_OUTPUT"
           echo "release_id=$RELEASE_ID" >> "$GITHUB_OUTPUT"
           echo "dry_run=$DRY_RUN" >> "$GITHUB_OUTPUT"
@@ -114,7 +109,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          test -n "$YC_BUCKET_NAME"
+          test -n "${{ steps.vars.outputs.bucket_name }}"
           test -f "${{ steps.vars.outputs.config_path }}"
           test -f "data/snapshot.example.json"
           test -n "$YC_SA_JSON_CREDENTIALS"
@@ -126,7 +121,6 @@ jobs:
         run: npm run build -w @dtm/web
 
       - name: Stage deploy package
-        id: stage
         shell: bash
         run: |
           set -euo pipefail
@@ -147,10 +141,10 @@ jobs:
           {
             "release_id": "${{ steps.vars.outputs.release_id }}",
             "deploy_target": "${{ steps.vars.outputs.target }}",
-            "site_prefix": "${{ steps.vars.outputs.target_prefix }}",
             "generated_at_utc": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")",
             "git_ref": "${GITHUB_REF}",
-            "git_sha": "${GITHUB_SHA}"
+            "git_sha": "${GITHUB_SHA}",
+            "frontend_bucket": "${{ steps.vars.outputs.bucket_name }}"
           }
           EOF
           cp "$RELEASE_DIR/release.json" "$RELEASE_DIR/latest.json"
@@ -161,7 +155,7 @@ jobs:
         run: |
           echo "Dry-run: true"
           echo "Target: ${{ steps.vars.outputs.target }}"
-          echo "Bucket: $YC_BUCKET_NAME"
+          echo "Bucket: ${{ steps.vars.outputs.bucket_name }}"
           echo "Site path: ${{ steps.vars.outputs.site_path }}"
           echo "Runtime config: ${{ steps.vars.outputs.config_path }}"
           echo "Release ID: ${{ steps.vars.outputs.release_id }}"
@@ -172,12 +166,8 @@ jobs:
         with:
           root: .deploy/site
           include: "**"
-          # Shared bucket safety: never use destructive clear from Actions.
-          # Test deploys must touch only `test/`, and prod deploys must not wipe
-          # unrelated prefixes or release metadata.
-          clear: "false"
-          bucket: ${{ env.YC_BUCKET_NAME }}
-          prefix: ${{ steps.vars.outputs.target_prefix }}
+          clear: "true"
+          bucket: ${{ steps.vars.outputs.bucket_name }}
           yc-sa-json-credentials: ${{ secrets.YC_SA_JSON_CREDENTIALS }}
 
       - name: Upload release metadata
@@ -187,7 +177,7 @@ jobs:
           root: .deploy/release
           include: "**"
           clear: "false"
-          bucket: ${{ env.YC_BUCKET_NAME }}
+          bucket: ${{ steps.vars.outputs.bucket_name }}
           prefix: releases/${{ steps.vars.outputs.target }}
           yc-sa-json-credentials: ${{ secrets.YC_SA_JSON_CREDENTIALS }}
 
@@ -197,6 +187,6 @@ jobs:
         run: |
           echo "Deploy complete"
           echo "Target: ${{ steps.vars.outputs.target }}"
-          echo "Bucket: $YC_BUCKET_NAME"
+          echo "Bucket: ${{ steps.vars.outputs.bucket_name }}"
           echo "Site path: ${{ steps.vars.outputs.site_path }}"
           echo "Release ID: ${{ steps.vars.outputs.release_id }}"

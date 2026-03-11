@@ -54,32 +54,32 @@ function resolveEventPath(event: YcHttpEvent): string {
 
 function contourFromPath(pathname: string): { contour: Contour; routeKind: "auth" | "api"; routePath: string } {
   const normalized = pathname.replace(/\/+$/, "") || "/";
-  if (normalized === "/test/auth" || normalized.startsWith("/test/auth/")) {
+  if (normalized === "/test/ops/auth" || normalized.startsWith("/test/ops/auth/")) {
     return {
       contour: "test",
       routeKind: "auth",
-      routePath: normalized.slice("/test/auth".length) || "/",
+      routePath: normalized.slice("/test/ops/auth".length) || "/",
     };
   }
-  if (normalized === "/test/api" || normalized.startsWith("/test/api/")) {
+  if (normalized === "/test/ops/api" || normalized.startsWith("/test/ops/api/")) {
     return {
       contour: "test",
       routeKind: "api",
-      routePath: normalized.slice("/test/api".length) || "/",
+      routePath: normalized.slice("/test/ops/api".length) || "/",
     };
   }
-  if (normalized === "/auth" || normalized.startsWith("/auth/")) {
+  if (normalized === "/ops/auth" || normalized.startsWith("/ops/auth/")) {
     return {
       contour: "prod",
       routeKind: "auth",
-      routePath: normalized.slice("/auth".length) || "/",
+      routePath: normalized.slice("/ops/auth".length) || "/",
     };
   }
-  if (normalized === "/api" || normalized.startsWith("/api/")) {
+  if (normalized === "/ops/api" || normalized.startsWith("/ops/api/")) {
     return {
       contour: "prod",
       routeKind: "api",
-      routePath: normalized.slice("/api".length) || "/",
+      routePath: normalized.slice("/ops/api".length) || "/",
     };
   }
 
