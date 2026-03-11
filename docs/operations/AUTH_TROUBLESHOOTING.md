@@ -36,6 +36,7 @@ Local Vite frontend is allowed to use the public test auth contour:
 Expected behavior:
 - `/auth/me` from localhost returns credentialed CORS with exact origin
 - `/api/*` from localhost returns credentialed CORS with exact origin
+- login button opens `https://dtm.solofarm.ru/test/auth/login?...`, not `/prod/auth/...`
 - Yandex login may redirect back to `http://localhost:5173/...`
 
 Quick checks:
@@ -53,6 +54,10 @@ Expected headers:
 If local login redirects to `/` on the public domain instead of localhost:
 - check allowlist of `return_to` hosts in `apps/auth/src/handlers/authHandlers.ts`
 - redeploy `auth-test`
+
+If localhost opens `/prod/auth/...` instead of `/test/auth/...`:
+- check `apps/web/src/config/runtimeContour.ts`
+- local hosts must resolve to `test` contour but keep SPA base path `/`
 
 ## Admin page says administrator access is required
 
@@ -83,6 +88,10 @@ If needed, force a fresh session:
 ## Deploy function fails on secrets
 
 Check lockbox entries:
+- `YANDEX_CLIENT_ID_TEST`
+- `YANDEX_CLIENT_SECRET_TEST`
+- `YANDEX_CLIENT_ID_PROD`
+- `YANDEX_CLIENT_SECRET_PROD`
 - `YANDEX_CLIENT_ID`
 - `YANDEX_CLIENT_SECRET`
 - `SESSION_SIGNING_SECRET`

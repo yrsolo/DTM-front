@@ -20,6 +20,16 @@ export type AuthRuntimeConfig = {
   adminBootstrapUid: string | null;
 };
 
+function readRequiredAny(...names: string[]): string {
+  for (const name of names) {
+    const value = process.env[name]?.trim();
+    if (value) {
+      return value;
+    }
+  }
+  throw new Error(`Missing required env: ${names.join(" or ")}`);
+}
+
 function readRequired(name: string): string {
   const value = process.env[name]?.trim();
   if (!value) {
@@ -65,6 +75,9 @@ export function getAuthRuntimeConfig(): AuthRuntimeConfig {
   const authBasePath = readRequired("AUTH_BASE_PATH");
   const apiProxyBasePath = readRequired("API_PROXY_BASE_PATH");
   const apiUpstreamOrigin = readRequired("API_UPSTREAM_ORIGIN").replace(/\/+$/, "");
+  const yandexClientIdVar = contour === "test" ? "YANDEX_CLIENT_ID_TEST" : "YANDEX_CLIENT_ID_PROD";
+  const yandexClientSecretVar =
+    contour === "test" ? "YANDEX_CLIENT_SECRET_TEST" : "YANDEX_CLIENT_SECRET_PROD";
 
   cachedConfig = {
     contour,
@@ -72,8 +85,8 @@ export function getAuthRuntimeConfig(): AuthRuntimeConfig {
     authBasePath,
     apiProxyBasePath,
     apiUpstreamOrigin,
-    yandexClientId: readRequired("YANDEX_CLIENT_ID"),
-    yandexClientSecret: readRequired("YANDEX_CLIENT_SECRET"),
+    yandexClientId: readRequiredAny(yandexClientIdVar, "YANDEX_CLIENT_ID"),
+    yandexClientSecret: readRequiredAny(yandexClientSecretVar, "YANDEX_CLIENT_SECRET"),
     sessionSigningSecret: readRequired("SESSION_SIGNING_SECRET"),
     sessionTtlSeconds: readNumber("SESSION_TTL_SECONDS", 60 * 60 * 12),
     cookieName: readRequired("COOKIE_NAME"),

@@ -18,6 +18,9 @@ export function isLocalFrontendRuntime(): boolean {
 }
 
 export function getRuntimeContour(pathname = currentPathname()): RuntimeContour {
+  if (isLocalFrontendRuntime()) {
+    return "test";
+  }
   const path = pathname.toLowerCase();
   if (path === "/test-front" || path.startsWith("/test-front/")) {
     return "test";
@@ -26,6 +29,9 @@ export function getRuntimeContour(pathname = currentPathname()): RuntimeContour 
 }
 
 export function getFrontendBasePath(pathname = currentPathname()): string {
+  if (isLocalFrontendRuntime()) {
+    return "/";
+  }
   return getRuntimeContour(pathname) === "test" ? "/test-front/" : "/";
 }
 
@@ -38,10 +44,16 @@ export function getApiProxyBasePath(pathname = currentPathname()): string {
 }
 
 export function getAdminRoute(pathname = currentPathname()): string {
+  if (isLocalFrontendRuntime()) {
+    return "/admin";
+  }
   return getRuntimeContour(pathname) === "test" ? "/test-front/admin" : "/admin";
 }
 
 export function getTasksRoute(pathname = currentPathname()): string {
+  if (isLocalFrontendRuntime()) {
+    return "/";
+  }
   return getRuntimeContour(pathname) === "test" ? "/test-front/" : "/";
 }
 

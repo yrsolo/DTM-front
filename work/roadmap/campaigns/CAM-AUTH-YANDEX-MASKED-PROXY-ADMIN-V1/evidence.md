@@ -31,6 +31,7 @@
   - `Origin: http://localhost:5173` on `/test/auth/me` -> exact allow-origin + credentials
   - `Origin: http://localhost:5173` on `/test/api/api/v2/frontend?...` -> exact allow-origin + credentials
   - `OPTIONS /test/api/api/v2/frontend` from localhost -> `204` with credentialed CORS
+  - `GET /test/auth/login?return_to=http://localhost:5173/` -> `302` to Yandex OAuth with `redirect_uri=https://dtm.solofarm.ru/test/auth/callback`
 
 ## Pending
 - prod function deploy

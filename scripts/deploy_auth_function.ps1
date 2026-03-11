@@ -36,6 +36,10 @@ if (-not $yc) { throw "Missing yandex_cloud section in config/deploy.yaml" }
 $functionName = if ($Target -eq "test") { $yc.auth_function_name_test } else { $yc.auth_function_name_prod }
 $ydbDatabase = if ($Target -eq "test") { $yc.ydb_database_test } else { $yc.ydb_database_prod }
 $maskingSecretKey = if ($Target -eq "test") { "MASKING_SALT_TEST" } else { "MASKING_SALT_PROD" }
+$oauthClientIdEnvName = if ($Target -eq "test") { "YANDEX_CLIENT_ID_TEST" } else { "YANDEX_CLIENT_ID_PROD" }
+$oauthClientSecretEnvName = if ($Target -eq "test") { "YANDEX_CLIENT_SECRET_TEST" } else { "YANDEX_CLIENT_SECRET_PROD" }
+$oauthClientIdValue = [Environment]::GetEnvironmentVariable($oauthClientIdEnvName)
+$oauthClientSecretValue = [Environment]::GetEnvironmentVariable($oauthClientSecretEnvName)
 $authBasePath = if ($Target -eq "test") { "/test/auth" } else { "/prod/auth" }
 $apiProxyBasePath = if ($Target -eq "test") { "/test/api" } else { "/prod/api" }
 $apiUpstreamOrigin = if ($Target -eq "test") { $yc.api_origin_test } else { $yc.api_origin_prod }
@@ -89,8 +93,6 @@ try {
 }
 
 $secretArgs = @(
-  "--secret", "id=$($yc.lockbox_id),key=YANDEX_CLIENT_ID,environment-variable=YANDEX_CLIENT_ID",
-  "--secret", "id=$($yc.lockbox_id),key=YANDEX_CLIENT_SECRET,environment-variable=YANDEX_CLIENT_SECRET",
   "--secret", "id=$($yc.lockbox_id),key=SESSION_SIGNING_SECRET,environment-variable=SESSION_SIGNING_SECRET",
   "--secret", "id=$($yc.lockbox_id),key=COOKIE_NAME,environment-variable=COOKIE_NAME",
   "--secret", "id=$($yc.lockbox_id),key=COOKIE_PATH,environment-variable=COOKIE_PATH",
@@ -99,6 +101,15 @@ $secretArgs = @(
   "--secret", "id=$($yc.lockbox_id),key=SESSION_TTL_SECONDS,environment-variable=SESSION_TTL_SECONDS",
   "--secret", "id=$($yc.lockbox_id),key=$maskingSecretKey,environment-variable=MASKING_SALT"
 )
+
+$oauthArgs = @()
+if ($oauthClientIdValue -and $oauthClientSecretValue) {
+  $oauthArgs += @("--environment", "$oauthClientIdEnvName=$oauthClientIdValue")
+  $oauthArgs += @("--environment", "$oauthClientSecretEnvName=$oauthClientSecretValue")
+} else {
+  $oauthArgs += @("--secret", "id=$($yc.lockbox_id),key=YANDEX_CLIENT_ID,environment-variable=YANDEX_CLIENT_ID")
+  $oauthArgs += @("--secret", "id=$($yc.lockbox_id),key=YANDEX_CLIENT_SECRET,environment-variable=YANDEX_CLIENT_SECRET")
+}
 
 $envArgs = @(
   "--environment", "CONTOUR=$Target",
@@ -120,7 +131,7 @@ $args = @(
   "--execution-timeout", $yc.function_timeout,
   "--service-account-id", $yc.service_account_id,
   "--source-path", "apps/auth/dist"
-) + $envArgs + $secretArgs
+) + $envArgs + $secretArgs + $oauthArgs
 
 yc @args | Out-Host
 

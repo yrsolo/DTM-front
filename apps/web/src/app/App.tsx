@@ -6,8 +6,9 @@ import { AdminPage } from "../pages/AdminPage";
 import { TimelinePage } from "../pages/TimelinePage";
 
 export function App() {
+  const frontendBasePath = getFrontendBasePath();
   return (
-    <BrowserRouter basename={getFrontendBasePath() === "/" ? undefined : "/test-front"}>
+    <BrowserRouter basename={frontendBasePath === "/" ? undefined : frontendBasePath.replace(/\/$/, "")}>
       <Layout>
         <Routes>
           <Route path="/" element={<TimelinePage />} />

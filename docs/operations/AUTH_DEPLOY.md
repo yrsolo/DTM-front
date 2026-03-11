@@ -124,6 +124,10 @@ bash scripts/deploy_auth_function.sh --target test --dry-run
 ## Secrets contract
 
 Function deploy reads lockbox entries:
+- `YANDEX_CLIENT_ID_TEST`
+- `YANDEX_CLIENT_SECRET_TEST`
+- `YANDEX_CLIENT_ID_PROD`
+- `YANDEX_CLIENT_SECRET_PROD`
 - `YANDEX_CLIENT_ID`
 - `YANDEX_CLIENT_SECRET`
 - `SESSION_SIGNING_SECRET`
@@ -138,6 +142,13 @@ Function deploy reads lockbox entries:
 Deferred:
 - `ADMIN_BOOTSTRAP_UID_TEST`
 - `ADMIN_BOOTSTRAP_UID_PROD`
+
+The contour-specific Yandex OAuth credentials are canonical.
+The common `YANDEX_CLIENT_ID` and `YANDEX_CLIENT_SECRET` remain only as a temporary fallback for older function versions.
+
+Deploy scripts use this precedence:
+1. contour-specific env vars in the current shell / CI environment
+2. common lockbox fallback keys
 
 ## Runtime env
 

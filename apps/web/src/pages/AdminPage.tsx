@@ -1,7 +1,7 @@
 import React from "react";
 
 import { LayoutContext } from "../components/Layout";
-import { getAuthBasePath, isLocalFrontendRuntime } from "../config/runtimeContour";
+import { getAuthRequestBase } from "../config/runtimeContour";
 
 type AdminOverview = {
   pendingUsers: Array<{
@@ -26,7 +26,7 @@ type AdminOverview = {
 };
 
 function buildAuthUrl(path: string): string {
-  return `${window.location.origin}${getAuthBasePath()}${path}`;
+  return `${getAuthRequestBase()}${path}`;
 }
 
 export function AdminPage() {
@@ -39,11 +39,6 @@ export function AdminPage() {
   const authSession = ctx?.authSession;
 
   const loadOverview = React.useCallback(async () => {
-    if (isLocalFrontendRuntime()) {
-      setOverview({ pendingUsers: [], allowlist: [], openRequests: [] });
-      setLoading(false);
-      return;
-    }
     setLoading(true);
     setError(null);
     try {
@@ -116,24 +111,13 @@ export function AdminPage() {
 
   if (!ctx) return null;
 
-  if (isLocalFrontendRuntime()) {
-    return (
-      <div className="card">
-        <div className="pageHeader">
-          <h3 className="pageTitle">Admin</h3>
-        </div>
-        <p className="muted">Локальный dev-режим не использует auth function. Страница доступна для вёрстки, но не подключена к backend.</p>
-      </div>
-    );
-  }
-
   if (!authSession?.state.authenticated || authSession.state.user?.role !== "admin") {
     return (
       <div className="card">
         <div className="pageHeader">
           <h3 className="pageTitle">Admin</h3>
         </div>
-        <p className="muted">Требуется доступ администратора.</p>
+        <p className="muted">????????? ?????? ??????????????.</p>
       </div>
     );
   }
@@ -144,7 +128,7 @@ export function AdminPage() {
         <h3 className="pageTitle">Admin</h3>
       </div>
 
-      {loading ? <p className="muted">Загрузка...</p> : null}
+      {loading ? <p className="muted">????????...</p> : null}
       {error ? <p className="muted">{error}</p> : null}
 
       <div className="grid2" style={{ alignItems: "start" }}>
@@ -161,7 +145,7 @@ export function AdminPage() {
                 </div>
               </div>
             ))}
-            {!overview?.pendingUsers?.length ? <div className="muted">Нет ожидающих пользователей.</div> : null}
+            {!overview?.pendingUsers?.length ? <div className="muted">??? ????????? ?????????????.</div> : null}
           </div>
         </div>
 
@@ -191,7 +175,7 @@ export function AdminPage() {
                 </button>
               </div>
             ))}
-            {!overview?.allowlist?.length ? <div className="muted">Allowlist пуст.</div> : null}
+            {!overview?.allowlist?.length ? <div className="muted">Allowlist ????.</div> : null}
           </div>
         </div>
       </div>
@@ -205,7 +189,7 @@ export function AdminPage() {
               <div className="muted">{request.requestedAt}</div>
             </div>
           ))}
-          {!overview?.openRequests?.length ? <div className="muted">Нет активных заявок.</div> : null}
+          {!overview?.openRequests?.length ? <div className="muted">??? ???????? ??????.</div> : null}
         </div>
       </div>
     </div>

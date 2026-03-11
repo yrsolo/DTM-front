@@ -15,6 +15,10 @@ Source of truth:
 - admin SPA: `https://dtm.solofarm.ru/test-front/admin`
 - auth endpoints: `https://dtm.solofarm.ru/test/auth/*`
 - api proxy: `https://dtm.solofarm.ru/test/api/*`
+- local frontend runtime also uses the `test` contour for auth/api:
+  - local SPA route base stays `/`
+  - auth requests go to `https://dtm.solofarm.ru/test/auth/*`
+  - API requests go to `https://dtm.solofarm.ru/test/api/*`
 
 ### Prod
 - frontend: `https://dtm.solofarm.ru/`
@@ -84,3 +88,15 @@ V1 endpoints:
 - access requests
 - audit log
 - session versions
+
+## OAuth apps
+
+Two separate Yandex OAuth apps are used:
+- test -> callback `https://dtm.solofarm.ru/test/auth/callback`
+- prod -> callback `https://dtm.solofarm.ru/prod/auth/callback`
+
+Canonical env contract:
+- `YANDEX_CLIENT_ID_TEST`
+- `YANDEX_CLIENT_SECRET_TEST`
+- `YANDEX_CLIENT_ID_PROD`
+- `YANDEX_CLIENT_SECRET_PROD`

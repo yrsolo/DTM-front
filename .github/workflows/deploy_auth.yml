@@ -36,6 +36,10 @@ jobs:
     environment: ${{ github.event_name == 'push' && 'test' || inputs.target }}
     env:
       YC_SA_JSON_CREDENTIALS: ${{ secrets.YC_SA_JSON_CREDENTIALS }}
+      YANDEX_CLIENT_ID_TEST: ${{ secrets.YANDEX_CLIENT_ID_TEST }}
+      YANDEX_CLIENT_SECRET_TEST: ${{ secrets.YANDEX_CLIENT_SECRET_TEST }}
+      YANDEX_CLIENT_ID_PROD: ${{ secrets.YANDEX_CLIENT_ID_PROD }}
+      YANDEX_CLIENT_SECRET_PROD: ${{ secrets.YANDEX_CLIENT_SECRET_PROD }}
     permissions:
       contents: read
     steps:

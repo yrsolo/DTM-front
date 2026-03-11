@@ -65,6 +65,8 @@ if [[ "$TARGET" == "test" ]]; then
   api_proxy_base_path="/test/api"
   api_upstream_origin="$api_origin_test"
   masking_secret_key="MASKING_SALT_TEST"
+  oauth_client_id_env_name="YANDEX_CLIENT_ID_TEST"
+  oauth_client_secret_env_name="YANDEX_CLIENT_SECRET_TEST"
 else
   function_name="$(node -e "const cfg=$CONFIG_JSON; process.stdout.write(cfg.yandex_cloud.auth_function_name_prod)")"
   ydb_database="$(node -e "const cfg=$CONFIG_JSON; process.stdout.write(cfg.yandex_cloud.ydb_database_prod)")"
@@ -72,7 +74,12 @@ else
   api_proxy_base_path="/prod/api"
   api_upstream_origin="$api_origin_prod"
   masking_secret_key="MASKING_SALT_PROD"
+  oauth_client_id_env_name="YANDEX_CLIENT_ID_PROD"
+  oauth_client_secret_env_name="YANDEX_CLIENT_SECRET_PROD"
 fi
+
+oauth_client_id_value="${!oauth_client_id_env_name:-}"
+oauth_client_secret_value="${!oauth_client_secret_env_name:-}"
 
 if [[ -z "$api_upstream_origin" ]]; then
   echo "Missing api_origin for target=$TARGET in config/deploy.yaml" >&2
@@ -115,8 +122,6 @@ if ! yc serverless function get --name "$function_name" --format json >/dev/null
 fi
 
 secret_args=(
-  --secret "id=$lockbox_id,key=YANDEX_CLIENT_ID,environment-variable=YANDEX_CLIENT_ID"
-  --secret "id=$lockbox_id,key=YANDEX_CLIENT_SECRET,environment-variable=YANDEX_CLIENT_SECRET"
   --secret "id=$lockbox_id,key=SESSION_SIGNING_SECRET,environment-variable=SESSION_SIGNING_SECRET"
   --secret "id=$lockbox_id,key=COOKIE_NAME,environment-variable=COOKIE_NAME"
   --secret "id=$lockbox_id,key=COOKIE_PATH,environment-variable=COOKIE_PATH"
@@ -125,6 +130,19 @@ secret_args=(
   --secret "id=$lockbox_id,key=SESSION_TTL_SECONDS,environment-variable=SESSION_TTL_SECONDS"
   --secret "id=$lockbox_id,key=$masking_secret_key,environment-variable=MASKING_SALT"
 )
+
+oauth_args=()
+if [[ -n "$oauth_client_id_value" && -n "$oauth_client_secret_value" ]]; then
+  oauth_args+=(
+    --environment "$oauth_client_id_env_name=$oauth_client_id_value"
+    --environment "$oauth_client_secret_env_name=$oauth_client_secret_value"
+  )
+else
+  oauth_args+=(
+    --secret "id=$lockbox_id,key=YANDEX_CLIENT_ID,environment-variable=YANDEX_CLIENT_ID"
+    --secret "id=$lockbox_id,key=YANDEX_CLIENT_SECRET,environment-variable=YANDEX_CLIENT_SECRET"
+  )
+fi
 
 yc serverless function version create \
   --function-name "$function_name" \
@@ -142,4 +160,5 @@ yc serverless function version create \
   --environment "YDB_ENDPOINT=$ydb_endpoint" \
   --environment "YDB_DATABASE=$ydb_database" \
   --environment "YDB_METADATA_CREDENTIALS=1" \
-  "${secret_args[@]}"
+  "${secret_args[@]}" \
+  "${oauth_args[@]}"
