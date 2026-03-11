@@ -73,6 +73,8 @@ GitHub Actions deploy:
 - `push` в `dev` -> автоматически публикует `test`
 - `workflow_dispatch` -> ручной deploy в `prod` или `test`
 - test и prod больше не делят один bucket
+- upload идёт через generic `aws s3` against `https://storage.yandexcloud.net`, без `yc` CLI и без `yc-actions/yc-obj-storage-upload`
+- workflow требует GitHub secrets `AWS_ACCESS_KEY_ID` и `AWS_SECRET_ACCESS_KEY`
 
 ## Runtime config
 

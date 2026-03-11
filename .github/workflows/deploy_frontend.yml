@@ -46,7 +46,8 @@ jobs:
     runs-on: ubuntu-latest
     environment: ${{ github.event_name == 'push' && 'test' || inputs.target }}
     env:
-      YC_SA_JSON_CREDENTIALS: ${{ secrets.YC_SA_JSON_CREDENTIALS }}
+      YC_ENDPOINT: https://storage.yandexcloud.net
+      AWS_DEFAULT_REGION: ru-central1
     permissions:
       contents: read
     steps:
@@ -115,7 +116,22 @@ jobs:
           test -n "${{ steps.vars.outputs.bucket_name }}"
           test -f "${{ steps.vars.outputs.config_path }}"
           test -f "data/snapshot.example.json"
-          test -n "$YC_SA_JSON_CREDENTIALS"
+
+      - name: Validate upload credentials
+        if: ${{ steps.vars.outputs.dry_run != 'true' }}
+        shell: bash
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        run: |
+          set -euo pipefail
+          test -n "$AWS_ACCESS_KEY_ID"
+          test -n "$AWS_SECRET_ACCESS_KEY"
+
+      - name: Check AWS CLI
+        if: ${{ steps.vars.outputs.dry_run != 'true' }}
+        shell: bash
+        run: aws --version
 
       - name: Install dependencies
         run: npm ci
@@ -166,26 +182,83 @@ jobs:
           echo "Runtime config: ${{ steps.vars.outputs.config_path }}"
           echo "Release ID: ${{ steps.vars.outputs.release_id }}"
 
-      - name: Upload site package
+      - name: Upload site assets
         if: ${{ steps.vars.outputs.dry_run != 'true' }}
-        uses: yc-actions/yc-obj-storage-upload@v3
-        with:
-          root: .deploy/site
-          include: "**"
-          clear: "true"
-          bucket: ${{ steps.vars.outputs.bucket_name }}
-          yc-sa-json-credentials: ${{ secrets.YC_SA_JSON_CREDENTIALS }}
+        shell: bash
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        run: |
+          set -euo pipefail
+
+          aws s3 sync \
+            ".deploy/site" \
+            "s3://${{ steps.vars.outputs.bucket_name }}" \
+            --delete \
+            --exclude "index.html" \
+            --exclude "config/*" \
+            --exclude "data/*" \
+            --exclude "releases/*" \
+            --endpoint-url "$YC_ENDPOINT" \
+            --cache-control "public, max-age=31536000, immutable"
+
+          aws s3 sync \
+            ".deploy/site/config" \
+            "s3://${{ steps.vars.outputs.bucket_name }}/config" \
+            --delete \
+            --endpoint-url "$YC_ENDPOINT" \
+            --cache-control "no-cache"
+
+          aws s3 cp \
+            ".deploy/site/config/public.yaml" \
+            "s3://${{ steps.vars.outputs.bucket_name }}/config/public.yaml" \
+            --endpoint-url "$YC_ENDPOINT" \
+            --content-type "text/yaml" \
+            --cache-control "no-cache"
+
+          aws s3 cp \
+            ".deploy/site/config/public.yam" \
+            "s3://${{ steps.vars.outputs.bucket_name }}/config/public.yam" \
+            --endpoint-url "$YC_ENDPOINT" \
+            --content-type "text/yaml" \
+            --cache-control "no-cache"
+
+          aws s3 cp \
+            ".deploy/site/data/snapshot.example.json" \
+            "s3://${{ steps.vars.outputs.bucket_name }}/data/snapshot.example.json" \
+            --endpoint-url "$YC_ENDPOINT" \
+            --content-type "application/json" \
+            --cache-control "no-cache"
+
+          aws s3 cp \
+            ".deploy/site/index.html" \
+            "s3://${{ steps.vars.outputs.bucket_name }}/index.html" \
+            --endpoint-url "$YC_ENDPOINT" \
+            --content-type "text/html; charset=utf-8" \
+            --cache-control "no-cache"
 
       - name: Upload release metadata
         if: ${{ steps.vars.outputs.dry_run != 'true' }}
-        uses: yc-actions/yc-obj-storage-upload@v3
-        with:
-          root: .deploy/release
-          include: "**"
-          clear: "false"
-          bucket: ${{ steps.vars.outputs.bucket_name }}
-          prefix: releases/${{ steps.vars.outputs.target }}
-          yc-sa-json-credentials: ${{ secrets.YC_SA_JSON_CREDENTIALS }}
+        shell: bash
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        run: |
+          set -euo pipefail
+
+          aws s3 cp \
+            ".deploy/release/release.json" \
+            "s3://${{ steps.vars.outputs.bucket_name }}/releases/${{ steps.vars.outputs.target }}/${{ steps.vars.outputs.release_id }}/release.json" \
+            --endpoint-url "$YC_ENDPOINT" \
+            --content-type "application/json" \
+            --cache-control "no-cache"
+
+          aws s3 cp \
+            ".deploy/release/latest.json" \
+            "s3://${{ steps.vars.outputs.bucket_name }}/releases/${{ steps.vars.outputs.target }}/latest.json" \
+            --endpoint-url "$YC_ENDPOINT" \
+            --content-type "application/json" \
+            --cache-control "no-cache"
 
       - name: Deploy summary
         if: ${{ steps.vars.outputs.dry_run != 'true' }}

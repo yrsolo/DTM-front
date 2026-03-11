@@ -40,6 +40,8 @@ Shared endpoint:
 
 - `push` в `dev` -> migrations for test + deploy `auth-test`
 - prod deploy -> `workflow_dispatch` only
+- GitHub Actions deploy больше не устанавливает `yc` CLI: function version публикуется напрямую через `yc-actions/yc-sls-function`
+- в workflow OAuth credentials берутся из GitHub secrets `YANDEX_CLIENT_ID_TEST|PROD` и `YANDEX_CLIENT_SECRET_TEST|PROD`; lockbox остаётся источником session/cookie/masking secrets
 
 ## Local deploy
 
@@ -137,6 +139,10 @@ Contour-specific OAuth credentials считаются canonical:
 - `SESSION_TTL_SECONDS`
 - `MASKING_SALT_TEST`
 - `MASKING_SALT_PROD`
+
+Для GitHub Actions также нужны:
+- `YC_SA_JSON_CREDENTIALS` для deploy/migrations
+- contour-specific GitHub secrets `YANDEX_CLIENT_ID_TEST`, `YANDEX_CLIENT_SECRET_TEST`, `YANDEX_CLIENT_ID_PROD`, `YANDEX_CLIENT_SECRET_PROD`
 
 ## Runtime env
 
