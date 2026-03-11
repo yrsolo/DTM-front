@@ -1,0 +1,8 @@
+﻿{
+    "generated_at_utc":  "2026-03-11T18:01:56.5291866Z",
+    "release_id":  "prod-20260311-210156-c34b52c",
+    "git_ref":  null,
+    "frontend_bucket":  "dtm-front",
+    "deploy_target":  "prod",
+    "git_sha":  null
+}
