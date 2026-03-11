@@ -33,5 +33,8 @@ After each meaningful iteration, report:
 - Docs status (updated/not needed)
 - Tracking (done/blocked)
 
+If report says `Ready to commit: yes` and there is no explicit owner instruction to avoid commits,
+agent should create the commit in the current branch instead of waiting for a separate commit request.
+
 ## 5) Safety
 Never print/expose secrets from env or tokens.
