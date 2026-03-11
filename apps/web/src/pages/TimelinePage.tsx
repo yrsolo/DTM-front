@@ -9,6 +9,7 @@ import { TaskDetailsDrawer } from "../components/TaskDetailsDrawer";
 import { Tooltip, TooltipState } from "../components/Tooltip";
 import { UnifiedTimeline } from "../gantt/UnifiedTimeline";
 import { RenderTask } from "../gantt/types";
+import { readMaskingMode, writeMaskingMode } from "../auth/maskingMode";
 import { useElementWidth } from "../utils/useElementWidth";
 import { toShortPersonName } from "../utils/personName";
 
@@ -19,6 +20,28 @@ const MAX_ZOOM = 10;
 const TIMELINE_PAGE_VIEW_KEY = "dtm.timeline.pageView.v1";
 const PAGE_LABEL_TASKS = "\u0417\u0430\u0434\u0430\u0447\u0438";
 const PAGE_LABEL_DESIGNERS = "\u0414\u0438\u0437\u0430\u0439\u043d\u0435\u0440\u044b";
+
+function LockIcon() {
+  return (
+    <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">
+      <path
+        d="M5.25 6V4.85a2.75 2.75 0 1 1 5.5 0V6h.65c.58 0 1.05.47 1.05 1.05v4.7c0 .58-.47 1.05-1.05 1.05H4.6c-.58 0-1.05-.47-1.05-1.05v-4.7C3.55 6.47 4.02 6 4.6 6h.65Zm1.2 0h3.1V4.85a1.55 1.55 0 1 0-3.1 0V6Z"
+        fill="currentColor"
+      />
+    </svg>
+  );
+}
+
+function UserIcon() {
+  return (
+    <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">
+      <path
+        d="M8 8.05a2.6 2.6 0 1 0 0-5.2 2.6 2.6 0 0 0 0 5.2Zm0 1.2c-2.52 0-4.85 1.19-4.85 2.75 0 .32.26.58.58.58h8.54c.32 0 .58-.26.58-.58 0-1.56-2.33-2.75-4.85-2.75Z"
+        fill="currentColor"
+      />
+    </svg>
+  );
+}
 
 function clamp(value: number, min: number, max: number) {
   return Math.max(min, Math.min(max, value));
@@ -64,6 +87,8 @@ export function TimelinePage() {
   const [isDraggingTimeline, setIsDraggingTimeline] = React.useState(false);
   const [isRefreshPanelOpen, setIsRefreshPanelOpen] = React.useState(false);
   const [isDateFilterPanelOpen, setIsDateFilterPanelOpen] = React.useState(false);
+  const [isAuthPanelOpen, setIsAuthPanelOpen] = React.useState(false);
+  const [maskingMode, setMaskingMode] = React.useState<"auto" | "forced">(() => readMaskingMode());
   const [pageView, setPageView] = React.useState<"tasks" | "designers">(() => {
     try {
       const stored = localStorage.getItem(TIMELINE_PAGE_VIEW_KEY);
@@ -84,6 +109,7 @@ export function TimelinePage() {
   const scaleInfoRef = React.useRef<{ rangeStartMs: number; pxPerDay: number; labelW: number } | null>(null);
   const pendingZoomAnchorRef = React.useRef<{ dateMs: number; clientX: number } | null>(null);
   const pendingDateAnchorRef = React.useRef<number | null>(null);
+  const authMenuRef = React.useRef<HTMLDivElement | null>(null);
   const timelineHost = useElementWidth<HTMLDivElement>();
 
   const applyDateAnchor = (dateMs: number) => {
@@ -113,8 +139,29 @@ export function TimelinePage() {
     }
   }, [pageView]);
 
+  React.useEffect(() => {
+    if (!isAuthPanelOpen) return;
+    const onPointerDown = (event: MouseEvent) => {
+      const target = event.target as Node | null;
+      if (authMenuRef.current && target && !authMenuRef.current.contains(target)) {
+        setIsAuthPanelOpen(false);
+      }
+    };
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setIsAuthPanelOpen(false);
+      }
+    };
+    window.addEventListener("mousedown", onPointerDown);
+    window.addEventListener("keydown", onKeyDown);
+    return () => {
+      window.removeEventListener("mousedown", onPointerDown);
+      window.removeEventListener("keydown", onKeyDown);
+    };
+  }, [isAuthPanelOpen]);
+
   if (!ctx) return null;
-  const { viewMode, setViewMode, sortMode, setSortMode, filters, setFilters, snapshotState, design, setDesign, ui, locale, setLocale } = ctx;
+  const { viewMode, setViewMode, sortMode, setSortMode, filters, setFilters, snapshotState, design, setDesign, ui, locale, setLocale, authSession } = ctx;
   const {
     snapshot,
     isLoading,
@@ -322,6 +369,31 @@ export function TimelinePage() {
     });
   };
   const onLeave = () => setTooltip({ visible: false });
+  const maskingForced = maskingMode === "forced";
+  const maskingLockedByAccess = authSession.state.accessMode !== "full";
+  const maskButtonActive = maskingForced || maskingLockedByAccess;
+  const authButtonLabel = authSession.state.authenticated
+    ? authSession.state.user?.displayName || authSession.state.user?.email || "Пользователь"
+    : authSession.state.loading
+      ? (locale === "ru" ? "Проверка доступа" : "Checking access")
+      : (locale === "ru" ? "Войти через Яндекс" : "Sign in with Yandex");
+
+  const handleMaskToggle = React.useCallback(() => {
+    if (maskingLockedByAccess) return;
+    const nextMode = maskingForced ? "auto" : "forced";
+    writeMaskingMode(nextMode);
+    setMaskingMode(nextMode);
+    void syncFromApi();
+  }, [maskingForced, maskingLockedByAccess, syncFromApi]);
+
+  const handleAuthButtonClick = React.useCallback(() => {
+    if (authSession.state.loading) return;
+    if (!authSession.state.authenticated) {
+      window.location.assign(authSession.loginHref);
+      return;
+    }
+    setIsAuthPanelOpen((prev) => !prev);
+  }, [authSession.loginHref, authSession.state.authenticated, authSession.state.loading]);
 
   const onDesignerCardHover = (e: React.MouseEvent, task: TaskV1) => {
     const manager = task.customer?.trim() || "-";
@@ -553,6 +625,62 @@ export function TimelinePage() {
               <option value="en">{ui.localeEn}</option>
             </select>
           </label>
+          <div className="timelineTopControlSpacer" />
+          <button
+            type="button"
+            className={`iconCtlBtn authIconBtn ${maskButtonActive ? "active" : ""}`}
+            onClick={handleMaskToggle}
+            disabled={maskingLockedByAccess}
+            title={
+              maskingLockedByAccess
+                ? (locale === "ru" ? "Маскирование задаётся уровнем доступа" : "Masking is defined by access level")
+                : maskingForced
+                  ? (locale === "ru" ? "Выключить принудительную маскировку" : "Disable forced masking")
+                  : (locale === "ru" ? "Включить принудительную маскировку" : "Enable forced masking")
+            }
+            aria-label={locale === "ru" ? "Маскирование" : "Masking"}
+          >
+            <LockIcon />
+          </button>
+          <div className="authMenuWrap" ref={authMenuRef}>
+            <button
+              type="button"
+              className={`iconCtlBtn authIconBtn ${isAuthPanelOpen ? "active" : ""}`}
+              onClick={handleAuthButtonClick}
+              title={authButtonLabel}
+              aria-label={authButtonLabel}
+            >
+              <UserIcon />
+            </button>
+            {isAuthPanelOpen && authSession.state.authenticated ? (
+              <div className="authMenuPopover">
+                <div className="authMenuTitle">
+                  {authSession.state.user?.displayName || authSession.state.user?.email || "User"}
+                </div>
+                <button
+                  type="button"
+                  className="btn btnGhost authMenuAction"
+                  onClick={() => {
+                    setIsAuthPanelOpen(false);
+                    window.location.assign(authSession.adminHref);
+                  }}
+                  disabled={authSession.state.user?.role !== "admin"}
+                >
+                  Админка
+                </button>
+                <button
+                  type="button"
+                  className="btn btnGhost authMenuAction"
+                  onClick={() => {
+                    setIsAuthPanelOpen(false);
+                    void authSession.logout();
+                  }}
+                >
+                  Выйти
+                </button>
+              </div>
+            ) : null}
+          </div>
         </div>
         {isRefreshPanelOpen ? <FiltersBar /> : null}
         {isDateFilterPanelOpen ? (

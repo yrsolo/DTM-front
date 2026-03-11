@@ -29,6 +29,8 @@ export async function proxyApiRequest(req: NormalizedRequest) {
   const cfg = getAuthRuntimeConfig();
   const { user, clearCookie } = await resolveSession(req.headers.cookie);
   const accessMode = getAccessMode(user);
+  const forceMasking = req.headers["x-dtm-force-mask"] === "1";
+  const effectiveAccessMode = forceMasking ? "masked" : accessMode;
 
   const upstreamUrl = new URL(
     `${cfg.apiUpstreamOrigin.replace(/\/+$/, "")}${req.routePath}${req.query.toString() ? `?${req.query.toString()}` : ""}`
@@ -37,9 +39,10 @@ export async function proxyApiRequest(req: NormalizedRequest) {
   const headers = new Headers();
   for (const [key, value] of Object.entries(req.headers)) {
     if (!value || HOP_BY_HOP_HEADERS.has(key)) continue;
+    if (key === "x-dtm-force-mask") continue;
     headers.set(key, value);
   }
-  headers.set("x-dtm-access-mode", accessMode);
+  headers.set("x-dtm-access-mode", effectiveAccessMode);
   headers.set("x-dtm-contour", cfg.contour);
 
   const upstreamRes = await fetch(upstreamUrl, {
@@ -68,7 +71,7 @@ export async function proxyApiRequest(req: NormalizedRequest) {
   }
 
   const payload = await upstreamRes.json();
-  const finalPayload = accessMode === "full" ? payload : maskSnapshotPayload(payload, cfg.maskingSalt);
+  const finalPayload = effectiveAccessMode === "full" ? payload : maskSnapshotPayload(payload, cfg.maskingSalt);
   return {
     statusCode: upstreamRes.status,
     headers: responseHeaders,

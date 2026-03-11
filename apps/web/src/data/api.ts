@@ -1,6 +1,7 @@
 import { loadPublicConfig } from "../config/publicConfig";
 import { resolvePublicAssetUrl } from "../config/publicPaths";
 import { getApiProxyRequestBase } from "../config/runtimeContour";
+import { isMaskingForced } from "../auth/maskingMode";
 
 const MIN_API_INTERVAL_MS = 5000;
 let apiRateChain: Promise<void> = Promise.resolve();
@@ -167,11 +168,13 @@ export async function fetchApiSnapshotWithMeta(
 
     try {
       const includeCredentials = shouldIncludeCredentials(apiBaseUrl);
+      const forceMasking = isMaskingForced();
       const res = await runWithApiRateLimit(() =>
         fetch(url, {
           headers: {
             accept: "application/json",
             ...(lastEtag ? { "If-None-Match": lastEtag } : {}),
+            ...(forceMasking ? { "x-dtm-force-mask": "1" } : {}),
           },
           credentials: includeCredentials ? "include" : "same-origin",
           signal: controller.signal,
@@ -225,9 +228,13 @@ export async function fetchPersonNameByOwnerId(ownerId: string): Promise<string 
 
   try {
     const includeCredentials = shouldIncludeCredentials(apiBaseUrl);
+    const forceMasking = isMaskingForced();
     const res = await runWithApiRateLimit(() =>
       fetch(url, {
-        headers: { accept: "application/json" },
+        headers: {
+          accept: "application/json",
+          ...(forceMasking ? { "x-dtm-force-mask": "1" } : {}),
+        },
         credentials: includeCredentials ? "include" : "same-origin",
         signal: controller.signal,
       })
