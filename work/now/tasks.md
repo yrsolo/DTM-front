@@ -28,3 +28,6 @@ See: `docs/operations/TROUBLESHOOTING.md`
 
 ## Session 2026-03-11
 - [x] GitHub deploy workflows rebuilt: frontend upload moved to S3-compatible `aws s3`, auth workflow no longer installs `yc` CLI and deploys via `yc-actions/yc-sls-function`.
+
+## Session 2026-03-12
+- [x] Auth/admin UX completion: auth-panel now explains login/access/admin state, masking control moved into the panel, admin page access states and RU copy cleaned up.

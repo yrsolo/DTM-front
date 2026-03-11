@@ -67,6 +67,24 @@ React routes:
 - test: `/test/admin`
 - local: `/admin` against `test` contour
 
+User-facing entry flow:
+- основной вход в auth/admin начинается с кнопки пользователя в верхней панели timeline UI
+- кнопка открывает auth-панель, где видны:
+  - текущий auth status
+  - access mode (`masked` / `full`)
+  - текущий пользователь
+  - кнопка входа/выхода
+  - кнопка `Админка`
+- кнопка `Админка` всегда видима в auth-панели
+  - для non-admin она disabled
+  - для admin она открывает `/admin` или `/test/admin`
+
+User-visible statuses:
+- `Гость` -> не авторизован, данные доступны в masked mode
+- `Ожидает одобрения` -> логин успешен, но доступ ещё не подтверждён
+- `Пользователь` -> доступ подтверждён, full access есть, admin role нет
+- `Администратор` -> full access и доступ к admin UI
+
 JSON endpoints:
 - prod: `/ops/auth/admin/*`
 - test: `/test/ops/auth/admin/*`

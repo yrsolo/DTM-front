@@ -13,6 +13,8 @@ Expected baseline:
 - `/test/admin` -> `200`
 - `/test/ops/auth/health` -> `{"ok":true,"contour":"test","kind":"auth"}`
 - `/test/ops/auth/me` without cookie -> anonymous auth state
+- в правом верхнем углу timeline UI кнопка пользователя открывает auth-панель
+- для guest auth-панель показывает `Не авторизован` и кнопку `Войти через Яндекс`
 
 ## Frontend opens, but auth status stays guest
 
@@ -21,6 +23,7 @@ Check:
 - `https://dtm.solofarm.ru/test/ops/auth/me` returns JSON, not HTML and not `404`
 - browser is opening deployed frontend, not local dev server
 - gateway still routes `/test/ops/auth/*` to `auth-test`
+- auth-панель после открытия показывает guest status, а не имя/email пользователя
 
 ## Local dev mode for interactive design work
 
@@ -33,6 +36,7 @@ Expected behavior:
 - `/ops/auth/me` from localhost returns credentialed CORS with exact origin
 - login button opens `https://dtm.solofarm.ru/test/ops/auth/login?...`, not `/ops/auth/...`
 - Yandex login may redirect back to `http://localhost:5173/...`
+- после возврата с OAuth auth-панель на localhost показывает обновлённый status и пользователя
 
 Quick checks:
 
@@ -52,6 +56,10 @@ Check:
 - user role in test YDB is `admin`
 - cookie is still valid
 - `session_version` was not invalidated
+- в auth-панели кнопка `Админка` для non-admin должна быть disabled, а не активной
+- если route `/test/admin` открыт руками, страница должна явно объяснять причину отказа:
+  - не залогинен -> войдите через Яндекс
+  - нет admin role -> нет прав администратора
 
 If `ADMIN_BOOTSTRAP_UID_TEST` is still not set, raise the first admin manually:
 

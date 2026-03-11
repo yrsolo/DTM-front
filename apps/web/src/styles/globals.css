@@ -1486,9 +1486,10 @@ button:hover {
   right: 0;
   z-index: 20;
   display: grid;
-  gap: 8px;
-  min-width: 166px;
-  padding: 10px;
+  gap: 10px;
+  width: min(360px, calc(100vw - 28px));
+  min-width: 300px;
+  padding: 12px;
   border-radius: 12px;
   border: 1px solid rgba(130, 152, 216, 0.3);
   background: linear-gradient(165deg, rgba(9, 14, 30, 0.98) 0%, rgba(17, 14, 34, 0.98) 100%);
@@ -1498,16 +1499,64 @@ button:hover {
 }
 
 .authMenuTitle {
-  font-size: 12px;
-  color: #dce7ff;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  font-size: 16px;
+  font-weight: 700;
+  color: #eef4ff;
 }
 
 .authMenuAction {
   width: 100%;
   justify-content: center;
+}
+
+.authPanelSection {
+  display: grid;
+  gap: 6px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(133, 156, 221, 0.16);
+}
+
+.authPanelSection:last-child {
+  padding-bottom: 0;
+  border-bottom: 0;
+}
+
+.authPanelLabel {
+  font-size: 12px;
+  font-weight: 700;
+  color: #d9e6ff;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.authPanelStatusRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.authPanelStatusLabel {
+  font-size: 13px;
+  color: #eef4ff;
+}
+
+.authPanelIdentity {
+  font-size: 13px;
+  color: #dce7ff;
+  overflow-wrap: anywhere;
+}
+
+.authPanelText {
+  font-size: 13px;
+  line-height: 1.4;
+  color: #dce7ff;
+}
+
+.authPanelHint {
+  font-size: 12px;
+  line-height: 1.35;
+  color: #9fb1d9;
 }
 
 .sortToggleBtn {
@@ -2208,5 +2257,10 @@ button:hover {
 
   .authNav {
     margin-left: 0;
+  }
+
+  .authMenuPopover {
+    right: -8px;
+    min-width: min(320px, calc(100vw - 24px));
   }
 }
