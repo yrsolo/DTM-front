@@ -237,22 +237,6 @@ paths:
         type: http
         url: https://dtm-front.website.yandexcloud.net/test/index.html
 
-  /test/{path+}:
-    x-yc-apigateway-any-method:
-      parameters:
-        - name: path
-          in: path
-          required: true
-          schema:
-            type: string
-      x-yc-apigateway-integration:
-        type: http
-        url: https://dtm-front.website.yandexcloud.net/test/{path}
-        headers:
-          '*': '*'
-        query:
-          '*': '*'
-
   /:
     get:
       x-yc-apigateway-integration:
@@ -270,10 +254,6 @@ paths:
       x-yc-apigateway-integration:
         type: http
         url: https://dtm-front.website.yandexcloud.net/{path}
-        headers:
-          '*': '*'
-        query:
-          '*': '*'
 EOF
 
 if [[ "$DRY_RUN" == "true" ]]; then
