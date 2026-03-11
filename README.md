@@ -48,6 +48,22 @@ cd apps/web
 npm run dev
 ```
 
+Альтернатива из корня репозитория:
+
+```bash
+npm run dev -w @dtm/web
+```
+
+### Локальная проверка
+
+Отдельный `npm test` в проекте пока не настроен. Для локальной проверки используйте:
+
+```bash
+npm run build -w @dtm/web
+npm run validate:schema
+npm run check:mojibake
+```
+
 По умолчанию приложение читает runtime-конфиг из `/config/public.yaml`, а fallback-конфиг берёт из:
 
 - [public.yaml](n:\PROJECTS\DTM\DTM-front\apps\web\config\public.yaml)
