@@ -1,49 +1,51 @@
-# Backend Auth Handoff
+﻿# Backend Auth Handoff
 
-## Назначение
-Этот документ нужен backend-команде как target contract для внедрения native auth/masking в `dtm-api`.
+Назначение:
+- передать backend-команде browser-facing contract для auth/data контуров.
 
 ## Browser-facing contract
+
 Frontend не должен ходить в upstream API напрямую.
 
 ### Test
-- browser -> `/test/api/v2/frontend`
+- browser data path -> `/test/api/v2/frontend`
 - auth/session -> `/test/auth/*`
 
 ### Prod
-- browser -> `/prod/api/v2/frontend`
-- auth/session -> `/prod/auth/*`
+- browser data path -> `/api/v2/frontend`
+- auth/session -> `/auth/*`
 
-На V1 этот контракт обеспечивает `apps/auth` proxy.
+## Ownership boundaries
+
+Эта кампания не реализует backend paths:
+- `/api/*`
+- `/info/*`
+- `/test/api/*`
+- `/test/info/*`
+
+Frontend и auth layer только адресуют эти пути как публичный контракт.
 
 ## Access modes
-Proxy различает два режима:
+
+Система различает два режима:
 - `masked`
 - `full`
 
-На V1 proxy сам маскирует JSON payload.
-На следующем этапе backend может нативно уважать режим доступа и возвращать уже готовый `masked/full` ответ.
+Backend later phase должен уметь уважать access mode и возвращать snapshot той же формы.
 
-## Рекомендуемый upstream contract
-Proxy передаёт upstream-заголовок:
+## Recommended upstream contract
+
+Рекомендуемый trusted-proxy header:
 - `X-DTM-Access-Mode: masked|full`
 
-Backend later phase должен уметь:
+Backend later phase должен:
 - принимать этот заголовок от trusted proxy layer
 - возвращать валидный snapshot той же формы
 - сохранять shape/ids/dates/statuses
 - менять только чувствительные текстовые поля
 
-## Что маскируется в V1 proxy
-- group names
-- people names
-- task `brand`
-- task `customer`
-- task `format_`
-- task `title`
-- task `history`
-
 ## Что не должно ломаться
+
 - snapshot shape
 - task ids
 - group ids
@@ -51,5 +53,3 @@ Backend later phase должен уметь:
 - timeline dates
 - statuses
 - milestones array shape
-
-Идея: не скрыть существование задач, а безопасно скрыть реальные названия и контекст.

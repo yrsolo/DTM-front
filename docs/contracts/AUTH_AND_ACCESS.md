@@ -1,7 +1,7 @@
-# Auth And Access
+﻿# Auth And Access
 
-## Назначение
-Документ описывает текущий V1-контракт авторизации и режимов доступа для `DTM-front`.
+Назначение:
+- зафиксировать текущий V1-контракт авторизации и access modes.
 
 Source of truth:
 - `apps/auth/src/*`
@@ -11,47 +11,45 @@ Source of truth:
 ## Контуры
 
 ### Test
-- frontend: `https://dtm.solofarm.ru/test-front/`
-- admin SPA: `https://dtm.solofarm.ru/test-front/admin`
+- frontend: `https://dtm.solofarm.ru/test/`
+- admin SPA: `https://dtm.solofarm.ru/test/admin`
 - auth endpoints: `https://dtm.solofarm.ru/test/auth/*`
-- api proxy: `https://dtm.solofarm.ru/test/api/*`
-- local frontend runtime also uses the `test` contour for auth/api:
-  - local SPA route base stays `/`
-  - auth requests go to `https://dtm.solofarm.ru/test/auth/*`
-  - API requests go to `https://dtm.solofarm.ru/test/api/*`
+- browser-facing API path: `https://dtm.solofarm.ru/test/api/*`
+- local frontend runtime тоже использует `test` contour для auth/api:
+  - local SPA base остаётся `/`
+  - auth requests идут в `https://dtm.solofarm.ru/test/auth/*`
+  - data requests идут в `https://dtm.solofarm.ru/test/api/*`
 
 ### Prod
 - frontend: `https://dtm.solofarm.ru/`
 - admin SPA: `https://dtm.solofarm.ru/admin`
-- auth endpoints: `https://dtm.solofarm.ru/prod/auth/*`
-- api proxy: `https://dtm.solofarm.ru/prod/api/*`
+- auth endpoints: `https://dtm.solofarm.ru/auth/*`
+- browser-facing API path: `https://dtm.solofarm.ru/api/*`
 
 ## Модель доступа
 
 ### Anonymous
-- фронт открывается без логина
+- frontend открывается без логина
 - `/auth/me` возвращает `authenticated=false`
-- `/api/*` через proxy отдаёт `masked` payload
+- data path работает в режиме, который определяет backend/auth contour
 
 ### Authenticated + pending
 - пользователь прошёл Yandex login
 - учётная запись есть, но не одобрена
-- `/auth/me` возвращает `authenticated=true`, `status=pending`, `accessMode=masked`
-- `/api/*` по-прежнему отдаёт `masked` payload
+- `/auth/me` возвращает `authenticated=true`, `status=pending`
 
 ### Authenticated + approved
-- пользователь одобрен через admin UI или auto-approve по allowlist email
+- пользователь одобрен через admin UI или allowlist
 - `/auth/me` возвращает `authenticated=true`, `status=approved`, `accessMode=full`
-- `/api/*` отдаёт полный payload
 
 ### Blocked
 - user status `blocked`
-- текущая сессия немедленно теряет силу через `session_version`
-- дальнейшие обращения деградируют до anonymous/masked поведения
+- текущая сессия инвалидируется через `session_version`
 
 ## Session
+
 - cookie: httpOnly
-- flags: `HttpOnly`, `Path=/`, `SameSite` и `Secure` управляются secret/env
+- flags: `HttpOnly`, `Path=/`, `SameSite`, `Secure`
 - claims:
   - `userId`
   - `yandexUid`
@@ -63,12 +61,15 @@ Source of truth:
 - при каждом привилегированном запросе `sv` сверяется с YDB
 
 ## Admin surface
-- React route:
-  - `/admin`
-  - `/test-front/admin`
-- JSON endpoints:
-  - `/prod/auth/admin/*`
-  - `/test/auth/admin/*`
+
+React routes:
+- prod: `/admin`
+- test: `/test/admin`
+- local: `/admin` against `test` contour
+
+JSON endpoints:
+- prod: `/auth/admin/*`
+- test: `/test/auth/admin/*`
 
 V1 endpoints:
 - `GET /admin/overview`
@@ -78,6 +79,7 @@ V1 endpoints:
 - `DELETE /admin/allowlist?email=...`
 
 ## YDB contours
+
 Используются две отдельные serverless YDB базы:
 - test auth DB
 - prod auth DB
@@ -91,9 +93,9 @@ V1 endpoints:
 
 ## OAuth apps
 
-Two separate Yandex OAuth apps are used:
+Используются две отдельные Yandex OAuth apps:
 - test -> callback `https://dtm.solofarm.ru/test/auth/callback`
-- prod -> callback `https://dtm.solofarm.ru/prod/auth/callback`
+- prod -> callback `https://dtm.solofarm.ru/auth/callback`
 
 Canonical env contract:
 - `YANDEX_CLIENT_ID_TEST`

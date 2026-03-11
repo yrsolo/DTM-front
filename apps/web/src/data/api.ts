@@ -49,7 +49,7 @@ function shouldIncludeCredentials(baseUrl: string): boolean {
     if (base.origin === window.location.origin) return true;
     if (
       base.origin === "https://dtm.solofarm.ru" &&
-      (base.pathname.startsWith("/test/api") || base.pathname.startsWith("/prod/api"))
+      (base.pathname.startsWith("/test/api") || base.pathname.startsWith("/api"))
     ) {
       return true;
     }

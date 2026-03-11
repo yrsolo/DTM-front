@@ -40,8 +40,8 @@ $oauthClientIdEnvName = if ($Target -eq "test") { "YANDEX_CLIENT_ID_TEST" } else
 $oauthClientSecretEnvName = if ($Target -eq "test") { "YANDEX_CLIENT_SECRET_TEST" } else { "YANDEX_CLIENT_SECRET_PROD" }
 $oauthClientIdValue = [Environment]::GetEnvironmentVariable($oauthClientIdEnvName)
 $oauthClientSecretValue = [Environment]::GetEnvironmentVariable($oauthClientSecretEnvName)
-$authBasePath = if ($Target -eq "test") { "/test/auth" } else { "/prod/auth" }
-$apiProxyBasePath = if ($Target -eq "test") { "/test/api" } else { "/prod/api" }
+$authBasePath = if ($Target -eq "test") { "/test/auth" } else { "/auth" }
+$apiProxyBasePath = if ($Target -eq "test") { "/test/api" } else { "/api" }
 $apiUpstreamOrigin = if ($Target -eq "test") { $yc.api_origin_test } else { $yc.api_origin_prod }
 
 if (-not $functionName) { throw "Missing auth function name for target=$Target" }

@@ -70,8 +70,8 @@ if [[ "$TARGET" == "test" ]]; then
 else
   function_name="$(node -e "const cfg=$CONFIG_JSON; process.stdout.write(cfg.yandex_cloud.auth_function_name_prod)")"
   ydb_database="$(node -e "const cfg=$CONFIG_JSON; process.stdout.write(cfg.yandex_cloud.ydb_database_prod)")"
-  auth_base_path="/prod/auth"
-  api_proxy_base_path="/prod/api"
+  auth_base_path="/auth"
+  api_proxy_base_path="/api"
   api_upstream_origin="$api_origin_prod"
   masking_secret_key="MASKING_SALT_PROD"
   oauth_client_id_env_name="YANDEX_CLIENT_ID_PROD"

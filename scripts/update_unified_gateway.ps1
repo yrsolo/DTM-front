@@ -90,11 +90,11 @@ paths:
             type: string
       x-yc-apigateway-integration:
         type: cloud_functions
-        function_id: $authTestId
+        function_id: $testBackendId
         tag: '$latest'
         service_account_id: $($yc.service_account_id)
 
-  /test/{proxy+}:
+  /test/info/{proxy+}:
     x-yc-apigateway-any-method:
       parameters:
         - name: proxy
@@ -108,7 +108,7 @@ paths:
         tag: '$latest'
         service_account_id: $($yc.service_account_id)
 
-  /prod/auth/{proxy+}:
+  /auth/{proxy+}:
     x-yc-apigateway-any-method:
       parameters:
         - name: proxy
@@ -122,7 +122,7 @@ paths:
         tag: '$latest'
         service_account_id: $($yc.service_account_id)
 
-  /prod/api/{proxy+}:
+  /api/{proxy+}:
     x-yc-apigateway-any-method:
       parameters:
         - name: proxy
@@ -132,11 +132,11 @@ paths:
             type: string
       x-yc-apigateway-integration:
         type: cloud_functions
-        function_id: $authProdId
+        function_id: $prodBackendId
         tag: '$latest'
         service_account_id: $($yc.service_account_id)
 
-  /prod/{proxy+}:
+  /info/{proxy+}:
     x-yc-apigateway-any-method:
       parameters:
         - name: proxy
@@ -213,29 +213,45 @@ paths:
         type: http
         url: https://dtm-front.website.yandexcloud.net/index.html
 
-  /test-front:
+  /test:
     x-yc-apigateway-any-method:
       x-yc-apigateway-integration:
         type: http
-        url: https://dtm-front.website.yandexcloud.net/test-front/index.html
+        url: https://dtm-front.website.yandexcloud.net/test/index.html
 
-  /test-front/:
+  /test/:
     x-yc-apigateway-any-method:
       x-yc-apigateway-integration:
         type: http
-        url: https://dtm-front.website.yandexcloud.net/test-front/index.html
+        url: https://dtm-front.website.yandexcloud.net/test/index.html
 
-  /test-front/admin:
+  /test/admin:
     x-yc-apigateway-any-method:
       x-yc-apigateway-integration:
         type: http
-        url: https://dtm-front.website.yandexcloud.net/test-front/index.html
+        url: https://dtm-front.website.yandexcloud.net/test/index.html
 
-  /test-front/admin/:
+  /test/admin/:
     x-yc-apigateway-any-method:
       x-yc-apigateway-integration:
         type: http
-        url: https://dtm-front.website.yandexcloud.net/test-front/index.html
+        url: https://dtm-front.website.yandexcloud.net/test/index.html
+
+  /test/{path+}:
+    x-yc-apigateway-any-method:
+      parameters:
+        - name: path
+          in: path
+          required: true
+          schema:
+            type: string
+      x-yc-apigateway-integration:
+        type: http
+        url: https://dtm-front.website.yandexcloud.net/test/{path}
+        headers:
+          '*': '*'
+        query:
+          '*': '*'
 
   /:
     get:

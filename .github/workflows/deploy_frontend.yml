@@ -77,7 +77,7 @@ jobs:
 
           case "$TARGET" in
             test)
-              TARGET_PREFIX="test-front"
+              TARGET_PREFIX="test"
               CONFIG_PATH="apps/web/config/public.yaml"
               ;;
             prod)
@@ -173,7 +173,7 @@ jobs:
           root: .deploy/site
           include: "**"
           # Shared bucket safety: never use destructive clear from Actions.
-          # Test deploys must touch only `test-front/`, and prod deploys must not wipe
+          # Test deploys must touch only `test/`, and prod deploys must not wipe
           # unrelated prefixes or release metadata.
           clear: "false"
           bucket: ${{ env.YC_BUCKET_NAME }}

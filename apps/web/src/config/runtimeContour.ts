@@ -22,7 +22,7 @@ export function getRuntimeContour(pathname = currentPathname()): RuntimeContour 
     return "test";
   }
   const path = pathname.toLowerCase();
-  if (path === "/test-front" || path.startsWith("/test-front/")) {
+  if (path === "/test" || path.startsWith("/test/")) {
     return "test";
   }
   return "prod";
@@ -32,29 +32,29 @@ export function getFrontendBasePath(pathname = currentPathname()): string {
   if (isLocalFrontendRuntime()) {
     return "/";
   }
-  return getRuntimeContour(pathname) === "test" ? "/test-front/" : "/";
+  return getRuntimeContour(pathname) === "test" ? "/test/" : "/";
 }
 
 export function getAuthBasePath(pathname = currentPathname()): string {
-  return getRuntimeContour(pathname) === "test" ? "/test/auth" : "/prod/auth";
+  return getRuntimeContour(pathname) === "test" ? "/test/auth" : "/auth";
 }
 
 export function getApiProxyBasePath(pathname = currentPathname()): string {
-  return getRuntimeContour(pathname) === "test" ? "/test/api" : "/prod/api";
+  return getRuntimeContour(pathname) === "test" ? "/test/api" : "/api";
 }
 
 export function getAdminRoute(pathname = currentPathname()): string {
   if (isLocalFrontendRuntime()) {
     return "/admin";
   }
-  return getRuntimeContour(pathname) === "test" ? "/test-front/admin" : "/admin";
+  return getRuntimeContour(pathname) === "test" ? "/test/admin" : "/admin";
 }
 
 export function getTasksRoute(pathname = currentPathname()): string {
   if (isLocalFrontendRuntime()) {
     return "/";
   }
-  return getRuntimeContour(pathname) === "test" ? "/test-front/" : "/";
+  return getRuntimeContour(pathname) === "test" ? "/test/" : "/";
 }
 
 export function getRuntimeOrigin(pathname = currentPathname()): string {

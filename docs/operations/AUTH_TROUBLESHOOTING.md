@@ -1,22 +1,18 @@
-# Auth Troubleshooting
+﻿# Auth Troubleshooting
 
 ## Test contour quick checks
 
 Public test URLs:
-- `https://dtm.solofarm.ru/test-front/`
-- `https://dtm.solofarm.ru/test-front/admin`
+- `https://dtm.solofarm.ru/test/`
+- `https://dtm.solofarm.ru/test/admin`
 - `https://dtm.solofarm.ru/test/auth/health`
 - `https://dtm.solofarm.ru/test/auth/me`
-- `https://dtm.solofarm.ru/test/api/health`
-- `https://dtm.solofarm.ru/test/api/api/v2/frontend?...`
 
 Expected baseline:
-- `/test-front/` -> `200`
-- `/test-front/admin` -> `200`
+- `/test/` -> `200`
+- `/test/admin` -> `200`
 - `/test/auth/health` -> `{"ok":true,"contour":"test","kind":"auth"}`
-- `/test/auth/me` without cookie -> anonymous masked state
-- `/test/api/health` -> `{"ok":true,"contour":"test","kind":"api"}`
-- `/test/api/api/v2/frontend` without cookie -> valid masked snapshot payload
+- `/test/auth/me` without cookie -> anonymous auth state
 
 ## Frontend opens, but auth status stays guest
 
@@ -31,31 +27,21 @@ Check:
 Local Vite frontend is allowed to use the public test auth contour:
 - local app -> `http://localhost:5173`
 - auth -> `https://dtm.solofarm.ru/test/auth/*`
-- API proxy -> `https://dtm.solofarm.ru/test/api/*`
+- data path -> `https://dtm.solofarm.ru/test/api/*`
 
 Expected behavior:
 - `/auth/me` from localhost returns credentialed CORS with exact origin
-- `/api/*` from localhost returns credentialed CORS with exact origin
-- login button opens `https://dtm.solofarm.ru/test/auth/login?...`, not `/prod/auth/...`
+- login button opens `https://dtm.solofarm.ru/test/auth/login?...`, not `/auth/...`
 - Yandex login may redirect back to `http://localhost:5173/...`
 
 Quick checks:
 
 ```powershell
 curl.exe -i -H "Origin: http://localhost:5173" https://dtm.solofarm.ru/test/auth/me
-curl.exe -i -H "Origin: http://localhost:5173" "https://dtm.solofarm.ru/test/api/api/v2/frontend?statuses=work,pre_done&include_people=true&limit=2"
-curl.exe -i -X OPTIONS -H "Origin: http://localhost:5173" -H "Access-Control-Request-Method: GET" https://dtm.solofarm.ru/test/api/api/v2/frontend
+curl.exe -i -H "Origin: http://localhost:5173" "https://dtm.solofarm.ru/test/api/v2/frontend?statuses=work,pre_done&include_people=true&limit=2"
 ```
 
-Expected headers:
-- `Access-Control-Allow-Origin: http://localhost:5173`
-- `Access-Control-Allow-Credentials: true`
-
-If local login redirects to `/` on the public domain instead of localhost:
-- check allowlist of `return_to` hosts in `apps/auth/src/handlers/authHandlers.ts`
-- redeploy `auth-test`
-
-If localhost opens `/prod/auth/...` instead of `/test/auth/...`:
+If localhost opens `/auth/...` instead of `/test/auth/...`:
 - check `apps/web/src/config/runtimeContour.ts`
 - local hosts must resolve to `test` contour but keep SPA base path `/`
 
@@ -73,27 +59,13 @@ If `ADMIN_BOOTSTRAP_UID_TEST` is still not set, raise the first admin manually:
 node scripts/auth_admin_tool.mjs --target test --command make-admin --user-id <USER_ID>
 ```
 
-## API still returns masked payload after approve
-
-Check:
-- approve happened in the correct contour
-- `users.status` is really `approved`
-- browser cookie was refreshed after approve
-- request goes to `/test/api/...`, not directly to upstream API
-
-If needed, force a fresh session:
-- logout
-- login again
-
 ## Deploy function fails on secrets
 
-Check lockbox entries:
+Check lockbox / env entries:
 - `YANDEX_CLIENT_ID_TEST`
 - `YANDEX_CLIENT_SECRET_TEST`
 - `YANDEX_CLIENT_ID_PROD`
 - `YANDEX_CLIENT_SECRET_PROD`
-- `YANDEX_CLIENT_ID`
-- `YANDEX_CLIENT_SECRET`
 - `SESSION_SIGNING_SECRET`
 - `COOKIE_NAME`
 - `COOKIE_PATH`
@@ -110,15 +82,6 @@ Check:
 - `YDB_DATABASE`
 - function service account
 - migrations were applied to the same contour that function uses
-
-## Migrations passed, but admin data is empty
-
-This is normal for a new auth DB.
-
-V1 schema starts empty:
-- allowlist must be filled explicitly
-- first admin can be raised manually
-- pending users only appear after first successful Yandex login
 
 ## Gateway routes drifted
 

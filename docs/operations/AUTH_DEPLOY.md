@@ -1,4 +1,4 @@
-# Auth Deploy
+﻿# Auth Deploy
 
 Source of truth:
 - `config/deploy.yaml`
@@ -15,7 +15,7 @@ Source of truth:
 
 ## YDB
 
-Two separate serverless YDB databases are used:
+Используются две отдельные serverless YDB базы:
 - `ydb_database_test`
 - `ydb_database_prod`
 
@@ -25,43 +25,43 @@ Shared endpoint:
 ## Public routes
 
 ### Test
-- frontend: `https://dtm.solofarm.ru/test-front/`
-- admin SPA: `https://dtm.solofarm.ru/test-front/admin`
+- frontend: `https://dtm.solofarm.ru/test/`
+- admin SPA: `https://dtm.solofarm.ru/test/admin`
 - auth endpoints: `https://dtm.solofarm.ru/test/auth/*`
-- API proxy: `https://dtm.solofarm.ru/test/api/*`
+- backend-owned API: `https://dtm.solofarm.ru/test/api/*`
+- backend-owned info: `https://dtm.solofarm.ru/test/info/*`
 
 ### Prod
 - frontend: `https://dtm.solofarm.ru/`
 - admin SPA: `https://dtm.solofarm.ru/admin`
-- auth endpoints: `https://dtm.solofarm.ru/prod/auth/*`
-- API proxy: `https://dtm.solofarm.ru/prod/api/*`
+- auth endpoints: `https://dtm.solofarm.ru/auth/*`
+- backend-owned API: `https://dtm.solofarm.ru/api/*`
+- backend-owned info: `https://dtm.solofarm.ru/info/*`
 
 ## Auto-deploy
 
-- `push` to `dev` -> migrations for test + deploy `auth-test`
-- `prod` deploy -> `workflow_dispatch` only
+- `push` в `dev` -> migrations for test + deploy `auth-test`
+- prod deploy -> `workflow_dispatch` only
 
 ## Local deploy
 
 ### Test
-
 ```powershell
 scripts\deploy_auth_function.cmd
 ```
 
-or
+или
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File scripts/deploy_auth_function.ps1 -Target test
 ```
 
 ### Prod
-
 ```powershell
 scripts\deploy_auth_function_prod.cmd
 ```
 
-or
+или
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File scripts/deploy_auth_function.ps1 -Target prod
@@ -69,9 +69,13 @@ powershell -ExecutionPolicy Bypass -File scripts/deploy_auth_function.ps1 -Targe
 
 ## Gateway update
 
-The public domain routing for auth/admin/API proxy is managed by the unified gateway.
+Unified gateway должен:
+- направлять `/auth/*` в `auth-prod`
+- направлять `/test/auth/*` в `auth-test`
+- не отправлять `/api/*`, `/info/*`, `/test/api/*`, `/test/info/*` в SPA fallback
+- отдавать `/admin` из root SPA и `/test/admin` из test SPA
 
-Apply the current gateway spec:
+Обновление spec:
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File scripts/update_unified_gateway.ps1
@@ -83,19 +87,9 @@ Dry-run:
 powershell -ExecutionPolicy Bypass -File scripts/update_unified_gateway.ps1 -DryRun
 ```
 
-The spec keeps legacy backend paths:
-- `/test/*` -> legacy test backend function
-- `/prod/*` -> legacy prod backend function
-
-And adds auth/proxy overrides:
-- `/test/auth/*` -> `auth-test`
-- `/test/api/*` -> `auth-test`
-- `/prod/auth/*` -> `auth-prod`
-- `/prod/api/*` -> `auth-prod`
-
 ## Bootstrap without `ADMIN_BOOTSTRAP_UID`
 
-Until bootstrap UID is added, use the local utility:
+Пока bootstrap UID не добавлен, используйте локальную утилиту:
 
 ```bash
 node scripts/auth_admin_tool.mjs --target test --command list-users
@@ -105,31 +99,17 @@ node scripts/auth_admin_tool.mjs --target test --command make-admin --user-id <U
 node scripts/auth_admin_tool.mjs --target test --command block-user --user-id <USER_ID>
 ```
 
-Use `--target prod` for the production contour.
-
-## Dry-run
-
-PowerShell:
-
-```powershell
-powershell -ExecutionPolicy Bypass -File scripts/deploy_auth_function.ps1 -Target test -DryRun
-```
-
-bash:
-
-```bash
-bash scripts/deploy_auth_function.sh --target test --dry-run
-```
+Для production используйте `--target prod`.
 
 ## Secrets contract
 
-Function deploy reads lockbox entries:
+Contour-specific OAuth credentials являются canonical:
 - `YANDEX_CLIENT_ID_TEST`
 - `YANDEX_CLIENT_SECRET_TEST`
 - `YANDEX_CLIENT_ID_PROD`
 - `YANDEX_CLIENT_SECRET_PROD`
-- `YANDEX_CLIENT_ID`
-- `YANDEX_CLIENT_SECRET`
+
+Также нужны:
 - `SESSION_SIGNING_SECRET`
 - `COOKIE_NAME`
 - `COOKIE_PATH`
@@ -139,20 +119,11 @@ Function deploy reads lockbox entries:
 - `MASKING_SALT_TEST`
 - `MASKING_SALT_PROD`
 
-Deferred:
-- `ADMIN_BOOTSTRAP_UID_TEST`
-- `ADMIN_BOOTSTRAP_UID_PROD`
-
-The contour-specific Yandex OAuth credentials are canonical.
-The common `YANDEX_CLIENT_ID` and `YANDEX_CLIENT_SECRET` remain only as a temporary fallback for older function versions.
-
-Deploy scripts use this precedence:
-1. contour-specific env vars in the current shell / CI environment
-2. common lockbox fallback keys
+Fallback-keys `YANDEX_CLIENT_ID` и `YANDEX_CLIENT_SECRET` оставлены только для совместимости со старыми версиями функции.
 
 ## Runtime env
 
-Non-secret env on function version:
+Function version получает:
 - `CONTOUR`
 - `BASE_URL`
 - `AUTH_BASE_PATH`

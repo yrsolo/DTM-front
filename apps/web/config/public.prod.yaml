@@ -1,6 +1,6 @@
 # Public frontend config (production API)
-api_base_url: https://dtm.solofarm.ru/prod
-api_base_url_prod: https://dtm.solofarm.ru/prod
+api_base_url: https://dtm.solofarm.ru
+api_base_url_prod: https://dtm.solofarm.ru
 api_base_url_test: https://dtm.solofarm.ru/test
 api_frontend_path: /api/v2/frontend
 api_statuses: work,pre_done

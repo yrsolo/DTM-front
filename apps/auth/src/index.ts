@@ -68,18 +68,18 @@ function contourFromPath(pathname: string): { contour: Contour; routeKind: "auth
       routePath: normalized.slice("/test/api".length) || "/",
     };
   }
-  if (normalized === "/prod/auth" || normalized.startsWith("/prod/auth/")) {
+  if (normalized === "/auth" || normalized.startsWith("/auth/")) {
     return {
       contour: "prod",
       routeKind: "auth",
-      routePath: normalized.slice("/prod/auth".length) || "/",
+      routePath: normalized.slice("/auth".length) || "/",
     };
   }
-  if (normalized === "/prod/api" || normalized.startsWith("/prod/api/")) {
+  if (normalized === "/api" || normalized.startsWith("/api/")) {
     return {
       contour: "prod",
       routeKind: "api",
-      routePath: normalized.slice("/prod/api".length) || "/",
+      routePath: normalized.slice("/api".length) || "/",
     };
   }
 
