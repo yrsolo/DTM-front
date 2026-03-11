@@ -62,6 +62,8 @@ $summary = [ordered]@{
   lockboxId = $yc.lockbox_id
   runtime = $yc.function_runtime
   entrypoint = $yc.function_entrypoint
+  oauthClientIdEnv = $oauthClientIdEnvName
+  oauthClientSecretEnv = $oauthClientSecretEnvName
 }
 
 if ($DryRun) {
@@ -107,8 +109,8 @@ if ($oauthClientIdValue -and $oauthClientSecretValue) {
   $oauthArgs += @("--environment", "$oauthClientIdEnvName=$oauthClientIdValue")
   $oauthArgs += @("--environment", "$oauthClientSecretEnvName=$oauthClientSecretValue")
 } else {
-  $oauthArgs += @("--secret", "id=$($yc.lockbox_id),key=YANDEX_CLIENT_ID,environment-variable=YANDEX_CLIENT_ID")
-  $oauthArgs += @("--secret", "id=$($yc.lockbox_id),key=YANDEX_CLIENT_SECRET,environment-variable=YANDEX_CLIENT_SECRET")
+  $oauthArgs += @("--secret", "id=$($yc.lockbox_id),key=$oauthClientIdEnvName,environment-variable=$oauthClientIdEnvName")
+  $oauthArgs += @("--secret", "id=$($yc.lockbox_id),key=$oauthClientSecretEnvName,environment-variable=$oauthClientSecretEnvName")
 }
 
 $envArgs = @(

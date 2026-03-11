@@ -97,6 +97,8 @@ if [[ "$DRY_RUN" == "true" ]]; then
   echo "ydb_endpoint: $ydb_endpoint"
   echo "ydb_database: $ydb_database"
   echo "lockbox_id: $lockbox_id"
+  echo "oauth_client_id_env: $oauth_client_id_env_name"
+  echo "oauth_client_secret_env: $oauth_client_secret_env_name"
   exit 0
 fi
 
@@ -139,8 +141,8 @@ if [[ -n "$oauth_client_id_value" && -n "$oauth_client_secret_value" ]]; then
   )
 else
   oauth_args+=(
-    --secret "id=$lockbox_id,key=YANDEX_CLIENT_ID,environment-variable=YANDEX_CLIENT_ID"
-    --secret "id=$lockbox_id,key=YANDEX_CLIENT_SECRET,environment-variable=YANDEX_CLIENT_SECRET"
+    --secret "id=$lockbox_id,key=$oauth_client_id_env_name,environment-variable=$oauth_client_id_env_name"
+    --secret "id=$lockbox_id,key=$oauth_client_secret_env_name,environment-variable=$oauth_client_secret_env_name"
   )
 fi
 

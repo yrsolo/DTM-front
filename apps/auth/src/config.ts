@@ -20,16 +20,6 @@ export type AuthRuntimeConfig = {
   adminBootstrapUid: string | null;
 };
 
-function readRequiredAny(...names: string[]): string {
-  for (const name of names) {
-    const value = process.env[name]?.trim();
-    if (value) {
-      return value;
-    }
-  }
-  throw new Error(`Missing required env: ${names.join(" or ")}`);
-}
-
 function readRequired(name: string): string {
   const value = process.env[name]?.trim();
   if (!value) {
@@ -85,8 +75,8 @@ export function getAuthRuntimeConfig(): AuthRuntimeConfig {
     authBasePath,
     apiProxyBasePath,
     apiUpstreamOrigin,
-    yandexClientId: readRequiredAny(yandexClientIdVar, "YANDEX_CLIENT_ID"),
-    yandexClientSecret: readRequiredAny(yandexClientSecretVar, "YANDEX_CLIENT_SECRET"),
+    yandexClientId: readRequired(yandexClientIdVar),
+    yandexClientSecret: readRequired(yandexClientSecretVar),
     sessionSigningSecret: readRequired("SESSION_SIGNING_SECRET"),
     sessionTtlSeconds: readNumber("SESSION_TTL_SECONDS", 60 * 60 * 12),
     cookieName: readRequired("COOKIE_NAME"),
