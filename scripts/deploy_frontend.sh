@@ -103,6 +103,12 @@ if [[ "$TARGET" == "prod" ]]; then
   site_path_label="/"
 fi
 
+BUILD_BASE="/test/"
+if [[ "$TARGET" == "prod" ]]; then
+  BUILD_BASE="/"
+fi
+export DTM_WEB_BUILD_BASE="$BUILD_BASE"
+
 BUCKET="$(node - <<NODE
 const fs = require('fs');
 const raw = fs.readFileSync('$DEPLOY_INFRA_CONFIG', 'utf8');
@@ -147,6 +153,7 @@ if [[ -f "$WEB_DIR/package-lock.json" ]]; then
 else
   npm install
 fi
+echo "Build base: $DTM_WEB_BUILD_BASE"
 npm run build
 popd >/dev/null
 

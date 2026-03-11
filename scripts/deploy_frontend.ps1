@@ -236,6 +236,7 @@ if ([string]::IsNullOrWhiteSpace($bucket)) {
   throw "Missing frontend bucket for target=$deployTarget in config/deploy.yaml"
 }
 [Environment]::SetEnvironmentVariable("YC_BUCKET_NAME", $bucket, "Process")
+[Environment]::SetEnvironmentVariable("DTM_WEB_BUILD_BASE", $(if ($deployTarget -eq "test") { "/test/" } else { "/" }), "Process")
 
 $sitePrefix = ""
 $sitePrefixLabel = if ($deployTarget -eq "test") { "/test/" } else { "/" }
@@ -283,6 +284,7 @@ try {
   } else {
     Invoke-Checked { npm install }
   }
+  Write-Host "Build base: $([Environment]::GetEnvironmentVariable("DTM_WEB_BUILD_BASE"))"
   Invoke-Checked { npm run build }
 } finally {
   Pop-Location

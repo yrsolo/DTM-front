@@ -179,13 +179,8 @@ paths:
   /test:
     x-yc-apigateway-any-method:
       x-yc-apigateway-integration:
-        type: dummy
-        http_code: 302
-        http_headers:
-          Location: /test/
-          Content-Type: text/plain
-        content:
-          '*': Redirecting to /test/
+        type: http
+        url: $test_frontend/index.html
 
   /test/:
     x-yc-apigateway-any-method:

@@ -78,11 +78,13 @@ jobs:
               BUCKET_NAME="dtm-front-test"
               CONFIG_PATH="apps/web/config/public.yaml"
               SITE_PATH="/test/"
+              BUILD_BASE="/test/"
               ;;
             prod)
               BUCKET_NAME="dtm-front"
               CONFIG_PATH="apps/web/config/public.prod.yaml"
               SITE_PATH="/"
+              BUILD_BASE="/"
               ;;
             *)
               echo "Unsupported target: $TARGET" >&2
@@ -104,6 +106,7 @@ jobs:
           echo "release_id=$RELEASE_ID" >> "$GITHUB_OUTPUT"
           echo "dry_run=$DRY_RUN" >> "$GITHUB_OUTPUT"
           echo "site_path=$SITE_PATH" >> "$GITHUB_OUTPUT"
+          echo "build_base=$BUILD_BASE" >> "$GITHUB_OUTPUT"
 
       - name: Validate required deploy config
         shell: bash
@@ -118,6 +121,8 @@ jobs:
         run: npm ci
 
       - name: Build web app
+        env:
+          DTM_WEB_BUILD_BASE: ${{ steps.vars.outputs.build_base }}
         run: npm run build -w @dtm/web
 
       - name: Stage deploy package
@@ -157,6 +162,7 @@ jobs:
           echo "Target: ${{ steps.vars.outputs.target }}"
           echo "Bucket: ${{ steps.vars.outputs.bucket_name }}"
           echo "Site path: ${{ steps.vars.outputs.site_path }}"
+          echo "Build base: ${{ steps.vars.outputs.build_base }}"
           echo "Runtime config: ${{ steps.vars.outputs.config_path }}"
           echo "Release ID: ${{ steps.vars.outputs.release_id }}"
 
@@ -189,4 +195,5 @@ jobs:
           echo "Target: ${{ steps.vars.outputs.target }}"
           echo "Bucket: ${{ steps.vars.outputs.bucket_name }}"
           echo "Site path: ${{ steps.vars.outputs.site_path }}"
+          echo "Build base: ${{ steps.vars.outputs.build_base }}"
           echo "Release ID: ${{ steps.vars.outputs.release_id }}"
