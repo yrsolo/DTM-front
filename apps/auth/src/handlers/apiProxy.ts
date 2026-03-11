@@ -17,6 +17,14 @@ const HOP_BY_HOP_HEADERS = new Set([
   "cookie",
 ]);
 
+const STRIP_RESPONSE_HEADERS = new Set([
+  "access-control-allow-origin",
+  "access-control-allow-credentials",
+  "access-control-allow-headers",
+  "access-control-allow-methods",
+  "vary",
+]);
+
 export async function proxyApiRequest(req: NormalizedRequest) {
   const cfg = getAuthRuntimeConfig();
   const { user, clearCookie } = await resolveSession(req.headers.cookie);
@@ -42,7 +50,8 @@ export async function proxyApiRequest(req: NormalizedRequest) {
 
   const responseHeaders: Record<string, string> = {};
   upstreamRes.headers.forEach((value, key) => {
-    if (HOP_BY_HOP_HEADERS.has(key.toLowerCase())) return;
+    const normalizedKey = key.toLowerCase();
+    if (HOP_BY_HOP_HEADERS.has(normalizedKey) || STRIP_RESPONSE_HEADERS.has(normalizedKey)) return;
     responseHeaders[key] = value;
   });
   if (clearCookie) {

@@ -1,6 +1,6 @@
 import { loadPublicConfig } from "../config/publicConfig";
 import { resolvePublicAssetUrl } from "../config/publicPaths";
-import { getApiProxyBasePath, isLocalFrontendRuntime } from "../config/runtimeContour";
+import { getApiProxyRequestBase } from "../config/runtimeContour";
 
 const MIN_API_INTERVAL_MS = 5000;
 let apiRateChain: Promise<void> = Promise.resolve();
@@ -39,19 +39,21 @@ function resolveBrowserApiBase(cfg: Awaited<ReturnType<typeof loadPublicConfig>>
   if (typeof window === "undefined") {
     return cfg.apiBaseUrlProd || cfg.apiBaseUrlTest || cfg.apiBaseUrl;
   }
-
-  if (isLocalFrontendRuntime()) {
-    return cfg.apiBaseUrlProd || cfg.apiBaseUrlTest || cfg.apiBaseUrl;
-  }
-
-  return `${window.location.origin}${getApiProxyBasePath()}`;
+  return getApiProxyRequestBase();
 }
 
 function shouldIncludeCredentials(baseUrl: string): boolean {
   if (typeof window === "undefined") return false;
   try {
     const base = new URL(baseUrl, window.location.origin);
-    return base.origin === window.location.origin;
+    if (base.origin === window.location.origin) return true;
+    if (
+      base.origin === "https://dtm.solofarm.ru" &&
+      (base.pathname.startsWith("/test/api") || base.pathname.startsWith("/prod/api"))
+    ) {
+      return true;
+    }
+    return false;
   } catch {
     return false;
   }

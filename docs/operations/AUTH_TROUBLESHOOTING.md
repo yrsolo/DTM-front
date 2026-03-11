@@ -26,6 +26,34 @@ Check:
 - browser is opening deployed frontend, not local dev server
 - gateway still routes `/test/auth/*` to `auth-test`
 
+## Local dev mode for interactive design work
+
+Local Vite frontend is allowed to use the public test auth contour:
+- local app -> `http://localhost:5173`
+- auth -> `https://dtm.solofarm.ru/test/auth/*`
+- API proxy -> `https://dtm.solofarm.ru/test/api/*`
+
+Expected behavior:
+- `/auth/me` from localhost returns credentialed CORS with exact origin
+- `/api/*` from localhost returns credentialed CORS with exact origin
+- Yandex login may redirect back to `http://localhost:5173/...`
+
+Quick checks:
+
+```powershell
+curl.exe -i -H "Origin: http://localhost:5173" https://dtm.solofarm.ru/test/auth/me
+curl.exe -i -H "Origin: http://localhost:5173" "https://dtm.solofarm.ru/test/api/api/v2/frontend?statuses=work,pre_done&include_people=true&limit=2"
+curl.exe -i -X OPTIONS -H "Origin: http://localhost:5173" -H "Access-Control-Request-Method: GET" https://dtm.solofarm.ru/test/api/api/v2/frontend
+```
+
+Expected headers:
+- `Access-Control-Allow-Origin: http://localhost:5173`
+- `Access-Control-Allow-Credentials: true`
+
+If local login redirects to `/` on the public domain instead of localhost:
+- check allowlist of `return_to` hosts in `apps/auth/src/handlers/authHandlers.ts`
+- redeploy `auth-test`
+
 ## Admin page says administrator access is required
 
 Check:

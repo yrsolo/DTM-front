@@ -121,13 +121,30 @@ function normalizeRequest(event: YcHttpEvent): NormalizedRequest {
 }
 
 function withCorsHeaders(result: HttpResult): HttpResult {
+  const origin = result.headers?.["x-dtm-cors-origin"] ?? "";
+  const allowCredentials = origin
+    ? origin.startsWith("http://localhost:") ||
+      origin.startsWith("http://127.0.0.1:") ||
+      origin.startsWith("http://[::1]:") ||
+      origin.startsWith("https://dtm.solofarm.ru")
+    : false;
+
+  const nextHeaders = { ...(result.headers ?? {}) };
+  delete nextHeaders["x-dtm-cors-origin"];
+
   return {
     ...result,
     headers: {
-      "access-control-allow-origin": "*",
+      "access-control-allow-origin": allowCredentials ? origin : "*",
       "access-control-allow-headers": "content-type,x-request-id",
       "access-control-allow-methods": "GET,POST,PUT,PATCH,DELETE,OPTIONS",
-      ...(result.headers ?? {}),
+      ...(allowCredentials
+        ? {
+            "access-control-allow-credentials": "true",
+            vary: "Origin",
+          }
+        : {}),
+      ...nextHeaders,
     },
   };
 }
@@ -145,10 +162,21 @@ export async function handler(event: YcHttpEvent): Promise<HttpResult> {
     }
 
     if (req.method === "OPTIONS") {
-      return withCorsHeaders({ statusCode: 204, body: "" });
+      return withCorsHeaders({
+        statusCode: 204,
+        body: "",
+        headers: req.origin ? { "x-dtm-cors-origin": req.origin } : undefined,
+      });
     }
 
-    return withCorsHeaders(await routeRequest(req));
+    const result = await routeRequest(req);
+    return withCorsHeaders({
+      ...result,
+      headers: {
+        ...(result.headers ?? {}),
+        ...(req.origin ? { "x-dtm-cors-origin": req.origin } : {}),
+      },
+    });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unhandled error";
     return withCorsHeaders(internalError(message));

@@ -16,9 +16,30 @@ import { issueSessionCookie, clearSessionCookie } from "../session/cookieSession
 import { clearOAuthStateCookie, createOAuthStateCookie, readOAuthState } from "../session/oauthState";
 import type { NormalizedRequest } from "../types";
 
+const ALLOWED_RETURN_TO_HOSTS = new Set([
+  "dtm.solofarm.ru",
+  "localhost",
+  "127.0.0.1",
+  "::1",
+]);
+
 function normalizeReturnTo(raw: string | null | undefined): string {
   const candidate = raw?.trim() || "/";
-  return candidate.startsWith("/") ? candidate : "/";
+  if (candidate.startsWith("/")) {
+    return candidate;
+  }
+
+  try {
+    const url = new URL(candidate);
+    const host = url.hostname.toLowerCase();
+    if (ALLOWED_RETURN_TO_HOSTS.has(host) || host.endsWith(".local")) {
+      return url.toString();
+    }
+  } catch {
+    // fall through
+  }
+
+  return "/";
 }
 
 export async function login(req: NormalizedRequest) {

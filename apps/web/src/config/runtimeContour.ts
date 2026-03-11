@@ -1,4 +1,5 @@
 export type RuntimeContour = "test" | "prod";
+const REMOTE_RUNTIME_ORIGIN = "https://dtm.solofarm.ru";
 
 function currentPathname(): string {
   if (typeof window === "undefined") return "/";
@@ -42,4 +43,17 @@ export function getAdminRoute(pathname = currentPathname()): string {
 
 export function getTasksRoute(pathname = currentPathname()): string {
   return getRuntimeContour(pathname) === "test" ? "/test-front/" : "/";
+}
+
+export function getRuntimeOrigin(pathname = currentPathname()): string {
+  if (typeof window === "undefined") return REMOTE_RUNTIME_ORIGIN;
+  return isLocalFrontendRuntime() ? REMOTE_RUNTIME_ORIGIN : window.location.origin;
+}
+
+export function getAuthRequestBase(pathname = currentPathname()): string {
+  return `${getRuntimeOrigin(pathname)}${getAuthBasePath(pathname)}`;
+}
+
+export function getApiProxyRequestBase(pathname = currentPathname()): string {
+  return `${getRuntimeOrigin(pathname)}${getApiProxyBasePath(pathname)}`;
 }

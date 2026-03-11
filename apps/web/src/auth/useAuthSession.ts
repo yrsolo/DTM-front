@@ -1,6 +1,6 @@
 import React from "react";
 
-import { getAdminRoute, getAuthBasePath, isLocalFrontendRuntime } from "../config/runtimeContour";
+import { getAdminRoute, getAuthRequestBase } from "../config/runtimeContour";
 
 export type AuthSessionUser = {
   id: string;
@@ -23,27 +23,19 @@ const DEFAULT_STATE: AuthSessionState = {
   authenticated: false,
   accessMode: "masked",
   user: null,
-  available: false,
+  available: true,
 };
 
 function buildAuthUrl(path: string): string {
-  if (typeof window === "undefined") return path;
-  return `${window.location.origin}${getAuthBasePath()}${path}`;
+  return `${getAuthRequestBase()}${path}`;
 }
 
 export function useAuthSession() {
   const [state, setState] = React.useState<AuthSessionState>(() =>
-    isLocalFrontendRuntime()
-      ? DEFAULT_STATE
-      : { ...DEFAULT_STATE, loading: true, available: true }
+    ({ ...DEFAULT_STATE, loading: true, available: true })
   );
 
   const reload = React.useCallback(async () => {
-    if (isLocalFrontendRuntime()) {
-      setState(DEFAULT_STATE);
-      return;
-    }
-
     setState((prev) => ({ ...prev, loading: true, available: true }));
     try {
       const res = await fetch(buildAuthUrl("/me"), {
@@ -82,7 +74,7 @@ export function useAuthSession() {
   const loginHref = React.useMemo(() => {
     const returnTo =
       typeof window !== "undefined"
-        ? `${window.location.pathname}${window.location.search}${window.location.hash}`
+        ? `${window.location.origin}${window.location.pathname}${window.location.search}${window.location.hash}`
         : "/";
     return `${buildAuthUrl("/login")}?return_to=${encodeURIComponent(returnTo)}`;
   }, []);
@@ -90,7 +82,6 @@ export function useAuthSession() {
   const adminHref = React.useMemo(() => getAdminRoute(), []);
 
   const logout = React.useCallback(async () => {
-    if (isLocalFrontendRuntime()) return;
     await fetch(buildAuthUrl("/logout"), {
       method: "POST",
       credentials: "include",

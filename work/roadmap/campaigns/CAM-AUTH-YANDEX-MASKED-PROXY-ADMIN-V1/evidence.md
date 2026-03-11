@@ -27,6 +27,10 @@
 - `https://dtm.solofarm.ru/test/auth/me` -> anonymous auth payload
 - `https://dtm.solofarm.ru/test/api/health` -> `200`
 - `https://dtm.solofarm.ru/test/api/api/v2/frontend?...` -> masked snapshot payload
+- localhost design mode works against the public test contour:
+  - `Origin: http://localhost:5173` on `/test/auth/me` -> exact allow-origin + credentials
+  - `Origin: http://localhost:5173` on `/test/api/api/v2/frontend?...` -> exact allow-origin + credentials
+  - `OPTIONS /test/api/api/v2/frontend` from localhost -> `204` with credentialed CORS
 
 ## Pending
 - prod function deploy
