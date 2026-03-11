@@ -1,0 +1,157 @@
+﻿openapi: 3.0.0
+info:
+  title: DTM Unified API
+  version: 1.2.0
+
+servers:
+  - url: https://dtm.solofarm.ru
+
+paths:
+  /test/ops/auth/{proxy+}:
+    x-yc-apigateway-any-method:
+      parameters:
+        - name: proxy
+          in: path
+          required: true
+          schema:
+            type: string
+      x-yc-apigateway-integration:
+        type: cloud_functions
+        function_id: d4ebtgp4dhnbu1476gfu
+        tag: $latest
+        service_account_id: aje1kqd422vq2vefkbbl
+
+  /ops/auth/{proxy+}:
+    x-yc-apigateway-any-method:
+      parameters:
+        - name: proxy
+          in: path
+          required: true
+          schema:
+            type: string
+      x-yc-apigateway-integration:
+        type: cloud_functions
+        function_id: d4ecpcsedh5k7l81d3lp
+        tag: $latest
+        service_account_id: aje1kqd422vq2vefkbbl
+
+  /test/ops/{proxy+}:
+    x-yc-apigateway-any-method:
+      parameters:
+        - name: proxy
+          in: path
+          required: true
+          schema:
+            type: string
+      x-yc-apigateway-integration:
+        type: cloud_functions
+        function_id: d4e81vgi5vri8poe7qba
+        tag: $latest
+        service_account_id: aje1kqd422vq2vefkbbl
+
+  /ops/{proxy+}:
+    x-yc-apigateway-any-method:
+      parameters:
+        - name: proxy
+          in: path
+          required: true
+          schema:
+            type: string
+      x-yc-apigateway-integration:
+        type: cloud_functions
+        function_id: d4e2qtl9l30ockjv2hn7
+        tag: $latest
+        service_account_id: aje1kqd422vq2vefkbbl
+
+  /grafana:
+    x-yc-apigateway-any-method:
+      x-yc-apigateway-integration:
+        type: http
+        url: http://89.169.132.198:3000/grafana
+        headers:
+          Host: dtm.solofarm.ru
+          X-Forwarded-Proto: https
+          '*': '*'
+        query:
+          '*': '*'
+        timeouts:
+          connect: 1
+          read: 30
+
+  /grafana/:
+    x-yc-apigateway-any-method:
+      x-yc-apigateway-integration:
+        type: http
+        url: http://89.169.132.198:3000/grafana/
+        headers:
+          Host: dtm.solofarm.ru
+          X-Forwarded-Proto: https
+          '*': '*'
+        query:
+          '*': '*'
+        timeouts:
+          connect: 1
+          read: 30
+
+  /grafana/{path+}:
+    x-yc-apigateway-any-method:
+      parameters:
+        - name: path
+          in: path
+          required: true
+          schema:
+            type: string
+      x-yc-apigateway-integration:
+        type: http
+        url: http://89.169.132.198:3000/grafana/{path}
+        headers:
+          Host: dtm.solofarm.ru
+          X-Forwarded-Proto: https
+          '*': '*'
+        query:
+          '*': '*'
+        timeouts:
+          connect: 1
+          read: 30
+
+  /test:
+    x-yc-apigateway-any-method:
+      x-yc-apigateway-integration:
+        type: http
+        url: https://dtm-front-test.website.yandexcloud.net/index.html
+
+  /test/:
+    x-yc-apigateway-any-method:
+      x-yc-apigateway-integration:
+        type: http
+        url: https://dtm-front-test.website.yandexcloud.net/index.html
+
+  /test/{path+}:
+    x-yc-apigateway-any-method:
+      parameters:
+        - name: path
+          in: path
+          required: true
+          schema:
+            type: string
+      x-yc-apigateway-integration:
+        type: http
+        url: https://dtm-front-test.website.yandexcloud.net/{path}
+
+  /:
+    get:
+      x-yc-apigateway-integration:
+        type: http
+        url: https://dtm-front.website.yandexcloud.net/
+
+  /{path+}:
+    x-yc-apigateway-any-method:
+      parameters:
+        - name: path
+          in: path
+          required: true
+          schema:
+            type: string
+      x-yc-apigateway-integration:
+        type: http
+        url: https://dtm-front.website.yandexcloud.net/{path}
