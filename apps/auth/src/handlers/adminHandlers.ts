@@ -23,10 +23,6 @@ function parseJsonBody(req: NormalizedRequest): any {
   }
 }
 
-function getAvatarUrl(yandexUid: string): string {
-  return `https://avatars.yandex.net/get-yapic/${encodeURIComponent(yandexUid)}/islands-200`;
-}
-
 export async function listAdminData(req: NormalizedRequest) {
   const auth = await requireAdmin(req);
   if (auth.error) return auth.error;
@@ -53,7 +49,7 @@ export async function listAdminData(req: NormalizedRequest) {
     status: user.status,
     role: user.role,
     requestedAt: latestRequestByUserId.get(user.id) ?? user.createdAt,
-    avatarUrl: getAvatarUrl(user.yandexUid),
+    avatarUrl: user.avatarUrl,
   });
 
   return json(200, {

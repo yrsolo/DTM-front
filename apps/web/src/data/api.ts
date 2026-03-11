@@ -61,6 +61,13 @@ function shouldIncludeCredentials(baseUrl: string): boolean {
   }
 }
 
+function resolveApiCredentials(baseUrl: string): RequestCredentials {
+  if (isMaskingForced()) {
+    return "omit";
+  }
+  return shouldIncludeCredentials(baseUrl) ? "include" : "same-origin";
+}
+
 export async function fetchSnapshot(): Promise<any> {
   return fetchLocalSnapshot();
 }
@@ -168,16 +175,14 @@ export async function fetchApiSnapshotWithMeta(
     const timer = setTimeout(() => controller.abort(), Math.max(1000, cfg.apiTimeoutMs));
 
     try {
-      const includeCredentials = shouldIncludeCredentials(apiBaseUrl);
-      const forceMasking = isMaskingForced();
+      const credentials = resolveApiCredentials(apiBaseUrl);
       const res = await runWithApiRateLimit(() =>
         fetch(url, {
           headers: {
             accept: "application/json",
             ...(lastEtag ? { "If-None-Match": lastEtag } : {}),
-            ...(forceMasking ? { "x-dtm-force-mask": "1" } : {}),
           },
-          credentials: includeCredentials ? "include" : "same-origin",
+          credentials,
           signal: controller.signal,
         })
       );
@@ -228,15 +233,13 @@ export async function fetchPersonNameByOwnerId(ownerId: string): Promise<string 
   const timer = setTimeout(() => controller.abort(), Math.max(1000, cfg.apiTimeoutMs));
 
   try {
-    const includeCredentials = shouldIncludeCredentials(apiBaseUrl);
-    const forceMasking = isMaskingForced();
+    const credentials = resolveApiCredentials(apiBaseUrl);
     const res = await runWithApiRateLimit(() =>
       fetch(url, {
         headers: {
           accept: "application/json",
-          ...(forceMasking ? { "x-dtm-force-mask": "1" } : {}),
         },
-        credentials: includeCredentials ? "include" : "same-origin",
+        credentials,
         signal: controller.signal,
       })
     );

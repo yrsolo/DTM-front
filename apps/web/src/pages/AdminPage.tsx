@@ -3,27 +3,20 @@ import React from "react";
 import { LayoutContext } from "../components/Layout";
 import { getAuthRequestBase } from "../config/runtimeContour";
 
+type AdminUserCard = {
+  id: string;
+  yandexUid: string;
+  email: string | null;
+  displayName: string | null;
+  status: string;
+  role: string;
+  requestedAt: string;
+  avatarUrl: string | null;
+};
+
 type AdminOverview = {
-  pendingUsers: Array<{
-    id: string;
-    yandexUid: string;
-    email: string | null;
-    displayName: string | null;
-    status: string;
-    role: string;
-    requestedAt: string;
-    avatarUrl: string;
-  }>;
-  approvedUsers: Array<{
-    id: string;
-    yandexUid: string;
-    email: string | null;
-    displayName: string | null;
-    status: string;
-    role: string;
-    requestedAt: string;
-    avatarUrl: string;
-  }>;
+  pendingUsers: AdminUserCard[];
+  approvedUsers: AdminUserCard[];
   allowlist: Array<{
     email: string;
     source: string;
@@ -56,7 +49,7 @@ function initials(name: string | null, email: string | null): string {
   return source.slice(0, 2).toUpperCase();
 }
 
-function UserAvatar(props: { name: string | null; email: string | null; avatarUrl: string }) {
+function UserAvatar(props: { name: string | null; email: string | null; avatarUrl: string | null }) {
   const [failed, setFailed] = React.useState(false);
 
   if (failed || !props.avatarUrl) {
@@ -71,6 +64,11 @@ function UserAvatar(props: { name: string | null; email: string | null; avatarUr
       onError={() => setFailed(true)}
     />
   );
+}
+
+async function expectOk(res: Response, message: string): Promise<void> {
+  if (res.ok) return;
+  throw new Error(`${message} (HTTP ${res.status})`);
 }
 
 export function AdminPage() {
@@ -93,9 +91,7 @@ export function AdminPage() {
         headers: { accept: "application/json" },
         cache: "no-store",
       });
-      if (!res.ok) {
-        throw new Error(`Не удалось загрузить данные админки (HTTP ${res.status})`);
-      }
+      await expectOk(res, `Не удалось загрузить данные админки`);
       setOverview((await res.json()) as AdminOverview);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Не удалось загрузить данные админки");
@@ -115,25 +111,63 @@ export function AdminPage() {
         method: "POST",
         credentials: "include",
       });
-      if (!res.ok) {
-        throw new Error(`Не удалось одобрить пользователя (HTTP ${res.status})`);
-      }
+      await expectOk(res, "Не удалось одобрить пользователя");
       await loadOverview();
       await authSession?.reload();
     },
     [authSession, loadOverview]
   );
 
-  const block = React.useCallback(
+  const reject = React.useCallback(
     async (userId: string) => {
       setActionError(null);
-      const res = await fetch(buildAuthUrl(`/admin/users/${encodeURIComponent(userId)}/block`), {
+      const res = await fetch(buildAuthUrl(`/admin/users/${encodeURIComponent(userId)}/reject`), {
         method: "POST",
         credentials: "include",
       });
-      if (!res.ok) {
-        throw new Error(`Не удалось заблокировать пользователя (HTTP ${res.status})`);
-      }
+      await expectOk(res, "Не удалось отклонить заявку");
+      await loadOverview();
+      await authSession?.reload();
+    },
+    [authSession, loadOverview]
+  );
+
+  const revoke = React.useCallback(
+    async (userId: string) => {
+      setActionError(null);
+      const res = await fetch(buildAuthUrl(`/admin/users/${encodeURIComponent(userId)}/revoke`), {
+        method: "POST",
+        credentials: "include",
+      });
+      await expectOk(res, "Не удалось удалить пользователя из одобренных");
+      await loadOverview();
+      await authSession?.reload();
+    },
+    [authSession, loadOverview]
+  );
+
+  const makeAdmin = React.useCallback(
+    async (userId: string) => {
+      setActionError(null);
+      const res = await fetch(buildAuthUrl(`/admin/users/${encodeURIComponent(userId)}/make-admin`), {
+        method: "POST",
+        credentials: "include",
+      });
+      await expectOk(res, "Не удалось назначить администратора");
+      await loadOverview();
+      await authSession?.reload();
+    },
+    [authSession, loadOverview]
+  );
+
+  const removeAdmin = React.useCallback(
+    async (userId: string) => {
+      setActionError(null);
+      const res = await fetch(buildAuthUrl(`/admin/users/${encodeURIComponent(userId)}/remove-admin`), {
+        method: "POST",
+        credentials: "include",
+      });
+      await expectOk(res, "Не удалось снять права администратора");
       await loadOverview();
       await authSession?.reload();
     },
@@ -149,9 +183,7 @@ export function AdminPage() {
       headers: { "content-type": "application/json" },
       body: JSON.stringify({ email: newEmail.trim() }),
     });
-    if (!res.ok) {
-      throw new Error(`Не удалось добавить email в allowlist (HTTP ${res.status})`);
-    }
+    await expectOk(res, "Не удалось добавить email в allowlist");
     setNewEmail("");
     await loadOverview();
   }, [loadOverview, newEmail]);
@@ -163,76 +195,10 @@ export function AdminPage() {
         method: "DELETE",
         credentials: "include",
       });
-      if (!res.ok) {
-        throw new Error(`Не удалось удалить email из allowlist (HTTP ${res.status})`);
-      }
+      await expectOk(res, "Не удалось удалить email из allowlist");
       await loadOverview();
     },
     [loadOverview]
-  );
-
-  const reject = React.useCallback(
-    async (userId: string) => {
-      setActionError(null);
-      const res = await fetch(buildAuthUrl(`/admin/users/${encodeURIComponent(userId)}/reject`), {
-        method: "POST",
-        credentials: "include",
-      });
-      if (!res.ok) {
-        throw new Error(`Не удалось отклонить заявку (HTTP ${res.status})`);
-      }
-      await loadOverview();
-      await authSession?.reload();
-    },
-    [authSession, loadOverview]
-  );
-
-  const revoke = React.useCallback(
-    async (userId: string) => {
-      setActionError(null);
-      const res = await fetch(buildAuthUrl(`/admin/users/${encodeURIComponent(userId)}/revoke`), {
-        method: "POST",
-        credentials: "include",
-      });
-      if (!res.ok) {
-        throw new Error(`Не удалось удалить пользователя из одобренных (HTTP ${res.status})`);
-      }
-      await loadOverview();
-      await authSession?.reload();
-    },
-    [authSession, loadOverview]
-  );
-
-  const makeAdmin = React.useCallback(
-    async (userId: string) => {
-      setActionError(null);
-      const res = await fetch(buildAuthUrl(`/admin/users/${encodeURIComponent(userId)}/make-admin`), {
-        method: "POST",
-        credentials: "include",
-      });
-      if (!res.ok) {
-        throw new Error(`Не удалось назначить администратора (HTTP ${res.status})`);
-      }
-      await loadOverview();
-      await authSession?.reload();
-    },
-    [authSession, loadOverview]
-  );
-
-  const removeAdmin = React.useCallback(
-    async (userId: string) => {
-      setActionError(null);
-      const res = await fetch(buildAuthUrl(`/admin/users/${encodeURIComponent(userId)}/remove-admin`), {
-        method: "POST",
-        credentials: "include",
-      });
-      if (!res.ok) {
-        throw new Error(`Не удалось снять права администратора (HTTP ${res.status})`);
-      }
-      await loadOverview();
-      await authSession?.reload();
-    },
-    [authSession, loadOverview]
   );
 
   const runAdminAction = React.useCallback(async (action: () => Promise<void>) => {
@@ -300,12 +266,18 @@ export function AdminPage() {
                   <div className="muted">Заявка: {formatRequestedAt(user.requestedAt)}</div>
                 </div>
                 <div className="adminUserActions">
-                  <button className="btn" type="button" onClick={() => void runAdminAction(() => approve(user.id))}>Одобрить</button>
-                  <button className="btn btnGhost" type="button" onClick={() => void runAdminAction(() => reject(user.id))}>Отклонить</button>
+                  <button className="btn" type="button" onClick={() => void runAdminAction(() => approve(user.id))}>
+                    Одобрить
+                  </button>
+                  <button className="btn btnGhost" type="button" onClick={() => void runAdminAction(() => reject(user.id))}>
+                    Отклонить
+                  </button>
                 </div>
               </div>
             ))}
-            {!overview?.pendingUsers?.length ? <div className="muted">Нет пользователей, ожидающих одобрения.</div> : null}
+            {!overview?.pendingUsers?.length ? (
+              <div className="muted">Нет пользователей, ожидающих одобрения.</div>
+            ) : null}
           </div>
         </div>
 
@@ -351,7 +323,9 @@ export function AdminPage() {
                 </div>
               </div>
             ))}
-            {!overview?.approvedUsers?.length ? <div className="muted">Нет одобренных пользователей.</div> : null}
+            {!overview?.approvedUsers?.length ? (
+              <div className="muted">Нет одобренных пользователей.</div>
+            ) : null}
           </div>
         </div>
       </div>

@@ -43,6 +43,34 @@ Quick checks:
 ```powershell
 curl.exe -i -H "Origin: http://localhost:5173" https://dtm.solofarm.ru/test/ops/auth/me
 curl.exe -i -H "Origin: http://localhost:5173" "https://dtm.solofarm.ru/test/ops/api/v2/frontend?statuses=work,pre_done&include_people=true&limit=2"
+
+## Включено маскирование, хотя пользователь approved/admin
+
+Проверьте, не включён ли masking toggle в UI.
+
+Что происходит технически:
+- при обычном режиме frontend отправляет browser API request с auth cookie;
+- при принудительном маскировании frontend отправляет тот же запрос без auth cookie;
+- auth proxy воспринимает такой запрос как guest/masked и проксирует в backend `x-dtm-access-mode: masked`.
+
+Проверка:
+- откройте auth-панель;
+- выключите `Принудительная маскировка`;
+- повторите запрос к `/ops/api/*` или `/test/ops/api/*`.
+
+## Backend не понимает, когда отдавать full, а когда masked
+
+Backend не должен анализировать browser cookie самостоятельно.
+
+Надо опираться на headers от auth proxy:
+- `x-dtm-access-mode`
+- `x-dtm-authenticated`
+- `x-dtm-user-id`
+- `x-dtm-user-role`
+- `x-dtm-user-status`
+
+Полный handoff описан в:
+- `docs/contracts/BACKEND_AUTH_HANDOFF.md`
 ```
 
 If localhost opens `/ops/auth/...` instead of `/test/ops/auth/...`:

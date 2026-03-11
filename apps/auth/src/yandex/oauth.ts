@@ -1,6 +1,14 @@
 import { getAuthRuntimeConfig } from "../config";
 import type { YandexProfile } from "../types";
 
+export function buildYandexAvatarUrl(profile: Pick<YandexProfile, "default_avatar_id" | "is_avatar_empty">): string | null {
+  const avatarId = profile.default_avatar_id?.trim();
+  if (!avatarId || profile.is_avatar_empty) {
+    return null;
+  }
+  return `https://avatars.yandex.net/get-yapic/${encodeURIComponent(avatarId)}/islands-200`;
+}
+
 export function getYandexRedirectUri(): string {
   const cfg = getAuthRuntimeConfig();
   return `${cfg.baseUrl}${cfg.authBasePath}/callback`;

@@ -5,6 +5,7 @@ import path from "node:path";
 import ydbSdk from "ydb-sdk";
 
 const {
+  AlterTableDescription,
   Column,
   CreateTableSettings,
   Driver,
@@ -85,6 +86,20 @@ async function ensureTable(driver, tableName, description) {
   });
 }
 
+async function ensureOptionalColumns(driver, tableName, columns) {
+  await driver.tableClient.withSessionRetry(async (session) => {
+    const description = await session.describeTable(tableName);
+    const existing = new Set((description.columns || []).map((column) => column.name));
+    const missing = columns.filter((column) => !existing.has(column.name));
+    if (!missing.length) {
+      return;
+    }
+    const alterDescription = new AlterTableDescription();
+    alterDescription.addColumns = missing;
+    await session.alterTable(tableName, alterDescription);
+  });
+}
+
 async function main() {
   const { target } = parseArgs(process.argv.slice(2));
   const config = loadDeployConfig();
@@ -114,6 +129,7 @@ async function main() {
         new Column("yandex_uid", Types.UTF8),
         new Column("email", optional(Types.UTF8)),
         new Column("display_name", optional(Types.UTF8)),
+        new Column("avatar_url", optional(Types.UTF8)),
         new Column("status", Types.UTF8),
         new Column("role", Types.UTF8),
         new Column("session_version", Types.INT32),
@@ -157,6 +173,7 @@ async function main() {
     await ensureTable(driver, "allowlist_emails", allowlist);
     await ensureTable(driver, "access_requests", accessRequests);
     await ensureTable(driver, "audit_log", auditLog);
+    await ensureOptionalColumns(driver, "users", [new Column("avatar_url", optional(Types.UTF8))]);
 
     console.log(`Auth YDB migration completed for ${target}`);
   } finally {

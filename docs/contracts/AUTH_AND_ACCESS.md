@@ -85,6 +85,17 @@ User-visible statuses:
 - `Пользователь` -> доступ подтверждён, full access есть, admin role нет
 - `Администратор` -> full access и доступ к admin UI
 
+Browser data request behavior:
+- default mode для approved/admin -> frontend отправляет browser API requests с auth cookie
+- guest и pending получают masked data из-за отсутствия full access
+- если approved/admin вручную включает маскирование в UI, frontend отправляет browser API requests без auth cookie
+- auth proxy на основе cookie сам выставляет upstream headers:
+  - `x-dtm-access-mode`
+  - `x-dtm-authenticated`
+  - `x-dtm-user-id`
+  - `x-dtm-user-role`
+  - `x-dtm-user-status`
+
 JSON endpoints:
 - prod: `/ops/auth/admin/*`
 - test: `/test/ops/auth/admin/*`
@@ -123,3 +134,9 @@ Canonical env contract:
 - `YANDEX_CLIENT_SECRET_TEST`
 - `YANDEX_CLIENT_ID_PROD`
 - `YANDEX_CLIENT_SECRET_PROD`
+
+Avatar contract:
+- auth service читает avatar metadata из Yandex profile (`default_avatar_id`)
+- `user.avatarUrl` может возвращаться в `/me`
+- admin overview возвращает `avatarUrl` для карточек пользователей
+- если avatar отсутствует или не загрузился, UI показывает fallback по инициалам

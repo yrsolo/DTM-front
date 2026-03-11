@@ -4,12 +4,14 @@ import type { AuthUser, UserRole, UserStatus, YandexProfile } from "../types";
 import { AUTH_TABLES } from "./schema";
 import { executeQuery, executeVoid, int32, optionalTimestamp, optionalUtf8, timestamp, utf8 } from "./query";
 import { normalizeEmail } from "./normalization";
+import { buildYandexAvatarUrl } from "../yandex/oauth";
 
 type UserRow = {
   id: string;
   yandex_uid: string;
   email: string | null;
   display_name: string | null;
+  avatar_url: string | null;
   status: UserStatus;
   role: UserRole;
   session_version: number;
@@ -23,6 +25,7 @@ function mapUser(row: UserRow): AuthUser {
     yandexUid: row.yandex_uid,
     email: row.email,
     displayName: row.display_name,
+    avatarUrl: row.avatar_url,
     status: row.status,
     role: row.role,
     sessionVersion: Number(row.session_version ?? 1),
@@ -36,7 +39,7 @@ export async function getUserByYandexUid(yandexUid: string): Promise<AuthUser | 
   const rows = await executeQuery<UserRow>(
     `
       DECLARE $yandex_uid AS Utf8;
-      SELECT id, yandex_uid, email, display_name, status, role, session_version, created_at, last_login_at
+      SELECT id, yandex_uid, email, display_name, avatar_url, status, role, session_version, created_at, last_login_at
       FROM ${AUTH_TABLES.users}
       WHERE yandex_uid = $yandex_uid
       LIMIT 1;
@@ -50,7 +53,7 @@ export async function getUserById(userId: string): Promise<AuthUser | null> {
   const rows = await executeQuery<UserRow>(
     `
       DECLARE $id AS Utf8;
-      SELECT id, yandex_uid, email, display_name, status, role, session_version, created_at, last_login_at
+      SELECT id, yandex_uid, email, display_name, avatar_url, status, role, session_version, created_at, last_login_at
       FROM ${AUTH_TABLES.users}
       WHERE id = $id
       LIMIT 1;
@@ -66,7 +69,7 @@ export async function listUsersByStatus(status?: UserStatus): Promise<AuthUser[]
   const rows = await executeQuery<UserRow>(
     `
       ${status ? "DECLARE $status AS Utf8;" : ""}
-      SELECT id, yandex_uid, email, display_name, status, role, session_version, created_at, last_login_at
+      SELECT id, yandex_uid, email, display_name, avatar_url, status, role, session_version, created_at, last_login_at
       FROM ${AUTH_TABLES.users}
       ${predicate}
       ORDER BY created_at DESC;
@@ -85,12 +88,14 @@ export async function createUserFromProfile(
   const now = new Date();
   const email = normalizeEmail(profile.default_email);
   const displayName = profile.real_name?.trim() || profile.display_name?.trim() || profile.login?.trim() || null;
+  const avatarUrl = buildYandexAvatarUrl(profile);
   await executeVoid(
     `
       DECLARE $id AS Utf8;
       DECLARE $yandex_uid AS Utf8;
       DECLARE $email AS Optional<Utf8>;
       DECLARE $display_name AS Optional<Utf8>;
+      DECLARE $avatar_url AS Optional<Utf8>;
       DECLARE $status AS Utf8;
       DECLARE $role AS Utf8;
       DECLARE $session_version AS Int32;
@@ -98,15 +103,16 @@ export async function createUserFromProfile(
       DECLARE $last_login_at AS Optional<Timestamp>;
 
       UPSERT INTO ${AUTH_TABLES.users}
-      (id, yandex_uid, email, display_name, status, role, session_version, created_at, last_login_at)
+      (id, yandex_uid, email, display_name, avatar_url, status, role, session_version, created_at, last_login_at)
       VALUES
-      ($id, $yandex_uid, $email, $display_name, $status, $role, $session_version, $created_at, $last_login_at);
+      ($id, $yandex_uid, $email, $display_name, $avatar_url, $status, $role, $session_version, $created_at, $last_login_at);
     `,
     {
       $id: utf8(id),
       $yandex_uid: utf8(profile.id),
       $email: optionalUtf8(email),
       $display_name: optionalUtf8(displayName),
+      $avatar_url: optionalUtf8(avatarUrl),
       $status: utf8(status),
       $role: utf8(role),
       $session_version: int32(1),
@@ -125,7 +131,7 @@ export async function touchUserLogin(userId: string): Promise<void> {
       DECLARE $id AS Utf8;
       DECLARE $last_login_at AS Timestamp;
       UPSERT INTO ${AUTH_TABLES.users}
-      SELECT id, yandex_uid, email, display_name, status, role, session_version, created_at, $last_login_at AS last_login_at
+      SELECT id, yandex_uid, email, display_name, avatar_url, status, role, session_version, created_at, $last_login_at AS last_login_at
       FROM ${AUTH_TABLES.users}
       WHERE id = $id;
     `,
@@ -139,11 +145,13 @@ export async function touchUserLogin(userId: string): Promise<void> {
 export async function syncUserProfile(userId: string, profile: YandexProfile): Promise<void> {
   const email = normalizeEmail(profile.default_email);
   const displayName = profile.real_name?.trim() || profile.display_name?.trim() || profile.login?.trim() || null;
+  const avatarUrl = buildYandexAvatarUrl(profile);
   await executeVoid(
     `
       DECLARE $id AS Utf8;
       DECLARE $email AS Optional<Utf8>;
       DECLARE $display_name AS Optional<Utf8>;
+      DECLARE $avatar_url AS Optional<Utf8>;
       DECLARE $last_login_at AS Timestamp;
 
       UPSERT INTO ${AUTH_TABLES.users}
@@ -152,6 +160,7 @@ export async function syncUserProfile(userId: string, profile: YandexProfile): P
         yandex_uid,
         $email AS email,
         $display_name AS display_name,
+        $avatar_url AS avatar_url,
         status,
         role,
         session_version,
@@ -164,6 +173,7 @@ export async function syncUserProfile(userId: string, profile: YandexProfile): P
       $id: utf8(userId),
       $email: optionalUtf8(email),
       $display_name: optionalUtf8(displayName),
+      $avatar_url: optionalUtf8(avatarUrl),
       $last_login_at: timestamp(new Date()),
     }
   );
@@ -181,6 +191,7 @@ export async function setUserStatus(userId: string, status: UserStatus): Promise
         yandex_uid,
         email,
         display_name,
+        avatar_url,
         $status AS status,
         role,
         session_version,
@@ -214,6 +225,7 @@ export async function incrementSessionVersion(userId: string): Promise<void> {
         yandex_uid,
         email,
         display_name,
+        avatar_url,
         status,
         role,
         $session_version AS session_version,
@@ -241,6 +253,7 @@ export async function upsertRole(userId: string, role: UserRole): Promise<void> 
         yandex_uid,
         email,
         display_name,
+        avatar_url,
         status,
         $role AS role,
         session_version,

@@ -33,3 +33,4 @@ See: `docs/operations/TROUBLESHOOTING.md`
 - [x] Auth/admin UX completion: auth-panel now explains login/access/admin state, masking control moved into the panel, admin page access states and RU copy cleaned up.
 - [x] Auth session fix: auth function now reads cookies from YC gateway event shapes and returns multi-value `Set-Cookie`; test account `yrsolo@yandex.ru` promoted to `approved/admin` in test YDB.
 - [x] Admin panel expanded: pending and approved user lists, soft reject flow, admin role controls, request timestamps, avatars, and self-lockout protection. Test frontend/auth contour redeployed.
+- [x] Backend auth handoff clarified: browser masking toggle now maps to `with auth` vs `without auth` API requests; auth proxy forwards trusted `x-dtm-*` access headers upstream; Yandex avatar URL is stored from profile metadata.

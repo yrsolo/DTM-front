@@ -119,7 +119,7 @@ function buildAuthPanelContent(params: {
       maskingTitle: locale === "ru" ? `Принудительная маскировка: ${maskingForced ? "вкл" : "выкл"}` : `Forced masking: ${maskingForced ? "on" : "off"}`,
       maskingHint: maskingLockedByAccess
         ? (locale === "ru" ? "Маскирование определяется уровнем доступа." : "Masking is defined by access level.")
-        : (locale === "ru" ? "Вы можете вручную включить или выключить маскирование." : "You can manually enable or disable masking."),
+        : (locale === "ru" ? "Во включённом режиме запросы к API отправляются без auth cookie." : "When enabled, API requests are sent without the auth cookie."),
     };
   }
 
@@ -154,7 +154,7 @@ function buildAuthPanelContent(params: {
     maskingTitle: locale === "ru" ? `Принудительная маскировка: ${maskingForced ? "вкл" : "выкл"}` : `Forced masking: ${maskingForced ? "on" : "off"}`,
     maskingHint: maskingLockedByAccess
       ? (locale === "ru" ? "Маскирование определяется уровнем доступа." : "Masking is defined by access level.")
-      : (locale === "ru" ? "Вы можете вручную включить или выключить маскирование." : "You can manually enable or disable masking."),
+      : (locale === "ru" ? "Во включённом режиме запросы к API отправляются без auth cookie." : "When enabled, API requests are sent without the auth cookie."),
   };
 }
 

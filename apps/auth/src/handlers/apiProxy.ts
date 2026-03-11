@@ -17,6 +17,16 @@ const HOP_BY_HOP_HEADERS = new Set([
   "cookie",
 ]);
 
+const INTERNAL_PROXY_HEADERS = new Set([
+  "x-dtm-force-mask",
+  "x-dtm-access-mode",
+  "x-dtm-authenticated",
+  "x-dtm-user-id",
+  "x-dtm-user-role",
+  "x-dtm-user-status",
+  "x-dtm-contour",
+]);
+
 const STRIP_RESPONSE_HEADERS = new Set([
   "access-control-allow-origin",
   "access-control-allow-credentials",
@@ -39,11 +49,17 @@ export async function proxyApiRequest(req: NormalizedRequest) {
   const headers = new Headers();
   for (const [key, value] of Object.entries(req.headers)) {
     if (!value || HOP_BY_HOP_HEADERS.has(key)) continue;
-    if (key === "x-dtm-force-mask") continue;
+    if (INTERNAL_PROXY_HEADERS.has(key)) continue;
     headers.set(key, value);
   }
   headers.set("x-dtm-access-mode", effectiveAccessMode);
+  headers.set("x-dtm-authenticated", user ? "1" : "0");
   headers.set("x-dtm-contour", cfg.contour);
+  if (user) {
+    headers.set("x-dtm-user-id", user.id);
+    headers.set("x-dtm-user-role", user.role);
+    headers.set("x-dtm-user-status", user.status);
+  }
 
   const upstreamRes = await fetch(upstreamUrl, {
     method: req.method,

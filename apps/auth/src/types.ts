@@ -19,6 +19,7 @@ export type AuthUser = {
   yandexUid: string;
   email: string | null;
   displayName: string | null;
+  avatarUrl: string | null;
   status: UserStatus;
   role: UserRole;
   sessionVersion: number;
@@ -55,4 +56,6 @@ export type YandexProfile = {
   real_name?: string;
   display_name?: string;
   login?: string;
+  default_avatar_id?: string;
+  is_avatar_empty?: boolean;
 };
