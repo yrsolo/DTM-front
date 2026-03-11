@@ -2,14 +2,16 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 
-import {
+import ydbSdk from "ydb-sdk";
+
+const {
   Column,
   CreateTableSettings,
   Driver,
   getCredentialsFromEnv,
   TableDescription,
   Types,
-} from "ydb-sdk";
+} = ydbSdk;
 
 function parseArgs(argv) {
   const result = { target: null };

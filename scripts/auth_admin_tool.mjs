@@ -2,7 +2,9 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 
-import { AUTO_TX, Driver, getCredentialsFromEnv, TypedValues, Types } from "ydb-sdk";
+import ydbSdk from "ydb-sdk";
+
+const { AUTO_TX, Driver, getCredentialsFromEnv, TypedValues, Types } = ydbSdk;
 
 function parseArgs(argv) {
   const result = {
