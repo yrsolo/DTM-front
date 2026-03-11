@@ -91,7 +91,7 @@ export function AdminPage() {
         headers: { accept: "application/json" },
         cache: "no-store",
       });
-      await expectOk(res, `Не удалось загрузить данные админки`);
+      await expectOk(res, "Не удалось загрузить данные админки");
       setOverview((await res.json()) as AdminOverview);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Не удалось загрузить данные админки");
@@ -201,6 +201,17 @@ export function AdminPage() {
     [loadOverview]
   );
 
+  const toggleAdminRole = React.useCallback(
+    async (user: AdminUserCard) => {
+      if (user.role === "admin") {
+        await removeAdmin(user.id);
+        return;
+      }
+      await makeAdmin(user.id);
+    },
+    [makeAdmin, removeAdmin]
+  );
+
   const runAdminAction = React.useCallback(async (action: () => Promise<void>) => {
     try {
       await action();
@@ -256,9 +267,9 @@ export function AdminPage() {
       <div className="grid2" style={{ alignItems: "start" }}>
         <div className="card">
           <h4 className="pageTitle" style={{ fontSize: 22 }}>Ожидают одобрения</h4>
-          <div className="adminUserGrid">
+          <div className="adminUserGrid adminUserGridTiles">
             {(overview?.pendingUsers ?? []).map((user) => (
-              <div key={user.id} className="adminUserCard">
+              <div key={user.id} className="adminUserCard adminUserBrick">
                 <UserAvatar name={user.displayName} email={user.email} avatarUrl={user.avatarUrl} />
                 <div className="adminUserBody">
                   <div className="adminUserName">{user.displayName || user.email || user.id}</div>
@@ -283,46 +294,42 @@ export function AdminPage() {
 
         <div className="card">
           <h4 className="pageTitle" style={{ fontSize: 22 }}>Одобренные пользователи</h4>
-          <div className="adminUserGrid">
-            {(overview?.approvedUsers ?? []).map((user) => (
-              <div key={user.id} className="adminUserCard">
-                <UserAvatar name={user.displayName} email={user.email} avatarUrl={user.avatarUrl} />
-                <div className="adminUserBody">
-                  <div className="adminUserName">{user.displayName || user.email || user.id}</div>
-                  <div className="muted">{user.email || "Email не указан"}</div>
-                  <div className="muted">Заявка: {formatRequestedAt(user.requestedAt)}</div>
-                  <div className="adminUserRole">
-                    {user.role === "admin" ? "Администратор" : "Пользователь"}
+          <div className="adminUserGrid adminUserGridTiles">
+            {(overview?.approvedUsers ?? []).map((user) => {
+              const isSelf = authSession.state.user?.id === user.id;
+              const isAdmin = user.role === "admin";
+              return (
+                <div key={user.id} className="adminUserCard adminUserBrick">
+                  <UserAvatar name={user.displayName} email={user.email} avatarUrl={user.avatarUrl} />
+                  <div className="adminUserBody">
+                    <div className="adminUserName">{user.displayName || user.email || user.id}</div>
+                    <div className="muted">{user.email || "Email не указан"}</div>
+                    <div className="muted">Заявка: {formatRequestedAt(user.requestedAt)}</div>
+                    <div className={`adminUserRole ${isAdmin ? "isAdmin" : ""}`}>
+                      {isAdmin ? "Администратор" : "Пользователь"}
+                    </div>
+                  </div>
+                  <div className="adminUserActions">
+                    <button
+                      className="btn btnGhost"
+                      type="button"
+                      onClick={() => void runAdminAction(() => revoke(user.id))}
+                      disabled={isSelf}
+                    >
+                      Удалить
+                    </button>
+                    <button
+                      className={`btn ${isAdmin ? "btnGhost" : ""}`}
+                      type="button"
+                      onClick={() => void runAdminAction(() => toggleAdminRole(user))}
+                      disabled={isSelf}
+                    >
+                      {isAdmin ? "Убрать из админов" : "Сделать админом"}
+                    </button>
                   </div>
                 </div>
-                <div className="adminUserActions">
-                  <button
-                    className="btn btnGhost"
-                    type="button"
-                    onClick={() => void runAdminAction(() => revoke(user.id))}
-                    disabled={authSession.state.user?.id === user.id}
-                  >
-                    Удалить
-                  </button>
-                  <button
-                    className="btn"
-                    type="button"
-                    onClick={() => void runAdminAction(() => makeAdmin(user.id))}
-                    disabled={user.role === "admin"}
-                  >
-                    Сделать админом
-                  </button>
-                  <button
-                    className="btn btnGhost"
-                    type="button"
-                    onClick={() => void runAdminAction(() => removeAdmin(user.id))}
-                    disabled={user.role !== "admin" || authSession.state.user?.id === user.id}
-                  >
-                    Удалить из админов
-                  </button>
-                </div>
-              </div>
-            ))}
+              );
+            })}
             {!overview?.approvedUsers?.length ? (
               <div className="muted">Нет одобренных пользователей.</div>
             ) : null}

@@ -2191,6 +2191,11 @@ button:hover {
   gap: 10px;
 }
 
+.adminUserGridTiles {
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  align-items: stretch;
+}
+
 .adminUserCard {
   display: grid;
   grid-template-columns: auto 1fr;
@@ -2200,6 +2205,13 @@ button:hover {
   border-radius: 16px;
   border: 1px solid rgba(135, 159, 225, 0.24);
   background: linear-gradient(180deg, rgba(10, 17, 34, 0.94) 0%, rgba(19, 21, 49, 0.84) 100%);
+}
+
+.adminUserBrick {
+  grid-template-columns: 1fr;
+  gap: 14px;
+  min-height: 224px;
+  align-content: start;
 }
 
 .adminUserAvatar {
@@ -2234,16 +2246,31 @@ button:hover {
 }
 
 .adminUserRole {
-  margin-top: 2px;
+  margin-top: 4px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 28px;
+  width: fit-content;
+  padding: 0 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(137, 164, 255, 0.22);
+  background: rgba(27, 36, 76, 0.7);
   font-size: 12px;
-  color: #c8d8ff;
+  color: #d7e5ff;
+}
+
+.adminUserRole.isAdmin {
+  border-color: rgba(197, 140, 255, 0.34);
+  background: rgba(78, 40, 112, 0.56);
+  color: #f3d9ff;
 }
 
 .adminUserActions {
-  grid-column: 1 / -1;
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
+  margin-top: auto;
 }
 
 @media (max-width: 800px) {
