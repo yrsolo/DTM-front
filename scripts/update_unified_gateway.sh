@@ -179,8 +179,13 @@ paths:
   /test:
     x-yc-apigateway-any-method:
       x-yc-apigateway-integration:
-        type: http
-        url: https://${frontend_bucket_test}.website.yandexcloud.net/index.html
+        type: dummy
+        http_code: 302
+        http_headers:
+          Location: /test/
+          Content-Type: text/plain
+        content:
+          '*': Redirecting to /test/
 
   /test/:
     x-yc-apigateway-any-method:
