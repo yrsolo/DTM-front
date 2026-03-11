@@ -25,7 +25,7 @@ Source of truth в коде:
 
 Если обе попытки неуспешны, используется встроенный YAML:
 - root runtime -> `public.prod.yaml`
-- локальный режим и `/test/` runtime -> `public.yaml`
+- локальный режим и `/test-front/` runtime -> `public.yaml`
 
 ## Что лежит в runtime config
 
@@ -115,4 +115,4 @@ Workbench-вкладка `По умолчанию` должна задавать
 - host-specific логика не должна расползаться по rendering-компонентам;
 - persisted browser state не должен подменять собой API-контракт, только дополнять его;
 - fallback на `config/public.yam` сохранён как совместимость с уже развернутым окружением.
-- runtime asset paths должны корректно работать и из `/`, и из `/test/`.
+- runtime asset paths должны корректно работать и из `/`, и из `/test-front/`.

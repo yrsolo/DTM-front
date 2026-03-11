@@ -1,5 +1,6 @@
 import { loadPublicConfig } from "../config/publicConfig";
 import { resolvePublicAssetUrl } from "../config/publicPaths";
+import { getApiProxyBasePath, isLocalFrontendRuntime } from "../config/runtimeContour";
 
 const MIN_API_INTERVAL_MS = 5000;
 let apiRateChain: Promise<void> = Promise.resolve();
@@ -28,9 +29,32 @@ async function runWithApiRateLimit<T>(fn: () => Promise<T>): Promise<T> {
 }
 
 function buildApiUrl(baseUrl: string, path: string, params: URLSearchParams): string {
-  const url = new URL(path, `${baseUrl.replace(/\/$/, "")}/`);
+  const normalizedPath = path.replace(/^\/+/, "");
+  const url = new URL(normalizedPath, `${baseUrl.replace(/\/+$/, "")}/`);
   url.search = params.toString();
   return url.toString();
+}
+
+function resolveBrowserApiBase(cfg: Awaited<ReturnType<typeof loadPublicConfig>>): string | null {
+  if (typeof window === "undefined") {
+    return cfg.apiBaseUrlProd || cfg.apiBaseUrlTest || cfg.apiBaseUrl;
+  }
+
+  if (isLocalFrontendRuntime()) {
+    return cfg.apiBaseUrlProd || cfg.apiBaseUrlTest || cfg.apiBaseUrl;
+  }
+
+  return `${window.location.origin}${getApiProxyBasePath()}`;
+}
+
+function shouldIncludeCredentials(baseUrl: string): boolean {
+  if (typeof window === "undefined") return false;
+  try {
+    const base = new URL(baseUrl, window.location.origin);
+    return base.origin === window.location.origin;
+  } catch {
+    return false;
+  }
 }
 
 export async function fetchSnapshot(): Promise<any> {
@@ -88,7 +112,7 @@ export async function fetchApiSnapshot(): Promise<any> {
 
 export async function isApiConfigured(): Promise<boolean> {
   const cfg = await loadPublicConfig();
-  return Boolean(cfg.apiBaseUrl);
+  return Boolean(resolveBrowserApiBase(cfg));
 }
 
 export async function fetchApiSnapshotWithMeta(
@@ -99,7 +123,8 @@ export async function fetchApiSnapshotWithMeta(
   apiBaseUrlOverride?: string | null
 ): Promise<ApiSnapshotFetchResult> {
   const cfg = await loadPublicConfig();
-  const apiBaseUrl = (apiBaseUrlOverride ?? "").trim() || cfg.apiBaseUrl;
+  const apiBaseUrl =
+    (apiBaseUrlOverride ?? "").trim() || resolveBrowserApiBase(cfg);
   if (!apiBaseUrl) {
     throw new Error("API base URL is not configured. Set api_base_url in public config.");
   }
@@ -139,12 +164,14 @@ export async function fetchApiSnapshotWithMeta(
     const timer = setTimeout(() => controller.abort(), Math.max(1000, cfg.apiTimeoutMs));
 
     try {
+      const includeCredentials = shouldIncludeCredentials(apiBaseUrl);
       const res = await runWithApiRateLimit(() =>
         fetch(url, {
           headers: {
             accept: "application/json",
             ...(lastEtag ? { "If-None-Match": lastEtag } : {}),
           },
+          credentials: includeCredentials ? "include" : "same-origin",
           signal: controller.signal,
         })
       );
@@ -186,17 +213,20 @@ export async function fetchApiSnapshotWithMeta(
 
 export async function fetchPersonNameByOwnerId(ownerId: string): Promise<string | null> {
   const cfg = await loadPublicConfig();
-  if (!cfg.apiBaseUrl || !ownerId) return null;
+  const apiBaseUrl = resolveBrowserApiBase(cfg);
+  if (!apiBaseUrl || !ownerId) return null;
 
-  const path = `${cfg.apiFrontendPath.replace(/\/$/, "")}/entities/people/${encodeURIComponent(ownerId)}`;
-  const url = new URL(path, `${cfg.apiBaseUrl.replace(/\/$/, "")}/`).toString();
+  const path = `${cfg.apiFrontendPath.replace(/^\/+/, "").replace(/\/$/, "")}/entities/people/${encodeURIComponent(ownerId)}`;
+  const url = new URL(path, `${apiBaseUrl.replace(/\/+$/, "")}/`).toString();
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), Math.max(1000, cfg.apiTimeoutMs));
 
   try {
+    const includeCredentials = shouldIncludeCredentials(apiBaseUrl);
     const res = await runWithApiRateLimit(() =>
       fetch(url, {
         headers: { accept: "application/json" },
+        credentials: includeCredentials ? "include" : "same-origin",
         signal: controller.signal,
       })
     );

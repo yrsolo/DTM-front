@@ -93,8 +93,8 @@ if [[ ! -d "$PUBLIC_CONFIG_DIR" ]]; then
 fi
 
 if [[ "$TARGET" == "test" ]]; then
-  SITE_PREFIX="test"
-  SITE_PATH_LABEL="/test/"
+  SITE_PREFIX="test-front"
+  SITE_PATH_LABEL="/test-front/"
 else
   SITE_PREFIX=""
   SITE_PATH_LABEL="/"
@@ -156,7 +156,7 @@ EOF
 echo "Syncing dist assets (excluding index.html/config/data) ..."
 SYNC_EXCLUDES=(--exclude "index.html" --exclude "config/*" --exclude "data/*")
 if [[ "$TARGET" == "prod" ]]; then
-  SYNC_EXCLUDES+=(--exclude "test/*" --exclude "releases/*")
+  SYNC_EXCLUDES+=(--exclude "test-front/*" --exclude "releases/*")
 fi
 if [[ "$DRY_RUN" == "true" ]]; then
   echo "[DRY-RUN] aws s3 sync \"$DIST_DIR\" \"$SITE_BUCKET_URI\" --delete ${SYNC_EXCLUDES[*]} --endpoint-url \"$YC_ENDPOINT\" --cache-control \"public, max-age=31536000, immutable\""

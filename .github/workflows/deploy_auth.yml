@@ -1,0 +1,86 @@
+name: Deploy Auth Function
+
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: "Deploy target"
+        required: true
+        default: prod
+        type: choice
+        options:
+          - prod
+          - test
+      dry_run:
+        description: "Build and validate without deploy"
+        required: true
+        default: true
+        type: boolean
+  push:
+    branches:
+      - dev
+    paths:
+      - "apps/auth/**"
+      - "apps/web/src/auth/**"
+      - "apps/web/src/config/runtimeContour.ts"
+      - "apps/web/src/data/api.ts"
+      - "apps/web/src/data/useSnapshot.ts"
+      - "config/deploy.yaml"
+      - "scripts/deploy_auth_function.sh"
+      - "scripts/migrate_auth_ydb.mjs"
+      - ".github/workflows/deploy_auth.yml"
+
+jobs:
+  deploy-auth:
+    runs-on: ubuntu-latest
+    environment: ${{ github.event_name == 'push' && 'test' || inputs.target }}
+    env:
+      YC_SA_JSON_CREDENTIALS: ${{ secrets.YC_SA_JSON_CREDENTIALS }}
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install YC CLI
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsSL https://storage.yandexcloud.net/yandexcloud-yc/install.sh | bash -s -- -i "$HOME/yc" -n
+          echo "$HOME/yc/bin" >> "$GITHUB_PATH"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Validate auth deploy prerequisites
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f "config/deploy.yaml"
+          test -n "$YC_SA_JSON_CREDENTIALS"
+
+      - name: Run auth YDB migration (test)
+        if: ${{ github.event_name == 'push' || inputs.target == 'test' }}
+        run: node scripts/migrate_auth_ydb.mjs --target test
+
+      - name: Run auth YDB migration (prod)
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.target == 'prod' }}
+        run: node scripts/migrate_auth_ydb.mjs --target prod
+
+      - name: Dry-run auth deploy
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run == true }}
+        run: bash scripts/deploy_auth_function.sh --target "${{ inputs.target }}" --dry-run
+
+      - name: Deploy auth function (test)
+        if: ${{ github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.target == 'test' && inputs.dry_run != true) }}
+        run: bash scripts/deploy_auth_function.sh --target test
+
+      - name: Deploy auth function (prod)
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.target == 'prod' && inputs.dry_run != true }}
+        run: bash scripts/deploy_auth_function.sh --target prod

@@ -22,7 +22,7 @@ Frontend собирается как статический сайт и выкл
 
 Схема публикации:
 - `prod` -> корень сайта `https://dtm.solofarm.ru/`
-- `test` -> подпуть `https://dtm.solofarm.ru/test/`
+- `test` -> подпуть `https://dtm.solofarm.ru/test-front/`
 
 Deploy включает:
 - `dist/`
@@ -44,7 +44,7 @@ Deploy включает:
 
 ### `scripts/deploy_frontend.cmd` / `scripts/deploy_frontend_test.cmd`
 
-Локальный test deploy в подпуть `/test/`.
+Локальный test deploy в подпуть `/test-front/`.
 
 ### `scripts/deploy_frontend_prod.cmd`
 
@@ -76,8 +76,8 @@ Runtime-переключение между продовым и тестовым
 
 1. `npm run build` в `apps/web` проходит.
 2. Для target опубликованы `config/public.yaml` и `config/public.yam`.
-3. Для test deploy артефакты лежат под `test/`, а prod не затронут.
-4. На `https://dtm.solofarm.ru/` и `https://dtm.solofarm.ru/test/` грузятся данные и runtime config.
+3. Для test deploy артефакты лежат под `test-front/`, а prod не затронут.
+4. На `https://dtm.solofarm.ru/` и `https://dtm.solofarm.ru/test-front/` грузятся данные и runtime config.
 5. Demo mode по умолчанию соответствует ожидаемому runtime default.
 6. Проверены базовые страницы: `Задачи`, `Дизайнеры`, drawer, workbench.
 

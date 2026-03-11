@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import { useSnapshot } from "../data/useSnapshot";
 import { resolvePublicAssetUrl } from "../config/publicPaths";
 import { AppLocale, getUiText, UiText } from "../i18n/uiText";
@@ -22,6 +23,7 @@ import {
   RuntimeDefaults,
   normalizeRuntimeDefaults,
 } from "../data/runtimeDefaults";
+import { useAuthSession } from "../auth/useAuthSession";
 
 export type TimelineViewMode =
   | "brand_designer_show"
@@ -56,6 +58,7 @@ export type LayoutContextValue = {
   saveKeyColors: () => void;
   loadKeyColors: () => void;
   resetKeyColors: () => void;
+  authSession: ReturnType<typeof useAuthSession>;
 };
 
 export const LayoutContext = React.createContext<LayoutContextValue | null>(null);
@@ -150,6 +153,7 @@ export function Layout(props: { children: React.ReactNode }) {
     loadLimit: runtimeDefaults.loadLimit,
   }));
   const snapshotState = useSnapshot(runtimeDefaults);
+  const authSession = useAuthSession();
   const [design, setDesign] = React.useState<DesignControls>(DEFAULT_DESIGN_CONTROLS);
   const [keyColors, setKeyColors] = React.useState<KeyColors>(DEFAULT_KEY_COLORS);
   const [introState, setIntroState] = React.useState<"idle" | "enter" | "playing" | "exit">("idle");
@@ -576,6 +580,7 @@ export function Layout(props: { children: React.ReactNode }) {
         saveKeyColors,
         loadKeyColors,
         resetKeyColors,
+        authSession,
       }}
     >
       <div className="appShell" style={layoutVarsStyle}>
@@ -594,6 +599,42 @@ export function Layout(props: { children: React.ReactNode }) {
                 <strong>{ui.appTitle}</strong>
                 <span className="muted">{ui.appSubtitle}</span>
               </div>
+            </div>
+            <div className="authNav">
+              {authSession.state.available ? (
+                authSession.state.authenticated ? (
+                  <>
+                    <span className="authBadge">
+                      {authSession.state.user?.displayName || authSession.state.user?.email || "User"}
+                    </span>
+                    <span className={`authBadge ${authSession.state.accessMode === "full" ? "isFull" : ""}`}>
+                      {authSession.state.accessMode === "full" ? "Полный доступ" : "Маскировка"}
+                    </span>
+                    {authSession.state.user?.status === "pending" ? (
+                      <span className="authBadge">Ожидает одобрения</span>
+                    ) : null}
+                    {authSession.state.user?.role === "admin" ? (
+                      <Link className="btn btnGhost" to={authSession.adminHref}>
+                        Admin
+                      </Link>
+                    ) : null}
+                    <button type="button" className="btn btnGhost" onClick={() => void authSession.logout()}>
+                      Выйти
+                    </button>
+                  </>
+                ) : authSession.state.loading ? (
+                  <span className="authBadge">Проверка доступа...</span>
+                ) : (
+                  <>
+                    <span className="authBadge">Гостевой режим</span>
+                    <a className="btn btnGhost" href={authSession.loginHref}>
+                      Войти через Яндекс
+                    </a>
+                  </>
+                )
+              ) : (
+                <span className="authBadge">Локальный режим</span>
+              )}
             </div>
           </div>
         </div>

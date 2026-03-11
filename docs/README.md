@@ -7,6 +7,7 @@
 - `overview/` — обзор продукта и пользовательские сценарии.
 - `architecture/` — устройство frontend и поток данных.
 - `contracts/` — API, snapshot-модель и runtime-конфиг.
+- `contracts/` — API, snapshot-модель, runtime-конфиг и auth/access contracts.
 - `design/` — визуальная система, страницы, workbench и milestones.
 - `operations/` — deploy, browser storage и troubleshooting.
 
@@ -26,6 +27,7 @@
   - [MILESTONES_AND_COLORS.md](n:\PROJECTS\DTM\DTM-front\docs\design\MILESTONES_AND_COLORS.md)
 - Релиз и эксплуатация:
   - [DEPLOY.md](n:\PROJECTS\DTM\DTM-front\docs\operations\DEPLOY.md)
+  - [AUTH_DEPLOY.md](n:\PROJECTS\DTM\DTM-front\docs\operations\AUTH_DEPLOY.md)
   - [RUNTIME_STORAGE.md](n:\PROJECTS\DTM\DTM-front\docs\operations\RUNTIME_STORAGE.md)
   - [TROUBLESHOOTING.md](n:\PROJECTS\DTM\DTM-front\docs\operations\TROUBLESHOOTING.md)
 
@@ -47,6 +49,8 @@
 - [API_CONTRACT.md](n:\PROJECTS\DTM\DTM-front\docs\contracts\API_CONTRACT.md)
 - [SNAPSHOT_MODEL.md](n:\PROJECTS\DTM\DTM-front\docs\contracts\SNAPSHOT_MODEL.md)
 - [RUNTIME_CONFIG.md](n:\PROJECTS\DTM\DTM-front\docs\contracts\RUNTIME_CONFIG.md)
+- [AUTH_AND_ACCESS.md](n:\PROJECTS\DTM\DTM-front\docs\contracts\AUTH_AND_ACCESS.md)
+- [BACKEND_AUTH_HANDOFF.md](n:\PROJECTS\DTM\DTM-front\docs\contracts\BACKEND_AUTH_HANDOFF.md)
 
 ### Дизайн
 
@@ -58,6 +62,8 @@
 ### Эксплуатация
 
 - [DEPLOY.md](n:\PROJECTS\DTM\DTM-front\docs\operations\DEPLOY.md)
+- [AUTH_DEPLOY.md](n:\PROJECTS\DTM\DTM-front\docs\operations\AUTH_DEPLOY.md)
+- [AUTH_TROUBLESHOOTING.md](n:\PROJECTS\DTM\DTM-front\docs\operations\AUTH_TROUBLESHOOTING.md)
 - [RUNTIME_STORAGE.md](n:\PROJECTS\DTM\DTM-front\docs\operations\RUNTIME_STORAGE.md)
 - [TROUBLESHOOTING.md](n:\PROJECTS\DTM\DTM-front\docs\operations\TROUBLESHOOTING.md)
 

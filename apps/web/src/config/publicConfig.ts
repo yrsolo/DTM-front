@@ -1,6 +1,7 @@
 import rawPublicConfig from "../../config/public.yaml?raw";
 import rawPublicConfigProd from "../../config/public.prod.yaml?raw";
 import { resolvePublicAssetUrl } from "./publicPaths";
+import { getRuntimeContour } from "./runtimeContour";
 
 type PublicConfig = {
   apiBaseUrl: string | null;
@@ -103,13 +104,12 @@ function buildConfig(parsed: Record<string, string>): PublicConfig {
 function pickFallbackYaml(): string {
   if (typeof window === "undefined") return rawPublicConfig;
   const host = window.location.hostname.toLowerCase();
-  const path = window.location.pathname.toLowerCase();
   const isLocal =
     host === "localhost" ||
     host === "127.0.0.1" ||
     host === "::1" ||
     host.endsWith(".local");
-  const isTestRuntime = path === "/test" || path.startsWith("/test/");
+  const isTestRuntime = getRuntimeContour() === "test";
   if (isLocal || isTestRuntime) return rawPublicConfig;
   return rawPublicConfigProd;
 }

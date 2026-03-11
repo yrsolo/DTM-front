@@ -9,6 +9,7 @@ import {
   isApiConfigured,
 } from "./api";
 import { loadPublicConfig } from "../config/publicConfig";
+import { isLocalFrontendRuntime } from "../config/runtimeContour";
 import { normalizeToSnapshotV1 } from "./normalize";
 import {
   DEFAULT_RUNTIME_DEFAULTS,
@@ -184,9 +185,11 @@ export function useSnapshot(initialRuntimeDefaults?: Partial<RuntimeDefaults>) {
         done: true,
         wait: true,
       };
-      const apiBaseOverride = useTestApi
-        ? cfg.apiBaseUrlTest || cfg.apiBaseUrl
-        : cfg.apiBaseUrlProd || cfg.apiBaseUrl;
+      const apiBaseOverride = isLocalFrontendRuntime()
+        ? useTestApi
+          ? cfg.apiBaseUrlTest || cfg.apiBaseUrl
+          : cfg.apiBaseUrlProd || cfg.apiBaseUrl
+        : null;
       const { payload, etag, notModified } = await fetchApiSnapshotWithMeta(
         currentMeta?.etag ?? null,
         dateFilter,

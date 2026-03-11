@@ -23,7 +23,7 @@ Source of truth в коде:
 
 Fallback выбирается по runtime path:
 - root runtime использует `public.prod.yaml`
-- локальный режим и `/test/` используют `public.yaml`
+- локальный режим и `/test-front/` используют `public.yaml`
 
 Из runtime-конфига приходят:
 - базовый URL API;

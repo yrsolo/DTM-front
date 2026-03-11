@@ -209,7 +209,7 @@ $deployTargetSource = if (-not [string]::IsNullOrWhiteSpace($Target)) {
   [Environment]::GetEnvironmentVariable("DTM_WEB_DEPLOY_TARGET")
 }
 $deployTarget = Normalize-DeployTarget -Value $deployTargetSource
-$sitePrefix = if ($deployTarget -eq "test") { "test" } else { "" }
+$sitePrefix = if ($deployTarget -eq "test") { "test-front" } else { "" }
 $sitePrefixLabel = if ([string]::IsNullOrWhiteSpace($sitePrefix)) { "/" } else { "/$sitePrefix/" }
 $configPrefix = if ([string]::IsNullOrWhiteSpace($sitePrefix)) { "config" } else { "$sitePrefix/config" }
 $dataPrefix = if ([string]::IsNullOrWhiteSpace($sitePrefix)) { "data" } else { "$sitePrefix/data" }
@@ -284,7 +284,7 @@ $releaseMetadata | ConvertTo-Json -Depth 4 | Set-Content -Path $releaseMetadataP
 Write-Host "Syncing dist assets (excluding index.html) ..."
 $syncExcludeArgs = @("--exclude", "index.html", "--exclude", "config/*", "--exclude", "data/*")
 if ($deployTarget -eq "prod") {
-  $syncExcludeArgs += @("--exclude", "test/*", "--exclude", "releases/*")
+  $syncExcludeArgs += @("--exclude", "test-front/*", "--exclude", "releases/*")
 }
 if ($DryRun) {
   Write-Host "[DRY-RUN] aws s3 sync `"$distDir`" `"$siteBucketUri`" --delete $($syncExcludeArgs -join ' ') --endpoint-url `"$endpoint`" --cache-control `"public, max-age=31536000, immutable`""
