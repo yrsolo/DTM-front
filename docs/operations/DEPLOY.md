@@ -89,7 +89,7 @@ Frontend и auth адресуют только новую service-схему:
 - prod api -> `https://dtm.solofarm.ru/ops/api/*`
 - test auth -> `https://dtm.solofarm.ru/test/ops/auth/*`
 - test api -> `https://dtm.solofarm.ru/test/ops/api/*`
-- shared grafana -> `https://dtm.solofarm.ru/ops/grafana/*`
+- shared grafana -> `https://dtm.solofarm.ru/grafana/*`
 
 `/ops/admin/*`, `/ops/telegram*`, `/ops/api/*` и test-аналоги считаются backend-owned routes. Frontend только использует их публичный контракт.
 

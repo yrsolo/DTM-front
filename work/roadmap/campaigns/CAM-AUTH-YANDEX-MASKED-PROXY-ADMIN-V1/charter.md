@@ -18,8 +18,8 @@ Add Yandex-based auth/admin as a same-origin proxy layer in this repo while keep
 
 ## Fixed decisions
 - two separate YDB serverless databases: test and prod
-- frontend test path: `/test-front/`
-- test auth/api proxy paths: `/test/auth/*`, `/test/api/*`
-- prod auth/api proxy paths: `/prod/auth/*`, `/prod/api/*`
+- frontend test path: `/test/`
+- test auth/api proxy paths: `/test/ops/auth/*`, `/test/ops/api/*`
+- prod auth/api proxy paths: `/ops/auth/*`, `/ops/api/*`
 - anonymous and pending users receive masked payloads
 - approved users receive full payloads

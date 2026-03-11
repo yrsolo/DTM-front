@@ -53,6 +53,12 @@ npm run dev
 - [public.yaml](n:\PROJECTS\DTM\DTM-front\apps\web\config\public.yaml)
 - [public.prod.yaml](n:\PROJECTS\DTM\DTM-front\apps\web\config\public.prod.yaml)
 
+Важно:
+- prod frontend работает в корне `https://dtm.solofarm.ru/`
+- public test frontend работает в `https://dtm.solofarm.ru/test/`
+- локальный frontend живёт на `/`, но auth/api использует test contour
+- runtime config резолвится относительно текущего app base, а не только из корня домена
+
 ## Где читать дальше
 
 - Общая карта документации: [docs/README.md](n:\PROJECTS\DTM\DTM-front\docs\README.md)

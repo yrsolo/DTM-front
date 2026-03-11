@@ -21,10 +21,12 @@ Backend-owned service routes:
 - `/ops/api/*`
 - `/ops/admin/*`
 - `/ops/telegram*`
-- `/ops/grafana/*`
 - `/test/ops/api/*`
 - `/test/ops/admin/*`
 - `/test/ops/telegram*`
+
+Shared infra route:
+- `/grafana/*`
 
 Frontend SPA routes остаются только:
 - `/`

@@ -124,7 +124,7 @@ Contour-specific OAuth credentials считаются canonical:
 - `YANDEX_CLIENT_SECRET_PROD`
 
 Важно:
-- fallback на общие `YANDEX_CLIENT_ID` / `YANDEX_CLIENT_SECRET` больше не используется
+- fallback на общие OAuth credentials больше не используется
 - в lockbox или environment secrets должны лежать именно contour-specific ключи
 - иначе `auth-test` или `auth-prod` не задеплоятся корректно
 

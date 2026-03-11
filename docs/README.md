@@ -6,7 +6,6 @@
 
 - `overview/` — обзор продукта и пользовательские сценарии.
 - `architecture/` — устройство frontend и поток данных.
-- `contracts/` — API, snapshot-модель и runtime-конфиг.
 - `contracts/` — API, snapshot-модель, runtime-конфиг и auth/access contracts.
 - `design/` — визуальная система, страницы, workbench и milestones.
 - `operations/` — deploy, browser storage и troubleshooting.
