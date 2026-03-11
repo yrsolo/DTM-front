@@ -95,7 +95,7 @@ paths:
         tag: __LATEST__
         service_account_id: $($yc.service_account_id)
 
-  /test/ops/api/{proxy+}:
+  /test/ops/{proxy+}:
     x-yc-apigateway-any-method:
       parameters:
         - name: proxy
@@ -109,7 +109,7 @@ paths:
         tag: __LATEST__
         service_account_id: $($yc.service_account_id)
 
-  /ops/api/{proxy+}:
+  /ops/{proxy+}:
     x-yc-apigateway-any-method:
       parameters:
         - name: proxy
@@ -123,95 +123,7 @@ paths:
         tag: __LATEST__
         service_account_id: $($yc.service_account_id)
 
-  /test/ops/admin:
-    x-yc-apigateway-any-method:
-      x-yc-apigateway-integration:
-        type: cloud_functions
-        function_id: $testBackendId
-        tag: __LATEST__
-        service_account_id: $($yc.service_account_id)
-
-  /test/ops/admin/{proxy+}:
-    x-yc-apigateway-any-method:
-      parameters:
-        - name: proxy
-          in: path
-          required: true
-          schema:
-            type: string
-      x-yc-apigateway-integration:
-        type: cloud_functions
-        function_id: $testBackendId
-        tag: __LATEST__
-        service_account_id: $($yc.service_account_id)
-
-  /ops/admin:
-    x-yc-apigateway-any-method:
-      x-yc-apigateway-integration:
-        type: cloud_functions
-        function_id: $prodBackendId
-        tag: __LATEST__
-        service_account_id: $($yc.service_account_id)
-
-  /ops/admin/{proxy+}:
-    x-yc-apigateway-any-method:
-      parameters:
-        - name: proxy
-          in: path
-          required: true
-          schema:
-            type: string
-      x-yc-apigateway-integration:
-        type: cloud_functions
-        function_id: $prodBackendId
-        tag: __LATEST__
-        service_account_id: $($yc.service_account_id)
-
-  /test/ops/telegram:
-    x-yc-apigateway-any-method:
-      x-yc-apigateway-integration:
-        type: cloud_functions
-        function_id: $testBackendId
-        tag: __LATEST__
-        service_account_id: $($yc.service_account_id)
-
-  /test/ops/telegram/{proxy+}:
-    x-yc-apigateway-any-method:
-      parameters:
-        - name: proxy
-          in: path
-          required: true
-          schema:
-            type: string
-      x-yc-apigateway-integration:
-        type: cloud_functions
-        function_id: $testBackendId
-        tag: __LATEST__
-        service_account_id: $($yc.service_account_id)
-
-  /ops/telegram:
-    x-yc-apigateway-any-method:
-      x-yc-apigateway-integration:
-        type: cloud_functions
-        function_id: $prodBackendId
-        tag: __LATEST__
-        service_account_id: $($yc.service_account_id)
-
-  /ops/telegram/{proxy+}:
-    x-yc-apigateway-any-method:
-      parameters:
-        - name: proxy
-          in: path
-          required: true
-          schema:
-            type: string
-      x-yc-apigateway-integration:
-        type: cloud_functions
-        function_id: $prodBackendId
-        tag: __LATEST__
-        service_account_id: $($yc.service_account_id)
-
-  /ops/grafana:
+  /grafana:
     x-yc-apigateway-any-method:
       x-yc-apigateway-integration:
         type: http
@@ -226,7 +138,7 @@ paths:
           connect: 1
           read: 30
 
-  /ops/grafana/:
+  /grafana/:
     x-yc-apigateway-any-method:
       x-yc-apigateway-integration:
         type: http
@@ -241,7 +153,7 @@ paths:
           connect: 1
           read: 30
 
-  /ops/grafana/{path+}:
+  /grafana/{path+}:
     x-yc-apigateway-any-method:
       parameters:
         - name: path
@@ -262,18 +174,6 @@ paths:
           connect: 1
           read: 30
 
-  /admin:
-    x-yc-apigateway-any-method:
-      x-yc-apigateway-integration:
-        type: http
-        url: $prodFrontend/index.html
-
-  /admin/:
-    x-yc-apigateway-any-method:
-      x-yc-apigateway-integration:
-        type: http
-        url: $prodFrontend/index.html
-
   /test:
     x-yc-apigateway-any-method:
       x-yc-apigateway-integration:
@@ -281,18 +181,6 @@ paths:
         url: $testFrontend/index.html
 
   /test/:
-    x-yc-apigateway-any-method:
-      x-yc-apigateway-integration:
-        type: http
-        url: $testFrontend/index.html
-
-  /test/admin:
-    x-yc-apigateway-any-method:
-      x-yc-apigateway-integration:
-        type: http
-        url: $testFrontend/index.html
-
-  /test/admin/:
     x-yc-apigateway-any-method:
       x-yc-apigateway-integration:
         type: http

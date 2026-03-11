@@ -16,3 +16,6 @@ Thumbs.db
 # IDE
 .idea
 .vscode
+
+# Local infra snapshots
+config/API_Gateway.yaml
