@@ -476,7 +476,7 @@ button:hover {
 }
 
 .workbench {
-  width: min(var(--wb-width-max, 1880px), calc(100vw - var(--wb-viewport-margin, 24px)));
+  width: min(var(--wb-width-max, 2160px), calc(100vw - var(--wb-viewport-margin, 12px)));
 }
 
 .favoritesPanel {
@@ -534,7 +534,7 @@ button:hover {
 
 .workbenchMain {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) var(--wb-side-w, 360px);
+  grid-template-columns: minmax(0, 1fr) var(--wb-side-w, 460px);
   gap: var(--wb-main-gap, 8px);
   align-items: start;
 }
@@ -683,6 +683,41 @@ button:hover {
   margin-top: 8px;
   display: grid;
   gap: 4px;
+}
+
+.wbPresetSelectWrapTooltip {
+  position: relative;
+}
+
+.wbPresetSelectWrapTooltip[data-tooltip]::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  left: 0;
+  top: calc(100% + 8px);
+  min-width: 220px;
+  max-width: 320px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(168, 188, 245, 0.34);
+  background: linear-gradient(180deg, rgba(12, 18, 35, 0.98), rgba(28, 20, 49, 0.96));
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.42);
+  color: #eef4ff;
+  font-size: 13px;
+  line-height: 1.4;
+  white-space: pre-line;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(4px);
+  transition: opacity 120ms ease, transform 120ms ease, visibility 120ms ease;
+  z-index: 6;
+}
+
+.wbPresetSelectWrapTooltip:hover::after,
+.wbPresetSelectWrapTooltip:focus-within::after {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
 }
 
 .wbPresetHint,

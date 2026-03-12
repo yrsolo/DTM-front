@@ -417,6 +417,11 @@ export function ControlsWorkbench() {
             : "Название layout-пресета";
       const nextName = window.prompt(promptLabel, preset?.name || "");
       if (!nextName?.trim()) return;
+      const descriptionLabel =
+        locale === "en"
+          ? "Optional comment / description"
+          : "Необязательный комментарий / описание";
+      const nextDescription = window.prompt(descriptionLabel, preset?.description || "") ?? "";
 
       setPresetError(null);
       setPresetNotice(null);
@@ -431,8 +436,8 @@ export function ControlsWorkbench() {
           : `${getAuthRequestBase()}/presets`;
       const method = canEdit ? "PUT" : "POST";
       const body = canEdit
-        ? { kind, name: nextName.trim(), payload }
-        : { kind, name: nextName.trim(), payload };
+        ? { kind, name: nextName.trim(), description: nextDescription.trim(), payload }
+        : { kind, name: nextName.trim(), description: nextDescription.trim(), payload };
 
       try {
         const res = await fetch(endpoint, {
@@ -992,16 +997,7 @@ export function ControlsWorkbench() {
     <section className="wbPresetGroup">
       <div className="wbPresetHeader">
         <div>
-          <h4>{kind === "color" ? (locale === "en" ? "Color presets" : "Цветовые пресеты") : "UI / Layout"}</h4>
-          <div className="muted wbPresetMetaLine">
-            {kind === "color"
-              ? locale === "en"
-                ? "Stored separately from layout."
-                : "Хранятся отдельно от layout."
-              : locale === "en"
-                ? "Stored separately from colors."
-                : "Хранится отдельно от цветов."}
-          </div>
+          <h4>{kind === "color" ? (locale === "en" ? "Color" : "Цвет") : "UI / Layout"}</h4>
         </div>
         {!cloudCatalogAvailable[kind] ? (
           <div className="wbPresetHint">
@@ -1012,7 +1008,10 @@ export function ControlsWorkbench() {
         ) : null}
       </div>
 
-      <label className="wbPresetSelectWrap">
+      <label
+        className="wbPresetSelectWrap wbPresetSelectWrapTooltip"
+        data-tooltip={buildPresetTooltipText(locale, activePreset)}
+      >
         <span className="wbPresetSelectLabel">{locale === "en" ? "Preset" : "Пресет"}</span>
         <select
           value={activePreset?.id ?? ""}
@@ -1029,34 +1028,6 @@ export function ControlsWorkbench() {
           ))}
         </select>
       </label>
-
-      {activePreset ? (
-        <div className="wbPresetSummary">
-          <div className="muted wbPresetMetaLine">
-            {activePreset.sourceKind === "builtin"
-              ? locale === "en"
-                ? "Builtin"
-                : "Builtin"
-              : locale === "en"
-                ? "Cloud"
-                : "Cloud"}
-            {activePreset.isDefault ? locale === "en" ? " • default" : " • default" : ""}
-            {activePreset.authorDisplayName ? ` • ${activePreset.authorDisplayName}` : ""}
-          </div>
-          {activePreset.description ? <div className="muted wbPresetMetaLine">{activePreset.description}</div> : null}
-          {activePreset.availability !== "ready" ? (
-            <div className="muted wbPresetMetaLine">
-              {activePreset.availability === "broken"
-                ? locale === "en"
-                  ? "Asset is broken."
-                  : "Asset повреждён."
-                : locale === "en"
-                  ? "Asset is temporarily unavailable."
-                  : "Asset временно недоступен."}
-            </div>
-          ) : null}
-        </div>
-      ) : null}
 
       <div className="wbPresetActions">
         <button
@@ -1276,6 +1247,44 @@ export function ControlsWorkbench() {
       ) : null}
     </>
   );
+}
+
+function buildPresetTooltipText(locale: "ru" | "en", preset: PresetSummary | null): string {
+  if (!preset) return locale === "en" ? "No preset selected" : "Пресет не выбран";
+
+  const lines: string[] = [
+    preset.name,
+    preset.sourceKind === "builtin"
+      ? locale === "en"
+        ? "Builtin preset"
+        : "Встроенный пресет"
+      : locale === "en"
+        ? "Cloud preset"
+        : "Облачный пресет",
+  ];
+
+  if (preset.isDefault) {
+    lines.push(locale === "en" ? "Default preset" : "Пресет по умолчанию");
+  }
+  if (preset.authorDisplayName) {
+    lines.push(locale === "en" ? `Author: ${preset.authorDisplayName}` : `Автор: ${preset.authorDisplayName}`);
+  }
+  if (preset.description) {
+    lines.push(locale === "en" ? `Comment: ${preset.description}` : `Комментарий: ${preset.description}`);
+  }
+  if (preset.availability !== "ready") {
+    lines.push(
+      preset.availability === "broken"
+        ? locale === "en"
+          ? "Asset is broken"
+          : "Asset повреждён"
+        : locale === "en"
+          ? "Asset is temporarily unavailable"
+          : "Asset временно недоступен"
+    );
+  }
+
+  return lines.join("\n");
 }
 
 function PresetActionIcon({ name }: { name: "apply" | "save" | "load" | "reset" | "export" | "import" | "cloud" }) {
