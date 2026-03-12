@@ -298,7 +298,7 @@ $snapshotPath = Join-Path $repoRoot "data/snapshot.example.json"
 $resolvedReleaseId = Get-ReleaseId -ProvidedReleaseId $ReleaseId -DeployTarget $deployTarget
 $releasePrefix = "$releaseRootUri/$resolvedReleaseId"
 $latestReleasePath = "$releaseRootUri/latest.json"
-$releaseMetadataPath = Join-Path $repoRoot ".tmp.release.json"
+$releaseMetadataPath = [System.IO.Path]::GetTempFileName()
 $releaseMetadata = @{
   release_id = $resolvedReleaseId
   deploy_target = $deployTarget
@@ -309,70 +309,78 @@ $releaseMetadata = @{
 }
 $releaseMetadata | ConvertTo-Json -Depth 4 | Set-Content -Path $releaseMetadataPath -Encoding UTF8
 
-Write-Host "Syncing dist assets (excluding index.html) ..."
-$syncExcludeArgs = @("--exclude", "index.html", "--exclude", "config/*", "--exclude", "data/*", "--exclude", "releases/*")
-if ($DryRun) {
-  Write-Host "[DRY-RUN] aws s3 sync `"$distDir`" `"$siteBucketUri`" --delete $($syncExcludeArgs -join ' ') --endpoint-url `"$endpoint`" --cache-control `"public, max-age=31536000, immutable`""
-} else {
-  $syncArgs = @("s3", "sync", $distDir, $siteBucketUri, "--delete") + $syncExcludeArgs + @(
-    "--endpoint-url",
-    $endpoint,
-    "--cache-control",
-    "public, max-age=31536000, immutable"
-  )
-  Invoke-Checked {
-    & aws @syncArgs
-  }
-}
+try {
 
-Write-Host "Syncing public config directory to $sitePrefixLabel config/ ..."
-if ($DryRun) {
-  Write-Host "[DRY-RUN] aws s3 sync `"$publicConfigDir`" `"s3://$bucket/$configPrefix`" --delete --endpoint-url `"$endpoint`" --cache-control `"no-cache`""
-} else {
-  $configSyncArgs = @(
-    "s3", "sync", $publicConfigDir, "s3://$bucket/$configPrefix",
-    "--delete",
-    "--endpoint-url", $endpoint,
-    "--cache-control", "no-cache"
-  )
-  Invoke-Checked {
-    & aws @configSyncArgs
-  }
-}
-
-Write-Host "Uploading runtime config aliases to $sitePrefixLabel config/public.yaml ..."
-if ($DryRun) {
-  Write-Host "[DRY-RUN] aws s3 cp `"$runtimeConfigPath`" `"s3://$bucket/$configPrefix/public.yaml`" --endpoint-url `"$endpoint`" --content-type text/yaml --cache-control no-cache"
-  Write-Host "[DRY-RUN] aws s3 cp `"$runtimeConfigPath`" `"s3://$bucket/$configPrefix/public.yam`" --endpoint-url `"$endpoint`" --content-type text/yaml --cache-control no-cache"
-} else {
-  Invoke-Checked { aws s3 cp $runtimeConfigPath "s3://$bucket/$configPrefix/public.yaml" --endpoint-url $endpoint --content-type "text/yaml" --cache-control "no-cache" }
-  Invoke-Checked { aws s3 cp $runtimeConfigPath "s3://$bucket/$configPrefix/public.yam" --endpoint-url $endpoint --content-type "text/yaml" --cache-control "no-cache" }
-}
-
-if (Test-Path $snapshotPath) {
-  Write-Host "Uploading fallback snapshot to $sitePrefixLabel data/snapshot.example.json ..."
+  Write-Host "Syncing dist assets (excluding index.html) ..."
+  $syncExcludeArgs = @("--exclude", "index.html", "--exclude", "config/*", "--exclude", "data/*", "--exclude", "releases/*")
   if ($DryRun) {
-    Write-Host "[DRY-RUN] aws s3 cp `"$snapshotPath`" `"s3://$bucket/$dataPrefix/snapshot.example.json`" --endpoint-url `"$endpoint`" --content-type application/json --cache-control no-cache"
+    Write-Host "[DRY-RUN] aws s3 sync `"$distDir`" `"$siteBucketUri`" --delete $($syncExcludeArgs -join ' ') --endpoint-url `"$endpoint`" --cache-control `"public, max-age=31536000, immutable`""
   } else {
-    Invoke-Checked { aws s3 cp $snapshotPath "s3://$bucket/$dataPrefix/snapshot.example.json" --endpoint-url $endpoint --content-type "application/json" --cache-control "no-cache" }
+    $syncArgs = @("s3", "sync", $distDir, $siteBucketUri, "--delete") + $syncExcludeArgs + @(
+      "--endpoint-url",
+      $endpoint,
+      "--cache-control",
+      "public, max-age=31536000, immutable"
+    )
+    Invoke-Checked {
+      & aws @syncArgs
+    }
+  }
+
+  Write-Host "Syncing public config directory to $sitePrefixLabel config/ ..."
+  if ($DryRun) {
+    Write-Host "[DRY-RUN] aws s3 sync `"$publicConfigDir`" `"s3://$bucket/$configPrefix`" --delete --endpoint-url `"$endpoint`" --cache-control `"no-cache`""
+  } else {
+    $configSyncArgs = @(
+      "s3", "sync", $publicConfigDir, "s3://$bucket/$configPrefix",
+      "--delete",
+      "--endpoint-url", $endpoint,
+      "--cache-control", "no-cache"
+    )
+    Invoke-Checked {
+      & aws @configSyncArgs
+    }
+  }
+
+  Write-Host "Uploading runtime config aliases to $sitePrefixLabel config/public.yaml ..."
+  if ($DryRun) {
+    Write-Host "[DRY-RUN] aws s3 cp `"$runtimeConfigPath`" `"s3://$bucket/$configPrefix/public.yaml`" --endpoint-url `"$endpoint`" --content-type text/yaml --cache-control no-cache"
+    Write-Host "[DRY-RUN] aws s3 cp `"$runtimeConfigPath`" `"s3://$bucket/$configPrefix/public.yam`" --endpoint-url `"$endpoint`" --content-type text/yaml --cache-control no-cache"
+  } else {
+    Invoke-Checked { aws s3 cp $runtimeConfigPath "s3://$bucket/$configPrefix/public.yaml" --endpoint-url $endpoint --content-type "text/yaml" --cache-control "no-cache" }
+    Invoke-Checked { aws s3 cp $runtimeConfigPath "s3://$bucket/$configPrefix/public.yam" --endpoint-url $endpoint --content-type "text/yaml" --cache-control "no-cache" }
+  }
+
+  if (Test-Path $snapshotPath) {
+    Write-Host "Uploading fallback snapshot to $sitePrefixLabel data/snapshot.example.json ..."
+    if ($DryRun) {
+      Write-Host "[DRY-RUN] aws s3 cp `"$snapshotPath`" `"s3://$bucket/$dataPrefix/snapshot.example.json`" --endpoint-url `"$endpoint`" --content-type application/json --cache-control no-cache"
+    } else {
+      Invoke-Checked { aws s3 cp $snapshotPath "s3://$bucket/$dataPrefix/snapshot.example.json" --endpoint-url $endpoint --content-type "application/json" --cache-control "no-cache" }
+    }
+  }
+
+  $indexTarget = "s3://$bucket/index.html"
+  Write-Host "Uploading index.html with no-cache to $sitePrefixLabel ..."
+  if ($DryRun) {
+    Write-Host "[DRY-RUN] aws s3 cp `"$distDir/index.html`" `"$indexTarget`" --endpoint-url `"$endpoint`" --content-type `"text/html; charset=utf-8`" --cache-control no-cache"
+  } else {
+    Invoke-Checked { aws s3 cp (Join-Path $distDir "index.html") $indexTarget --endpoint-url $endpoint --content-type "text/html; charset=utf-8" --cache-control "no-cache" }
+  }
+
+  Write-Host "Uploading release metadata ..."
+  if ($DryRun) {
+    Write-Host "[DRY-RUN] aws s3 cp `"$releaseMetadataPath`" `"$releasePrefix/release.json`" --endpoint-url `"$endpoint`" --content-type application/json --cache-control no-cache"
+    Write-Host "[DRY-RUN] aws s3 cp `"$releaseMetadataPath`" `"$latestReleasePath`" --endpoint-url `"$endpoint`" --content-type application/json --cache-control no-cache"
+  } else {
+    Invoke-Checked { aws s3 cp $releaseMetadataPath "$releasePrefix/release.json" --endpoint-url $endpoint --content-type "application/json" --cache-control "no-cache" }
+    Invoke-Checked { aws s3 cp $releaseMetadataPath $latestReleasePath --endpoint-url $endpoint --content-type "application/json" --cache-control "no-cache" }
   }
 }
-
-$indexTarget = "s3://$bucket/index.html"
-Write-Host "Uploading index.html with no-cache to $sitePrefixLabel ..."
-if ($DryRun) {
-  Write-Host "[DRY-RUN] aws s3 cp `"$distDir/index.html`" `"$indexTarget`" --endpoint-url `"$endpoint`" --content-type `"text/html; charset=utf-8`" --cache-control no-cache"
-} else {
-  Invoke-Checked { aws s3 cp (Join-Path $distDir "index.html") $indexTarget --endpoint-url $endpoint --content-type "text/html; charset=utf-8" --cache-control "no-cache" }
-}
-
-Write-Host "Uploading release metadata ..."
-if ($DryRun) {
-  Write-Host "[DRY-RUN] aws s3 cp `"$releaseMetadataPath`" `"$releasePrefix/release.json`" --endpoint-url `"$endpoint`" --content-type application/json --cache-control no-cache"
-  Write-Host "[DRY-RUN] aws s3 cp `"$releaseMetadataPath`" `"$latestReleasePath`" --endpoint-url `"$endpoint`" --content-type application/json --cache-control no-cache"
-} else {
-  Invoke-Checked { aws s3 cp $releaseMetadataPath "$releasePrefix/release.json" --endpoint-url $endpoint --content-type "application/json" --cache-control "no-cache" }
-  Invoke-Checked { aws s3 cp $releaseMetadataPath $latestReleasePath --endpoint-url $endpoint --content-type "application/json" --cache-control "no-cache" }
+finally {
+  if (Test-Path $releaseMetadataPath) {
+    Remove-Item -Force $releaseMetadataPath -ErrorAction SilentlyContinue
+  }
 }
 
 Write-Host ""
