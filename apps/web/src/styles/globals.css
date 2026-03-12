@@ -25,6 +25,7 @@
   --badge-fs: 11px;
   --card-p: 14px;
   --drawer-width: 520px;
+  --drawer-safe-top: 104px;
   --drawer-padding: 16px;
   --drawer-title-size: 18px;
   --drawer-meta-gap: 8px;
@@ -1850,8 +1851,11 @@ button:hover {
   background: rgba(4, 7, 16, 0.72);
   display: flex;
   justify-content: flex-end;
+  align-items: flex-start;
+  padding-top: var(--drawer-safe-top, 104px);
   z-index: 50;
   opacity: 0;
+  box-sizing: border-box;
   transition: opacity var(--anim-drawer-duration-ms, 220ms) var(--anim-drawer-ease, ease-in-out);
 }
 
@@ -1861,9 +1865,11 @@ button:hover {
 
 .drawer {
   width: min(var(--drawer-width, 520px), 92vw);
-  height: 100%;
+  height: calc(100% - var(--drawer-safe-top, 104px));
   background: linear-gradient(170deg, #12192d 0%, #100f23 100%);
   border-left: 1px solid rgba(114, 136, 197, 0.34);
+  border-top: 1px solid rgba(114, 136, 197, 0.34);
+  border-top-left-radius: 20px;
   padding: var(--drawer-padding, 16px);
   overflow: auto;
   overscroll-behavior: contain;
@@ -2370,6 +2376,10 @@ button:hover {
 }
 
 @media (max-width: 800px) {
+  :root {
+    --drawer-safe-top: 88px;
+  }
+
   .kpiGrid {
     grid-template-columns: 1fr;
   }
