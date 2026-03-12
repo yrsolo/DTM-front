@@ -62,11 +62,13 @@ export type LayoutContextValue = {
   saveKeyColors: () => void;
   loadKeyColors: () => void;
   resetKeyColors: () => void;
+  workbenchPanelEnabled: boolean;
+  setWorkbenchPanelEnabled: React.Dispatch<React.SetStateAction<boolean>>;
   workbenchOpen: boolean;
   setWorkbenchOpen: React.Dispatch<React.SetStateAction<boolean>>;
   favoritesOpen: boolean;
   setFavoritesOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  canAccessWorkbench: boolean;
+  canUseWorkbench: boolean;
   authSession: ReturnType<typeof useAuthSession>;
 };
 
@@ -164,6 +166,7 @@ export function Layout(props: { children: React.ReactNode }) {
   const authSession = useAuthSession();
   const [design, setDesign] = React.useState<DesignControls>(() => readStoredLayoutDraft());
   const [keyColors, setKeyColors] = React.useState<KeyColors>(() => readStoredColorDraft());
+  const [workbenchPanelEnabled, setWorkbenchPanelEnabled] = React.useState(false);
   const [workbenchOpen, setWorkbenchOpen] = React.useState(false);
   const [favoritesOpen, setFavoritesOpen] = React.useState(false);
   const [introState, setIntroState] = React.useState<"idle" | "enter" | "playing" | "exit">("idle");
@@ -370,17 +373,18 @@ export function Layout(props: { children: React.ReactNode }) {
     return () => window.clearTimeout(endTimer);
   }, [introState]);
 
-  const canAccessWorkbench =
+  const canUseWorkbench =
     authSession.state.authenticated &&
     authSession.state.available &&
     authSession.state.accessMode === "full" &&
     authSession.state.user?.status === "approved";
 
   React.useEffect(() => {
-    if (canAccessWorkbench) return;
+    if (canUseWorkbench) return;
+    setWorkbenchPanelEnabled(false);
     setWorkbenchOpen(false);
     setFavoritesOpen(false);
-  }, [canAccessWorkbench]);
+  }, [canUseWorkbench]);
 
   React.useEffect(() => {
     if (introState === "idle") return;
@@ -583,11 +587,13 @@ export function Layout(props: { children: React.ReactNode }) {
         saveKeyColors,
         loadKeyColors,
         resetKeyColors,
+        workbenchPanelEnabled,
+        setWorkbenchPanelEnabled,
         workbenchOpen,
         setWorkbenchOpen,
         favoritesOpen,
         setFavoritesOpen,
-        canAccessWorkbench,
+        canUseWorkbench,
         authSession,
       }}
     >

@@ -290,10 +290,11 @@ export function TimelinePage() {
     locale,
     setLocale,
     authSession,
+    workbenchPanelEnabled,
+    setWorkbenchPanelEnabled,
     workbenchOpen,
-    setWorkbenchOpen,
     setFavoritesOpen,
-    canAccessWorkbench,
+    canUseWorkbench,
   } = ctx;
   const {
     snapshot,
@@ -850,33 +851,33 @@ export function TimelinePage() {
                   </button>
                 </div>
 
-                {canAccessWorkbench ? (
+                {canUseWorkbench ? (
                   <div className="authPanelSection">
                     <div className="authPanelLabel">{locale === "ru" ? "Крутилки" : "Workbench"}</div>
                     <div className="authPanelHint">
                       {locale === "ru"
-                        ? "Крутилки и избранное скрыты по умолчанию и доступны только одобренным пользователям."
-                        : "Workbench and favorites stay hidden by default and are available only to approved users."}
+                        ? "Показывает нижнюю кнопку открытия панели крутилок."
+                        : "Shows the bottom button that opens the workbench panel."}
                     </div>
                     <button
                       type="button"
                       className="btn btnGhost authMenuAction"
                       onClick={() => {
-                        const next = !workbenchOpen;
-                        setWorkbenchOpen(next);
+                        const next = !workbenchPanelEnabled;
+                        setWorkbenchPanelEnabled(next);
                         if (!next) {
                           setFavoritesOpen(false);
                         }
                         setIsAuthPanelOpen(false);
                       }}
                     >
-                      {workbenchOpen
+                      {workbenchPanelEnabled
                         ? locale === "ru"
-                          ? "Скрыть крутилки"
-                          : "Hide workbench"
+                          ? "Выключить крутилки"
+                          : "Disable workbench"
                         : locale === "ru"
-                          ? "Показать крутилки"
-                          : "Show workbench"}
+                          ? "Включить крутилки"
+                          : "Enable workbench"}
                     </button>
                   </div>
                 ) : null}

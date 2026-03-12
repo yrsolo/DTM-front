@@ -136,12 +136,12 @@ function fallbackBuiltinPresets(kind: PresetKind): PresetSummary[] {
   if (kind === "color") {
     return [
       {
-        id: "builtin:dtm-default-colors",
+        id: "builtin:deploy-colors",
         kind,
-        name: "DTM Default Colors",
-        description: "Fallback color preset bundled with the frontend.",
+        name: "Deploy Colors",
+        description: "Color preset bundled from the deployed design-controls baseline.",
         authorDisplayName: "DTM",
-        assetUrl: resolvePublicAssetUrl("config/UI/colors/default.json"),
+        assetUrl: resolvePublicAssetUrl("config/UI/colors/deploy.json"),
         sourceKind: "builtin",
         revision: 1,
         updatedAt: null,

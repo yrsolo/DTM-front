@@ -121,11 +121,13 @@ export function ControlsWorkbench() {
     loadDeployDesign,
     resetDesign,
     resetKeyColors,
+    workbenchPanelEnabled,
+    setWorkbenchPanelEnabled,
     workbenchOpen,
     setWorkbenchOpen,
     favoritesOpen,
     setFavoritesOpen,
-    canAccessWorkbench,
+    canUseWorkbench,
     ui,
     filters,
     setFilters,
@@ -989,14 +991,14 @@ export function ControlsWorkbench() {
       <div className="wbPresetHeader">
         <div>
           <h4>{kind === "color" ? (locale === "en" ? "Color presets" : "Цветовые пресеты") : "UI / Layout"}</h4>
-          <div className="muted">
+          <div className="muted wbPresetMetaLine">
             {kind === "color"
               ? locale === "en"
-                ? "Colors are stored and applied independently."
-                : "Цвета хранятся и применяются отдельно."
+                ? "Stored separately from layout."
+                : "Хранятся отдельно от layout."
               : locale === "en"
-                ? "Layout is stored and applied independently."
-                : "Layout хранится и применяется отдельно."}
+                ? "Stored separately from colors."
+                : "Хранится отдельно от цветов."}
           </div>
         </div>
         {!cloudCatalogAvailable[kind] ? (
@@ -1008,35 +1010,56 @@ export function ControlsWorkbench() {
         ) : null}
       </div>
 
-      <div className="wbPresetList">
-        {presets.map((preset) => (
-          <button
-            key={preset.id}
-            type="button"
-            className={`wbPresetCard ${activePreset?.id === preset.id ? "active" : ""}`}
-            onClick={() => void applyPreset(kind, preset)}
-            disabled={preset.availability !== "ready"}
-          >
-            <strong>{preset.name}</strong>
-            <span className="muted">
-              {preset.sourceKind === "builtin"
+      <label className="wbPresetSelectWrap">
+        <span className="wbPresetSelectLabel">{locale === "en" ? "Preset" : "Пресет"}</span>
+        <select
+          value={activePreset?.id ?? ""}
+          onChange={(event) => {
+            const next = presets.find((preset) => preset.id === event.target.value) ?? null;
+            if (kind === "color") setActiveColorPresetId(next?.id ?? null);
+            else setActiveLayoutPresetId(next?.id ?? null);
+          }}
+        >
+          {presets.map((preset) => (
+            <option key={preset.id} value={preset.id}>
+              {preset.name}
+            </option>
+          ))}
+        </select>
+      </label>
+
+      {activePreset ? (
+        <div className="wbPresetSummary">
+          <div className="muted wbPresetMetaLine">
+            {activePreset.sourceKind === "builtin"
+              ? locale === "en"
+                ? "Builtin"
+                : "Builtin"
+              : locale === "en"
+                ? "Cloud"
+                : "Cloud"}
+            {activePreset.isDefault ? locale === "en" ? " • default" : " • default" : ""}
+            {activePreset.authorDisplayName ? ` • ${activePreset.authorDisplayName}` : ""}
+          </div>
+          {activePreset.description ? <div className="muted wbPresetMetaLine">{activePreset.description}</div> : null}
+          {activePreset.availability !== "ready" ? (
+            <div className="muted wbPresetMetaLine">
+              {activePreset.availability === "broken"
                 ? locale === "en"
-                  ? "Builtin"
-                  : "Builtin"
+                  ? "Asset is broken."
+                  : "Asset повреждён."
                 : locale === "en"
-                  ? "Cloud"
-                  : "Cloud"}
-              {preset.isDefault ? locale === "en" ? " • default" : " • default" : ""}
-            </span>
-            {preset.description ? <span className="muted">{preset.description}</span> : null}
-            <span className="muted">
-              {preset.authorDisplayName || (locale === "en" ? "Unknown author" : "Автор не указан")}
-            </span>
-          </button>
-        ))}
-      </div>
+                  ? "Asset is temporarily unavailable."
+                  : "Asset временно недоступен."}
+            </div>
+          ) : null}
+        </div>
+      ) : null}
 
       <div className="wbPresetActions">
+        <button type="button" onClick={() => void applyPreset(kind, activePreset)} disabled={!activePreset}>
+          {locale === "en" ? "Apply" : "Применить"}
+        </button>
         <button type="button" onClick={() => saveLocalDraft(kind)}>
           {locale === "en" ? "Save local" : "Сохранить локально"}
         </button>
@@ -1073,8 +1096,11 @@ export function ControlsWorkbench() {
 
   return (
     <>
-      {canAccessWorkbench ? (
+      {canUseWorkbench && workbenchPanelEnabled ? (
       <div className={`workbench ${workbenchOpen ? "open" : ""}`}>
+        <button className="workbenchToggle" onClick={() => setWorkbenchOpen((value) => !value)}>
+          {workbenchOpen ? ui.workbench.toggleHide : ui.workbench.toggleShow}
+        </button>
         {workbenchOpen ? (
           <div className="workbenchBody">
             <div className="workbenchMain">
@@ -1125,8 +1151,12 @@ export function ControlsWorkbench() {
                         ? "Show favorites"
                         : "Показать избранное"}
                   </button>
-                  <button onClick={() => setWorkbenchOpen(false)}>
-                    {locale === "en" ? "Close workbench" : "Закрыть крутилки"}
+                  <button onClick={() => {
+                    setWorkbenchOpen(false);
+                    setFavoritesOpen(false);
+                    setWorkbenchPanelEnabled(false);
+                  }}>
+                    {locale === "en" ? "Disable workbench" : "Выключить крутилки"}
                   </button>
                 </div>
 
@@ -1174,7 +1204,7 @@ export function ControlsWorkbench() {
       </div>
       ) : null}
 
-      {canAccessWorkbench ? (
+      {canUseWorkbench && workbenchPanelEnabled ? (
       <aside className={`favoritesPanel favoritesPanelDetached ${favoritesOpen && workbenchOpen ? "open" : ""}`}>
         {favoritesOpen && workbenchOpen ? (
           <div className="favoritesPanelBody">
