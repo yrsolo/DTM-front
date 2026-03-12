@@ -139,6 +139,7 @@ Contour-specific OAuth credentials считаются canonical:
 - `COOKIE_SAMESITE`
 - `COOKIE_SECURE`
 - `SESSION_TTL_SECONDS`
+- `BROWSER_AUTH_PROXY_SECRET`
 - `MASKING_SALT_TEST`
 - `MASKING_SALT_PROD`
 - `AWS_ACCESS_KEY_ID`
@@ -166,3 +167,4 @@ Function version получает:
 - `PRESET_STORAGE_REGION=ru-central1`
 - `AWS_ACCESS_KEY_ID`
 - `AWS_SECRET_ACCESS_KEY`
+- `BROWSER_AUTH_PROXY_SECRET`

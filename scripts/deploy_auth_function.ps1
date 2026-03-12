@@ -81,6 +81,7 @@ $summary = [ordered]@{
   entrypoint = $yc.function_entrypoint
   oauthClientIdEnv = $oauthClientIdEnvName
   oauthClientSecretEnv = $oauthClientSecretEnvName
+  browserAuthProxySecret = "lockbox:BROWSER_AUTH_PROXY_SECRET"
   presetBucket = "dtm-presets"
   presetPublicBaseUrl = "http://dtm-presets.solofarm.ru"
 }
@@ -120,7 +121,8 @@ $secretArgs = @(
   "--secret", "id=$($yc.lockbox_id),key=COOKIE_SAMESITE,environment-variable=COOKIE_SAMESITE",
   "--secret", "id=$($yc.lockbox_id),key=COOKIE_SECURE,environment-variable=COOKIE_SECURE",
   "--secret", "id=$($yc.lockbox_id),key=SESSION_TTL_SECONDS,environment-variable=SESSION_TTL_SECONDS",
-  "--secret", "id=$($yc.lockbox_id),key=$maskingSecretKey,environment-variable=MASKING_SALT"
+  "--secret", "id=$($yc.lockbox_id),key=$maskingSecretKey,environment-variable=MASKING_SALT",
+  "--secret", "id=$($yc.lockbox_id),key=BROWSER_AUTH_PROXY_SECRET,environment-variable=BROWSER_AUTH_PROXY_SECRET"
 )
 
 $oauthArgs = @()

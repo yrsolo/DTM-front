@@ -47,23 +47,25 @@ Frontend всегда ходит через browser-facing auth proxy:
 Что делает frontend:
 - обычный full-flow запрос отправляется с `credentials: "include"`, то есть с auth cookie;
 - masked-flow запрос отправляется с `credentials: "omit"`, то есть без auth cookie;
-- toggle маскирования на фронтенде переключает именно это поведение;
-- браузер не должен сам выставлять доверенные `x-dtm-*` auth headers.
+- toggle маскирования на frontend переключает именно это поведение;
+- браузер не должен сам выставлять доверенные `x-dtm-*` auth headers;
+- браузер не должен знать и не должен отправлять `BROWSER_AUTH_PROXY_SECRET`.
 
 ## Auth Proxy -> Backend
 
 Auth proxy сам вычисляет access mode и проксирует запрос дальше в upstream backend.
 
 Backend должен ориентироваться на эти headers:
+- `X-DTM-Proxy-Secret: <server-side secret from auth proxy>`
 - `x-dtm-access-mode: full | masked`
 - `x-dtm-authenticated: 1 | 0`
 - `x-dtm-contour: test | prod`
-- `x-dtm-user-id: <uuid>` только для authenticated request
-- `x-dtm-user-role: admin | viewer` только для authenticated request
-- `x-dtm-user-status: approved | pending | blocked` только для authenticated request
+- `x-dtm-user-id: <uuid>` только для approved `full` request
+- `x-dtm-user-role: admin | viewer` только для approved `full` request
+- `x-dtm-user-status: approved` только для approved `full` request
 
 Важно:
-- эти headers trustworthy только если запрос пришёл через auth proxy / gateway chain;
+- эти headers trustworthy только если запрос пришёл через auth proxy / gateway chain и содержит валидный `X-DTM-Proxy-Secret`;
 - backend не должен принимать browser-supplied `x-dtm-*` как источник истины вне этого контура.
 
 ## Required Backend Behavior
@@ -71,6 +73,7 @@ Backend должен ориентироваться на эти headers:
 ### Full Access
 
 Если backend видит:
+- валидный `X-DTM-Proxy-Secret`
 - `x-dtm-authenticated: 1`
 - `x-dtm-access-mode: full`
 
@@ -84,6 +87,8 @@ Backend должен ориентироваться на эти headers:
 ### Masked Access
 
 Если backend видит:
+- отсутствующий или невалидный `X-DTM-Proxy-Secret`
+или
 - `x-dtm-authenticated: 0`
 или
 - `x-dtm-access-mode: masked`
@@ -119,9 +124,10 @@ Backend должен ориентироваться на эти headers:
 Практическая схема:
 1. принимать browser traffic только через `/ops/api/*` или `/test/ops/api/*`;
 2. доверять `x-dtm-access-mode` и `x-dtm-authenticated`, выставленным auth proxy;
-3. строить один и тот же `frontend v2` payload shape;
-4. менять только содержание чувствительных полей, а не структуру ответа;
-5. не смешивать авторизацию браузера и внутреннюю service-to-service auth в одном контракте.
+3. считать `full` trustworthy только при валидном `X-DTM-Proxy-Secret`;
+4. строить один и тот же `frontend v2` payload shape;
+5. менять только содержание чувствительных полей, а не структуру ответа;
+6. не смешивать авторизацию браузера и внутреннюю service-to-service auth в одном контракте.
 
 ## OAuth Callbacks
 

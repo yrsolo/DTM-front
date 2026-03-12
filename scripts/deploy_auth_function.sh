@@ -117,6 +117,7 @@ if [[ "$DRY_RUN" == "true" ]]; then
   echo "lockbox_id: $lockbox_id"
   echo "oauth_client_id_env: $oauth_client_id_env_name"
   echo "oauth_client_secret_env: $oauth_client_secret_env_name"
+  echo "browser_auth_proxy_secret: lockbox:BROWSER_AUTH_PROXY_SECRET"
   echo "preset_bucket: dtm-presets"
   echo "preset_public_base_url: http://dtm-presets.solofarm.ru"
   exit 0
@@ -151,6 +152,7 @@ secret_args=(
   --secret "id=$lockbox_id,key=COOKIE_SECURE,environment-variable=COOKIE_SECURE"
   --secret "id=$lockbox_id,key=SESSION_TTL_SECONDS,environment-variable=SESSION_TTL_SECONDS"
   --secret "id=$lockbox_id,key=$masking_secret_key,environment-variable=MASKING_SALT"
+  --secret "id=$lockbox_id,key=BROWSER_AUTH_PROXY_SECRET,environment-variable=BROWSER_AUTH_PROXY_SECRET"
 )
 
 oauth_args=()

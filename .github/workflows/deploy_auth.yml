@@ -204,6 +204,7 @@ jobs:
           echo "YDB endpoint: ${{ steps.vars.outputs.ydb_endpoint }}"
           echo "YDB database: ${{ steps.vars.outputs.ydb_database }}"
           echo "Masking secret key: ${{ steps.vars.outputs.masking_secret_key }}"
+          echo "Browser auth proxy secret: lockbox:BROWSER_AUTH_PROXY_SECRET"
           echo "Preset bucket: dtm-presets"
           echo "Preset public base URL: http://dtm-presets.solofarm.ru"
 
@@ -250,6 +251,7 @@ jobs:
             COOKIE_SECURE=${{ steps.vars.outputs.lockbox_id }}/latest/COOKIE_SECURE
             SESSION_TTL_SECONDS=${{ steps.vars.outputs.lockbox_id }}/latest/SESSION_TTL_SECONDS
             MASKING_SALT=${{ steps.vars.outputs.lockbox_id }}/latest/${{ steps.vars.outputs.masking_secret_key }}
+            BROWSER_AUTH_PROXY_SECRET=${{ steps.vars.outputs.lockbox_id }}/latest/BROWSER_AUTH_PROXY_SECRET
 
       - name: Deploy auth summary
         if: ${{ always() }}

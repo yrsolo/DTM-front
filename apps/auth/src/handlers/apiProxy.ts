@@ -18,6 +18,7 @@ const HOP_BY_HOP_HEADERS = new Set([
 ]);
 
 const INTERNAL_PROXY_HEADERS = new Set([
+  "x-dtm-proxy-secret",
   "x-dtm-force-mask",
   "x-dtm-access-mode",
   "x-dtm-authenticated",
@@ -41,6 +42,7 @@ export async function proxyApiRequest(req: NormalizedRequest) {
   const accessMode = getAccessMode(user);
   const forceMasking = req.headers["x-dtm-force-mask"] === "1";
   const effectiveAccessMode = forceMasking ? "masked" : accessMode;
+  const isApprovedFullRequest = Boolean(user && user.status === "approved" && effectiveAccessMode === "full");
 
   const upstreamUrl = new URL(
     `${cfg.apiUpstreamOrigin.replace(/\/+$/, "")}${req.routePath}${req.query.toString() ? `?${req.query.toString()}` : ""}`
@@ -52,10 +54,11 @@ export async function proxyApiRequest(req: NormalizedRequest) {
     if (INTERNAL_PROXY_HEADERS.has(key)) continue;
     headers.set(key, value);
   }
+  headers.set("x-dtm-proxy-secret", cfg.browserAuthProxySecret);
   headers.set("x-dtm-access-mode", effectiveAccessMode);
   headers.set("x-dtm-authenticated", user ? "1" : "0");
   headers.set("x-dtm-contour", cfg.contour);
-  if (user) {
+  if (isApprovedFullRequest && user) {
     headers.set("x-dtm-user-id", user.id);
     headers.set("x-dtm-user-role", user.role);
     headers.set("x-dtm-user-status", user.status);
