@@ -16,7 +16,6 @@ export type AuthRuntimeConfig = {
   cookieSecure: boolean;
   ydbEndpoint: string;
   ydbDatabase: string;
-  maskingSalt: string;
   browserAuthProxySecret: string;
   adminBootstrapUid: string | null;
   presetBucket: string;
@@ -93,7 +92,6 @@ export function getAuthRuntimeConfig(): AuthRuntimeConfig {
     cookieSecure: readBoolean("COOKIE_SECURE", true),
     ydbEndpoint: readRequired("YDB_ENDPOINT"),
     ydbDatabase: readRequired("YDB_DATABASE"),
-    maskingSalt: readRequired("MASKING_SALT"),
     browserAuthProxySecret: readRequired("BROWSER_AUTH_PROXY_SECRET"),
     adminBootstrapUid: readOptional("ADMIN_BOOTSTRAP_UID"),
     presetBucket: process.env.PRESET_BUCKET?.trim() || "dtm-presets",

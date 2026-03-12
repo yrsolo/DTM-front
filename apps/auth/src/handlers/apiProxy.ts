@@ -1,7 +1,6 @@
 import { getAuthRuntimeConfig } from "../config";
 import { clearSessionCookie } from "../session/cookieSession";
 import { getAccessMode, resolveSession } from "../middleware/auth";
-import { maskSnapshotPayload } from "../masking/maskSnapshot";
 import type { NormalizedRequest } from "../types";
 
 const HOP_BY_HOP_HEADERS = new Set([
@@ -103,15 +102,13 @@ export async function proxyApiRequest(req: NormalizedRequest) {
     return clearCookie ? { ...result, multiValueHeaders: { "set-cookie": [clearSessionCookie()] } } : result;
   }
 
-  const payload = await upstreamRes.json();
-  const finalPayload = effectiveAccessMode === "full" ? payload : maskSnapshotPayload(payload, cfg.maskingSalt);
   const result = {
     statusCode: upstreamRes.status,
     headers: {
       ...responseHeaders,
       ...(debugHeaders ?? {}),
     },
-    body: JSON.stringify(finalPayload),
+    body: JSON.stringify(await upstreamRes.json()),
   };
   return clearCookie ? { ...result, multiValueHeaders: { "set-cookie": [clearSessionCookie()] } } : result;
 }

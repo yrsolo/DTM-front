@@ -52,7 +52,6 @@ if (-not $yc) { throw "Missing yandex_cloud section in config/deploy.yaml" }
 
 $functionName = if ($Target -eq "test") { $yc.auth_function_name_test } else { $yc.auth_function_name_prod }
 $ydbDatabase = if ($Target -eq "test") { $yc.ydb_database_test } else { $yc.ydb_database_prod }
-$maskingSecretKey = if ($Target -eq "test") { "MASKING_SALT_TEST" } else { "MASKING_SALT_PROD" }
 $oauthClientIdEnvName = if ($Target -eq "test") { "YANDEX_CLIENT_ID_TEST" } else { "YANDEX_CLIENT_ID_PROD" }
 $oauthClientSecretEnvName = if ($Target -eq "test") { "YANDEX_CLIENT_SECRET_TEST" } else { "YANDEX_CLIENT_SECRET_PROD" }
 $oauthClientIdValue = [Environment]::GetEnvironmentVariable($oauthClientIdEnvName)
@@ -122,7 +121,6 @@ $secretArgs = @(
   "--secret", "id=$($yc.lockbox_id),key=COOKIE_SAMESITE,environment-variable=COOKIE_SAMESITE",
   "--secret", "id=$($yc.lockbox_id),key=COOKIE_SECURE,environment-variable=COOKIE_SECURE",
   "--secret", "id=$($yc.lockbox_id),key=SESSION_TTL_SECONDS,environment-variable=SESSION_TTL_SECONDS",
-  "--secret", "id=$($yc.lockbox_id),key=$maskingSecretKey,environment-variable=MASKING_SALT",
   "--secret", "id=$($yc.lockbox_id),key=BROWSER_AUTH_PROXY_SECRET,environment-variable=BROWSER_AUTH_PROXY_SECRET"
 )
 

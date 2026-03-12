@@ -82,7 +82,6 @@ if [[ "$TARGET" == "test" ]]; then
   auth_base_path="/test/ops/auth"
   api_proxy_base_path="/test/ops/bff"
   api_upstream_origin="${api_origin_test%/}/api"
-  masking_secret_key="MASKING_SALT_TEST"
   oauth_client_id_env_name="YANDEX_CLIENT_ID_TEST"
   oauth_client_secret_env_name="YANDEX_CLIENT_SECRET_TEST"
 else
@@ -91,7 +90,6 @@ else
   auth_base_path="/ops/auth"
   api_proxy_base_path="/ops/bff"
   api_upstream_origin="${api_origin_prod%/}/api"
-  masking_secret_key="MASKING_SALT_PROD"
   oauth_client_id_env_name="YANDEX_CLIENT_ID_PROD"
   oauth_client_secret_env_name="YANDEX_CLIENT_SECRET_PROD"
 fi
@@ -151,7 +149,6 @@ secret_args=(
   --secret "id=$lockbox_id,key=COOKIE_SAMESITE,environment-variable=COOKIE_SAMESITE"
   --secret "id=$lockbox_id,key=COOKIE_SECURE,environment-variable=COOKIE_SECURE"
   --secret "id=$lockbox_id,key=SESSION_TTL_SECONDS,environment-variable=SESSION_TTL_SECONDS"
-  --secret "id=$lockbox_id,key=$masking_secret_key,environment-variable=MASKING_SALT"
   --secret "id=$lockbox_id,key=BROWSER_AUTH_PROXY_SECRET,environment-variable=BROWSER_AUTH_PROXY_SECRET"
 )
 

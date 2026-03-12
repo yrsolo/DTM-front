@@ -108,8 +108,7 @@ Check lockbox / env entries:
 - `COOKIE_SAMESITE`
 - `COOKIE_SECURE`
 - `SESSION_TTL_SECONDS`
-- `MASKING_SALT_TEST`
-- `MASKING_SALT_PROD`
+- `BROWSER_AUTH_PROXY_SECRET`
 
 ## Function does not see YDB
 
