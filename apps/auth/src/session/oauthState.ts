@@ -5,6 +5,7 @@ import { getAuthRuntimeConfig } from "../config";
 type OAuthStatePayload = {
   state: string;
   returnTo: string;
+  popup: boolean;
   iat: number;
 };
 
@@ -34,11 +35,12 @@ function parseCookieHeader(cookieHeader: string | undefined): Record<string, str
   return cookies;
 }
 
-export function createOAuthStateCookie(returnTo: string): { cookie: string; state: string } {
+export function createOAuthStateCookie(returnTo: string, popup: boolean): { cookie: string; state: string } {
   const cfg = getAuthRuntimeConfig();
   const payload: OAuthStatePayload = {
     state: randomBytes(18).toString("base64url"),
     returnTo,
+    popup,
     iat: Math.floor(Date.now() / 1000),
   };
   const encoded = base64urlEncode(JSON.stringify(payload));
@@ -64,7 +66,7 @@ export function readOAuthState(cookieHeader: string | undefined): OAuthStatePayl
 
   try {
     const decoded = JSON.parse(base64urlDecode(payload)) as OAuthStatePayload;
-    if (!decoded?.state || !decoded?.returnTo || !decoded?.iat) return null;
+    if (!decoded?.state || !decoded?.returnTo || !decoded?.iat || typeof decoded.popup !== "boolean") return null;
     if (Math.floor(Date.now() / 1000) - decoded.iat > TTL_SECONDS) return null;
     return decoded;
   } catch {

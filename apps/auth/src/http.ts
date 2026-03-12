@@ -40,6 +40,17 @@ export function text(statusCode: number, body: string, headers?: Record<string, 
   };
 }
 
+export function html(statusCode: number, body: string, headers?: Record<string, string>): HttpResult {
+  return {
+    statusCode,
+    headers: {
+      "content-type": "text/html; charset=utf-8",
+      ...headers,
+    },
+    body,
+  };
+}
+
 export function redirect(location: string, headers?: Record<string, string>): HttpResult {
   return {
     statusCode: 302,

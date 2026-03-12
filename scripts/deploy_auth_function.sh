@@ -117,7 +117,7 @@ if [[ "$DRY_RUN" == "true" ]]; then
   echo "oauth_client_secret_env: $oauth_client_secret_env_name"
   echo "browser_auth_proxy_secret: lockbox:BROWSER_AUTH_PROXY_SECRET"
   echo "preset_bucket: dtm-presets"
-  echo "preset_public_base_url: http://dtm-presets.solofarm.ru"
+  echo "preset_public_base_url: https://dtm-presets.website.yandexcloud.net"
   exit 0
 fi
 
@@ -175,7 +175,7 @@ env_args=(
   --environment "YDB_DATABASE=$ydb_database"
   --environment "YDB_METADATA_CREDENTIALS=1"
   --environment "PRESET_BUCKET=dtm-presets"
-  --environment "PRESET_PUBLIC_BASE_URL=http://dtm-presets.solofarm.ru"
+  --environment "PRESET_PUBLIC_BASE_URL=https://dtm-presets.website.yandexcloud.net"
   --environment "PRESET_STORAGE_ENDPOINT=https://storage.yandexcloud.net"
   --environment "PRESET_STORAGE_REGION=ru-central1"
 )

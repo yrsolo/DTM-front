@@ -82,6 +82,60 @@ export function useAuthSession() {
 
   const adminHref = React.useMemo(() => getAdminRoute(), []);
 
+  const startLogin = React.useCallback(async () => {
+    if (typeof window === "undefined") return;
+    const popupUrl = `${loginHref}${loginHref.includes("?") ? "&" : "?"}popup=1`;
+    const popup = window.open(
+      popupUrl,
+      "dtm-auth",
+      "popup=yes,width=560,height=760,resizable=yes,scrollbars=yes"
+    );
+
+    if (!popup) {
+      window.location.assign(loginHref);
+      return;
+    }
+
+    popup.focus();
+
+    await new Promise<void>((resolve) => {
+      let settled = false;
+      const cleanup = () => {
+        if (settled) return;
+        settled = true;
+        window.removeEventListener("message", onMessage);
+        window.clearInterval(closeWatcher);
+        window.clearTimeout(timeoutId);
+      };
+
+      const finish = () => {
+        cleanup();
+        resolve();
+      };
+
+      const onMessage = (event: MessageEvent) => {
+        if (event.origin !== window.location.origin) return;
+        if (!event.data || typeof event.data !== "object") return;
+        if ((event.data as { type?: string }).type !== "dtm-auth-complete") return;
+        finish();
+      };
+
+      const closeWatcher = window.setInterval(() => {
+        if (popup.closed) {
+          finish();
+        }
+      }, 400);
+
+      const timeoutId = window.setTimeout(() => {
+        finish();
+      }, 5 * 60 * 1000);
+
+      window.addEventListener("message", onMessage);
+    });
+
+    await reload();
+  }, [loginHref, reload]);
+
   const logout = React.useCallback(async () => {
     await fetch(buildAuthUrl("/logout"), {
       method: "POST",
@@ -94,6 +148,7 @@ export function useAuthSession() {
     state,
     reload,
     loginHref,
+    startLogin,
     adminHref,
     logout,
   };

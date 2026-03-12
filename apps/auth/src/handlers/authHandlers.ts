@@ -1,18 +1,19 @@
+import { getAuthRuntimeConfig } from "../config";
 import { buildAuthorizeUrl, exchangeCode, fetchProfile } from "../yandex/oauth";
-import { appendSetCookie, badRequest, json, redirect } from "../http";
+import { appendSetCookie, badRequest, html, json, redirect } from "../http";
 import { isEmailAllowed } from "../db/allowlistRepo";
 import { ensureOpenAccessRequest } from "../db/accessRequestsRepo";
 import { writeAuditLog } from "../db/auditRepo";
 import {
   createUserFromProfile,
-  getUserByYandexUid,
-  syncUserProfile,
   getUserById,
+  getUserByYandexUid,
   setUserStatus,
+  syncUserProfile,
   upsertRole,
 } from "../db/usersRepo";
 import { buildMePayload, getAccessMode, isBootstrapAdmin, resolveSession } from "../middleware/auth";
-import { issueSessionCookie, clearSessionCookie } from "../session/cookieSession";
+import { clearSessionCookie, issueSessionCookie } from "../session/cookieSession";
 import { clearOAuthStateCookie, createOAuthStateCookie, readOAuthState } from "../session/oauthState";
 import type { NormalizedRequest } from "../types";
 
@@ -44,8 +45,41 @@ function normalizeReturnTo(raw: string | null | undefined): string {
 
 export async function login(req: NormalizedRequest) {
   const returnTo = normalizeReturnTo(req.query.get("return_to"));
-  const { cookie, state } = createOAuthStateCookie(returnTo);
+  const popup = req.query.get("popup") === "1";
+  const { cookie, state } = createOAuthStateCookie(returnTo, popup);
   return appendSetCookie(redirect(buildAuthorizeUrl(state)), cookie);
+}
+
+function buildPopupClosePage(returnTo: string): string {
+  const safeReturnTo = JSON.stringify(returnTo);
+  return `<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>DTM Auth</title>
+  <style>
+    body{margin:0;font-family:Manrope,Segoe UI,sans-serif;background:#0b1020;color:#eef4ff;display:grid;place-items:center;min-height:100vh}
+    .card{padding:20px 24px;border:1px solid rgba(140,162,224,.24);border-radius:16px;background:linear-gradient(180deg,rgba(12,18,35,.96),rgba(20,17,42,.94));box-shadow:0 18px 40px rgba(0,0,0,.35)}
+  </style>
+</head>
+<body>
+  <div class="card">Authorization complete. You can close this window.</div>
+  <script>
+    const returnTo = ${safeReturnTo};
+    const targetOrigin = (() => {
+      try { return new URL(returnTo, window.location.origin).origin; } catch { return window.location.origin; }
+    })();
+    try {
+      if (window.opener && !window.opener.closed) {
+        window.opener.postMessage({ type: "dtm-auth-complete", returnTo }, targetOrigin);
+        window.close();
+      }
+    } catch {}
+    window.location.replace(returnTo);
+  </script>
+</body>
+</html>`;
 }
 
 export async function callback(req: NormalizedRequest) {
@@ -110,6 +144,7 @@ export async function callback(req: NormalizedRequest) {
     }),
   });
 
+  const cfg = getAuthRuntimeConfig();
   const now = Math.floor(Date.now() / 1000);
   const sessionCookie = issueSessionCookie({
     userId: user.id,
@@ -118,11 +153,15 @@ export async function callback(req: NormalizedRequest) {
     status: user.status,
     sv: user.sessionVersion,
     iat: now,
-    exp: now + 60 * 60 * 12,
+    exp: now + cfg.sessionTtlSeconds,
   });
 
+  const response = oauthState.popup
+    ? html(200, buildPopupClosePage(oauthState.returnTo))
+    : redirect(oauthState.returnTo);
+
   return appendSetCookie(
-    appendSetCookie(redirect(oauthState.returnTo), sessionCookie),
+    appendSetCookie(response, sessionCookie),
     clearOAuthStateCookie()
   );
 }

@@ -9,7 +9,7 @@
 
 Preset assets живут отдельно от frontend buckets и отдельно от contour-specific auth DB:
 - bucket: `dtm-presets`
-- public domain alias: `http://dtm-presets.solofarm.ru`
+- public website origin: `https://dtm-presets.website.yandexcloud.net`
 - canonical fallback asset origin: `https://storage.yandexcloud.net/dtm-presets`
 
 Catalog общий для `test` и `prod`.
@@ -47,7 +47,7 @@ Cloud presets читаются через auth contour:
 
 Assets should stay publicly readable even if the custom preset domain is unavailable.
 Runtime reads use this order:
-- preferred alias: `http://dtm-presets.solofarm.ru/...`
+- preferred website origin: `https://dtm-presets.website.yandexcloud.net/...`
 - fallback public storage URL: `https://storage.yandexcloud.net/dtm-presets/...`
 
 ## Graceful fallback

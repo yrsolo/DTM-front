@@ -539,7 +539,7 @@ export function TimelinePage() {
       return;
     }
     if (!authSession.state.authenticated) {
-      window.location.assign(authSession.loginHref);
+      void authSession.startLogin();
       return;
     }
     void authSession.logout();

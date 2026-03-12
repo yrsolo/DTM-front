@@ -166,7 +166,7 @@ Function version получает:
 - `YDB_DATABASE`
 - `YDB_METADATA_CREDENTIALS=1`
 - `PRESET_BUCKET=dtm-presets`
-- `PRESET_PUBLIC_BASE_URL=http://dtm-presets.solofarm.ru`
+- `PRESET_PUBLIC_BASE_URL=https://dtm-presets.website.yandexcloud.net`
 - `PRESET_STORAGE_ENDPOINT=https://storage.yandexcloud.net`
 - `PRESET_STORAGE_REGION=ru-central1`
 - preset runtime reads/writes must continue to work even if `PRESET_PUBLIC_BASE_URL` alias is unavailable; public storage endpoint remains the canonical fallback

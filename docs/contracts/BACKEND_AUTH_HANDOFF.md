@@ -143,7 +143,7 @@ Preset catalog routes are exposed by the auth contour and are shared across `tes
 - `PUT /ops/auth/presets/:id`
 - `DELETE /ops/auth/presets/:id`
 
-Preset assets are public JSON files served from `http://dtm-presets.solofarm.ru`.
+Preset assets are public JSON files served from `https://dtm-presets.website.yandexcloud.net`.
 
 Graceful degradation rule:
 - if preset catalog or preset asset is unavailable, the application must stay operational in builtin-only mode;

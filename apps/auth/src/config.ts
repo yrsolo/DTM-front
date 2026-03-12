@@ -96,7 +96,7 @@ export function getAuthRuntimeConfig(): AuthRuntimeConfig {
     adminBootstrapUid: readOptional("ADMIN_BOOTSTRAP_UID"),
     presetBucket: process.env.PRESET_BUCKET?.trim() || "dtm-presets",
     presetPublicBaseUrl:
-      process.env.PRESET_PUBLIC_BASE_URL?.trim().replace(/\/+$/, "") || "http://dtm-presets.solofarm.ru",
+      process.env.PRESET_PUBLIC_BASE_URL?.trim().replace(/\/+$/, "") || "https://dtm-presets.website.yandexcloud.net",
     presetStorageEndpoint:
       process.env.PRESET_STORAGE_ENDPOINT?.trim().replace(/\/+$/, "") || "https://storage.yandexcloud.net",
     presetStorageRegion: process.env.PRESET_STORAGE_REGION?.trim() || "ru-central1",

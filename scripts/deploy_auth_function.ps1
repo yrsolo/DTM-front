@@ -83,7 +83,7 @@ $summary = [ordered]@{
   oauthClientSecretEnv = $oauthClientSecretEnvName
   browserAuthProxySecret = "lockbox:BROWSER_AUTH_PROXY_SECRET"
   presetBucket = "dtm-presets"
-  presetPublicBaseUrl = "http://dtm-presets.solofarm.ru"
+  presetPublicBaseUrl = "https://dtm-presets.website.yandexcloud.net"
 }
 
 if ($DryRun) {
@@ -143,7 +143,7 @@ $envArgs = @(
   "--environment", "YDB_DATABASE=$ydbDatabase",
   "--environment", "YDB_METADATA_CREDENTIALS=1",
   "--environment", "PRESET_BUCKET=dtm-presets",
-  "--environment", "PRESET_PUBLIC_BASE_URL=http://dtm-presets.solofarm.ru",
+  "--environment", "PRESET_PUBLIC_BASE_URL=https://dtm-presets.website.yandexcloud.net",
   "--environment", "PRESET_STORAGE_ENDPOINT=https://storage.yandexcloud.net",
   "--environment", "PRESET_STORAGE_REGION=ru-central1"
 )

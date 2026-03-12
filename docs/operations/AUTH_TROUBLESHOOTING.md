@@ -43,6 +43,32 @@ Quick checks:
 ```powershell
 curl.exe -i -H "Origin: http://localhost:5173" https://dtm.solofarm.ru/test/ops/auth/me
 curl.exe -i -H "Origin: http://localhost:5173" "https://dtm.solofarm.ru/test/ops/bff/v2/frontend?statuses=work,pre_done&include_people=true&limit=2"
+```
+
+## Login opens a full white page
+
+Expected behavior now:
+- clicking `Подключиться` opens Yandex OAuth in a popup window
+- the main DTM page stays visible in the background
+- after successful callback the popup closes itself and the auth panel refreshes
+
+If a full-page redirect still happens:
+- the popup was blocked by the browser, so frontend fell back to normal redirect
+- allow popups for `dtm.solofarm.ru`
+- retry login from the auth panel
+
+## Session drops too often
+
+Session lifetime is controlled by `SESSION_TTL_SECONDS` in auth runtime.
+
+Current code now uses `SESSION_TTL_SECONDS` for both:
+- cookie `Max-Age`
+- signed session payload `exp`
+
+If users still have to reconnect too often after deploy:
+- verify the live auth contour has the expected `SESSION_TTL_SECONDS`
+- check whether the browser or extension clears site cookies
+- verify `/ops/auth/me` still returns `authenticated: true` before concluding the session is gone
 
 ## Включено маскирование, хотя пользователь approved/admin
 
@@ -71,7 +97,6 @@ Backend не должен анализировать browser cookie самост
 
 Полный handoff описан в:
 - `docs/contracts/BACKEND_AUTH_HANDOFF.md`
-```
 
 If localhost opens `/ops/auth/...` instead of `/test/ops/auth/...`:
 - check `apps/web/src/config/runtimeContour.ts`
