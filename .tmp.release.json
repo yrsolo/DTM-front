@@ -1,8 +1,8 @@
 ﻿{
-    "generated_at_utc":  "2026-03-11T19:57:15.1365238Z",
-    "release_id":  "prod-20260311-225715-3d2e588",
+    "generated_at_utc":  "2026-03-12T13:48:32.4005436Z",
+    "release_id":  "test-20260312-164832-9dcbc8b",
     "git_ref":  null,
-    "frontend_bucket":  "dtm-front",
-    "deploy_target":  "prod",
+    "frontend_bucket":  "dtm-front-test",
+    "deploy_target":  "test",
     "git_sha":  null
 }

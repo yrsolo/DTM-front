@@ -1,8 +1,8 @@
 # Public frontend config (non-secret)
-api_base_url: https://dtm.solofarm.ru/test/ops
-api_base_url_prod: https://dtm.solofarm.ru/ops
-api_base_url_test: https://dtm.solofarm.ru/test/ops
-api_frontend_path: /bff/v2/frontend
+api_base_url: https://dtm.solofarm.ru/test/ops/bff
+api_base_url_prod: https://dtm.solofarm.ru/ops/bff
+api_base_url_test: https://dtm.solofarm.ru/test/ops/bff
+api_frontend_path: /v2/frontend
 api_statuses: work,pre_done
 api_include_people: true
 api_limit: 200

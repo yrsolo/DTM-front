@@ -60,8 +60,8 @@ Canonical поведение:
 Из contour выводятся browser-facing пути:
 - test auth -> `/test/ops/auth`
 - prod auth -> `/ops/auth`
-- test data path -> `/test/ops/api`
-- prod data path -> `/ops/api`
+- test data path -> `/test/ops/bff`
+- prod data path -> `/ops/bff`
 
 ## Browser storage keys
 

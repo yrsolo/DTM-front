@@ -40,7 +40,7 @@ export function getAuthBasePath(pathname = currentPathname()): string {
 }
 
 export function getApiProxyBasePath(pathname = currentPathname()): string {
-  return getRuntimeContour(pathname) === "test" ? "/test/ops/api" : "/ops/api";
+  return getRuntimeContour(pathname) === "test" ? "/test/ops/bff" : "/ops/bff";
 }
 
 export function getAdminRoute(pathname = currentPathname()): string {
