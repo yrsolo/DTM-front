@@ -2,7 +2,6 @@
 import { KEY_COLOR_ITEMS, normalizeKeyColors, TASK_PALETTE_ITEMS } from "../design/colors";
 import {
   ALL_DESIGN_CONTROL_ITEMS,
-  DESIGN_CONTROLS_PUBLIC_PATH,
   normalizeDesignControls,
 } from "../design/controls";
 import {
@@ -30,6 +29,7 @@ import { LayoutContext } from "./Layout";
 
 const FAVORITES_STORAGE_KEY = "dtm.web.workbench.favorites.v1";
 const WORKBENCH_TAB_STORAGE_KEY = "dtm.web.workbench.tab.v2";
+const DEPLOY_PRESET_HINT = "config/UI/colors/deploy.json + config/UI/layouts/deploy.json";
 type RangeItem = (typeof ALL_DESIGN_CONTROL_ITEMS)[number];
 
 type ResolvedControl = {
@@ -1145,7 +1145,7 @@ export function ControlsWorkbench() {
 
               <aside className="workbenchSideActions">
                 <div className="muted workbenchDeployHint">
-                  {ui.workbench.deployPathLabel}: <code>{DESIGN_CONTROLS_PUBLIC_PATH}</code>
+                  {ui.workbench.deployPathLabel}: <code>{DEPLOY_PRESET_HINT}</code>
                 </div>
                 <div className="wbToolbar wbToolbarSide">
                   <input

@@ -4,7 +4,6 @@ import { resolvePublicAssetUrl } from "../config/publicPaths";
 import { AppLocale, getUiText, UiText } from "../i18n/uiText";
 import {
   DEFAULT_DESIGN_CONTROLS,
-  DESIGN_CONTROLS_PUBLIC_PATH,
   DESIGN_CONTROLS_STORAGE_KEY,
   DesignControls,
   normalizeDesignControls,
@@ -28,6 +27,9 @@ import {
   normalizeRuntimeDefaults,
 } from "../data/runtimeDefaults";
 import { useAuthSession } from "../auth/useAuthSession";
+
+const DEPLOY_COLOR_PRESET_PATH = resolvePublicAssetUrl("config/UI/colors/deploy.json");
+const DEPLOY_LAYOUT_PRESET_PATH = resolvePublicAssetUrl("config/UI/layouts/deploy.json");
 
 export type TimelineViewMode =
   | "brand_designer_show"
@@ -201,16 +203,43 @@ export function Layout(props: { children: React.ReactNode }) {
 
   const loadDeployDesign = React.useCallback(async () => {
     try {
-      const res = await fetch(DESIGN_CONTROLS_PUBLIC_PATH, {
-        headers: { accept: "application/json" },
-        cache: "no-store",
-      });
-      if (!res.ok) return;
-      const parsed = await res.json();
-      const preset = normalizeUiPreset(parsed);
-      setDesign(preset.design);
-      setKeyColors(preset.keyColors);
-      setRuntimeDefaults(sanitizeRuntimeDefaultsForHost(preset.runtimeDefaults));
+      const [colorRes, layoutRes] = await Promise.all([
+        fetch(DEPLOY_COLOR_PRESET_PATH, {
+          headers: { accept: "application/json" },
+          cache: "no-store",
+        }),
+        fetch(DEPLOY_LAYOUT_PRESET_PATH, {
+          headers: { accept: "application/json" },
+          cache: "no-store",
+        }),
+      ]);
+
+      if (!colorRes.ok && !layoutRes.ok) return;
+
+      if (colorRes.ok) {
+        const colorParsed = (await colorRes.json()) as Record<string, unknown>;
+        const nextColors =
+          colorParsed.keyColors && typeof colorParsed.keyColors === "object"
+            ? normalizeKeyColors(colorParsed.keyColors as Partial<KeyColors>)
+            : normalizeKeyColors(colorParsed as Partial<KeyColors>);
+        setKeyColors(nextColors);
+      }
+
+      if (layoutRes.ok) {
+        const layoutParsed = (await layoutRes.json()) as Record<string, unknown>;
+        const nextDesign =
+          layoutParsed.design && typeof layoutParsed.design === "object"
+            ? normalizeDesignControls(layoutParsed.design as Partial<DesignControls>)
+            : normalizeDesignControls(layoutParsed as Partial<DesignControls>);
+        setDesign(nextDesign);
+        if (layoutParsed.runtimeDefaults && typeof layoutParsed.runtimeDefaults === "object") {
+          setRuntimeDefaults(
+            sanitizeRuntimeDefaultsForHost(
+              normalizeRuntimeDefaults(layoutParsed.runtimeDefaults as Partial<RuntimeDefaults>)
+            )
+          );
+        }
+      }
     } catch {
       // ignore optional preset file errors
     }
