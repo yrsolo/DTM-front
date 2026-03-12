@@ -65,6 +65,9 @@ Current code now uses `SESSION_TTL_SECONDS` for both:
 - cookie `Max-Age`
 - signed session payload `exp`
 
+Current expected runtime value:
+- `15552000` seconds (`180` days)
+
 If users still have to reconnect too often after deploy:
 - verify the live auth contour has the expected `SESSION_TTL_SECONDS`
 - check whether the browser or extension clears site cookies

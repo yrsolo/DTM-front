@@ -140,6 +140,9 @@ Contour-specific OAuth credentials считаются canonical:
 - `COOKIE_SECURE`
 - `SESSION_TTL_SECONDS`
 - `BROWSER_AUTH_PROXY_SECRET`
+
+Current operational value:
+- `SESSION_TTL_SECONDS=15552000` (`180` days, about half a year)
 - `AWS_ACCESS_KEY_ID`
 - `AWS_SECRET_ACCESS_KEY`
 
