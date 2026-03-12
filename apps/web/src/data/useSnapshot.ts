@@ -156,7 +156,7 @@ export function useSnapshot(initialRuntimeDefaults?: Partial<RuntimeDefaults>) {
     }
   }, []);
 
-  const refreshFromApi = React.useCallback(async (opts?: { manual?: boolean; ignoreDemoMode?: boolean }) => {
+  const refreshFromApi = React.useCallback(async (opts?: { manual?: boolean; ignoreDemoMode?: boolean; ignoreEtag?: boolean }) => {
     if (demoMode && !opts?.ignoreDemoMode) {
       await loadDemo();
       return;
@@ -185,7 +185,7 @@ export function useSnapshot(initialRuntimeDefaults?: Partial<RuntimeDefaults>) {
         wait: true,
       };
       const { payload, etag, notModified } = await fetchApiSnapshotWithMeta(
-        currentMeta?.etag ?? null,
+        opts?.ignoreEtag ? null : currentMeta?.etag ?? null,
         dateFilter,
         apiStatusFilterAll,
         loadLimit,
@@ -272,7 +272,7 @@ export function useSnapshot(initialRuntimeDefaults?: Partial<RuntimeDefaults>) {
   }, [demoMode, loadDemo]);
 
   const syncFromApi = React.useCallback(async () => {
-    await refreshFromApi({ manual: true });
+    await refreshFromApi({ manual: true, ignoreEtag: true });
   }, [refreshFromApi]);
 
   const setRefreshIntervalMs = React.useCallback((next: number) => {
