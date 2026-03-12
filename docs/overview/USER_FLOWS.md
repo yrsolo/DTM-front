@@ -76,7 +76,7 @@ Source of truth в коде:
 
 Шаги:
 1. Пользователь открывает workbench.
-2. Переходит по вкладкам: material, panels, timeline, milestones, drawer, tasks page, defaults и другим.
+2. Переходит по каноническим вкладкам: `Foundation`, `Surfaces`, `Timeline`, `Tasks Table`, `Drawer`, `Milestones`, `Motion`, `Workbench`, `Defaults`.
 3. Меняет параметры через range-контролы и бинарные кнопки.
 4. Сохраняет локально, экспортирует JSON или загружает deploy preset.
 

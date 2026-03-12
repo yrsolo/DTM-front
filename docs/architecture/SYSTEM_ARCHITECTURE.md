@@ -63,7 +63,7 @@ Tooltip-система и интерактивные оверлеи рендер
 
 ### Design runtime
 
-`controls.ts`, `colors.ts` и `workbenchLayout.ts` задают параметры дизайна, а `ControlsWorkbench.tsx` даёт runtime-редактор этих параметров.
+`controls.ts`, `colors.ts` и `workbenchLayout.ts` задают параметры дизайна и каноническую taxonomy крутилок, а `ControlsWorkbench.tsx` даёт runtime-редактор этих параметров.
 
 ## Границы ответственности
 

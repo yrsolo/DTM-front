@@ -3,7 +3,8 @@
   "private": true,
   "scripts": {
     "validate:schema": "node scripts/validate_schema.mjs",
-    "check:mojibake": "node scripts/check_mojibake.mjs"
+    "check:mojibake": "node scripts/check_mojibake.mjs",
+    "check:workbench": "node scripts/check_workbench_layout.mjs"
   },
   "workspaces": [
     "apps/*",

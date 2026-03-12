@@ -27,6 +27,7 @@ Source of truth в коде:
 | `dtm.locale.v1` | локаль интерфейса | `Layout.tsx` |
 | `dtm.timeline.pageView.v1` | выбранная страница: `tasks` или `designers` | `TimelinePage.tsx` |
 | `dtm.web.workbench.favorites.v1` | избранные controls в workbench | `ControlsWorkbench.tsx` |
+| `dtm.web.workbench.tab.v2` | последняя открытая каноническая вкладка workbench | `ControlsWorkbench.tsx` |
 
 ## Как это влияет на старт приложения
 

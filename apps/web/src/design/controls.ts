@@ -503,6 +503,11 @@ export const DRAWER_CONTROL_ITEMS: DesignControlItem[] = [
   { key: "drawerPanelGlowOpacity", label: "Panel glow", min: 0, max: 0.8, step: 0.01 },
 ];
 
+export const ALL_DESIGN_CONTROL_ITEMS: DesignControlItem[] = [
+  ...DESIGN_CONTROL_ITEMS,
+  ...MATERIAL_CONTROL_ITEMS,
+];
+
 export function normalizeDesignControls(input: Partial<DesignControls>): DesignControls {
   const maybeLegacy = input as Partial<DesignControls> & {
     timelinePerfMinMonthPxDetailed?: number;

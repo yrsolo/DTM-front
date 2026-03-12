@@ -1,12 +1,15 @@
 ﻿import React from "react";
 import { KEY_COLOR_ITEMS, normalizeKeyColors, TASK_PALETTE_ITEMS } from "../design/colors";
 import {
+  ALL_DESIGN_CONTROL_ITEMS,
   DESIGN_CONTROL_ITEMS,
   DESIGN_CONTROLS_PUBLIC_PATH,
   normalizeDesignControls,
 } from "../design/controls";
 import {
   WORKBENCH_LAYOUT,
+  resolveWorkbenchTabId,
+  validateWorkbenchLayout,
   type WorkbenchControlRef,
   type WorkbenchSectionConfig,
   type WorkbenchTabId,
@@ -15,6 +18,7 @@ import { DEFAULT_RUNTIME_DEFAULTS, normalizeRuntimeDefaults } from "../data/runt
 import { LayoutContext } from "./Layout";
 
 const FAVORITES_STORAGE_KEY = "dtm.web.workbench.favorites.v1";
+const WORKBENCH_TAB_STORAGE_KEY = "dtm.web.workbench.tab.v2";
 
 type ResolvedControl = {
   id: string;
@@ -69,7 +73,13 @@ export function ControlsWorkbench() {
   const ctx = React.useContext(LayoutContext);
   const [open, setOpen] = React.useState(false);
   const [favoritesOpen, setFavoritesOpen] = React.useState(false);
-  const [tab, setTab] = React.useState<WorkbenchTabId>(WORKBENCH_LAYOUT[0]?.id ?? "material");
+  const [tab, setTab] = React.useState<WorkbenchTabId>(() => {
+    try {
+      return resolveWorkbenchTabId(localStorage.getItem(WORKBENCH_TAB_STORAGE_KEY));
+    } catch {
+      return WORKBENCH_LAYOUT[0]?.id ?? "foundation";
+    }
+  });
   const [query, setQuery] = React.useState("");
   const [favorites, setFavorites] = React.useState<string[]>([]);
   const [panelMapTarget, setPanelMapTarget] = React.useState<"scene" | "drawer">("drawer");
@@ -142,6 +152,14 @@ export function ControlsWorkbench() {
     }
   }, [favorites]);
 
+  React.useEffect(() => {
+    try {
+      localStorage.setItem(WORKBENCH_TAB_STORAGE_KEY, tab);
+    } catch {
+      // ignore
+    }
+  }, [tab]);
+
   const exportPreset = () => {
     const payload = { design, keyColors, runtimeDefaults };
     const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
@@ -155,7 +173,7 @@ export function ControlsWorkbench() {
 
   const rangeByKey = React.useMemo(() => {
     const map = new Map<string, (typeof DESIGN_CONTROL_ITEMS)[number]>();
-    for (const item of DESIGN_CONTROL_ITEMS) map.set(String(item.key), item);
+    for (const item of ALL_DESIGN_CONTROL_ITEMS) map.set(String(item.key), item);
     return map;
   }, []);
 
@@ -170,34 +188,13 @@ export function ControlsWorkbench() {
   React.useEffect(() => {
     if (!import.meta.env.DEV) return;
 
-    const knownRange = new Set(DESIGN_CONTROL_ITEMS.map((item) => String(item.key)));
-    const knownColor = new Set([...KEY_COLOR_ITEMS, ...TASK_PALETTE_ITEMS].map((item) => String(item.key)));
-    const rangeSeen = new Map<string, number>();
-
-    for (const section of WORKBENCH_LAYOUT) {
-      for (const group of section.groups) {
-        if (group.controls.length === 0) console.warn("[workbench-layout] Empty group:", section.id, group.title);
-        if (group.controls.length > 6) {
-          console.warn("[workbench-layout] Group has more than 6 controls:", section.id, group.title, group.controls.length);
-        }
-        for (const control of group.controls) {
-          const key = String(control.key);
-          if (control.kind === "range") {
-            rangeSeen.set(key, (rangeSeen.get(key) ?? 0) + 1);
-            if (!knownRange.has(key)) console.warn("[workbench-layout] Unknown range key:", section.id, group.title, key);
-          } else if (!knownColor.has(key)) {
-            console.warn("[workbench-layout] Unknown color key:", section.id, group.title, key);
-          }
-        }
+    for (const issue of validateWorkbenchLayout()) {
+      const prefix = `[workbench-layout] ${issue.code}:`;
+      if (issue.severity === "error") {
+        console.error(prefix, issue.message);
+      } else {
+        console.warn(prefix, issue.message);
       }
-    }
-
-    for (const [key, count] of rangeSeen) {
-      if (count > 1) console.warn("[workbench-layout] Duplicate range key across groups:", key, count);
-    }
-
-    for (const key of knownRange) {
-      if (!rangeSeen.has(key)) console.warn("[workbench-layout] Range key not assigned in layout:", key);
     }
   }, []);
 
@@ -274,7 +271,7 @@ export function ControlsWorkbench() {
       if (filtered.length > 0) groups.push({ title: group.title, controls: filtered });
     }
 
-    return groups.sort((a, b) => b.controls.length - a.controls.length);
+    return groups;
   }, [selectedSection, resolveControl, normalizedQuery]);
 
   const toggleFavorite = React.useCallback((id: string) => {
@@ -636,7 +633,7 @@ export function ControlsWorkbench() {
         </div>
       );
     }
-    const showPanelsGuide = section.id === "panelGuide";
+    const showPanelsGuide = section.id === "surfaces";
     const panelGlowLeft = panelMapTarget === "scene" ? keyColors.keyBackdropLeft : keyColors.keyDrawerPanelGlowLeft;
     const panelGlowRight = panelMapTarget === "scene" ? keyColors.keyBackdropRight : keyColors.keyDrawerPanelGlowRight;
     const panelGlowBottom = panelMapTarget === "scene" ? keyColors.keyBackdropBottom : keyColors.keyDrawerPanelGlowBottom;

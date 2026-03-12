@@ -65,8 +65,7 @@ Backend, таблицы, процессы синхронизации и адми
 ### 3. Runtime-тюнинг интерфейса
 
 Встроенный workbench даёт:
-- настройку material и цветовых слоёв;
-- настройку таймлайна, milestones, drawer и panels;
+- настройку foundation, surfaces, timeline, tasks table, drawer и milestones;
 - настройку runtime defaults;
 - импорт, экспорт, локальное сохранение и загрузку deploy preset.
 
