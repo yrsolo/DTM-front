@@ -30,7 +30,7 @@ Check:
 Local Vite frontend is allowed to use the public test auth contour:
 - local app -> `http://localhost:5173`
 - auth -> `https://dtm.solofarm.ru/test/ops/auth/*`
-- data path -> `https://dtm.solofarm.ru/test/ops/api/*`
+- data path -> `https://dtm.solofarm.ru/test/ops/bff/*`
 
 Expected behavior:
 - `/ops/auth/me` from localhost returns credentialed CORS with exact origin
@@ -42,7 +42,7 @@ Quick checks:
 
 ```powershell
 curl.exe -i -H "Origin: http://localhost:5173" https://dtm.solofarm.ru/test/ops/auth/me
-curl.exe -i -H "Origin: http://localhost:5173" "https://dtm.solofarm.ru/test/ops/api/v2/frontend?statuses=work,pre_done&include_people=true&limit=2"
+curl.exe -i -H "Origin: http://localhost:5173" "https://dtm.solofarm.ru/test/ops/bff/v2/frontend?statuses=work,pre_done&include_people=true&limit=2"
 
 ## Включено маскирование, хотя пользователь approved/admin
 
@@ -56,7 +56,7 @@ curl.exe -i -H "Origin: http://localhost:5173" "https://dtm.solofarm.ru/test/ops
 Проверка:
 - откройте auth-панель;
 - выключите `Принудительная маскировка`;
-- повторите запрос к `/ops/api/*` или `/test/ops/api/*`.
+- повторите запрос к `/ops/bff/*` или `/test/ops/bff/*`.
 
 ## Backend не понимает, когда отдавать full, а когда masked
 

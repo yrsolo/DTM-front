@@ -51,7 +51,12 @@ function shouldIncludeCredentials(baseUrl: string): boolean {
     if (isLocalFrontendRuntime()) return false;
     if (
       base.origin === "https://dtm.solofarm.ru" &&
-      (base.pathname.startsWith("/test/ops/api") || base.pathname.startsWith("/ops/api"))
+      (
+        base.pathname.startsWith("/test/ops/api") ||
+        base.pathname.startsWith("/ops/api") ||
+        base.pathname.startsWith("/test/ops/bff") ||
+        base.pathname.startsWith("/ops/bff")
+      )
     ) {
       return true;
     }

@@ -9,12 +9,12 @@
 
 ### Test
 - frontend: `https://dtm.solofarm.ru/test/`
-- browser data path: `/test/ops/api/v2/frontend`
+- browser data path: `/test/ops/bff/v2/frontend`
 - auth/session: `/test/ops/auth/*`
 
 ### Prod
 - frontend: `https://dtm.solofarm.ru/`
-- browser data path: `/ops/api/v2/frontend`
+- browser data path: `/ops/bff/v2/frontend`
 - auth/session: `/ops/auth/*`
 
 ## Reserved service namespace
@@ -41,8 +41,8 @@ Frontend SPA routes остаются только:
 Browser никогда не должен обращаться к backend напрямую.
 
 Frontend всегда ходит через browser-facing auth proxy:
-- prod: `/ops/api/*`
-- test: `/test/ops/api/*`
+- prod: `/ops/bff/*`
+- test: `/test/ops/bff/*`
 
 Что делает frontend:
 - обычный full-flow запрос отправляется с `credentials: "include"`, то есть с auth cookie;
@@ -123,6 +123,7 @@ Backend должен ориентироваться на эти headers:
 
 Практическая схема:
 1. принимать browser traffic только через `/ops/api/*` или `/test/ops/api/*`;
+1. принимать browser traffic только через `/ops/bff/*` или `/test/ops/bff/*`;
 2. доверять `x-dtm-access-mode` и `x-dtm-authenticated`, выставленным auth proxy;
 3. считать `full` trustworthy только при валидном `X-DTM-Proxy-Secret`;
 4. строить один и тот же `frontend v2` payload shape;

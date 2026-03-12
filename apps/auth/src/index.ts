@@ -63,6 +63,13 @@ function contourFromPath(pathname: string): { contour: Contour; routeKind: "auth
       routePath: normalized.slice("/test/ops/auth".length) || "/",
     };
   }
+  if (normalized === "/test/ops/bff" || normalized.startsWith("/test/ops/bff/")) {
+    return {
+      contour: "test",
+      routeKind: "api",
+      routePath: normalized.slice("/test/ops/bff".length) || "/",
+    };
+  }
   if (normalized === "/test/ops/api" || normalized.startsWith("/test/ops/api/")) {
     return {
       contour: "test",
@@ -75,6 +82,13 @@ function contourFromPath(pathname: string): { contour: Contour; routeKind: "auth
       contour: "prod",
       routeKind: "auth",
       routePath: normalized.slice("/ops/auth".length) || "/",
+    };
+  }
+  if (normalized === "/ops/bff" || normalized.startsWith("/ops/bff/")) {
+    return {
+      contour: "prod",
+      routeKind: "api",
+      routePath: normalized.slice("/ops/bff".length) || "/",
     };
   }
   if (normalized === "/ops/api" || normalized.startsWith("/ops/api/")) {
