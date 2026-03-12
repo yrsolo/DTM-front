@@ -422,10 +422,12 @@ export function ControlsWorkbench() {
       setPresetNotice(null);
 
       const payload = kind === "color" ? { keyColors } : { design };
+      const shouldCloneCloudPreset = Boolean(preset && preset.sourceKind === "cloud" && !canEdit);
+      const cloneSourceId = shouldCloneCloudPreset && preset ? preset.id : null;
       const endpoint = canEdit
         ? `${getAuthRequestBase()}/presets/${encodeURIComponent(preset.id)}`
-        : preset?.id
-          ? `${getAuthRequestBase()}/presets/${encodeURIComponent(preset.id)}/clone`
+        : cloneSourceId
+          ? `${getAuthRequestBase()}/presets/${encodeURIComponent(cloneSourceId)}/clone`
           : `${getAuthRequestBase()}/presets`;
       const method = canEdit ? "PUT" : "POST";
       const body = canEdit

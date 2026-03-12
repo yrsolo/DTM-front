@@ -44,17 +44,6 @@ export async function proxyApiRequest(req: NormalizedRequest) {
   const forceMasking = req.headers["x-dtm-force-mask"] === "1";
   const effectiveAccessMode = forceMasking ? "masked" : accessMode;
   const isApprovedFullRequest = Boolean(user && user.status === "approved" && effectiveAccessMode === "full");
-  const debugHeaders =
-    cfg.contour === "test"
-      ? {
-          "x-dtm-debug-proxy": "1",
-          "x-dtm-debug-authenticated": user ? "1" : "0",
-          "x-dtm-debug-access-mode": effectiveAccessMode,
-          "x-dtm-debug-approved-full": isApprovedFullRequest ? "1" : "0",
-          "x-dtm-debug-user-status": user?.status ?? "guest",
-          "x-dtm-debug-user-role": user?.role ?? "guest",
-        }
-      : undefined;
 
   const upstreamUrl = new URL(
     `${cfg.apiUpstreamOrigin.replace(/\/+$/, "")}${req.routePath}${req.query.toString() ? `?${req.query.toString()}` : ""}`
@@ -95,7 +84,6 @@ export async function proxyApiRequest(req: NormalizedRequest) {
       statusCode: upstreamRes.status,
       headers: {
         ...responseHeaders,
-        ...(debugHeaders ?? {}),
       },
       body: await upstreamRes.text(),
     };
@@ -106,7 +94,6 @@ export async function proxyApiRequest(req: NormalizedRequest) {
     statusCode: upstreamRes.status,
     headers: {
       ...responseHeaders,
-      ...(debugHeaders ?? {}),
     },
     body: JSON.stringify(await upstreamRes.json()),
   };

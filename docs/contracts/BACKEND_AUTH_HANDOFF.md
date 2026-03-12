@@ -122,7 +122,6 @@ Backend должен ориентироваться на эти headers:
 ## Recommended Backend Pattern
 
 Практическая схема:
-1. принимать browser traffic только через `/ops/api/*` или `/test/ops/api/*`;
 1. принимать browser traffic только через `/ops/bff/*` или `/test/ops/bff/*`;
 2. доверять `x-dtm-access-mode` и `x-dtm-authenticated`, выставленным auth proxy;
 3. считать `full` trustworthy только при валидном `X-DTM-Proxy-Secret`;
