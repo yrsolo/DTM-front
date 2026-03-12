@@ -157,7 +157,13 @@ Function version получает:
 - `BASE_URL`
 - `AUTH_BASE_PATH`
 - `API_PROXY_BASE_PATH`
+  Browser-facing proxy namespace. Current values:
+  `test=/test/ops/bff`, `prod=/ops/bff`
 - `API_UPSTREAM_ORIGIN`
+  Backend upstream base origin including service path prefix.
+  Current values resolve to:
+  `test=https://dtm-api-test.solofarm.ru/api`
+  `prod=https://dtm-api.solofarm.ru/api`
 - `YDB_ENDPOINT`
 - `YDB_DATABASE`
 - `YDB_METADATA_CREDENTIALS=1`
