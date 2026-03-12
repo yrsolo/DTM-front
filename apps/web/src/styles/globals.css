@@ -2391,16 +2391,17 @@ button:hover {
 }
 
 .adminUserGridTiles {
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(220px, 280px));
   align-items: stretch;
+  justify-content: start;
 }
 
 .adminUserCard {
   display: grid;
   grid-template-columns: auto 1fr;
-  gap: 12px;
+  gap: 10px;
   align-items: start;
-  padding: 14px;
+  padding: 12px;
   border-radius: 16px;
   border: 1px solid rgba(135, 159, 225, 0.24);
   background: linear-gradient(180deg, rgba(10, 17, 34, 0.94) 0%, rgba(19, 21, 49, 0.84) 100%);
@@ -2408,9 +2409,11 @@ button:hover {
 
 .adminUserBrick {
   grid-template-columns: 1fr;
-  gap: 14px;
-  min-height: 224px;
+  gap: 10px;
+  min-height: 0;
   align-content: start;
+  justify-items: start;
+  text-align: left;
 }
 
 .adminUserAvatar {
@@ -2436,6 +2439,7 @@ button:hover {
   min-width: 0;
   display: grid;
   gap: 4px;
+  justify-items: start;
 }
 
 .adminUserName {
@@ -2493,7 +2497,8 @@ button:hover {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  margin-top: auto;
+  margin-top: 2px;
+  justify-content: flex-start;
 }
 
 .adminPresetToolbar {
@@ -2504,7 +2509,41 @@ button:hover {
 }
 
 .adminPresetBrick {
-  min-height: 250px;
+  position: relative;
+  min-height: 0;
+  padding-top: 42px;
+}
+
+.adminPresetGrid {
+  grid-template-columns: repeat(auto-fit, minmax(240px, 300px));
+  justify-content: start;
+}
+
+.adminPresetKindBadge {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  border: 1px solid rgba(173, 196, 255, 0.22);
+  box-shadow: 0 8px 20px rgba(6, 9, 20, 0.22);
+}
+
+.adminPresetKindBadge.isColor {
+  background:
+    radial-gradient(circle at center, rgba(10, 14, 28, 0.82) 0 26%, transparent 27%),
+    conic-gradient(from 180deg, #ff6b9f, #ffd35e, #74f1b1, #63b7ff, #b97cff, #ff6b9f);
+}
+
+.adminPresetKindBadge.isLayout {
+  background: linear-gradient(180deg, rgba(17, 23, 45, 0.88), rgba(22, 18, 46, 0.86));
+  color: #f5cf62;
+  font-size: 18px;
+  line-height: 1;
 }
 
 @media (max-width: 800px) {

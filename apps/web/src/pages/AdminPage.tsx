@@ -28,6 +28,17 @@ type PresetCard = {
   availability: "ready" | "broken" | "unavailable";
 };
 
+function PresetKindBadge(props: { kind: "color" | "layout" }) {
+  if (props.kind === "color") {
+    return <span className="adminPresetKindBadge isColor" aria-hidden="true" />;
+  }
+  return (
+    <span className="adminPresetKindBadge isLayout" aria-hidden="true">
+      ⤢
+    </span>
+  );
+}
+
 type AdminOverview = {
   pendingUsers: AdminUserCard[];
   approvedUsers: AdminUserCard[];
@@ -503,9 +514,10 @@ export function AdminPage() {
               <h4 className="pageTitle" style={{ fontSize: 20 }}>
                 {kind === "color" ? "Цветовые пресеты" : "UI / Layout пресеты"}
               </h4>
-              <div className="adminUserGrid adminUserGridTiles">
+              <div className="adminUserGrid adminPresetGrid">
                 {(overview?.presets?.[kind] ?? []).map((preset) => (
                   <div key={preset.id} className="adminUserCard adminUserBrick adminPresetBrick">
+                    <PresetKindBadge kind={kind} />
                     <div className="adminUserBody">
                       <div className="adminUserName">{preset.name}</div>
                       <div className="muted">{preset.description || "Без описания"}</div>
