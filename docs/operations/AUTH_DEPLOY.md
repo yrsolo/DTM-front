@@ -139,9 +139,12 @@ Contour-specific OAuth credentials считаются canonical:
 - `SESSION_TTL_SECONDS`
 - `MASKING_SALT_TEST`
 - `MASKING_SALT_PROD`
+- `AWS_ACCESS_KEY_ID`
+- `AWS_SECRET_ACCESS_KEY`
 
 Для GitHub Actions также нужны:
 - `YC_SA_JSON_CREDENTIALS` для deploy/migrations
+- `AWS_ACCESS_KEY_ID` и `AWS_SECRET_ACCESS_KEY` для cloud preset catalog в `dtm-presets`
 - contour-specific GitHub secrets `YANDEX_CLIENT_ID_TEST`, `YANDEX_CLIENT_SECRET_TEST`, `YANDEX_CLIENT_ID_PROD`, `YANDEX_CLIENT_SECRET_PROD`
 
 ## Runtime env
@@ -155,3 +158,9 @@ Function version получает:
 - `YDB_ENDPOINT`
 - `YDB_DATABASE`
 - `YDB_METADATA_CREDENTIALS=1`
+- `PRESET_BUCKET=dtm-presets`
+- `PRESET_PUBLIC_BASE_URL=http://dtm-presets.solofarm.ru`
+- `PRESET_STORAGE_ENDPOINT=https://storage.yandexcloud.net`
+- `PRESET_STORAGE_REGION=ru-central1`
+- `AWS_ACCESS_KEY_ID`
+- `AWS_SECRET_ACCESS_KEY`

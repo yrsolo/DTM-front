@@ -15,6 +15,11 @@ import {
   KeyColors,
   normalizeKeyColors,
 } from "../design/colors";
+import {
+  LEGACY_UI_PRESET_STORAGE_KEY,
+  readStoredColorDraft,
+  readStoredLayoutDraft,
+} from "../design/presets";
 import { ControlsWorkbench } from "./ControlsWorkbench";
 import { FiltersState } from "./FiltersBar";
 import {
@@ -57,11 +62,15 @@ export type LayoutContextValue = {
   saveKeyColors: () => void;
   loadKeyColors: () => void;
   resetKeyColors: () => void;
+  workbenchOpen: boolean;
+  setWorkbenchOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  favoritesOpen: boolean;
+  setFavoritesOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  canAccessWorkbench: boolean;
   authSession: ReturnType<typeof useAuthSession>;
 };
 
 export const LayoutContext = React.createContext<LayoutContextValue | null>(null);
-const UI_PRESET_STORAGE_KEY = "dtm.web.uiPreset.v1";
 const VIEW_MODE_STORAGE_KEY = "dtm.viewMode.v1";
 const SORT_MODE_STORAGE_KEY = "dtm.sortMode.v1";
 const LOCALE_STORAGE_KEY = "dtm.locale.v1";
@@ -134,7 +143,7 @@ export function Layout(props: { children: React.ReactNode }) {
   const ui = getUiText(locale);
   const [runtimeDefaults, setRuntimeDefaults] = React.useState<RuntimeDefaults>(() => {
     try {
-      const raw = localStorage.getItem(UI_PRESET_STORAGE_KEY);
+      const raw = localStorage.getItem(LEGACY_UI_PRESET_STORAGE_KEY);
       if (!raw) return sanitizeRuntimeDefaultsForHost(DEFAULT_RUNTIME_DEFAULTS);
       const preset = normalizeUiPreset(JSON.parse(raw));
       return sanitizeRuntimeDefaultsForHost(preset.runtimeDefaults);
@@ -153,8 +162,10 @@ export function Layout(props: { children: React.ReactNode }) {
   }));
   const snapshotState = useSnapshot(runtimeDefaults);
   const authSession = useAuthSession();
-  const [design, setDesign] = React.useState<DesignControls>(DEFAULT_DESIGN_CONTROLS);
-  const [keyColors, setKeyColors] = React.useState<KeyColors>(DEFAULT_KEY_COLORS);
+  const [design, setDesign] = React.useState<DesignControls>(() => readStoredLayoutDraft());
+  const [keyColors, setKeyColors] = React.useState<KeyColors>(() => readStoredColorDraft());
+  const [workbenchOpen, setWorkbenchOpen] = React.useState(false);
+  const [favoritesOpen, setFavoritesOpen] = React.useState(false);
   const [introState, setIntroState] = React.useState<"idle" | "enter" | "playing" | "exit">("idle");
   const [introOverlayActive, setIntroOverlayActive] = React.useState(false);
   const introVideoRef = React.useRef<HTMLVideoElement | null>(null);
@@ -244,40 +255,10 @@ export function Layout(props: { children: React.ReactNode }) {
     let active = true;
 
     void (async () => {
-      try {
-        const combinedRaw = localStorage.getItem(UI_PRESET_STORAGE_KEY);
-        if (combinedRaw) {
-          const preset = normalizeUiPreset(JSON.parse(combinedRaw));
-          if (!active) return;
-          setDesign(preset.design);
-          setKeyColors(preset.keyColors);
-          setRuntimeDefaults(sanitizeRuntimeDefaultsForHost(preset.runtimeDefaults));
-          return;
-        }
-      } catch {
-        // ignore invalid combined payload
-      }
-
-      try {
-        const raw = localStorage.getItem(DESIGN_CONTROLS_STORAGE_KEY);
-        if (raw) {
-          if (!active) return;
-          setDesign(normalizeDesignControls(JSON.parse(raw)));
-        }
-      } catch {
-        // ignore invalid legacy payload
-      }
-
-      try {
-        const raw = localStorage.getItem(KEY_COLORS_STORAGE_KEY);
-        if (raw) {
-          if (!active) return;
-          setKeyColors(normalizeKeyColors(JSON.parse(raw)));
-        }
-      } catch {
-        // ignore invalid legacy payload
-      }
-
+      const hasLayoutDraft = Boolean(localStorage.getItem(DESIGN_CONTROLS_STORAGE_KEY));
+      const hasColorDraft = Boolean(localStorage.getItem(KEY_COLORS_STORAGE_KEY));
+      const hasLegacyPreset = Boolean(localStorage.getItem(LEGACY_UI_PRESET_STORAGE_KEY));
+      if (hasLayoutDraft || hasColorDraft || hasLegacyPreset) return;
       await loadDeployDesign();
     })();
 
@@ -287,41 +268,29 @@ export function Layout(props: { children: React.ReactNode }) {
   }, []);
 
   const saveDesign = React.useCallback(() => {
-    localStorage.setItem(UI_PRESET_STORAGE_KEY, JSON.stringify({ design, keyColors, runtimeDefaults }));
     localStorage.setItem(DESIGN_CONTROLS_STORAGE_KEY, JSON.stringify(design));
-    localStorage.setItem(KEY_COLORS_STORAGE_KEY, JSON.stringify(keyColors));
+    localStorage.setItem(LEGACY_UI_PRESET_STORAGE_KEY, JSON.stringify({ design, keyColors, runtimeDefaults }));
   }, [design, keyColors, runtimeDefaults]);
 
   const loadDesign = React.useCallback(() => {
     try {
-      const combinedRaw = localStorage.getItem(UI_PRESET_STORAGE_KEY);
-      if (combinedRaw) {
-        const preset = normalizeUiPreset(JSON.parse(combinedRaw));
-        setDesign(preset.design);
-        setKeyColors(preset.keyColors);
-        setRuntimeDefaults(sanitizeRuntimeDefaultsForHost(preset.runtimeDefaults));
-        return;
-      }
-    } catch {
-      // ignore invalid combined payload
-    }
-
-    try {
       const raw = localStorage.getItem(DESIGN_CONTROLS_STORAGE_KEY);
       if (raw) {
         setDesign(normalizeDesignControls(JSON.parse(raw)));
+        return;
       }
     } catch {
       // ignore invalid payload
     }
 
     try {
-      const raw = localStorage.getItem(KEY_COLORS_STORAGE_KEY);
-      if (raw) {
-        setKeyColors(normalizeKeyColors(JSON.parse(raw)));
-      }
+      const combinedRaw = localStorage.getItem(LEGACY_UI_PRESET_STORAGE_KEY);
+      if (!combinedRaw) return;
+      const preset = normalizeUiPreset(JSON.parse(combinedRaw));
+      setDesign(preset.design);
+      setRuntimeDefaults(sanitizeRuntimeDefaultsForHost(preset.runtimeDefaults));
     } catch {
-      // ignore invalid payload
+      // ignore invalid combined payload
     }
   }, []);
 
@@ -329,8 +298,31 @@ export function Layout(props: { children: React.ReactNode }) {
     setDesign(DEFAULT_DESIGN_CONTROLS);
   }, []);
 
-  const saveKeyColors = React.useCallback(() => saveDesign(), [saveDesign]);
-  const loadKeyColors = React.useCallback(() => loadDesign(), [loadDesign]);
+  const saveKeyColors = React.useCallback(() => {
+    localStorage.setItem(KEY_COLORS_STORAGE_KEY, JSON.stringify(keyColors));
+    localStorage.setItem(LEGACY_UI_PRESET_STORAGE_KEY, JSON.stringify({ design, keyColors, runtimeDefaults }));
+  }, [design, keyColors, runtimeDefaults]);
+  const loadKeyColors = React.useCallback(() => {
+    try {
+      const raw = localStorage.getItem(KEY_COLORS_STORAGE_KEY);
+      if (raw) {
+        setKeyColors(normalizeKeyColors(JSON.parse(raw)));
+        return;
+      }
+    } catch {
+      // ignore invalid payload
+    }
+
+    try {
+      const combinedRaw = localStorage.getItem(LEGACY_UI_PRESET_STORAGE_KEY);
+      if (!combinedRaw) return;
+      const preset = normalizeUiPreset(JSON.parse(combinedRaw));
+      setKeyColors(preset.keyColors);
+      setRuntimeDefaults(sanitizeRuntimeDefaultsForHost(preset.runtimeDefaults));
+    } catch {
+      // ignore invalid combined payload
+    }
+  }, []);
 
   const resetKeyColors = React.useCallback(() => {
     setKeyColors(DEFAULT_KEY_COLORS);
@@ -377,6 +369,18 @@ export function Layout(props: { children: React.ReactNode }) {
     }, INTRO_FADE_MS);
     return () => window.clearTimeout(endTimer);
   }, [introState]);
+
+  const canAccessWorkbench =
+    authSession.state.authenticated &&
+    authSession.state.available &&
+    authSession.state.accessMode === "full" &&
+    authSession.state.user?.status === "approved";
+
+  React.useEffect(() => {
+    if (canAccessWorkbench) return;
+    setWorkbenchOpen(false);
+    setFavoritesOpen(false);
+  }, [canAccessWorkbench]);
 
   React.useEffect(() => {
     if (introState === "idle") return;
@@ -579,6 +583,11 @@ export function Layout(props: { children: React.ReactNode }) {
         saveKeyColors,
         loadKeyColors,
         resetKeyColors,
+        workbenchOpen,
+        setWorkbenchOpen,
+        favoritesOpen,
+        setFavoritesOpen,
+        canAccessWorkbench,
         authSession,
       }}
     >

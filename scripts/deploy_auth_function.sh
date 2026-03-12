@@ -99,6 +99,8 @@ if [[ "$DRY_RUN" == "true" ]]; then
   echo "lockbox_id: $lockbox_id"
   echo "oauth_client_id_env: $oauth_client_id_env_name"
   echo "oauth_client_secret_env: $oauth_client_secret_env_name"
+  echo "preset_bucket: dtm-presets"
+  echo "preset_public_base_url: http://dtm-presets.solofarm.ru"
   exit 0
 fi
 
@@ -146,6 +148,28 @@ else
   )
 fi
 
+env_args=(
+  --environment "CONTOUR=$TARGET"
+  --environment "BASE_URL=https://dtm.solofarm.ru"
+  --environment "AUTH_BASE_PATH=$auth_base_path"
+  --environment "API_PROXY_BASE_PATH=$api_proxy_base_path"
+  --environment "API_UPSTREAM_ORIGIN=$api_upstream_origin"
+  --environment "YDB_ENDPOINT=$ydb_endpoint"
+  --environment "YDB_DATABASE=$ydb_database"
+  --environment "YDB_METADATA_CREDENTIALS=1"
+  --environment "PRESET_BUCKET=dtm-presets"
+  --environment "PRESET_PUBLIC_BASE_URL=http://dtm-presets.solofarm.ru"
+  --environment "PRESET_STORAGE_ENDPOINT=https://storage.yandexcloud.net"
+  --environment "PRESET_STORAGE_REGION=ru-central1"
+)
+
+if [[ -n "${AWS_ACCESS_KEY_ID:-}" && -n "${AWS_SECRET_ACCESS_KEY:-}" ]]; then
+  env_args+=(
+    --environment "AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID"
+    --environment "AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY"
+  )
+fi
+
 yc serverless function version create \
   --function-name "$function_name" \
   --runtime "$function_runtime" \
@@ -154,13 +178,6 @@ yc serverless function version create \
   --execution-timeout "$function_timeout" \
   --service-account-id "$service_account_id" \
   --source-path "apps/auth/dist" \
-  --environment "CONTOUR=$TARGET" \
-  --environment "BASE_URL=https://dtm.solofarm.ru" \
-  --environment "AUTH_BASE_PATH=$auth_base_path" \
-  --environment "API_PROXY_BASE_PATH=$api_proxy_base_path" \
-  --environment "API_UPSTREAM_ORIGIN=$api_upstream_origin" \
-  --environment "YDB_ENDPOINT=$ydb_endpoint" \
-  --environment "YDB_DATABASE=$ydb_database" \
-  --environment "YDB_METADATA_CREDENTIALS=1" \
+  "${env_args[@]}" \
   "${secret_args[@]}" \
   "${oauth_args[@]}"

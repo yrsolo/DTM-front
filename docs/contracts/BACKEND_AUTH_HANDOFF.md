@@ -127,3 +127,18 @@ Backend должен ориентироваться на эти headers:
 
 - test callback: `https://dtm.solofarm.ru/test/ops/auth/callback`
 - prod callback: `https://dtm.solofarm.ru/ops/auth/callback`
+
+## Preset Catalog Service
+
+Preset catalog routes are exposed by the auth contour and are shared across `test` and `prod` via the public preset bucket/domain:
+- `GET /ops/auth/presets?kind=color|layout`
+- `GET /test/ops/auth/presets?kind=color|layout`
+- `POST /ops/auth/presets`
+- `PUT /ops/auth/presets/:id`
+- `DELETE /ops/auth/presets/:id`
+
+Preset assets are public JSON files served from `http://dtm-presets.solofarm.ru`.
+
+Graceful degradation rule:
+- if preset catalog or preset asset is unavailable, the application must stay operational in builtin-only mode;
+- auth, snapshot loading and API proxy behavior must not depend on preset availability.

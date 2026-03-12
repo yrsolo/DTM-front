@@ -1,0 +1,13 @@
+{
+  "presets": [
+    {
+      "id": "builtin:dtm-default-colors",
+      "name": "DTM Default Colors",
+      "description": "Bundled fallback color palette for the workbench.",
+      "authorDisplayName": "DTM",
+      "assetPath": "config/UI/colors/default.json",
+      "revision": 1,
+      "isDefault": true
+    }
+  ]
+}

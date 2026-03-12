@@ -3,6 +3,7 @@ import { listAllowlistEntries, addAllowlistEmail, removeAllowlistEmail } from ".
 import { closeAccessRequestsForUser, listAccessRequests } from "../db/accessRequestsRepo";
 import { writeAuditLog } from "../db/auditRepo";
 import { ensureAdminRole, resolveSession } from "../middleware/auth";
+import { listPresetEntries } from "../presets/catalog";
 import { incrementSessionVersion, listUsersByStatus, setUserStatus, upsertRole } from "../db/usersRepo";
 import type { NormalizedRequest } from "../types";
 
@@ -27,11 +28,13 @@ export async function listAdminData(req: NormalizedRequest) {
   const auth = await requireAdmin(req);
   if (auth.error) return auth.error;
 
-  const [pendingUsers, approvedUsers, allowlist, accessRequests] = await Promise.all([
+  const [pendingUsers, approvedUsers, allowlist, accessRequests, colorPresets, layoutPresets] = await Promise.all([
     listUsersByStatus("pending"),
     listUsersByStatus("approved"),
     listAllowlistEntries(),
     listAccessRequests(),
+    listPresetEntries("color", auth.user),
+    listPresetEntries("layout", auth.user),
   ]);
 
   const latestRequestByUserId = new Map<string, string>();
@@ -56,6 +59,14 @@ export async function listAdminData(req: NormalizedRequest) {
     pendingUsers: pendingUsers.map(mapUserCard),
     approvedUsers: approvedUsers.map(mapUserCard),
     allowlist,
+    presets: {
+      color: colorPresets.presets,
+      layout: layoutPresets.presets,
+      defaults: {
+        color: colorPresets.defaults.color,
+        layout: layoutPresets.defaults.layout,
+      },
+    },
   });
 }
 

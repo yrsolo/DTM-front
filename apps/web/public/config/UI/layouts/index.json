@@ -1,0 +1,13 @@
+{
+  "presets": [
+    {
+      "id": "builtin:deploy-layout",
+      "name": "Deploy Layout",
+      "description": "Bundled layout preset based on the deployed design-controls baseline.",
+      "authorDisplayName": "DTM",
+      "assetPath": "config/UI/layouts/deploy.json",
+      "revision": 1,
+      "isDefault": true
+    }
+  ]
+}

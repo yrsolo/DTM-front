@@ -604,6 +604,22 @@ button:hover {
   width: min(520px, 100%);
 }
 
+.wbSegmented {
+  display: inline-flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.wbSegmentedBtn {
+  padding: 7px 10px;
+  border-radius: 999px;
+}
+
+.wbSegmentedBtn.active {
+  border-color: rgba(185, 141, 255, 0.45);
+  filter: saturate(1) brightness(1.06);
+}
+
 .wbGrid {
   display: grid;
   grid-template-columns: repeat(3, minmax(var(--wb-grid-min-col, 240px), 1fr));
@@ -629,6 +645,61 @@ button:hover {
   display: grid;
   gap: var(--wb-control-gap, 8px);
   align-items: start;
+}
+
+.wbPresetGroup {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(132, 154, 211, 0.18);
+}
+
+.wbPresetHeader {
+  display: grid;
+  gap: 6px;
+}
+
+.wbPresetHint,
+.wbPresetMessage {
+  padding: 8px 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(135, 159, 225, 0.2);
+  background: linear-gradient(180deg, rgba(10, 17, 34, 0.9) 0%, rgba(19, 21, 49, 0.82) 100%);
+  font-size: 12px;
+  line-height: 1.35;
+  color: #cbdaf8;
+}
+
+.wbPresetMessage {
+  margin-bottom: 8px;
+}
+
+.wbPresetMessage.isError {
+  border-color: rgba(255, 154, 175, 0.28);
+  color: #ffd1dd;
+}
+
+.wbPresetList {
+  margin-top: 8px;
+  display: grid;
+  gap: 8px;
+}
+
+.wbPresetCard {
+  width: 100%;
+  text-align: left;
+  display: grid;
+  gap: 4px;
+}
+
+.wbPresetCard.active {
+  border-color: rgba(185, 141, 255, 0.45);
+}
+
+.wbPresetActions {
+  margin-top: 8px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
 }
 
 .wbPanelGuide {
@@ -2271,6 +2342,17 @@ button:hover {
   flex-wrap: wrap;
   gap: 8px;
   margin-top: auto;
+}
+
+.adminPresetToolbar {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.adminPresetBrick {
+  min-height: 250px;
 }
 
 @media (max-width: 800px) {

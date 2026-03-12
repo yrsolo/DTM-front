@@ -12,6 +12,17 @@ import {
 } from "./handlers/adminHandlers";
 import { callback, login, logout, me } from "./handlers/authHandlers";
 import { proxyApiRequest } from "./handlers/apiProxy";
+import {
+  clonePresetHandler,
+  createPresetHandler,
+  deletePresetHandler,
+  exportPresetHandler,
+  getPresetHandler,
+  importPresetHandler,
+  listPresetsHandler,
+  setDefaultPresetHandler,
+  updatePresetHandler,
+} from "./handlers/presetHandlers";
 import type { HttpResult, NormalizedRequest } from "./types";
 
 export async function routeRequest(req: NormalizedRequest): Promise<HttpResult> {
@@ -40,6 +51,15 @@ export async function routeRequest(req: NormalizedRequest): Promise<HttpResult> 
     }
     if (req.method === "GET" && req.routePath === "/admin/overview") {
       return listAdminData(req);
+    }
+    if (req.method === "GET" && req.routePath === "/presets") {
+      return listPresetsHandler(req);
+    }
+    if (req.method === "POST" && req.routePath === "/presets") {
+      return createPresetHandler(req);
+    }
+    if (req.method === "POST" && req.routePath === "/presets/import") {
+      return importPresetHandler(req);
     }
     if (req.method === "POST" && req.routePath === "/admin/allowlist") {
       return addAllowlistEmailHandler(req);
@@ -71,6 +91,32 @@ export async function routeRequest(req: NormalizedRequest): Promise<HttpResult> 
     const removeAdminMatch = req.routePath.match(/^\/admin\/users\/([^/]+)\/remove-admin$/);
     if (req.method === "POST" && removeAdminMatch) {
       return removeAdminHandler(req, removeAdminMatch[1]);
+    }
+
+    const presetMatch = req.routePath.match(/^\/presets\/([^/]+)$/);
+    if (req.method === "GET" && presetMatch) {
+      return getPresetHandler(req, presetMatch[1]);
+    }
+    if (req.method === "PUT" && presetMatch) {
+      return updatePresetHandler(req, presetMatch[1]);
+    }
+    if (req.method === "DELETE" && presetMatch) {
+      return deletePresetHandler(req, presetMatch[1]);
+    }
+
+    const presetCloneMatch = req.routePath.match(/^\/presets\/([^/]+)\/clone$/);
+    if (req.method === "POST" && presetCloneMatch) {
+      return clonePresetHandler(req, presetCloneMatch[1]);
+    }
+
+    const presetDefaultMatch = req.routePath.match(/^\/presets\/([^/]+)\/set-default$/);
+    if (req.method === "POST" && presetDefaultMatch) {
+      return setDefaultPresetHandler(req, presetDefaultMatch[1]);
+    }
+
+    const presetExportMatch = req.routePath.match(/^\/presets\/([^/]+)\/export$/);
+    if (req.method === "GET" && presetExportMatch) {
+      return exportPresetHandler(req, presetExportMatch[1]);
     }
 
     return notFound(`Unknown auth route: ${req.routePath}`);

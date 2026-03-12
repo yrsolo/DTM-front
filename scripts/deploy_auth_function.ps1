@@ -64,6 +64,8 @@ $summary = [ordered]@{
   entrypoint = $yc.function_entrypoint
   oauthClientIdEnv = $oauthClientIdEnvName
   oauthClientSecretEnv = $oauthClientSecretEnvName
+  presetBucket = "dtm-presets"
+  presetPublicBaseUrl = "http://dtm-presets.solofarm.ru"
 }
 
 if ($DryRun) {
@@ -121,8 +123,17 @@ $envArgs = @(
   "--environment", "API_UPSTREAM_ORIGIN=$apiUpstreamOrigin",
   "--environment", "YDB_ENDPOINT=$($yc.ydb_endpoint)",
   "--environment", "YDB_DATABASE=$ydbDatabase",
-  "--environment", "YDB_METADATA_CREDENTIALS=1"
+  "--environment", "YDB_METADATA_CREDENTIALS=1",
+  "--environment", "PRESET_BUCKET=dtm-presets",
+  "--environment", "PRESET_PUBLIC_BASE_URL=http://dtm-presets.solofarm.ru",
+  "--environment", "PRESET_STORAGE_ENDPOINT=https://storage.yandexcloud.net",
+  "--environment", "PRESET_STORAGE_REGION=ru-central1"
 )
+
+if ($env:AWS_ACCESS_KEY_ID -and $env:AWS_SECRET_ACCESS_KEY) {
+  $envArgs += @("--environment", "AWS_ACCESS_KEY_ID=$($env:AWS_ACCESS_KEY_ID)")
+  $envArgs += @("--environment", "AWS_SECRET_ACCESS_KEY=$($env:AWS_SECRET_ACCESS_KEY)")
+}
 
 $args = @(
   "serverless", "function", "version", "create",

@@ -276,7 +276,25 @@ export function TimelinePage() {
   }, [isAuthPanelOpen]);
 
   if (!ctx) return null;
-  const { viewMode, setViewMode, sortMode, setSortMode, filters, setFilters, snapshotState, design, setDesign, ui, locale, setLocale, authSession } = ctx;
+  const {
+    viewMode,
+    setViewMode,
+    sortMode,
+    setSortMode,
+    filters,
+    setFilters,
+    snapshotState,
+    design,
+    setDesign,
+    ui,
+    locale,
+    setLocale,
+    authSession,
+    workbenchOpen,
+    setWorkbenchOpen,
+    setFavoritesOpen,
+    canAccessWorkbench,
+  } = ctx;
   const {
     snapshot,
     isLoading,
@@ -831,6 +849,37 @@ export function TimelinePage() {
                     {locale === "ru" ? "Открыть админку" : "Open admin"}
                   </button>
                 </div>
+
+                {canAccessWorkbench ? (
+                  <div className="authPanelSection">
+                    <div className="authPanelLabel">{locale === "ru" ? "Крутилки" : "Workbench"}</div>
+                    <div className="authPanelHint">
+                      {locale === "ru"
+                        ? "Крутилки и избранное скрыты по умолчанию и доступны только одобренным пользователям."
+                        : "Workbench and favorites stay hidden by default and are available only to approved users."}
+                    </div>
+                    <button
+                      type="button"
+                      className="btn btnGhost authMenuAction"
+                      onClick={() => {
+                        const next = !workbenchOpen;
+                        setWorkbenchOpen(next);
+                        if (!next) {
+                          setFavoritesOpen(false);
+                        }
+                        setIsAuthPanelOpen(false);
+                      }}
+                    >
+                      {workbenchOpen
+                        ? locale === "ru"
+                          ? "Скрыть крутилки"
+                          : "Hide workbench"
+                        : locale === "ru"
+                          ? "Показать крутилки"
+                          : "Show workbench"}
+                    </button>
+                  </div>
+                ) : null}
 
                 <div className="authPanelSection">
                   <button

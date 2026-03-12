@@ -18,6 +18,12 @@ export type AuthRuntimeConfig = {
   ydbDatabase: string;
   maskingSalt: string;
   adminBootstrapUid: string | null;
+  presetBucket: string;
+  presetPublicBaseUrl: string;
+  presetStorageEndpoint: string;
+  presetStorageRegion: string;
+  presetAccessKeyId: string | null;
+  presetSecretAccessKey: string | null;
 };
 
 function readRequired(name: string): string {
@@ -88,6 +94,14 @@ export function getAuthRuntimeConfig(): AuthRuntimeConfig {
     ydbDatabase: readRequired("YDB_DATABASE"),
     maskingSalt: readRequired("MASKING_SALT"),
     adminBootstrapUid: readOptional("ADMIN_BOOTSTRAP_UID"),
+    presetBucket: process.env.PRESET_BUCKET?.trim() || "dtm-presets",
+    presetPublicBaseUrl:
+      process.env.PRESET_PUBLIC_BASE_URL?.trim().replace(/\/+$/, "") || "http://dtm-presets.solofarm.ru",
+    presetStorageEndpoint:
+      process.env.PRESET_STORAGE_ENDPOINT?.trim().replace(/\/+$/, "") || "https://storage.yandexcloud.net",
+    presetStorageRegion: process.env.PRESET_STORAGE_REGION?.trim() || "ru-central1",
+    presetAccessKeyId: readOptional("AWS_ACCESS_KEY_ID"),
+    presetSecretAccessKey: readOptional("AWS_SECRET_ACCESS_KEY"),
   };
 
   return cachedConfig;

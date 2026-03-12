@@ -21,7 +21,9 @@ Source of truth в коде:
 | `dtm.snapshot.meta` | meta по snapshot | `useSnapshot.ts` |
 | `dtm.web.keyColors.v1` | текущие key colors | `Layout.tsx` / workbench |
 | `dtm.web.designControls.v1` | текущие design controls | `Layout.tsx` / workbench |
-| `dtm.web.uiPreset.v1` | активный UI preset | `Layout.tsx` / workbench |
+| `dtm.web.uiPreset.v1` | legacy combined preset для fallback-миграции | `Layout.tsx` / workbench |
+| `dtm.web.preset.activeColor.v1` | id активного color preset | `presets.ts` / workbench |
+| `dtm.web.preset.activeLayout.v1` | id активного layout preset | `presets.ts` / workbench |
 | `dtm.viewMode.v1` | текущий режим группировки | `Layout.tsx` |
 | `dtm.sortMode.v1` | текущий режим сортировки | `Layout.tsx` |
 | `dtm.locale.v1` | локаль интерфейса | `Layout.tsx` |
@@ -33,7 +35,9 @@ Source of truth в коде:
 
 - `pageView`, locale и другие runtime-параметры восстанавливаются сразу при инициализации состояния.
 - persisted snapshot и meta позволяют быстро показать данные после reload.
-- design controls и key colors восстанавливают внешний вид без отдельной загрузки preset.
+- design controls и key colors восстанавливают внешний вид независимо друг от друга.
+- active preset ids помогают после reload вернуть выбранный color/layout preset без смешивания слоёв.
+- legacy combined preset читается только как fallback, чтобы старые сохранения не сломались.
 
 ## Что считается текущим состоянием, а что дефолтом
 
@@ -42,6 +46,7 @@ Source of truth в коде:
 - defaults for new session.
 
 Current state живёт в localStorage и применяется немедленно.
+Color и layout теперь хранятся раздельно: применение color preset не должно менять layout, и наоборот.
 Defaults нового сеанса задаются отдельно через runtime defaults и используются как базовый слой при чистом старте.
 
 ## Поведение при пустом или битом storage
