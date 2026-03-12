@@ -1059,38 +1059,88 @@ export function ControlsWorkbench() {
       ) : null}
 
       <div className="wbPresetActions">
-        <button type="button" onClick={() => void applyPreset(kind, activePreset)} disabled={!activePreset}>
-          {locale === "en" ? "Apply" : "Применить"}
-        </button>
-        <button type="button" onClick={() => saveLocalDraft(kind)}>
-          {locale === "en" ? "Save local" : "Сохранить локально"}
-        </button>
-        <button type="button" onClick={() => loadLocalDraft(kind)}>
-          {locale === "en" ? "Load local" : "Загрузить локальное"}
-        </button>
-        <button type="button" onClick={() => resetDraft(kind)}>
-          {locale === "en" ? "Reset" : "Сброс"}
-        </button>
-        <button type="button" onClick={() => exportPresetFile(kind)}>
-          {locale === "en" ? "Export" : "Экспорт"}
+        <button
+          type="button"
+          className="wbIconBtn"
+          data-tooltip={locale === "en" ? "Apply selected preset" : "Применить выбранный пресет"}
+          aria-label={locale === "en" ? "Apply selected preset" : "Применить выбранный пресет"}
+          onClick={() => void applyPreset(kind, activePreset)}
+          disabled={!activePreset}
+        >
+          <PresetActionIcon name="apply" />
         </button>
         <button
           type="button"
+          className="wbIconBtn"
+          data-tooltip={locale === "en" ? "Save current values locally" : "Сохранить текущие значения локально"}
+          aria-label={locale === "en" ? "Save current values locally" : "Сохранить текущие значения локально"}
+          onClick={() => saveLocalDraft(kind)}
+        >
+          <PresetActionIcon name="save" />
+        </button>
+        <button
+          type="button"
+          className="wbIconBtn"
+          data-tooltip={locale === "en" ? "Load local draft" : "Загрузить локальный черновик"}
+          aria-label={locale === "en" ? "Load local draft" : "Загрузить локальный черновик"}
+          onClick={() => loadLocalDraft(kind)}
+        >
+          <PresetActionIcon name="load" />
+        </button>
+        <button
+          type="button"
+          className="wbIconBtn"
+          data-tooltip={locale === "en" ? "Reset current values" : "Сбросить текущие значения"}
+          aria-label={locale === "en" ? "Reset current values" : "Сбросить текущие значения"}
+          onClick={() => resetDraft(kind)}
+        >
+          <PresetActionIcon name="reset" />
+        </button>
+        <button
+          type="button"
+          className="wbIconBtn"
+          data-tooltip={locale === "en" ? "Export preset JSON" : "Экспортировать пресет в JSON"}
+          aria-label={locale === "en" ? "Export preset JSON" : "Экспортировать пресет в JSON"}
+          onClick={() => exportPresetFile(kind)}
+        >
+          <PresetActionIcon name="export" />
+        </button>
+        <button
+          type="button"
+          className="wbIconBtn"
+          data-tooltip={locale === "en" ? "Import preset JSON" : "Импортировать пресет из JSON"}
+          aria-label={locale === "en" ? "Import preset JSON" : "Импортировать пресет из JSON"}
           onClick={() => {
             setPendingImportKind(kind);
             importRef.current?.click();
           }}
         >
-          {locale === "en" ? "Import" : "Импорт"}
+          <PresetActionIcon name="import" />
         </button>
-        <button type="button" onClick={() => void saveCloudPreset(kind, activePreset)}>
-          {activePreset?.sourceKind === "cloud" && activePreset.canEdit
-            ? locale === "en"
-              ? "Update cloud"
-              : "Обновить cloud"
-            : locale === "en"
-              ? "Save to cloud"
-              : "Сохранить в cloud"}
+        <button
+          type="button"
+          className="wbIconBtn wbIconBtnCloud"
+          data-tooltip={
+            activePreset?.sourceKind === "cloud" && activePreset.canEdit
+              ? locale === "en"
+                ? "Update cloud preset"
+                : "Обновить облачный пресет"
+              : locale === "en"
+                ? "Save as cloud preset"
+                : "Сохранить как облачный пресет"
+          }
+          aria-label={
+            activePreset?.sourceKind === "cloud" && activePreset.canEdit
+              ? locale === "en"
+                ? "Update cloud preset"
+                : "Обновить облачный пресет"
+              : locale === "en"
+                ? "Save as cloud preset"
+                : "Сохранить как облачный пресет"
+          }
+          onClick={() => void saveCloudPreset(kind, activePreset)}
+        >
+          <PresetActionIcon name="cloud" />
         </button>
       </div>
     </section>
@@ -1226,4 +1276,23 @@ export function ControlsWorkbench() {
       ) : null}
     </>
   );
+}
+
+function PresetActionIcon({ name }: { name: "apply" | "save" | "load" | "reset" | "export" | "import" | "cloud" }) {
+  switch (name) {
+    case "apply":
+      return <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M5 12.5l4 4L19 7.5" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" /></svg>;
+    case "save":
+      return <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M6 4h9l3 3v13H6z" fill="none" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" /><path d="M9 4v5h6V4M9 18h6" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" /></svg>;
+    case "load":
+      return <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M12 4v11" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" /><path d="M8 11.5 12 15.5l4-4" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" /><path d="M5 19h14" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" /></svg>;
+    case "reset":
+      return <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M6 8V4H2" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" /><path d="M4.5 11a8 8 0 1 1 2.2 6" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" /></svg>;
+    case "export":
+      return <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M12 15V4" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" /><path d="m8 7.5 4-4 4 4" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" /><path d="M5 20h14" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" /></svg>;
+    case "import":
+      return <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M12 4v11" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" /><path d="m8 11.5 4 4 4-4" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" /><path d="M5 20h14" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" /></svg>;
+    case "cloud":
+      return <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M7.5 18.5h9a4 4 0 0 0 .5-8A5.5 5.5 0 0 0 6.6 9.1 3.8 3.8 0 0 0 7.5 18.5Z" fill="none" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" /><path d="M12 8.5v6" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" /><path d="m9.5 12 2.5 2.5 2.5-2.5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>;
+  }
 }

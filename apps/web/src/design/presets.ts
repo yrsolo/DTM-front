@@ -226,7 +226,7 @@ export async function loadCloudPresetCatalog(
           name: preset.name,
           description: preset.description ?? null,
           authorDisplayName: preset.authorDisplayName ?? null,
-          assetUrl: preset.storageUrl,
+          assetUrl: `${getAuthRequestBase()}/presets/${encodeURIComponent(preset.id)}/export`,
           sourceKind: "cloud" as const,
           revision: preset.revision ?? null,
           updatedAt: preset.updatedAt ?? null,
@@ -263,14 +263,19 @@ export async function loadColorPresetAsset(assetUrl: string): Promise<KeyColors 
   try {
     const res = await fetch(assetUrl, {
       headers: { accept: "application/json" },
+      credentials: "include",
       cache: "no-store",
     });
     if (!res.ok) return null;
     const parsed = (await res.json()) as Record<string, unknown>;
-    const keyColors =
-      parsed && typeof parsed === "object" && parsed.keyColors && typeof parsed.keyColors === "object"
-        ? parsed.keyColors
+    const payload =
+      parsed && typeof parsed === "object" && parsed.payload && typeof parsed.payload === "object"
+        ? (parsed.payload as Record<string, unknown>)
         : parsed;
+    const keyColors =
+      payload && typeof payload === "object" && payload.keyColors && typeof payload.keyColors === "object"
+        ? payload.keyColors
+        : payload;
     return normalizeKeyColors(keyColors as Partial<KeyColors>);
   } catch {
     return null;
@@ -281,14 +286,19 @@ export async function loadLayoutPresetAsset(assetUrl: string): Promise<DesignCon
   try {
     const res = await fetch(assetUrl, {
       headers: { accept: "application/json" },
+      credentials: "include",
       cache: "no-store",
     });
     if (!res.ok) return null;
     const parsed = (await res.json()) as Record<string, unknown>;
-    const design =
-      parsed && typeof parsed === "object" && parsed.design && typeof parsed.design === "object"
-        ? parsed.design
+    const payload =
+      parsed && typeof parsed === "object" && parsed.payload && typeof parsed.payload === "object"
+        ? (parsed.payload as Record<string, unknown>)
         : parsed;
+    const design =
+      payload && typeof payload === "object" && payload.design && typeof payload.design === "object"
+        ? payload.design
+        : payload;
     return normalizeDesignControls(design as Partial<DesignControls>);
   } catch {
     return null;
