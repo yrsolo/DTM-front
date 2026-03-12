@@ -1,7 +1,7 @@
 import React from "react";
 
 import { LayoutContext } from "../components/Layout";
-import { getAuthRequestBase } from "../config/runtimeContour";
+import { getAuthRequestBase, getTasksRoute } from "../config/runtimeContour";
 
 type AdminUserCard = {
   id: string;
@@ -49,6 +49,11 @@ type AdminOverview = {
 
 function buildAuthUrl(path: string): string {
   return `${getAuthRequestBase()}${path}`;
+}
+
+function goToTimeline(): void {
+  if (typeof window === "undefined") return;
+  window.location.assign(getTasksRoute());
 }
 
 function formatRequestedAt(value: string): string {
@@ -317,6 +322,9 @@ export function AdminPage() {
       <div className="card">
         <div className="pageHeader">
           <h3 className="pageTitle">Админка</h3>
+          <button type="button" className="adminCloseButton" onClick={goToTimeline} aria-label="Вернуться на таймлайн" title="Вернуться на таймлайн">
+            ×
+          </button>
         </div>
         <p className="muted">Загружаем данные доступа, пользователей и preset catalog...</p>
       </div>
@@ -328,6 +336,9 @@ export function AdminPage() {
       <div className="card">
         <div className="pageHeader">
           <h3 className="pageTitle">Админка</h3>
+          <button type="button" className="adminCloseButton" onClick={goToTimeline} aria-label="Вернуться на таймлайн" title="Вернуться на таймлайн">
+            ×
+          </button>
         </div>
         <p className="muted">Войдите через Яндекс, чтобы открыть админку.</p>
       </div>
@@ -339,6 +350,9 @@ export function AdminPage() {
       <div className="card">
         <div className="pageHeader">
           <h3 className="pageTitle">Админка</h3>
+          <button type="button" className="adminCloseButton" onClick={goToTimeline} aria-label="Вернуться на таймлайн" title="Вернуться на таймлайн">
+            ×
+          </button>
         </div>
         <p className="muted">У вашей учётной записи нет прав администратора.</p>
       </div>
@@ -349,6 +363,9 @@ export function AdminPage() {
     <div className="card">
       <div className="pageHeader">
         <h3 className="pageTitle">Админка</h3>
+        <button type="button" className="adminCloseButton" onClick={goToTimeline} aria-label="Вернуться на таймлайн" title="Вернуться на таймлайн">
+          ×
+        </button>
       </div>
 
       {error ? <p className="muted">{error}</p> : null}
