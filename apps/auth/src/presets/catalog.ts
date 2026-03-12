@@ -47,6 +47,20 @@ const CATALOG_KEY = "catalog/index.json";
 
 let cachedClient: S3Client | null = null;
 
+function trimTrailingSlashes(value: string): string {
+  return value.replace(/\/+$/, "");
+}
+
+function canonicalStorageAssetUrl(key: string): string {
+  const cfg = getAuthRuntimeConfig();
+  return `${trimTrailingSlashes(cfg.presetStorageEndpoint)}/${cfg.presetBucket}/${key}`;
+}
+
+function preferredPublicAssetUrl(key: string): string {
+  const cfg = getAuthRuntimeConfig();
+  return `${trimTrailingSlashes(cfg.presetPublicBaseUrl)}/${key}`;
+}
+
 function hasPresetWriteAccess(): boolean {
   const cfg = getAuthRuntimeConfig();
   return Boolean(cfg.presetAccessKeyId && cfg.presetSecretAccessKey);
@@ -79,34 +93,38 @@ function emptyCatalog(): PresetCatalog {
 }
 
 async function readObjectText(key: string): Promise<string | null> {
-  const cfg = getAuthRuntimeConfig();
-  const publicUrl = `${cfg.presetPublicBaseUrl}/${key}`;
-
-  try {
-    const res = await fetch(publicUrl, {
-      headers: { accept: "application/json" },
-      cache: "no-store",
-    });
-    if (res.status === 404) return null;
-    if (res.ok) return await res.text();
-  } catch {
-    // fallback to signed read below
+  if (hasPresetWriteAccess()) {
+    try {
+      const cfg = getAuthRuntimeConfig();
+      const object = await getClient().send(
+        new GetObjectCommand({
+          Bucket: cfg.presetBucket,
+          Key: key,
+        })
+      );
+      if (object.Body) {
+        return await object.Body.transformToString();
+      }
+    } catch {
+      // fallback to public reads below
+    }
   }
 
-  if (!hasPresetWriteAccess()) return null;
+  const urls = [preferredPublicAssetUrl(key), canonicalStorageAssetUrl(key)];
 
-  try {
-    const object = await getClient().send(
-      new GetObjectCommand({
-        Bucket: cfg.presetBucket,
-        Key: key,
-      })
-    );
-    if (!object.Body) return null;
-    return await object.Body.transformToString();
-  } catch {
-    return null;
+  for (const url of urls) {
+    try {
+      const res = await fetch(url, {
+        headers: { accept: "application/json" },
+        cache: "no-store",
+      });
+      if (res.ok) return await res.text();
+    } catch {
+      // continue to next public URL candidate
+    }
   }
+
+  return null;
 }
 
 async function writeObjectJson(key: string, payload: unknown): Promise<void> {
@@ -123,8 +141,7 @@ async function writeObjectJson(key: string, payload: unknown): Promise<void> {
 }
 
 function publicAssetUrl(key: string): string {
-  const cfg = getAuthRuntimeConfig();
-  return `${cfg.presetPublicBaseUrl}/${key}`;
+  return canonicalStorageAssetUrl(key);
 }
 
 function normalizeCatalog(input: unknown): PresetCatalog {
@@ -143,7 +160,7 @@ function normalizeCatalog(input: unknown): PresetCatalog {
           authorUserId: String(item.authorUserId || ""),
           authorDisplayName: typeof item.authorDisplayName === "string" ? item.authorDisplayName : null,
           storageKey: String(item.storageKey || ""),
-          storageUrl: String(item.storageUrl || publicAssetUrl(String(item.storageKey || ""))),
+          storageUrl: publicAssetUrl(String(item.storageKey || "")),
           revision: Number.isFinite(Number(item.revision)) ? Number(item.revision) : 1,
           isDeleted: Boolean(item.isDeleted),
           createdAt: typeof item.createdAt === "string" ? item.createdAt : new Date(0).toISOString(),
