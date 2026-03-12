@@ -13,6 +13,13 @@ import type { AuthUser } from "../types";
 export type PresetKind = "color" | "layout";
 export type PresetAvailability = "ready" | "broken" | "unavailable";
 
+export class PresetStorageUnavailableError extends Error {
+  constructor(message = "Preset storage is unavailable") {
+    super(message);
+    this.name = "PresetStorageUnavailableError";
+  }
+}
+
 export type PresetCatalogEntry = {
   id: string;
   kind: PresetKind;
@@ -49,7 +56,7 @@ function getClient(): S3Client {
   if (cachedClient) return cachedClient;
   const cfg = getAuthRuntimeConfig();
   if (!cfg.presetAccessKeyId || !cfg.presetSecretAccessKey) {
-    throw new Error("Preset storage credentials are not configured");
+    throw new PresetStorageUnavailableError("Preset storage credentials are not configured");
   }
   cachedClient = new S3Client({
     region: cfg.presetStorageRegion,
@@ -166,7 +173,7 @@ export async function readPresetCatalog(): Promise<PresetCatalog> {
 
 async function writePresetCatalog(catalog: PresetCatalog): Promise<void> {
   if (!hasPresetWriteAccess()) {
-    throw new Error("Preset storage is read-only");
+    throw new PresetStorageUnavailableError("Preset storage is read-only");
   }
   await writeObjectJson(CATALOG_KEY, catalog);
 }
@@ -177,7 +184,7 @@ function buildStorageKey(kind: PresetKind, presetId: string, revision: number): 
 
 async function writePresetPayload(key: string, payload: PresetPayloadRecord): Promise<void> {
   if (!hasPresetWriteAccess()) {
-    throw new Error("Preset storage is read-only");
+    throw new PresetStorageUnavailableError("Preset storage is read-only");
   }
   await writeObjectJson(key, payload);
 }

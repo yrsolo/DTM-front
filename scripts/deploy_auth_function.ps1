@@ -8,6 +8,23 @@ $ErrorActionPreference = "Stop"
 $repoRoot = Split-Path -Parent $PSScriptRoot
 Set-Location $repoRoot
 
+function Read-DotEnvValue([string]$name) {
+  $envFile = Join-Path $repoRoot ".env"
+  if (-not (Test-Path $envFile)) { return $null }
+  $match = [regex]::Match((Get-Content $envFile -Raw), "(?m)^$([regex]::Escape($name))=(.*)$")
+  if (-not $match.Success) { return $null }
+  return $match.Groups[1].Value.Trim()
+}
+
+foreach ($envName in @("YC_SA_JSON_CREDENTIALS", "AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY")) {
+  if (-not [Environment]::GetEnvironmentVariable($envName)) {
+    $dotenvValue = Read-DotEnvValue $envName
+    if ($dotenvValue) {
+      [Environment]::SetEnvironmentVariable($envName, $dotenvValue, "Process")
+    }
+  }
+}
+
 function Parse-SimpleYaml([string]$raw) {
   $root = @{}
   $current = $null

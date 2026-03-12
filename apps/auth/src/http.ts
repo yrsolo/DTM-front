@@ -71,6 +71,10 @@ export function internalError(message = "Internal error"): HttpResult {
   return json(500, { error: message });
 }
 
+export function serviceUnavailable(message = "Service unavailable"): HttpResult {
+  return json(503, { error: message });
+}
+
 export function appendSetCookie(
   result: HttpResult,
   cookieValue: string

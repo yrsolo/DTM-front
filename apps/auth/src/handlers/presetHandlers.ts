@@ -1,4 +1,4 @@
-import { badRequest, forbidden, json, notFound } from "../http";
+import { badRequest, forbidden, json, notFound, serviceUnavailable } from "../http";
 import { resolveSession } from "../middleware/auth";
 import type { NormalizedRequest } from "../types";
 import {
@@ -10,6 +10,7 @@ import {
   getPresetEntryById,
   listPresetEntries,
   markPresetDeleted,
+  PresetStorageUnavailableError,
   setDefaultPreset,
   updatePreset,
   type PresetKind,
@@ -28,6 +29,13 @@ function parseJsonBody(req: NormalizedRequest): Record<string, unknown> | null {
   } catch {
     return null;
   }
+}
+
+function mapPresetWriteError(error: unknown) {
+  if (error instanceof PresetStorageUnavailableError) {
+    return serviceUnavailable(error.message);
+  }
+  throw error;
 }
 
 async function requireApprovedUser(req: NormalizedRequest) {
@@ -71,14 +79,18 @@ export async function createPresetHandler(req: NormalizedRequest) {
   if (typeof body.name !== "string" || !body.name.trim()) return badRequest("name is required");
   if (!body.payload || typeof body.payload !== "object") return badRequest("payload is required");
 
-  const preset = await createPreset({
-    kind,
-    name: body.name,
-    description: typeof body.description === "string" ? body.description : null,
-    payload: body.payload as Record<string, unknown>,
-    actor: auth.user,
-  });
-  return json(200, { ok: true, preset });
+  try {
+    const preset = await createPreset({
+      kind,
+      name: body.name,
+      description: typeof body.description === "string" ? body.description : null,
+      payload: body.payload as Record<string, unknown>,
+      actor: auth.user,
+    });
+    return json(200, { ok: true, preset });
+  } catch (error) {
+    return mapPresetWriteError(error);
+  }
 }
 
 export async function updatePresetHandler(req: NormalizedRequest, presetId: string) {
@@ -95,13 +107,17 @@ export async function updatePresetHandler(req: NormalizedRequest, presetId: stri
   if (typeof body.name !== "string" || !body.name.trim()) return badRequest("name is required");
   if (!body.payload || typeof body.payload !== "object") return badRequest("payload is required");
 
-  const preset = await updatePreset({
-    entry,
-    name: body.name,
-    description: typeof body.description === "string" ? body.description : null,
-    payload: body.payload as Record<string, unknown>,
-  });
-  return json(200, { ok: true, preset });
+  try {
+    const preset = await updatePreset({
+      entry,
+      name: body.name,
+      description: typeof body.description === "string" ? body.description : null,
+      payload: body.payload as Record<string, unknown>,
+    });
+    return json(200, { ok: true, preset });
+  } catch (error) {
+    return mapPresetWriteError(error);
+  }
 }
 
 export async function deletePresetHandler(req: NormalizedRequest, presetId: string) {
@@ -113,8 +129,12 @@ export async function deletePresetHandler(req: NormalizedRequest, presetId: stri
     return forbidden("You can delete only your own presets");
   }
 
-  await markPresetDeleted(entry.id);
-  return json(200, { ok: true });
+  try {
+    await markPresetDeleted(entry.id);
+    return json(200, { ok: true });
+  } catch (error) {
+    return mapPresetWriteError(error);
+  }
 }
 
 export async function clonePresetHandler(req: NormalizedRequest, presetId: string) {
@@ -130,15 +150,19 @@ export async function clonePresetHandler(req: NormalizedRequest, presetId: strin
   if (typeof body.name !== "string" || !body.name.trim()) return badRequest("name is required");
   if (!body.payload || typeof body.payload !== "object") return badRequest("payload is required");
 
-  const preset = await clonePreset({
-    source,
-    kind,
-    name: body.name,
-    description: typeof body.description === "string" ? body.description : source.description,
-    payload: body.payload as Record<string, unknown>,
-    actor: auth.user,
-  });
-  return json(200, { ok: true, preset });
+  try {
+    const preset = await clonePreset({
+      source,
+      kind,
+      name: body.name,
+      description: typeof body.description === "string" ? body.description : source.description,
+      payload: body.payload as Record<string, unknown>,
+      actor: auth.user,
+    });
+    return json(200, { ok: true, preset });
+  } catch (error) {
+    return mapPresetWriteError(error);
+  }
 }
 
 export async function setDefaultPresetHandler(req: NormalizedRequest, presetId: string) {
@@ -150,8 +174,12 @@ export async function setDefaultPresetHandler(req: NormalizedRequest, presetId: 
   const kind = parseKind(typeof body?.kind === "string" ? body.kind : entry?.kind ?? null);
   if (!kind) return badRequest("kind is required");
 
-  await setDefaultPreset(kind, presetId);
-  return json(200, { ok: true });
+  try {
+    await setDefaultPreset(kind, presetId);
+    return json(200, { ok: true });
+  } catch (error) {
+    return mapPresetWriteError(error);
+  }
 }
 
 export async function importPresetHandler(req: NormalizedRequest) {

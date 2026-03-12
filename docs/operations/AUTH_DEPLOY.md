@@ -67,6 +67,8 @@ scripts\deploy_auth_function_prod.cmd
 powershell -ExecutionPolicy Bypass -File scripts/deploy_auth_function.ps1 -Target prod
 ```
 
+Локальные deploy scripts пытаются взять `YC_SA_JSON_CREDENTIALS`, `AWS_ACCESS_KEY_ID` и `AWS_SECRET_ACCESS_KEY` из process env, а если их нет, читают эти значения из repo `.env`.
+
 ## Combined contour deploy
 
 Если нужно задеплоить frontend и auth вместе:

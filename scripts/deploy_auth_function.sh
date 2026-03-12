@@ -4,6 +4,24 @@ set -euo pipefail
 TARGET="test"
 DRY_RUN="false"
 
+read_dotenv_value() {
+  local key="$1"
+  [[ -f .env ]] || return 0
+  local line
+  line="$(grep -m1 "^${key}=" .env || true)"
+  [[ -n "$line" ]] || return 0
+  printf '%s' "${line#*=}"
+}
+
+for env_name in YC_SA_JSON_CREDENTIALS AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY; do
+  if [[ -z "${!env_name:-}" ]]; then
+    dotenv_value="$(read_dotenv_value "$env_name")"
+    if [[ -n "$dotenv_value" ]]; then
+      export "$env_name=$dotenv_value"
+    fi
+  fi
+done
+
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --target)
