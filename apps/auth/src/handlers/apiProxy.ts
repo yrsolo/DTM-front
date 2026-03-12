@@ -34,6 +34,8 @@ const STRIP_RESPONSE_HEADERS = new Set([
   "access-control-allow-headers",
   "access-control-allow-methods",
   "vary",
+  "content-encoding",
+  "content-length",
 ]);
 
 export async function proxyApiRequest(req: NormalizedRequest) {
