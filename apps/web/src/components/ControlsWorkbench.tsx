@@ -1019,6 +1019,7 @@ export function ControlsWorkbench() {
             const next = presets.find((preset) => preset.id === event.target.value) ?? null;
             if (kind === "color") setActiveColorPresetId(next?.id ?? null);
             else setActiveLayoutPresetId(next?.id ?? null);
+            void applyPreset(kind, next);
           }}
         >
           {presets.map((preset) => (
