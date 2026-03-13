@@ -584,7 +584,7 @@ export function AdminPage() {
                     <PresetKindBadge kind={kind} />
                     <div className="adminUserBody">
                       <div className="adminUserName">{preset.name}</div>
-                      <div className="muted">{preset.description || "Без описания"}</div>
+                      <div className="muted adminPresetDescription">{preset.description || "Без описания"}</div>
                       <div className="muted">Автор: {preset.authorDisplayName || "не указан"}</div>
                       <div className="muted">Revision: {preset.revision ?? "-"}</div>
                       <div className="muted">Обновлён: {preset.updatedAt ? formatRequestedAt(preset.updatedAt) : "-"}</div>

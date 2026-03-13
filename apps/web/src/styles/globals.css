@@ -2530,7 +2530,7 @@ button:hover {
 .adminPresetBrick {
   position: relative;
   min-height: 0;
-  padding-top: 42px;
+  padding-top: 38px;
 }
 
 .adminPresetSplit {
@@ -2539,20 +2539,22 @@ button:hover {
 
 .adminPresetColumn {
   min-height: 0;
-  max-height: 72vh;
-  overflow: auto;
+  overflow: visible;
 }
 
 .adminPresetGrid {
-  grid-template-columns: repeat(auto-fit, minmax(260px, 320px));
+  grid-template-columns: repeat(auto-fit, minmax(320px, 380px));
   justify-content: start;
   align-content: start;
+  max-height: 72vh;
+  overflow: auto;
+  padding-right: 6px;
 }
 
 .adminPresetKindBadge {
   position: absolute;
-  top: 12px;
-  left: 12px;
+  top: 10px;
+  left: 10px;
   width: 28px;
   height: 28px;
   display: inline-flex;
@@ -2574,6 +2576,16 @@ button:hover {
   color: #f5cf62;
   font-size: 18px;
   line-height: 1;
+}
+
+.adminPresetDescription {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 @media (max-width: 800px) {
