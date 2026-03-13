@@ -9,8 +9,12 @@ type OAuthStatePayload = {
   iat: number;
 };
 
-const OAUTH_STATE_COOKIE = "dtm_oauth_state";
 const TTL_SECONDS = 600;
+
+function getOAuthStateCookieName(): string {
+  const cfg = getAuthRuntimeConfig();
+  return `${cfg.cookieName}_oauth_state`;
+}
 
 function base64urlEncode(value: string): string {
   return Buffer.from(value, "utf8").toString("base64url");
@@ -30,6 +34,7 @@ function parseCookieHeader(cookieHeader: string | undefined): Record<string, str
   for (const rawPart of (cookieHeader ?? "").split(";")) {
     const [rawName, ...rawValue] = rawPart.trim().split("=");
     if (!rawName) continue;
+    if (cookies[rawName] != null) continue;
     cookies[rawName] = rawValue.join("=");
   }
   return cookies;
@@ -46,13 +51,13 @@ export function createOAuthStateCookie(returnTo: string, popup: boolean): { cook
   const encoded = base64urlEncode(JSON.stringify(payload));
   const sig = sign(encoded);
   const secure = cfg.cookieSecure ? "; Secure" : "";
-  const cookie = `${OAUTH_STATE_COOKIE}=${encoded}.${sig}; HttpOnly; Path=/; Max-Age=${TTL_SECONDS}; SameSite=Lax${secure}`;
+  const cookie = `${getOAuthStateCookieName()}=${encoded}.${sig}; HttpOnly; Path=${cfg.authBasePath}; Max-Age=${TTL_SECONDS}; SameSite=Lax${secure}`;
   return { cookie, state: payload.state };
 }
 
 export function readOAuthState(cookieHeader: string | undefined): OAuthStatePayload | null {
   const cookies = parseCookieHeader(cookieHeader);
-  const raw = cookies[OAUTH_STATE_COOKIE];
+  const raw = cookies[getOAuthStateCookieName()];
   if (!raw) return null;
 
   const [payload, signature] = raw.split(".");
@@ -77,5 +82,5 @@ export function readOAuthState(cookieHeader: string | undefined): OAuthStatePayl
 export function clearOAuthStateCookie(): string {
   const cfg = getAuthRuntimeConfig();
   const secure = cfg.cookieSecure ? "; Secure" : "";
-  return `${OAUTH_STATE_COOKIE}=; HttpOnly; Path=/; Max-Age=0; SameSite=Lax${secure}`;
+  return `${getOAuthStateCookieName()}=; HttpOnly; Path=${cfg.authBasePath}; Max-Age=0; SameSite=Lax${secure}`;
 }

@@ -61,6 +61,11 @@ function readNumber(name: string, fallback: number): number {
   return Math.floor(parsed);
 }
 
+function deriveContourCookieName(baseName: string, contour: Contour): string {
+  const suffix = `_${contour}`;
+  return baseName.endsWith(suffix) ? baseName : `${baseName}${suffix}`;
+}
+
 let cachedConfig: AuthRuntimeConfig | null = null;
 
 export function getAuthRuntimeConfig(): AuthRuntimeConfig {
@@ -85,7 +90,7 @@ export function getAuthRuntimeConfig(): AuthRuntimeConfig {
     yandexClientSecret: readRequired(yandexClientSecretVar),
     sessionSigningSecret: readRequired("SESSION_SIGNING_SECRET"),
     sessionTtlSeconds: readNumber("SESSION_TTL_SECONDS", 60 * 60 * 12),
-    cookieName: readRequired("COOKIE_NAME"),
+    cookieName: deriveContourCookieName(readRequired("COOKIE_NAME"), contour),
     cookiePath: process.env.COOKIE_PATH?.trim() || "/",
     cookieSameSite:
       (process.env.COOKIE_SAMESITE?.trim() as "Lax" | "Strict" | "None" | undefined) || "Lax",

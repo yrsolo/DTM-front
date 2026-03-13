@@ -138,6 +138,10 @@ Check lockbox / env entries:
 - `SESSION_TTL_SECONDS`
 - `BROWSER_AUTH_PROXY_SECRET`
 
+Note:
+- session cookie name is made contour-specific at runtime (`..._test` / `..._prod`)
+- OAuth state cookie is also contour-specific and scoped to `AUTH_BASE_PATH`
+
 ## Function does not see YDB
 
 Check:

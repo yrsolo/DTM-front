@@ -21,6 +21,7 @@ function parseCookieHeader(cookieHeader: string | undefined): Record<string, str
   for (const rawPart of (cookieHeader ?? "").split(";")) {
     const [rawName, ...rawValue] = rawPart.trim().split("=");
     if (!rawName) continue;
+    if (cookies[rawName] != null) continue;
     cookies[rawName] = rawValue.join("=");
   }
   return cookies;

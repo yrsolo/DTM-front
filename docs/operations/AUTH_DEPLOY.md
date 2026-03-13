@@ -141,6 +141,10 @@ Contour-specific OAuth credentials считаются canonical:
 - `SESSION_TTL_SECONDS`
 - `BROWSER_AUTH_PROXY_SECRET`
 
+Cookie behavior:
+- runtime автоматически делает session cookie contour-specific, добавляя suffix `_test` или `_prod` к `COOKIE_NAME`
+- OAuth state cookie тоже contour-specific и ограничивается `AUTH_BASE_PATH`, чтобы `test` и `prod` на одном домене не конфликтовали
+
 Current operational value:
 - `SESSION_TTL_SECONDS=15552000` (`180` days, about half a year)
 - `AWS_ACCESS_KEY_ID`
