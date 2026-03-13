@@ -136,6 +136,7 @@ export function AdminPage() {
   const [orderedColorPresets, setOrderedColorPresets] = React.useState<PresetCard[]>([]);
   const [orderedLayoutPresets, setOrderedLayoutPresets] = React.useState<PresetCard[]>([]);
   const [dragState, setDragState] = React.useState<{ list: DragListKey; id: string } | null>(null);
+  const [dragTarget, setDragTarget] = React.useState<{ list: DragListKey; id: string } | null>(null);
   const importRef = React.useRef<HTMLInputElement | null>(null);
 
   const authSession = ctx?.authSession;
@@ -182,6 +183,19 @@ export function AdminPage() {
       if (list === "colorPresets") setOrderedColorPresets((items) => reorderById(items, current.id, targetId));
       if (list === "layoutPresets") setOrderedLayoutPresets((items) => reorderById(items, current.id, targetId));
       return null;
+    });
+    setDragTarget(null);
+  }, []);
+
+  const moveDragOver = React.useCallback((list: DragListKey, targetId: string) => {
+    setDragTarget({ list, id: targetId });
+    setDragState((current) => {
+      if (!current || current.list !== list || current.id === targetId) return current;
+      if (list === "pendingUsers") setOrderedPendingUsers((items) => reorderById(items, current.id, targetId));
+      if (list === "approvedUsers") setOrderedApprovedUsers((items) => reorderById(items, current.id, targetId));
+      if (list === "colorPresets") setOrderedColorPresets((items) => reorderById(items, current.id, targetId));
+      if (list === "layoutPresets") setOrderedLayoutPresets((items) => reorderById(items, current.id, targetId));
+      return { ...current, id: targetId };
     });
   }, []);
 
@@ -430,12 +444,16 @@ export function AdminPage() {
             {orderedPendingUsers.map((user) => (
               <div
                 key={user.id}
-                className={`adminUserCard adminUserBrick ${dragState?.list === "pendingUsers" && dragState.id === user.id ? "isDragging" : ""}`}
+                className={`adminUserCard adminUserBrick ${dragState?.list === "pendingUsers" && dragState.id === user.id ? "isDragging" : ""} ${dragTarget?.list === "pendingUsers" && dragTarget.id === user.id ? "isDragTarget" : ""}`}
                 draggable
                 onDragStart={() => startDrag("pendingUsers", user.id)}
                 onDragOver={(event) => event.preventDefault()}
+                onDragEnter={() => moveDragOver("pendingUsers", user.id)}
                 onDrop={() => dropOn("pendingUsers", user.id)}
-                onDragEnd={() => setDragState(null)}
+                onDragEnd={() => {
+                  setDragState(null);
+                  setDragTarget(null);
+                }}
               >
                 <UserAvatar name={user.displayName} email={user.email} avatarUrl={user.avatarUrl} />
                 <div className="adminUserBody">
@@ -466,12 +484,16 @@ export function AdminPage() {
               return (
                 <div
                   key={user.id}
-                  className={`adminUserCard adminUserBrick ${dragState?.list === "approvedUsers" && dragState.id === user.id ? "isDragging" : ""}`}
+                  className={`adminUserCard adminUserBrick ${dragState?.list === "approvedUsers" && dragState.id === user.id ? "isDragging" : ""} ${dragTarget?.list === "approvedUsers" && dragTarget.id === user.id ? "isDragTarget" : ""}`}
                   draggable
                   onDragStart={() => startDrag("approvedUsers", user.id)}
                   onDragOver={(event) => event.preventDefault()}
+                  onDragEnter={() => moveDragOver("approvedUsers", user.id)}
                   onDrop={() => dropOn("approvedUsers", user.id)}
-                  onDragEnd={() => setDragState(null)}
+                  onDragEnd={() => {
+                    setDragState(null);
+                    setDragTarget(null);
+                  }}
                 >
                   <UserAvatar name={user.displayName} email={user.email} avatarUrl={user.avatarUrl} />
                   <div className="adminUserBody">
@@ -574,12 +596,16 @@ export function AdminPage() {
                 {(kind === "color" ? orderedColorPresets : orderedLayoutPresets).map((preset) => (
                   <div
                     key={preset.id}
-                    className={`adminUserCard adminUserBrick adminPresetBrick ${dragState?.list === (kind === "color" ? "colorPresets" : "layoutPresets") && dragState.id === preset.id ? "isDragging" : ""}`}
+                    className={`adminUserCard adminUserBrick adminPresetBrick ${dragState?.list === (kind === "color" ? "colorPresets" : "layoutPresets") && dragState.id === preset.id ? "isDragging" : ""} ${dragTarget?.list === (kind === "color" ? "colorPresets" : "layoutPresets") && dragTarget.id === preset.id ? "isDragTarget" : ""}`}
                     draggable
                     onDragStart={() => startDrag(kind === "color" ? "colorPresets" : "layoutPresets", preset.id)}
                     onDragOver={(event) => event.preventDefault()}
+                    onDragEnter={() => moveDragOver(kind === "color" ? "colorPresets" : "layoutPresets", preset.id)}
                     onDrop={() => dropOn(kind === "color" ? "colorPresets" : "layoutPresets", preset.id)}
-                    onDragEnd={() => setDragState(null)}
+                    onDragEnd={() => {
+                      setDragState(null);
+                      setDragTarget(null);
+                    }}
                   >
                     <PresetKindBadge kind={kind} />
                     <div className="adminUserBody">
