@@ -2,6 +2,7 @@ import { badRequest, forbidden, json } from "../http";
 import { listAllowlistEntries, addAllowlistEmail, removeAllowlistEmail } from "../db/allowlistRepo";
 import { closeAccessRequestsForUser, listAccessRequests } from "../db/accessRequestsRepo";
 import { writeAuditLog } from "../db/auditRepo";
+import { getAdminLayoutPrefs, saveAdminLayoutOrder, type AdminLayoutListKey } from "../db/adminLayoutPrefsRepo";
 import { ensureAdminRole, resolveSession } from "../middleware/auth";
 import { listPresetEntries } from "../presets/catalog";
 import { incrementSessionVersion, listUsersByStatus, setUserStatus, upsertRole } from "../db/usersRepo";
@@ -24,17 +25,39 @@ function parseJsonBody(req: NormalizedRequest): any {
   }
 }
 
+function applyPersonalOrder<T extends { id: string }>(items: T[], order: string[]): T[] {
+  if (!order.length) return items;
+  const byId = new Map(items.map((item) => [item.id, item] as const));
+  const ordered: T[] = [];
+  const used = new Set<string>();
+
+  for (const id of order) {
+    const item = byId.get(id);
+    if (!item || used.has(id)) continue;
+    ordered.push(item);
+    used.add(id);
+  }
+
+  for (const item of items) {
+    if (used.has(item.id)) continue;
+    ordered.push(item);
+  }
+
+  return ordered;
+}
+
 export async function listAdminData(req: NormalizedRequest) {
   const auth = await requireAdmin(req);
   if (auth.error) return auth.error;
 
-  const [pendingUsers, approvedUsers, allowlist, accessRequests, colorPresets, layoutPresets] = await Promise.all([
+  const [pendingUsers, approvedUsers, allowlist, accessRequests, colorPresets, layoutPresets, prefs] = await Promise.all([
     listUsersByStatus("pending"),
     listUsersByStatus("approved"),
     listAllowlistEntries(),
     listAccessRequests(),
     listPresetEntries("color", auth.user),
     listPresetEntries("layout", auth.user),
+    getAdminLayoutPrefs(auth.user.id),
   ]);
 
   const latestRequestByUserId = new Map<string, string>();
@@ -55,19 +78,55 @@ export async function listAdminData(req: NormalizedRequest) {
     avatarUrl: user.avatarUrl,
   });
 
+  const orderedPendingUsers = applyPersonalOrder(pendingUsers.map(mapUserCard), prefs?.pendingUsers ?? []);
+  const orderedApprovedUsers = applyPersonalOrder(approvedUsers.map(mapUserCard), prefs?.approvedUsers ?? []);
+  const orderedColorPresets = applyPersonalOrder(colorPresets.presets, prefs?.colorPresets ?? []);
+  const orderedLayoutPresets = applyPersonalOrder(layoutPresets.presets, prefs?.layoutPresets ?? []);
+
   return json(200, {
-    pendingUsers: pendingUsers.map(mapUserCard),
-    approvedUsers: approvedUsers.map(mapUserCard),
+    pendingUsers: orderedPendingUsers,
+    approvedUsers: orderedApprovedUsers,
     allowlist,
     presets: {
-      color: colorPresets.presets,
-      layout: layoutPresets.presets,
+      color: orderedColorPresets,
+      layout: orderedLayoutPresets,
       defaults: {
         color: colorPresets.defaults.color,
         layout: layoutPresets.defaults.layout,
       },
     },
   });
+}
+
+export async function saveAdminLayoutOrderHandler(req: NormalizedRequest) {
+  const auth = await requireAdmin(req);
+  if (auth.error) return auth.error;
+
+  const body = parseJsonBody(req);
+  if (!body || typeof body !== "object") {
+    return badRequest("Request body must be a JSON object");
+  }
+
+  const list = body.list;
+  const ids = body.ids;
+  const allowedLists = new Set<AdminLayoutListKey>(["pendingUsers", "approvedUsers", "colorPresets", "layoutPresets"]);
+  if (typeof list !== "string" || !allowedLists.has(list as AdminLayoutListKey)) {
+    return badRequest("Unknown layout order list");
+  }
+  if (!Array.isArray(ids) || ids.some((id) => typeof id !== "string" || !id)) {
+    return badRequest("ids must be a non-empty string array");
+  }
+
+  const uniqueIds = [...new Set(ids)];
+  await saveAdminLayoutOrder(auth.user.id, list as AdminLayoutListKey, uniqueIds);
+  await writeAuditLog({
+    actorUserId: auth.user.id,
+    targetUserId: null,
+    action: "admin.layout_order_update",
+    payloadJson: JSON.stringify({ list, ids: uniqueIds }),
+  });
+
+  return json(200, { ok: true, list, ids: uniqueIds });
 }
 
 export async function approveUserHandler(req: NormalizedRequest, userId: string) {

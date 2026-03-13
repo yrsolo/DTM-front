@@ -1,4 +1,5 @@
 import React from "react";
+import { useLocation } from "react-router-dom";
 import { useSnapshot } from "../data/useSnapshot";
 import { resolvePublicAssetUrl } from "../config/publicPaths";
 import { AppLocale, getUiText, UiText } from "../i18n/uiText";
@@ -139,6 +140,7 @@ function sanitizeRuntimeDefaultsForHost(input: RuntimeDefaults): RuntimeDefaults
 }
 
 export function Layout(props: { children: React.ReactNode }) {
+  const location = useLocation();
   const INTRO_FADE_MS = 3000;
   const INTRO_VIDEO_DELAY_MS = 1000;
   const brandIconUrl = React.useMemo(() => resolvePublicAssetUrl("dtm_ico_64x64.png"), []);
@@ -590,6 +592,10 @@ export function Layout(props: { children: React.ReactNode }) {
     };
   }, [layoutVarsStyle]);
 
+  const isAdminRoute = location.pathname === "/admin";
+  const appShellClassName = isAdminRoute ? "appShell adminShell" : "appShell";
+  const containerClassName = isAdminRoute ? "container adminContainer" : "container";
+
   return (
     <LayoutContext.Provider
       value={{
@@ -626,7 +632,7 @@ export function Layout(props: { children: React.ReactNode }) {
         authSession,
       }}
     >
-      <div className="appShell" style={layoutVarsStyle}>
+      <div className={appShellClassName} style={layoutVarsStyle}>
         <div className="topbar">
           <div className="nav">
             <div className="brand">
@@ -645,7 +651,7 @@ export function Layout(props: { children: React.ReactNode }) {
             </div>
           </div>
         </div>
-        <div className="container">{props.children}</div>
+        <div className={containerClassName}>{props.children}</div>
         {introState !== "idle" ? (
           <div
             className={`logoIntroOverlay ${introState === "exit" ? "isExit" : introOverlayActive ? "isActive" : ""}`}

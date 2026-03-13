@@ -9,6 +9,7 @@ import {
   removeAdminHandler,
   removeAllowlistEmailHandler,
   revokeApprovedUserHandler,
+  saveAdminLayoutOrderHandler,
 } from "./handlers/adminHandlers";
 import { callback, login, logout, me } from "./handlers/authHandlers";
 import { proxyApiRequest } from "./handlers/apiProxy";
@@ -51,6 +52,9 @@ export async function routeRequest(req: NormalizedRequest): Promise<HttpResult> 
     }
     if (req.method === "GET" && req.routePath === "/admin/overview") {
       return listAdminData(req);
+    }
+    if (req.method === "POST" && req.routePath === "/admin/layout-order") {
+      return saveAdminLayoutOrderHandler(req);
     }
     if (req.method === "GET" && req.routePath === "/presets") {
       return listPresetsHandler(req);

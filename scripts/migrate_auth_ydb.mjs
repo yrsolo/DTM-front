@@ -169,10 +169,22 @@ async function main() {
         new Column("created_at", Types.TIMESTAMP),
       );
 
+    const adminLayoutPrefs = new TableDescription()
+      .withPrimaryKey("admin_user_id")
+      .withColumns(
+        new Column("admin_user_id", Types.UTF8),
+        new Column("pending_users_order", optional(Types.UTF8)),
+        new Column("approved_users_order", optional(Types.UTF8)),
+        new Column("color_presets_order", optional(Types.UTF8)),
+        new Column("layout_presets_order", optional(Types.UTF8)),
+        new Column("updated_at", Types.TIMESTAMP),
+      );
+
     await ensureTable(driver, "users", users);
     await ensureTable(driver, "allowlist_emails", allowlist);
     await ensureTable(driver, "access_requests", accessRequests);
     await ensureTable(driver, "audit_log", auditLog);
+    await ensureTable(driver, "admin_layout_prefs", adminLayoutPrefs);
     await ensureOptionalColumns(driver, "users", [new Column("avatar_url", optional(Types.UTF8))]);
 
     console.log(`Auth YDB migration completed for ${target}`);

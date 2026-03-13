@@ -1,4 +1,18 @@
 import React from "react";
+import { createPortal } from "react-dom";
+import {
+  closestCenter,
+  DndContext,
+  DragEndEvent,
+  DragOverEvent,
+  DragOverlay,
+  DragStartEvent,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
+import { arrayMove, rectSortingStrategy, SortableContext, useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 
 import { LayoutContext } from "../components/Layout";
 import { getAuthRequestBase, getTasksRoute } from "../config/runtimeContour";
@@ -30,17 +44,6 @@ type PresetCard = {
 
 type DragListKey = "pendingUsers" | "approvedUsers" | "colorPresets" | "layoutPresets";
 
-function PresetKindBadge(props: { kind: "color" | "layout" }) {
-  if (props.kind === "color") {
-    return <span className="adminPresetKindBadge isColor" aria-hidden="true" />;
-  }
-  return (
-    <span className="adminPresetKindBadge isLayout" aria-hidden="true">
-      ⤢
-    </span>
-  );
-}
-
 type AdminOverview = {
   pendingUsers: AdminUserCard[];
   approvedUsers: AdminUserCard[];
@@ -58,6 +61,17 @@ type AdminOverview = {
       layout: string | null;
     };
   };
+};
+
+type ActiveDrag = {
+  list: DragListKey;
+  id: string;
+};
+
+type SortableCardProps = {
+  id: string;
+  children: React.ReactNode;
+  className: string;
 };
 
 function buildAuthUrl(path: string): string {
@@ -78,17 +92,6 @@ function formatRequestedAt(value: string): string {
   const hh = String(date.getHours()).padStart(2, "0");
   const min = String(date.getMinutes()).padStart(2, "0");
   return `${yy}-${mm}-${dd} ${hh}:${min}`;
-}
-
-function reorderById<T extends { id: string }>(items: T[], draggedId: string, targetId: string): T[] {
-  if (!draggedId || !targetId || draggedId === targetId) return items;
-  const fromIndex = items.findIndex((item) => item.id === draggedId);
-  const toIndex = items.findIndex((item) => item.id === targetId);
-  if (fromIndex < 0 || toIndex < 0 || fromIndex === toIndex) return items;
-  const next = [...items];
-  const [moved] = next.splice(fromIndex, 1);
-  next.splice(toIndex, 0, moved);
-  return next;
 }
 
 function initials(name: string | null, email: string | null): string {
@@ -117,9 +120,125 @@ function UserAvatar(props: { name: string | null; email: string | null; avatarUr
   );
 }
 
+function PresetKindBadge(props: { kind: "color" | "layout" }) {
+  if (props.kind === "color") {
+    return <span className="adminPresetKindBadge isColor" aria-hidden="true" />;
+  }
+
+  return (
+    <span className="adminPresetKindBadge isLayout" aria-hidden="true">
+      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.8">
+        <path d="M12 3v7" />
+        <path d="M12 3l-3 3" />
+        <path d="M12 3l3 3" />
+        <path d="M21 12h-7" />
+        <path d="M21 12l-3-3" />
+        <path d="M21 12l-3 3" />
+        <path d="M12 21v-7" />
+        <path d="M12 21l-3-3" />
+        <path d="M12 21l3-3" />
+        <path d="M3 12h7" />
+        <path d="M3 12l3-3" />
+        <path d="M3 12l3 3" />
+      </svg>
+    </span>
+  );
+}
+
+function orderItems<T extends { id: string }>(items: T[], order: string[]): T[] {
+  if (!order.length) return items;
+  const itemById = new Map(items.map((item) => [item.id, item] as const));
+  const next: T[] = [];
+  const used = new Set<string>();
+
+  for (const id of order) {
+    const item = itemById.get(id);
+    if (!item || used.has(id)) continue;
+    next.push(item);
+    used.add(id);
+  }
+
+  for (const item of items) {
+    if (used.has(item.id)) continue;
+    next.push(item);
+  }
+
+  return next;
+}
+
 async function expectOk(res: Response, message: string): Promise<void> {
   if (res.ok) return;
   throw new Error(`${message} (HTTP ${res.status})`);
+}
+
+function idsOf(items: Array<{ id: string }>): string[] {
+  return items.map((item) => item.id);
+}
+
+function arraysEqual(left: string[], right: string[]): boolean {
+  return left.length === right.length && left.every((item, index) => item === right[index]);
+}
+
+function SortableCard(props: SortableCardProps) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: props.id });
+
+  return (
+    <div
+      ref={setNodeRef}
+      className={`${props.className} ${isDragging ? "isDragging" : ""}`}
+      style={{ transform: CSS.Transform.toString(transform), transition }}
+      {...attributes}
+      {...listeners}
+    >
+      {props.children}
+    </div>
+  );
+}
+
+function UserCardContent(props: {
+  user: AdminUserCard;
+  roleText?: string;
+  roleClassName?: string;
+  actions: React.ReactNode;
+}) {
+  return (
+    <>
+      <UserAvatar name={props.user.displayName} email={props.user.email} avatarUrl={props.user.avatarUrl} />
+      <div className="adminUserBody">
+        <div className="adminUserName">{props.user.displayName || props.user.email || props.user.id}</div>
+        <div className="muted">{props.user.email || "Email не указан"}</div>
+        <div className="muted">Заявка: {formatRequestedAt(props.user.requestedAt)}</div>
+        {props.roleText ? <div className={`adminUserRole ${props.roleClassName ?? ""}`}>{props.roleText}</div> : null}
+      </div>
+      <div className="adminUserActions">{props.actions}</div>
+    </>
+  );
+}
+
+function PresetCardContent(props: { preset: PresetCard; actions: React.ReactNode }) {
+  const availabilityText =
+    props.preset.isDefault
+      ? "По умолчанию"
+      : props.preset.availability === "ready"
+        ? "Доступен"
+        : props.preset.availability === "broken"
+          ? "Asset повреждён"
+          : "Asset недоступен";
+
+  return (
+    <>
+      <PresetKindBadge kind={props.preset.kind} />
+      <div className="adminUserBody">
+        <div className="adminUserName">{props.preset.name}</div>
+        <div className="muted adminPresetDescription">{props.preset.description || "Без описания"}</div>
+        <div className="muted">Автор: {props.preset.authorDisplayName || "не указан"}</div>
+        <div className="muted">Revision: {props.preset.revision ?? "-"}</div>
+        <div className="muted">Обновлён: {props.preset.updatedAt ? formatRequestedAt(props.preset.updatedAt) : "-"}</div>
+        <div className={`adminUserRole ${props.preset.isDefault ? "isAdmin" : ""}`}>{availabilityText}</div>
+      </div>
+      <div className="adminUserActions">{props.actions}</div>
+    </>
+  );
 }
 
 export function AdminPage() {
@@ -135,11 +254,12 @@ export function AdminPage() {
   const [orderedApprovedUsers, setOrderedApprovedUsers] = React.useState<AdminUserCard[]>([]);
   const [orderedColorPresets, setOrderedColorPresets] = React.useState<PresetCard[]>([]);
   const [orderedLayoutPresets, setOrderedLayoutPresets] = React.useState<PresetCard[]>([]);
-  const [dragState, setDragState] = React.useState<{ list: DragListKey; id: string } | null>(null);
-  const [dragTarget, setDragTarget] = React.useState<{ list: DragListKey; id: string } | null>(null);
+  const [activeDrag, setActiveDrag] = React.useState<ActiveDrag | null>(null);
   const importRef = React.useRef<HTMLInputElement | null>(null);
+  const dragSnapshotRef = React.useRef<{ list: DragListKey; ids: string[] } | null>(null);
 
   const authSession = ctx?.authSession;
+  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }));
 
   const loadOverview = React.useCallback(async () => {
     setLoading(true);
@@ -167,37 +287,100 @@ export function AdminPage() {
   React.useEffect(() => {
     setOrderedPendingUsers(overview?.pendingUsers ?? []);
     setOrderedApprovedUsers(overview?.approvedUsers ?? []);
-    setOrderedColorPresets(overview?.presets?.color ?? []);
-    setOrderedLayoutPresets(overview?.presets?.layout ?? []);
+    setOrderedColorPresets(overview?.presets.color ?? []);
+    setOrderedLayoutPresets(overview?.presets.layout ?? []);
   }, [overview]);
 
-  const startDrag = React.useCallback((list: DragListKey, id: string) => {
-    setDragState({ list, id });
+  const getListItems = React.useCallback(
+    (list: DragListKey) => {
+      if (list === "pendingUsers") return orderedPendingUsers;
+      if (list === "approvedUsers") return orderedApprovedUsers;
+      if (list === "colorPresets") return orderedColorPresets;
+      return orderedLayoutPresets;
+    },
+    [orderedApprovedUsers, orderedColorPresets, orderedLayoutPresets, orderedPendingUsers]
+  );
+
+  const setListItems = React.useCallback((list: DragListKey, nextItems: AdminUserCard[] | PresetCard[]) => {
+    if (list === "pendingUsers") {
+      setOrderedPendingUsers(nextItems as AdminUserCard[]);
+      return;
+    }
+    if (list === "approvedUsers") {
+      setOrderedApprovedUsers(nextItems as AdminUserCard[]);
+      return;
+    }
+    if (list === "colorPresets") {
+      setOrderedColorPresets(nextItems as PresetCard[]);
+      return;
+    }
+    setOrderedLayoutPresets(nextItems as PresetCard[]);
   }, []);
 
-  const dropOn = React.useCallback((list: DragListKey, targetId: string) => {
-    setDragState((current) => {
-      if (!current || current.list !== list || current.id === targetId) return null;
-      if (list === "pendingUsers") setOrderedPendingUsers((items) => reorderById(items, current.id, targetId));
-      if (list === "approvedUsers") setOrderedApprovedUsers((items) => reorderById(items, current.id, targetId));
-      if (list === "colorPresets") setOrderedColorPresets((items) => reorderById(items, current.id, targetId));
-      if (list === "layoutPresets") setOrderedLayoutPresets((items) => reorderById(items, current.id, targetId));
-      return null;
+  const persistListOrder = React.useCallback(async (list: DragListKey, ids: string[]) => {
+    const res = await fetch(buildAuthUrl("/admin/layout-order"), {
+      method: "POST",
+      credentials: "include",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ list, ids }),
     });
-    setDragTarget(null);
+    await expectOk(res, "Не удалось сохранить порядок карточек");
   }, []);
 
-  const moveDragOver = React.useCallback((list: DragListKey, targetId: string) => {
-    setDragTarget({ list, id: targetId });
-    setDragState((current) => {
-      if (!current || current.list !== list || current.id === targetId) return current;
-      if (list === "pendingUsers") setOrderedPendingUsers((items) => reorderById(items, current.id, targetId));
-      if (list === "approvedUsers") setOrderedApprovedUsers((items) => reorderById(items, current.id, targetId));
-      if (list === "colorPresets") setOrderedColorPresets((items) => reorderById(items, current.id, targetId));
-      if (list === "layoutPresets") setOrderedLayoutPresets((items) => reorderById(items, current.id, targetId));
-      return { ...current, id: targetId };
-    });
-  }, []);
+  const handleDragStart = React.useCallback(
+    (list: DragListKey, event: DragStartEvent) => {
+      setActiveDrag({ list, id: String(event.active.id) });
+      dragSnapshotRef.current = { list, ids: idsOf(getListItems(list) as Array<{ id: string }>) };
+    },
+    [getListItems]
+  );
+
+  const handleDragOver = React.useCallback(
+    (list: DragListKey, event: DragOverEvent) => {
+      if (!event.over) return;
+      const activeId = String(event.active.id);
+      const overId = String(event.over.id);
+      if (activeId === overId) return;
+
+      const currentItems = getListItems(list);
+      const oldIndex = currentItems.findIndex((item) => item.id === activeId);
+      const newIndex = currentItems.findIndex((item) => item.id === overId);
+      if (oldIndex < 0 || newIndex < 0 || oldIndex === newIndex) return;
+
+      setListItems(list, arrayMove(currentItems as Array<{ id: string }>, oldIndex, newIndex) as AdminUserCard[] | PresetCard[]);
+    },
+    [getListItems, setListItems]
+  );
+
+  const handleDragEnd = React.useCallback(
+    async (list: DragListKey, event: DragEndEvent) => {
+      setActiveDrag(null);
+      const snapshot = dragSnapshotRef.current;
+      dragSnapshotRef.current = null;
+      if (!event.over || !snapshot || snapshot.list !== list) return;
+
+      const finalIds = idsOf(getListItems(list) as Array<{ id: string }>);
+      if (arraysEqual(finalIds, snapshot.ids)) return;
+
+      try {
+        setActionError(null);
+        await persistListOrder(list, finalIds);
+      } catch (err) {
+        setActionError(err instanceof Error ? err.message : "Не удалось сохранить порядок карточек");
+        await loadOverview();
+      }
+    },
+    [getListItems, loadOverview, persistListOrder]
+  );
+
+  const handleDragCancel = React.useCallback(() => {
+    const snapshot = dragSnapshotRef.current;
+    dragSnapshotRef.current = null;
+    setActiveDrag(null);
+    if (!snapshot) return;
+    const currentItems = getListItems(snapshot.list);
+    setListItems(snapshot.list, orderItems(currentItems as Array<{ id: string }>, snapshot.ids) as AdminUserCard[] | PresetCard[]);
+  }, [getListItems, setListItems]);
 
   const runAdminAction = React.useCallback(async (action: () => Promise<void>, notice?: string) => {
     setActionError(null);
@@ -380,11 +563,17 @@ export function AdminPage() {
     [loadOverview]
   );
 
+  const activeOverlay = React.useMemo(() => {
+    if (!activeDrag) return null;
+    const items = getListItems(activeDrag.list);
+    return items.find((item) => item.id === activeDrag.id) ?? null;
+  }, [activeDrag, getListItems]);
+
   if (!ctx) return null;
 
   if (loading) {
     return (
-      <div className="card">
+      <div className="card adminPageRoot">
         <div className="pageHeader">
           <h3 className="pageTitle">Админка</h3>
           <button type="button" className="adminCloseButton" onClick={goToTimeline} aria-label="Вернуться на таймлайн" title="Вернуться на таймлайн">
@@ -398,7 +587,7 @@ export function AdminPage() {
 
   if (!authSession?.state.authenticated) {
     return (
-      <div className="card">
+      <div className="card adminPageRoot">
         <div className="pageHeader">
           <h3 className="pageTitle">Админка</h3>
           <button type="button" className="adminCloseButton" onClick={goToTimeline} aria-label="Вернуться на таймлайн" title="Вернуться на таймлайн">
@@ -412,7 +601,7 @@ export function AdminPage() {
 
   if (authSession.state.user?.role !== "admin") {
     return (
-      <div className="card">
+      <div className="card adminPageRoot">
         <div className="pageHeader">
           <h3 className="pageTitle">Админка</h3>
           <button type="button" className="adminCloseButton" onClick={goToTimeline} aria-label="Вернуться на таймлайн" title="Вернуться на таймлайн">
@@ -425,7 +614,7 @@ export function AdminPage() {
   }
 
   return (
-    <div className="card">
+    <div className="card adminPageRoot">
       <div className="pageHeader">
         <h3 className="pageTitle">Админка</h3>
         <button type="button" className="adminCloseButton" onClick={goToTimeline} aria-label="Вернуться на таймлайн" title="Вернуться на таймлайн">
@@ -438,97 +627,94 @@ export function AdminPage() {
       {actionNotice ? <p className="muted" style={{ color: "#9fe8c4" }}>{actionNotice}</p> : null}
 
       <div className="grid2" style={{ alignItems: "start" }}>
-        <div className="card">
+        <div className="card adminSectionCard">
           <h4 className="pageTitle" style={{ fontSize: 22 }}>Ожидают одобрения</h4>
-          <div className="adminUserGrid adminUserGridTiles">
-            {orderedPendingUsers.map((user) => (
-              <div
-                key={user.id}
-                className={`adminUserCard adminUserBrick ${dragState?.list === "pendingUsers" && dragState.id === user.id ? "isDragging" : ""} ${dragTarget?.list === "pendingUsers" && dragTarget.id === user.id ? "isDragTarget" : ""}`}
-                draggable
-                onDragStart={() => startDrag("pendingUsers", user.id)}
-                onDragOver={(event) => event.preventDefault()}
-                onDragEnter={() => moveDragOver("pendingUsers", user.id)}
-                onDrop={() => dropOn("pendingUsers", user.id)}
-                onDragEnd={() => {
-                  setDragState(null);
-                  setDragTarget(null);
-                }}
-              >
-                <UserAvatar name={user.displayName} email={user.email} avatarUrl={user.avatarUrl} />
-                <div className="adminUserBody">
-                  <div className="adminUserName">{user.displayName || user.email || user.id}</div>
-                  <div className="muted">{user.email || "Email не указан"}</div>
-                  <div className="muted">Заявка: {formatRequestedAt(user.requestedAt)}</div>
-                </div>
-                <div className="adminUserActions">
-                  <button type="button" onClick={() => void runAdminAction(() => approve(user.id), "Пользователь одобрен")}>
-                    Одобрить
-                  </button>
-                  <button type="button" className="btn btnGhost" onClick={() => void runAdminAction(() => reject(user.id), "Заявка отклонена")}>
-                    Отклонить
-                  </button>
-                </div>
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragStart={(event) => handleDragStart("pendingUsers", event)}
+            onDragOver={(event) => handleDragOver("pendingUsers", event)}
+            onDragEnd={(event) => void handleDragEnd("pendingUsers", event)}
+            onDragCancel={handleDragCancel}
+          >
+            <SortableContext items={orderedPendingUsers.map((user) => user.id)} strategy={rectSortingStrategy}>
+              <div className="adminUserGrid adminUserGridTiles">
+                {orderedPendingUsers.map((user) => (
+                  <SortableCard key={user.id} id={user.id} className="adminUserCard adminUserBrick">
+                    <UserCardContent
+                      user={user}
+                      actions={
+                        <>
+                          <button type="button" onClick={() => void runAdminAction(() => approve(user.id), "Пользователь одобрен")}>
+                            Одобрить
+                          </button>
+                          <button type="button" className="btn btnGhost" onClick={() => void runAdminAction(() => reject(user.id), "Заявка отклонена")}>
+                            Отклонить
+                          </button>
+                        </>
+                      }
+                    />
+                  </SortableCard>
+                ))}
+                {!orderedPendingUsers.length ? <div className="muted">Нет пользователей, ожидающих одобрения.</div> : null}
               </div>
-            ))}
-            {!overview?.pendingUsers?.length ? <div className="muted">Нет пользователей, ожидающих одобрения.</div> : null}
-          </div>
+            </SortableContext>
+          </DndContext>
         </div>
 
-        <div className="card">
+        <div className="card adminSectionCard">
           <h4 className="pageTitle" style={{ fontSize: 22 }}>Одобренные пользователи</h4>
-          <div className="adminUserGrid adminUserGridTiles">
-            {orderedApprovedUsers.map((user) => {
-              const isSelf = authSession.state.user?.id === user.id;
-              const isAdmin = user.role === "admin";
-              return (
-                <div
-                  key={user.id}
-                  className={`adminUserCard adminUserBrick ${dragState?.list === "approvedUsers" && dragState.id === user.id ? "isDragging" : ""} ${dragTarget?.list === "approvedUsers" && dragTarget.id === user.id ? "isDragTarget" : ""}`}
-                  draggable
-                  onDragStart={() => startDrag("approvedUsers", user.id)}
-                  onDragOver={(event) => event.preventDefault()}
-                  onDragEnter={() => moveDragOver("approvedUsers", user.id)}
-                  onDrop={() => dropOn("approvedUsers", user.id)}
-                  onDragEnd={() => {
-                    setDragState(null);
-                    setDragTarget(null);
-                  }}
-                >
-                  <UserAvatar name={user.displayName} email={user.email} avatarUrl={user.avatarUrl} />
-                  <div className="adminUserBody">
-                    <div className="adminUserName">{user.displayName || user.email || user.id}</div>
-                    <div className="muted">{user.email || "Email не указан"}</div>
-                    <div className="muted">Заявка: {formatRequestedAt(user.requestedAt)}</div>
-                    <div className={`adminUserRole ${isAdmin ? "isAdmin" : ""}`}>{isAdmin ? "Администратор" : "Пользователь"}</div>
-                  </div>
-                  <div className="adminUserActions">
-                    <button
-                      type="button"
-                      className="btn btnGhost"
-                      onClick={() => void runAdminAction(() => revoke(user.id), "Пользователь удалён из одобренных")}
-                      disabled={isSelf}
-                    >
-                      Удалить
-                    </button>
-                    <button
-                      type="button"
-                      className={`btn ${isAdmin ? "btnGhost" : ""}`}
-                      onClick={() => void runAdminAction(() => toggleAdminRole(user), isAdmin ? "Админ-роль снята" : "Админ-роль назначена")}
-                      disabled={isSelf}
-                    >
-                      {isAdmin ? "Убрать из админов" : "Сделать админом"}
-                    </button>
-                  </div>
-                </div>
-              );
-            })}
-            {!overview?.approvedUsers?.length ? <div className="muted">Нет одобренных пользователей.</div> : null}
-          </div>
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragStart={(event) => handleDragStart("approvedUsers", event)}
+            onDragOver={(event) => handleDragOver("approvedUsers", event)}
+            onDragEnd={(event) => void handleDragEnd("approvedUsers", event)}
+            onDragCancel={handleDragCancel}
+          >
+            <SortableContext items={orderedApprovedUsers.map((user) => user.id)} strategy={rectSortingStrategy}>
+              <div className="adminUserGrid adminUserGridTiles">
+                {orderedApprovedUsers.map((user) => {
+                  const isSelf = authSession.state.user?.id === user.id;
+                  const isAdmin = user.role === "admin";
+                  return (
+                    <SortableCard key={user.id} id={user.id} className="adminUserCard adminUserBrick">
+                      <UserCardContent
+                        user={user}
+                        roleText={isAdmin ? "Администратор" : "Пользователь"}
+                        roleClassName={isAdmin ? "isAdmin" : ""}
+                        actions={
+                          <>
+                            <button
+                              type="button"
+                              className="btn btnGhost"
+                              onClick={() => void runAdminAction(() => revoke(user.id), "Пользователь удалён из одобренных")}
+                              disabled={isSelf}
+                            >
+                              Удалить
+                            </button>
+                            <button
+                              type="button"
+                              className={`btn ${isAdmin ? "btnGhost" : ""}`}
+                              onClick={() => void runAdminAction(() => toggleAdminRole(user), isAdmin ? "Админ-роль снята" : "Админ-роль назначена")}
+                              disabled={isSelf}
+                            >
+                              {isAdmin ? "Убрать из админов" : "Сделать админом"}
+                            </button>
+                          </>
+                        }
+                      />
+                    </SortableCard>
+                  );
+                })}
+                {!orderedApprovedUsers.length ? <div className="muted">Нет одобренных пользователей.</div> : null}
+              </div>
+            </SortableContext>
+          </DndContext>
         </div>
       </div>
 
-      <div className="card" style={{ marginTop: 16 }}>
+      <div className="card adminSectionCard" style={{ marginTop: 16 }}>
         <h4 className="pageTitle" style={{ fontSize: 22 }}>Allowlist</h4>
         <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
           <input
@@ -558,7 +744,7 @@ export function AdminPage() {
         </div>
       </div>
 
-      <div className="card" style={{ marginTop: 16 }}>
+      <div className="card adminSectionCard" style={{ marginTop: 16 }}>
         <div className="pageHeader" style={{ marginBottom: 12 }}>
           <h4 className="pageTitle" style={{ fontSize: 22 }}>Пресеты</h4>
         </div>
@@ -587,54 +773,81 @@ export function AdminPage() {
         </div>
 
         <div className="grid2 adminPresetSplit" style={{ alignItems: "start" }}>
-          {(["color", "layout"] as const).map((kind) => (
-            <div key={kind} className="card adminPresetColumn">
-              <h4 className="pageTitle" style={{ fontSize: 20 }}>
-                {kind === "color" ? "Цветовые пресеты" : "UI / Layout пресеты"}
-              </h4>
-              <div className="adminUserGrid adminPresetGrid">
-                {(kind === "color" ? orderedColorPresets : orderedLayoutPresets).map((preset) => (
-                  <div
-                    key={preset.id}
-                    className={`adminUserCard adminUserBrick adminPresetBrick ${dragState?.list === (kind === "color" ? "colorPresets" : "layoutPresets") && dragState.id === preset.id ? "isDragging" : ""} ${dragTarget?.list === (kind === "color" ? "colorPresets" : "layoutPresets") && dragTarget.id === preset.id ? "isDragTarget" : ""}`}
-                    draggable
-                    onDragStart={() => startDrag(kind === "color" ? "colorPresets" : "layoutPresets", preset.id)}
-                    onDragOver={(event) => event.preventDefault()}
-                    onDragEnter={() => moveDragOver(kind === "color" ? "colorPresets" : "layoutPresets", preset.id)}
-                    onDrop={() => dropOn(kind === "color" ? "colorPresets" : "layoutPresets", preset.id)}
-                    onDragEnd={() => {
-                      setDragState(null);
-                      setDragTarget(null);
-                    }}
-                  >
-                    <PresetKindBadge kind={kind} />
-                    <div className="adminUserBody">
-                      <div className="adminUserName">{preset.name}</div>
-                      <div className="muted adminPresetDescription">{preset.description || "Без описания"}</div>
-                      <div className="muted">Автор: {preset.authorDisplayName || "не указан"}</div>
-                      <div className="muted">Revision: {preset.revision ?? "-"}</div>
-                      <div className="muted">Обновлён: {preset.updatedAt ? formatRequestedAt(preset.updatedAt) : "-"}</div>
-                      <div className={`adminUserRole ${preset.isDefault ? "isAdmin" : ""}`}>
-                        {preset.isDefault ? "По умолчанию" : preset.availability === "ready" ? "Доступен" : preset.availability === "broken" ? "Broken asset" : "Asset недоступен"}
-                      </div>
-                    </div>
-                    <div className="adminUserActions">
-                      <button type="button" onClick={() => void runAdminAction(() => setDefaultPreset(preset), "Preset по умолчанию обновлён")}>
-                        Сделать default
-                      </button>
-                      <button type="button" className="btn btnGhost" onClick={() => void runAdminAction(() => exportPreset(preset), "Preset экспортирован")}>
-                        Экспорт
-                      </button>
-                      <button type="button" className="btn btnGhost" onClick={() => void runAdminAction(() => deletePreset(preset.id), "Preset удалён")}>
-                        Удалить
-                      </button>
-                    </div>
-                  </div>
-                ))}
-                {!(kind === "color" ? orderedColorPresets : orderedLayoutPresets).length ? <div className="muted">Пока нет preset-ов этого типа.</div> : null}
-              </div>
-            </div>
-          ))}
+          <div className="card adminPresetColumn">
+            <h4 className="pageTitle" style={{ fontSize: 20 }}>Цветовые пресеты</h4>
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragStart={(event) => handleDragStart("colorPresets", event)}
+              onDragOver={(event) => handleDragOver("colorPresets", event)}
+              onDragEnd={(event) => void handleDragEnd("colorPresets", event)}
+              onDragCancel={handleDragCancel}
+            >
+              <SortableContext items={orderedColorPresets.map((preset) => preset.id)} strategy={rectSortingStrategy}>
+                <div className="adminUserGrid adminPresetGrid">
+                  {orderedColorPresets.map((preset) => (
+                    <SortableCard key={preset.id} id={preset.id} className="adminUserCard adminUserBrick adminPresetBrick">
+                      <PresetCardContent
+                        preset={preset}
+                        actions={
+                          <>
+                            <button type="button" onClick={() => void runAdminAction(() => setDefaultPreset(preset), "Preset по умолчанию обновлён")}>
+                              Сделать default
+                            </button>
+                            <button type="button" className="btn btnGhost" onClick={() => void runAdminAction(() => exportPreset(preset), "Preset экспортирован")}>
+                              Экспорт
+                            </button>
+                            <button type="button" className="btn btnGhost" onClick={() => void runAdminAction(() => deletePreset(preset.id), "Preset удалён")}>
+                              Удалить
+                            </button>
+                          </>
+                        }
+                      />
+                    </SortableCard>
+                  ))}
+                  {!orderedColorPresets.length ? <div className="muted">Пока нет preset-ов этого типа.</div> : null}
+                </div>
+              </SortableContext>
+            </DndContext>
+          </div>
+
+          <div className="card adminPresetColumn">
+            <h4 className="pageTitle" style={{ fontSize: 20 }}>UI / Layout пресеты</h4>
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragStart={(event) => handleDragStart("layoutPresets", event)}
+              onDragOver={(event) => handleDragOver("layoutPresets", event)}
+              onDragEnd={(event) => void handleDragEnd("layoutPresets", event)}
+              onDragCancel={handleDragCancel}
+            >
+              <SortableContext items={orderedLayoutPresets.map((preset) => preset.id)} strategy={rectSortingStrategy}>
+                <div className="adminUserGrid adminPresetGrid">
+                  {orderedLayoutPresets.map((preset) => (
+                    <SortableCard key={preset.id} id={preset.id} className="adminUserCard adminUserBrick adminPresetBrick">
+                      <PresetCardContent
+                        preset={preset}
+                        actions={
+                          <>
+                            <button type="button" onClick={() => void runAdminAction(() => setDefaultPreset(preset), "Preset по умолчанию обновлён")}>
+                              Сделать default
+                            </button>
+                            <button type="button" className="btn btnGhost" onClick={() => void runAdminAction(() => exportPreset(preset), "Preset экспортирован")}>
+                              Экспорт
+                            </button>
+                            <button type="button" className="btn btnGhost" onClick={() => void runAdminAction(() => deletePreset(preset.id), "Preset удалён")}>
+                              Удалить
+                            </button>
+                          </>
+                        }
+                      />
+                    </SortableCard>
+                  ))}
+                  {!orderedLayoutPresets.length ? <div className="muted">Пока нет preset-ов этого типа.</div> : null}
+                </div>
+              </SortableContext>
+            </DndContext>
+          </div>
         </div>
 
         <input
@@ -650,6 +863,42 @@ export function AdminPage() {
           }}
         />
       </div>
+
+      {typeof document !== "undefined"
+        ? createPortal(
+            <DragOverlay>
+              {activeDrag && activeOverlay
+                ? activeDrag.list === "pendingUsers" || activeDrag.list === "approvedUsers"
+                  ? (
+                    <div className="adminUserCard adminUserBrick isOverlay">
+                      <UserCardContent
+                        user={activeOverlay as AdminUserCard}
+                        roleText={
+                          activeDrag.list === "approvedUsers"
+                            ? (activeOverlay as AdminUserCard).role === "admin"
+                              ? "Администратор"
+                              : "Пользователь"
+                            : undefined
+                        }
+                        roleClassName={
+                          activeDrag.list === "approvedUsers" && (activeOverlay as AdminUserCard).role === "admin"
+                            ? "isAdmin"
+                            : undefined
+                        }
+                        actions={null}
+                      />
+                    </div>
+                  )
+                  : (
+                    <div className="adminUserCard adminUserBrick adminPresetBrick isOverlay">
+                      <PresetCardContent preset={activeOverlay as PresetCard} actions={null} />
+                    </div>
+                  )
+                : null}
+            </DragOverlay>,
+            document.body
+          )
+        : null}
     </div>
   );
 }
