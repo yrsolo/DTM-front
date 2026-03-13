@@ -28,12 +28,14 @@ Shared endpoint:
 - frontend: `https://dtm.solofarm.ru/test/`
 - admin SPA: `https://dtm.solofarm.ru/test/admin`
 - auth endpoints: `https://dtm.solofarm.ru/test/ops/auth/*`
+- browser-facing data path: `https://dtm.solofarm.ru/test/ops/bff/*`
 - backend-owned API: `https://dtm.solofarm.ru/test/ops/api/*`
 
 ### Prod
 - frontend: `https://dtm.solofarm.ru/`
 - admin SPA: `https://dtm.solofarm.ru/admin`
 - auth endpoints: `https://dtm.solofarm.ru/ops/auth/*`
+- browser-facing data path: `https://dtm.solofarm.ru/ops/bff/*`
 - backend-owned API: `https://dtm.solofarm.ru/ops/api/*`
 
 ## Auto-deploy
@@ -90,6 +92,8 @@ scripts\deploy_prod.cmd
 Unified gateway должен:
 - направлять `/ops/auth/*` в `auth-prod`
 - направлять `/test/ops/auth/*` в `auth-test`
+- направлять `/ops/bff/*` в `auth-prod`
+- направлять `/test/ops/bff/*` в `auth-test`
 - не отправлять `/ops/*` и `/test/ops/*` в SPA fallback
 - отправлять `/admin` в prod SPA и `/test/admin` в test SPA
 
@@ -144,6 +148,7 @@ Contour-specific OAuth credentials считаются canonical:
 Cookie behavior:
 - runtime автоматически делает session cookie contour-specific, добавляя suffix `_test` или `_prod` к `COOKIE_NAME`
 - OAuth state cookie тоже contour-specific и ограничивается `AUTH_BASE_PATH`, чтобы `test` и `prod` на одном домене не конфликтовали
+- при одном домене `dtm.solofarm.ru` это считается обязательной частью auth isolation, а не optional polish
 
 Current operational value:
 - `SESSION_TTL_SECONDS=15552000` (`180` days, about half a year)
@@ -180,3 +185,14 @@ Function version получает:
 - `AWS_ACCESS_KEY_ID`
 - `AWS_SECRET_ACCESS_KEY`
 - `BROWSER_AUTH_PROXY_SECRET`
+
+## Admin runtime data
+
+Auth YDB migration now must include:
+- `users`
+- `allowlist_emails`
+- `access_requests`
+- `audit_log`
+- `admin_layout_prefs`
+
+If `admin_layout_prefs` is missing in a contour, admin overview may return `HTTP 500`.

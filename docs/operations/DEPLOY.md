@@ -88,12 +88,12 @@ GitHub Actions deploy:
 
 Frontend и auth адресуют только новую service-схему:
 - prod auth -> `https://dtm.solofarm.ru/ops/auth/*`
-- prod api -> `https://dtm.solofarm.ru/ops/api/*`
+- prod browser data path -> `https://dtm.solofarm.ru/ops/bff/*`
 - test auth -> `https://dtm.solofarm.ru/test/ops/auth/*`
-- test api -> `https://dtm.solofarm.ru/test/ops/api/*`
+- test browser data path -> `https://dtm.solofarm.ru/test/ops/bff/*`
 - shared grafana -> `https://dtm.solofarm.ru/grafana/*`
 
-`/ops/admin/*`, `/ops/telegram*`, `/ops/api/*` и test-аналоги считаются backend-owned routes. Frontend только использует их публичный контракт.
+`/ops/admin/*`, `/ops/telegram*`, `/ops/api/*` и test-аналоги считаются backend-owned routes. Frontend browser traffic должен идти через `bff`, а не напрямую в backend-owned `/ops/api/*`.
 
 ## Validation checklist
 

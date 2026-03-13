@@ -24,8 +24,8 @@ Source of truth:
 4. `api.ts` строит browser URL:
    - test auth -> `/test/ops/auth`
    - prod auth -> `/ops/auth`
-   - test data path -> `/test/ops/api`
-   - prod data path -> `/ops/api`
+   - test data path -> `/test/ops/bff`
+   - prod data path -> `/ops/bff`
 5. `normalize.ts` приводит payload к UI-friendly shape.
 6. страницы `Tasks`, `Designers`, drawer и tooltips рендерятся уже на нормализованных данных.
 

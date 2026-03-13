@@ -57,6 +57,26 @@ If a full-page redirect still happens:
 - allow popups for `dtm.solofarm.ru`
 - retry login from the auth panel
 
+## Test and prod share one domain
+
+Current public host is shared:
+- prod -> `https://dtm.solofarm.ru/`
+- test -> `https://dtm.solofarm.ru/test/`
+
+Expected cookie isolation:
+- session cookie name is made contour-specific at runtime (`..._test` / `..._prod`)
+- OAuth state cookie is contour-specific and scoped to `AUTH_BASE_PATH`
+
+Typical collision symptoms:
+- login in one contour unexpectedly resets or hides session in the other
+- OAuth callback returns with invalid state
+- `/test/ops/auth/me` and `/ops/auth/me` show different auth truth than expected after a fresh login
+
+If this starts happening:
+- clear site cookies once
+- log in again separately in test and prod
+- verify current contour calls the correct `/ops/auth/me`
+
 ## Session drops too often
 
 Session lifetime is controlled by `SESSION_TTL_SECONDS` in auth runtime.
@@ -122,6 +142,17 @@ If `ADMIN_BOOTSTRAP_UID_TEST` is still not set, raise the first admin manually:
 ```bash
 node scripts/auth_admin_tool.mjs --target test --command make-admin --user-id <USER_ID>
 ```
+
+## Admin page returns HTTP 500
+
+If admin UI opens but `GET /ops/auth/admin/overview` or `GET /test/ops/auth/admin/overview` returns `500`:
+- check that the contour has the latest auth function version
+- check that auth YDB migration was applied to the same contour
+- specifically verify the table `admin_layout_prefs` exists
+
+Typical symptom:
+- admin page shell opens
+- top of the page shows `Не удалось загрузить данные админки (HTTP 500)`
 
 ## Deploy function fails on secrets
 

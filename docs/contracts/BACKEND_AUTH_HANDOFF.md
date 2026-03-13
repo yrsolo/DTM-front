@@ -1,25 +1,33 @@
 # Backend Auth Handoff
 
 Назначение:
-- передать backend-команде актуальный browser-facing контракт авторизации и data access mode;
-- зафиксировать, какие сигналы backend получает от auth proxy;
-- описать, как frontend intentionally переключает `full` и `masked`.
+- зафиксировать browser-facing auth/data contract между frontend, auth proxy и backend;
+- описать trusted headers, которые backend получает от auth contour;
+- исключить двусмысленность между browser traffic, backend-owned `/ops/api/*` и browser-facing `/ops/bff/*`.
 
-## Browser-facing public contract
+Source of truth:
+- `apps/auth/src/handlers/apiProxy.ts`
+- `apps/auth/src/handlers/authHandlers.ts`
+- `apps/web/src/data/api.ts`
+- `apps/web/src/config/runtimeContour.ts`
+
+## Public browser contract
 
 ### Test
 - frontend: `https://dtm.solofarm.ru/test/`
-- browser data path: `/test/ops/bff/v2/frontend`
-- auth/session: `/test/ops/auth/*`
+- browser-facing data path: `/test/ops/bff/v2/frontend`
+- auth/session/admin/presets: `/test/ops/auth/*`
 
 ### Prod
 - frontend: `https://dtm.solofarm.ru/`
-- browser data path: `/ops/bff/v2/frontend`
-- auth/session: `/ops/auth/*`
+- browser-facing data path: `/ops/bff/v2/frontend`
+- auth/session/admin/presets: `/ops/auth/*`
 
-## Reserved service namespace
+## Namespace ownership
 
-Backend-owned service routes:
+Browser never calls backend-owned service routes directly.
+
+Backend-owned service namespace:
 - `/ops/api/*`
 - `/ops/admin/*`
 - `/ops/telegram*`
@@ -27,124 +35,112 @@ Backend-owned service routes:
 - `/test/ops/admin/*`
 - `/test/ops/telegram*`
 
-Shared infra route:
-- `/grafana/*`
+Browser-facing proxy namespace:
+- `/ops/bff/*`
+- `/test/ops/bff/*`
 
-Frontend SPA routes остаются только:
-- `/`
-- `/admin`
-- `/test`
-- `/test/admin`
+Auth/session namespace:
+- `/ops/auth/*`
+- `/test/ops/auth/*`
 
-## Browser -> Auth Proxy
+## Browser -> Auth proxy
 
-Browser никогда не должен обращаться к backend напрямую.
+Frontend always calls the auth proxy for browser data requests:
+- prod -> `/ops/bff/*`
+- test -> `/test/ops/bff/*`
 
-Frontend всегда ходит через browser-facing auth proxy:
-- prod: `/ops/bff/*`
-- test: `/test/ops/bff/*`
+Frontend behavior:
+- full mode -> request with `credentials: "include"`
+- masked mode -> request with `credentials: "omit"`
+- browser must not set trusted `x-dtm-*` headers itself
+- browser must not know or send `BROWSER_AUTH_PROXY_SECRET`
 
-Что делает frontend:
-- обычный full-flow запрос отправляется с `credentials: "include"`, то есть с auth cookie;
-- masked-flow запрос отправляется с `credentials: "omit"`, то есть без auth cookie;
-- toggle маскирования на frontend переключает именно это поведение;
-- браузер не должен сам выставлять доверенные `x-dtm-*` auth headers;
-- браузер не должен знать и не должен отправлять `BROWSER_AUTH_PROXY_SECRET`.
+Masking toggle in the frontend changes only this:
+- whether the browser sends auth cookie
+- not which route it calls
 
-## Auth Proxy -> Backend
+## Auth proxy -> Backend
 
-Auth proxy сам вычисляет access mode и проксирует запрос дальше в upstream backend.
+Auth proxy validates session, computes access mode and proxies the request to backend upstream.
 
-Backend должен ориентироваться на эти headers:
-- `X-DTM-Proxy-Secret: <server-side secret from auth proxy>`
+Trusted upstream headers:
+- `X-DTM-Proxy-Secret`
 - `x-dtm-access-mode: full | masked`
 - `x-dtm-authenticated: 1 | 0`
 - `x-dtm-contour: test | prod`
-- `x-dtm-user-id: <uuid>` только для approved `full` request
-- `x-dtm-user-role: admin | viewer` только для approved `full` request
-- `x-dtm-user-status: approved` только для approved `full` request
+- `x-dtm-user-id` only for approved `full` requests
+- `x-dtm-user-role: admin | viewer` only for approved `full` requests
+- `x-dtm-user-status: approved` only for approved `full` requests
 
-Важно:
-- эти headers trustworthy только если запрос пришёл через auth proxy / gateway chain и содержит валидный `X-DTM-Proxy-Secret`;
-- backend не должен принимать browser-supplied `x-dtm-*` как источник истины вне этого контура.
+Important:
+- backend must treat these headers as trustworthy only when request arrived through the auth proxy/gateway chain and has a valid `X-DTM-Proxy-Secret`
+- backend must not trust browser-supplied `x-dtm-*` headers outside this chain
 
-## Required Backend Behavior
+## Full vs masked behavior
 
-### Full Access
+### Full
 
-Если backend видит:
-- валидный `X-DTM-Proxy-Secret`
+Backend may return full payload only when all of this is true:
+- valid `X-DTM-Proxy-Secret`
 - `x-dtm-authenticated: 1`
 - `x-dtm-access-mode: full`
 
-то он может отдавать нормальные данные без маскирования.
+Expected scenario:
+- approved user or admin
+- frontend sent browser request with cookie
+- auth proxy validated session and forwarded trusted full headers
 
-Ожидаемый кейс:
-- user approved;
-- frontend отправил запрос с cookie;
-- auth proxy подтвердил session и проставил `full`.
+### Masked
 
-### Masked Access
-
-Если backend видит:
-- отсутствующий или невалидный `X-DTM-Proxy-Secret`
-или
+Backend must return masked payload when any of this is true:
+- missing or invalid `X-DTM-Proxy-Secret`
 - `x-dtm-authenticated: 0`
-или
 - `x-dtm-access-mode: masked`
 
-то backend должен отдавать masked payload.
+This covers:
+- guest
+- expired/invalid session
+- approved/admin user who intentionally enabled masking in UI and sent the request without cookie
+- any direct browser call outside the proxy chain
 
-Это покрывает оба сценария:
-- гость или пользователь без действующей auth session;
-- авторизованный approved user, который в UI специально включил masking toggle, и frontend намеренно отправил запрос без cookie.
+## Payload expectations
 
-## Sensitive Fields
-
-В masked mode должны скрываться реальные бизнесовые значения, минимум:
+Masked mode should hide real business-sensitive values, at minimum:
 - task title
 - brand
 - customer
-- group/show name
+- show/group name
 - person/designer names
-- другие свободные текстовые поля, по которым можно восстановить реальные кампании
+- other reconstructable free-text fields
 
-## Stable Parts Of Payload
-
-Даже в masked mode желательно сохранять:
+Even in masked mode backend should keep stable structure:
 - ids
 - dates
 - statuses
 - milestone sequence
-- summary/meta structure
-- общую форму `frontend v2` payload
+- summary/meta shape
+- the same frontend `v2` payload form
 
-## Recommended Backend Pattern
-
-Практическая схема:
-1. принимать browser traffic только через `/ops/bff/*` или `/test/ops/bff/*`;
-2. доверять `x-dtm-access-mode` и `x-dtm-authenticated`, выставленным auth proxy;
-3. считать `full` trustworthy только при валидном `X-DTM-Proxy-Secret`;
-4. строить один и тот же `frontend v2` payload shape;
-5. менять только содержание чувствительных полей, а не структуру ответа;
-6. не смешивать авторизацию браузера и внутреннюю service-to-service auth в одном контракте.
-
-## OAuth Callbacks
+## OAuth callbacks
 
 - test callback: `https://dtm.solofarm.ru/test/ops/auth/callback`
 - prod callback: `https://dtm.solofarm.ru/ops/auth/callback`
 
-## Preset Catalog Service
+## Preset catalog through auth contour
 
-Preset catalog routes are exposed by the auth contour and are shared across `test` and `prod` via the public preset bucket/domain:
+Preset catalog APIs live under auth contour and are shared across test/prod through the shared preset bucket:
 - `GET /ops/auth/presets?kind=color|layout`
 - `GET /test/ops/auth/presets?kind=color|layout`
 - `POST /ops/auth/presets`
 - `PUT /ops/auth/presets/:id`
 - `DELETE /ops/auth/presets/:id`
+- `GET /ops/auth/presets/:id/export`
+- `GET /test/ops/auth/presets/:id/export`
 
-Preset assets are public JSON files served from `https://dtm-presets.website.yandexcloud.net`.
+Preset assets are publicly readable JSON files served from:
+- preferred origin: `https://dtm-presets.website.yandexcloud.net`
+- storage fallback: `https://storage.yandexcloud.net/dtm-presets`
 
-Graceful degradation rule:
-- if preset catalog or preset asset is unavailable, the application must stay operational in builtin-only mode;
-- auth, snapshot loading and API proxy behavior must not depend on preset availability.
+Graceful degradation:
+- preset catalog or preset asset outage must not break auth flow, snapshot loading or API proxy behavior
+- application should stay operational in builtin-only preset mode

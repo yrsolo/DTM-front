@@ -50,6 +50,7 @@ npm run check:mojibake
 - Релиз и эксплуатация:
   - [DEPLOY.md](n:\PROJECTS\DTM\DTM-front\docs\operations\DEPLOY.md)
   - [AUTH_DEPLOY.md](n:\PROJECTS\DTM\DTM-front\docs\operations\AUTH_DEPLOY.md)
+  - [AUTH_TROUBLESHOOTING.md](n:\PROJECTS\DTM\DTM-front\docs\operations\AUTH_TROUBLESHOOTING.md)
   - [RUNTIME_STORAGE.md](n:\PROJECTS\DTM\DTM-front\docs\operations\RUNTIME_STORAGE.md)
   - [TROUBLESHOOTING.md](n:\PROJECTS\DTM\DTM-front\docs\operations\TROUBLESHOOTING.md)
 

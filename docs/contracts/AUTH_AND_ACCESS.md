@@ -14,17 +14,17 @@ Source of truth:
 - frontend: `https://dtm.solofarm.ru/test/`
 - admin SPA: `https://dtm.solofarm.ru/test/admin`
 - auth endpoints: `https://dtm.solofarm.ru/test/ops/auth/*`
-- browser-facing API path: `https://dtm.solofarm.ru/test/ops/api/*`
+- browser-facing API path: `https://dtm.solofarm.ru/test/ops/bff/*`
 - local frontend runtime тоже использует `test` contour для auth/api:
   - local SPA base остаётся `/`
   - auth requests идут в `https://dtm.solofarm.ru/test/ops/auth/*`
-  - data requests идут в `https://dtm.solofarm.ru/test/ops/api/*`
+  - data requests идут в `https://dtm.solofarm.ru/test/ops/bff/*`
 
 ### Prod
 - frontend: `https://dtm.solofarm.ru/`
 - admin SPA: `https://dtm.solofarm.ru/admin`
 - auth endpoints: `https://dtm.solofarm.ru/ops/auth/*`
-- browser-facing API path: `https://dtm.solofarm.ru/ops/api/*`
+- browser-facing API path: `https://dtm.solofarm.ru/ops/bff/*`
 
 ## Модель доступа
 
@@ -48,8 +48,11 @@ Source of truth:
 
 ## Session
 
-- cookie: httpOnly
-- flags: `HttpOnly`, `Path=/`, `SameSite`, `Secure`
+- session cookie: httpOnly
+- session cookie name is made contour-specific at runtime by suffixing `_test` or `_prod` to `COOKIE_NAME`
+- session cookie path comes from `COOKIE_PATH`
+- OAuth state cookie is also contour-specific and scoped to `AUTH_BASE_PATH`
+- flags: `HttpOnly`, `Path`, `SameSite`, `Secure`
 - claims:
   - `userId`
   - `yandexUid`
@@ -59,6 +62,22 @@ Source of truth:
   - `iat`
   - `exp`
 - при каждом привилегированном запросе `sv` сверяется с YDB
+
+## Login procedure
+
+Current user-facing auth flow:
+- пользователь нажимает `Подключиться` в auth-панели
+- frontend открывает Yandex OAuth в popup window
+- callback идёт в:
+  - test -> `/test/ops/auth/callback`
+  - prod -> `/ops/auth/callback`
+- после успешного callback popup закрывается сам и обновляет основную страницу
+- если popup заблокирован браузером, frontend падает обратно в обычный redirect flow
+
+Cookie/session behavior:
+- session cookie и OAuth state cookie изолируются по contour even on the same host `dtm.solofarm.ru`
+- текущий runtime TTL задаётся через `SESSION_TTL_SECONDS`
+- session claims и cookie `Max-Age` используют одно и то же TTL
 
 ## Admin surface
 
@@ -109,6 +128,16 @@ V1 endpoints:
 - `POST /admin/users/:id/remove-admin`
 - `POST /admin/allowlist`
 - `DELETE /admin/allowlist?email=...`
+- `POST /admin/layout-order`
+
+Admin personal order:
+- порядок карточек в admin UI хранится лично на admin user
+- отдельные списки:
+  - pending users
+  - approved users
+  - color presets
+  - layout presets
+- `GET /admin/overview` возвращает эти списки уже в персональном порядке текущего администратора
 
 ## YDB contours
 
