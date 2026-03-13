@@ -2397,7 +2397,7 @@ button:hover {
 }
 
 .adminUserGridTiles {
-  grid-template-columns: repeat(auto-fit, minmax(220px, 280px));
+  grid-template-columns: repeat(auto-fit, minmax(300px, 360px));
   align-items: stretch;
   justify-content: start;
 }
@@ -2411,6 +2411,15 @@ button:hover {
   border-radius: 16px;
   border: 1px solid rgba(135, 159, 225, 0.24);
   background: linear-gradient(180deg, rgba(10, 17, 34, 0.94) 0%, rgba(19, 21, 49, 0.84) 100%);
+  cursor: grab;
+  transition: transform 120ms ease, border-color 120ms ease, box-shadow 120ms ease, opacity 120ms ease;
+}
+
+.adminUserCard.isDragging {
+  opacity: 0.66;
+  transform: scale(0.985);
+  border-color: rgba(208, 161, 255, 0.42);
+  box-shadow: 0 16px 34px rgba(10, 12, 28, 0.34);
 }
 
 .adminUserBrick {
@@ -2501,10 +2510,14 @@ button:hover {
 
 .adminUserActions {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: 8px;
   margin-top: 2px;
   justify-content: flex-start;
+}
+
+.adminUserActions > button {
+  white-space: nowrap;
 }
 
 .adminPresetToolbar {
@@ -2520,9 +2533,20 @@ button:hover {
   padding-top: 42px;
 }
 
+.adminPresetSplit {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+}
+
+.adminPresetColumn {
+  min-height: 0;
+  max-height: 72vh;
+  overflow: auto;
+}
+
 .adminPresetGrid {
-  grid-template-columns: repeat(auto-fit, minmax(240px, 300px));
+  grid-template-columns: repeat(auto-fit, minmax(260px, 320px));
   justify-content: start;
+  align-content: start;
 }
 
 .adminPresetKindBadge {
@@ -2574,6 +2598,10 @@ button:hover {
   }
 
   .workbenchTabs {
+    grid-template-columns: 1fr;
+  }
+
+  .adminPresetSplit {
     grid-template-columns: 1fr;
   }
 

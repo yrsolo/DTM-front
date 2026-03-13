@@ -28,6 +28,8 @@ type PresetCard = {
   availability: "ready" | "broken" | "unavailable";
 };
 
+type DragListKey = "pendingUsers" | "approvedUsers" | "colorPresets" | "layoutPresets";
+
 function PresetKindBadge(props: { kind: "color" | "layout" }) {
   if (props.kind === "color") {
     return <span className="adminPresetKindBadge isColor" aria-hidden="true" />;
@@ -78,6 +80,17 @@ function formatRequestedAt(value: string): string {
   return `${yy}-${mm}-${dd} ${hh}:${min}`;
 }
 
+function reorderById<T extends { id: string }>(items: T[], draggedId: string, targetId: string): T[] {
+  if (!draggedId || !targetId || draggedId === targetId) return items;
+  const fromIndex = items.findIndex((item) => item.id === draggedId);
+  const toIndex = items.findIndex((item) => item.id === targetId);
+  if (fromIndex < 0 || toIndex < 0 || fromIndex === toIndex) return items;
+  const next = [...items];
+  const [moved] = next.splice(fromIndex, 1);
+  next.splice(toIndex, 0, moved);
+  return next;
+}
+
 function initials(name: string | null, email: string | null): string {
   const source = name?.trim() || email?.trim() || "?";
   const parts = source.split(/\s+/).filter(Boolean);
@@ -118,6 +131,11 @@ export function AdminPage() {
   const [actionNotice, setActionNotice] = React.useState<string | null>(null);
   const [newEmail, setNewEmail] = React.useState("");
   const [pendingImportKind, setPendingImportKind] = React.useState<"color" | "layout">("color");
+  const [orderedPendingUsers, setOrderedPendingUsers] = React.useState<AdminUserCard[]>([]);
+  const [orderedApprovedUsers, setOrderedApprovedUsers] = React.useState<AdminUserCard[]>([]);
+  const [orderedColorPresets, setOrderedColorPresets] = React.useState<PresetCard[]>([]);
+  const [orderedLayoutPresets, setOrderedLayoutPresets] = React.useState<PresetCard[]>([]);
+  const [dragState, setDragState] = React.useState<{ list: DragListKey; id: string } | null>(null);
   const importRef = React.useRef<HTMLInputElement | null>(null);
 
   const authSession = ctx?.authSession;
@@ -144,6 +162,28 @@ export function AdminPage() {
   React.useEffect(() => {
     void loadOverview();
   }, [loadOverview]);
+
+  React.useEffect(() => {
+    setOrderedPendingUsers(overview?.pendingUsers ?? []);
+    setOrderedApprovedUsers(overview?.approvedUsers ?? []);
+    setOrderedColorPresets(overview?.presets?.color ?? []);
+    setOrderedLayoutPresets(overview?.presets?.layout ?? []);
+  }, [overview]);
+
+  const startDrag = React.useCallback((list: DragListKey, id: string) => {
+    setDragState({ list, id });
+  }, []);
+
+  const dropOn = React.useCallback((list: DragListKey, targetId: string) => {
+    setDragState((current) => {
+      if (!current || current.list !== list || current.id === targetId) return null;
+      if (list === "pendingUsers") setOrderedPendingUsers((items) => reorderById(items, current.id, targetId));
+      if (list === "approvedUsers") setOrderedApprovedUsers((items) => reorderById(items, current.id, targetId));
+      if (list === "colorPresets") setOrderedColorPresets((items) => reorderById(items, current.id, targetId));
+      if (list === "layoutPresets") setOrderedLayoutPresets((items) => reorderById(items, current.id, targetId));
+      return null;
+    });
+  }, []);
 
   const runAdminAction = React.useCallback(async (action: () => Promise<void>, notice?: string) => {
     setActionError(null);
@@ -387,8 +427,16 @@ export function AdminPage() {
         <div className="card">
           <h4 className="pageTitle" style={{ fontSize: 22 }}>Ожидают одобрения</h4>
           <div className="adminUserGrid adminUserGridTiles">
-            {(overview?.pendingUsers ?? []).map((user) => (
-              <div key={user.id} className="adminUserCard adminUserBrick">
+            {orderedPendingUsers.map((user) => (
+              <div
+                key={user.id}
+                className={`adminUserCard adminUserBrick ${dragState?.list === "pendingUsers" && dragState.id === user.id ? "isDragging" : ""}`}
+                draggable
+                onDragStart={() => startDrag("pendingUsers", user.id)}
+                onDragOver={(event) => event.preventDefault()}
+                onDrop={() => dropOn("pendingUsers", user.id)}
+                onDragEnd={() => setDragState(null)}
+              >
                 <UserAvatar name={user.displayName} email={user.email} avatarUrl={user.avatarUrl} />
                 <div className="adminUserBody">
                   <div className="adminUserName">{user.displayName || user.email || user.id}</div>
@@ -412,11 +460,19 @@ export function AdminPage() {
         <div className="card">
           <h4 className="pageTitle" style={{ fontSize: 22 }}>Одобренные пользователи</h4>
           <div className="adminUserGrid adminUserGridTiles">
-            {(overview?.approvedUsers ?? []).map((user) => {
+            {orderedApprovedUsers.map((user) => {
               const isSelf = authSession.state.user?.id === user.id;
               const isAdmin = user.role === "admin";
               return (
-                <div key={user.id} className="adminUserCard adminUserBrick">
+                <div
+                  key={user.id}
+                  className={`adminUserCard adminUserBrick ${dragState?.list === "approvedUsers" && dragState.id === user.id ? "isDragging" : ""}`}
+                  draggable
+                  onDragStart={() => startDrag("approvedUsers", user.id)}
+                  onDragOver={(event) => event.preventDefault()}
+                  onDrop={() => dropOn("approvedUsers", user.id)}
+                  onDragEnd={() => setDragState(null)}
+                >
                   <UserAvatar name={user.displayName} email={user.email} avatarUrl={user.avatarUrl} />
                   <div className="adminUserBody">
                     <div className="adminUserName">{user.displayName || user.email || user.id}</div>
@@ -508,15 +564,23 @@ export function AdminPage() {
           </button>
         </div>
 
-        <div className="grid2" style={{ alignItems: "start" }}>
+        <div className="grid2 adminPresetSplit" style={{ alignItems: "start" }}>
           {(["color", "layout"] as const).map((kind) => (
-            <div key={kind} className="card">
+            <div key={kind} className="card adminPresetColumn">
               <h4 className="pageTitle" style={{ fontSize: 20 }}>
                 {kind === "color" ? "Цветовые пресеты" : "UI / Layout пресеты"}
               </h4>
               <div className="adminUserGrid adminPresetGrid">
-                {(overview?.presets?.[kind] ?? []).map((preset) => (
-                  <div key={preset.id} className="adminUserCard adminUserBrick adminPresetBrick">
+                {(kind === "color" ? orderedColorPresets : orderedLayoutPresets).map((preset) => (
+                  <div
+                    key={preset.id}
+                    className={`adminUserCard adminUserBrick adminPresetBrick ${dragState?.list === (kind === "color" ? "colorPresets" : "layoutPresets") && dragState.id === preset.id ? "isDragging" : ""}`}
+                    draggable
+                    onDragStart={() => startDrag(kind === "color" ? "colorPresets" : "layoutPresets", preset.id)}
+                    onDragOver={(event) => event.preventDefault()}
+                    onDrop={() => dropOn(kind === "color" ? "colorPresets" : "layoutPresets", preset.id)}
+                    onDragEnd={() => setDragState(null)}
+                  >
                     <PresetKindBadge kind={kind} />
                     <div className="adminUserBody">
                       <div className="adminUserName">{preset.name}</div>
@@ -541,7 +605,7 @@ export function AdminPage() {
                     </div>
                   </div>
                 ))}
-                {!overview?.presets?.[kind]?.length ? <div className="muted">Пока нет preset-ов этого типа.</div> : null}
+                {!(kind === "color" ? orderedColorPresets : orderedLayoutPresets).length ? <div className="muted">Пока нет preset-ов этого типа.</div> : null}
               </div>
             </div>
           ))}
