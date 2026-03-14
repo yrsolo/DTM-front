@@ -139,7 +139,7 @@ Contour-specific OAuth credentials считаются canonical:
 Также нужны:
 - `SESSION_SIGNING_SECRET`
 - `TG_TOKEN` for Mini App session bootstrap via `POST /telegram/session`
-- `PEOPLE_SYNC_PATH` if backend people directory lives outside the default auth-side path
+- `PEOPLE_SYNC_PATH` if backend people directory lives outside the default auth-side path (`/v2/people`)
 - `COOKIE_NAME`
 - `COOKIE_PATH`
 - `COOKIE_SAMESITE`

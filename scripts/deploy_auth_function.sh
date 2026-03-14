@@ -94,7 +94,7 @@ else
   oauth_client_secret_env_name="YANDEX_CLIENT_SECRET_PROD"
 fi
 
-people_sync_path="${PEOPLE_SYNC_PATH:-/v2/frontend/entities/people}"
+people_sync_path="${PEOPLE_SYNC_PATH:-/v2/people}"
 
 oauth_client_id_value="${!oauth_client_id_env_name:-}"
 oauth_client_secret_value="${!oauth_client_secret_env_name:-}"

@@ -22,7 +22,14 @@ function readString(record: RawPersonRecord, keys: string[]): string | null {
 }
 
 function readEmail(record: RawPersonRecord): string | null {
-  const direct = readString(record, ["email", "primaryEmail", "workEmail", "mail"]);
+  const direct = readString(record, [
+    "yandexEmail",
+    "contactEmail",
+    "email",
+    "primaryEmail",
+    "workEmail",
+    "mail",
+  ]);
   if (direct) return normalizeEmail(direct);
 
   const emails = record.emails;
@@ -101,6 +108,7 @@ export async function fetchPeopleDirectory(): Promise<LinkedPersonRecord[]> {
     headers: {
       accept: "application/json",
       "x-dtm-contour": cfg.contour,
+      "x-dtm-proxy-secret": cfg.browserAuthProxySecret,
     },
   });
   if (!response.ok) {

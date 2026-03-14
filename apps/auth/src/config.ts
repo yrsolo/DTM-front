@@ -88,7 +88,7 @@ export function getAuthRuntimeConfig(): AuthRuntimeConfig {
     authBasePath,
     apiProxyBasePath,
     apiUpstreamOrigin,
-    peopleSyncPath: process.env.PEOPLE_SYNC_PATH?.trim() || "/v2/frontend/entities/people",
+    peopleSyncPath: process.env.PEOPLE_SYNC_PATH?.trim() || "/v2/people",
     yandexClientId: readRequired(yandexClientIdVar),
     yandexClientSecret: readRequired(yandexClientSecretVar),
     telegramBotToken: readOptional("TG_TOKEN"),

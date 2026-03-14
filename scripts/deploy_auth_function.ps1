@@ -60,7 +60,7 @@ $authBasePath = if ($Target -eq "test") { "/test/ops/auth" } else { "/ops/auth" 
 $apiProxyBasePath = if ($Target -eq "test") { "/test/ops/bff" } else { "/ops/bff" }
 $apiOrigin = if ($Target -eq "test") { $yc.api_origin_test } else { $yc.api_origin_prod }
 $apiUpstreamOrigin = "$($apiOrigin.TrimEnd('/'))/api"
-$peopleSyncPath = if ($env:PEOPLE_SYNC_PATH) { $env:PEOPLE_SYNC_PATH } else { "/v2/frontend/entities/people" }
+$peopleSyncPath = if ($env:PEOPLE_SYNC_PATH) { $env:PEOPLE_SYNC_PATH } else { "/v2/people" }
 
 if (-not $functionName) { throw "Missing auth function name for target=$Target" }
 if (-not $ydbDatabase) { throw "Missing ydb database path for target=$Target" }
