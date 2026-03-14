@@ -2710,11 +2710,13 @@ button:hover {
 }
 
 .miniAppShell {
+  height: calc(100vh - 92px);
   min-height: calc(100vh - 92px);
   display: flex;
   flex-direction: column;
   gap: 16px;
   padding-bottom: 88px;
+  overflow: hidden;
 }
 
 .miniAppHeader {
@@ -2739,9 +2741,13 @@ button:hover {
 }
 
 .miniAppMain {
+  flex: 1 1 auto;
+  min-height: 0;
   display: flex;
   flex-direction: column;
   gap: 16px;
+  overflow-y: auto;
+  padding-right: 2px;
 }
 
 .miniAppSection {

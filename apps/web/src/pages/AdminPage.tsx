@@ -17,6 +17,8 @@ import { CSS } from "@dnd-kit/utilities";
 import { LayoutContext } from "../components/Layout";
 import { getAuthRequestBase, getTasksRoute } from "../config/runtimeContour";
 
+const MINI_APP_ADMIN_RETURN_KEY = "dtm-miniapp-admin-return-to";
+
 type AdminUserCard = {
   id: string;
   yandexUid: string;
@@ -85,9 +87,9 @@ function buildAuthUrl(path: string): string {
 function goToTimeline(): void {
   if (typeof window === "undefined") return;
   try {
-    const url = new URL(window.location.href);
-    const returnTo = url.searchParams.get("return_to")?.trim() || "";
+    const returnTo = window.sessionStorage.getItem(MINI_APP_ADMIN_RETURN_KEY)?.trim() || "";
     if (returnTo === "/app" || returnTo.startsWith("/app?") || returnTo === "/test/app" || returnTo.startsWith("/test/app?")) {
+      window.sessionStorage.removeItem(MINI_APP_ADMIN_RETURN_KEY);
       window.location.assign(returnTo);
       return;
     }

@@ -9,7 +9,7 @@ export function MobileTaskList(props: {
   onOpenTask: (taskId: string) => void;
 }) {
   if (!props.tasks.length) {
-    return <div className="miniAppEmpty">Нет задач для текущего фильтра.</div>;
+    return <div className="miniAppEmpty">Нет активных задач.</div>;
   }
 
   return (
@@ -23,7 +23,6 @@ export function MobileTaskList(props: {
         >
           <div className="miniAppTaskCardTop">
             <span className="miniAppTaskDue">{taskDueDate(task)}</span>
-            <span className={`miniAppTaskStatus is-${task.status}`}>{task.status}</span>
           </div>
           <div className="miniAppTaskTitle">{task.title}</div>
           <div className="miniAppTaskMeta">

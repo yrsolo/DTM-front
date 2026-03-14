@@ -6,25 +6,21 @@ import { MiniAppShell, MiniAppTab } from "../components/miniapp/MiniAppShell";
 import { initTelegramMiniApp } from "../config/telegramRuntime";
 import { selectCurrentPersonLink } from "../data/selectors/sessionSelectors";
 import {
-  filterTasksByQuickFilter,
   selectAllTasks,
   selectMyTasks,
   selectTaskById,
-  selectTaskListStats,
   sortTasksForMobile,
-  TaskQuickFilter,
-  TaskScopeMode,
 } from "../data/selectors/taskSelectors";
 import { groupAgendaItemsByDay, selectAgendaItemsFromTasks } from "../data/selectors/timelineSelectors";
 import { MiniAppProfilePage } from "./MiniAppProfilePage";
 import { MiniAppTasksPage } from "./MiniAppTasksPage";
 import { MiniAppTimelinePage } from "./MiniAppTimelinePage";
 
+const MINI_APP_ADMIN_RETURN_KEY = "dtm-miniapp-admin-return-to";
+
 export function MiniAppPage() {
   const ctx = React.useContext(LayoutContext);
   const [currentTab, setCurrentTab] = React.useState<MiniAppTab>("tasks");
-  const [scopeMode, setScopeMode] = React.useState<TaskScopeMode>("mine");
-  const [quickFilter, setQuickFilter] = React.useState<TaskQuickFilter>("all");
   const [selectedTaskId, setSelectedTaskId] = React.useState<string | null>(null);
 
   React.useEffect(() => {
@@ -40,25 +36,10 @@ export function MiniAppPage() {
     snapshot,
   });
   const canViewAllTasks = authSession.state.user?.role === "admin";
-  const allTasks = sortTasksForMobile(selectAllTasks(snapshot));
-  const myTasks = sortTasksForMobile(selectMyTasks(snapshot, currentPerson.personId));
-
-  React.useEffect(() => {
-    if (canViewAllTasks) return;
-    setScopeMode("mine");
-  }, [canViewAllTasks]);
-
-  const scopedTasks = scopeMode === "all" && canViewAllTasks ? allTasks : myTasks;
-  const filteredTasks = filterTasksByQuickFilter(scopedTasks, quickFilter);
-  const statsBase = scopeMode === "all" && canViewAllTasks ? allTasks : myTasks;
-  const stats = selectTaskListStats(statsBase);
-  const statsMap: Record<TaskQuickFilter, number> = {
-    all: stats.all,
-    today: stats.today,
-    overdue: stats.overdue,
-    week: stats.week,
-  };
-  const agendaGroups = groupAgendaItemsByDay(selectAgendaItemsFromTasks(filteredTasks, snapshot));
+  const scopedTasks = canViewAllTasks
+    ? sortTasksForMobile(selectAllTasks(snapshot))
+    : sortTasksForMobile(selectMyTasks(snapshot, currentPerson.personId));
+  const agendaGroups = groupAgendaItemsByDay(selectAgendaItemsFromTasks(scopedTasks, snapshot));
   const selectedTask = selectTaskById(snapshot, selectedTaskId);
 
   let body: React.ReactNode;
@@ -69,16 +50,11 @@ export function MiniAppPage() {
   } else if (currentTab === "tasks") {
     body = (
       <MiniAppTasksPage
-        tasks={filteredTasks}
-        scopeMode={scopeMode}
-        quickFilter={quickFilter}
-        stats={statsMap}
+        tasks={scopedTasks}
         canViewAllTasks={canViewAllTasks}
-        onChangeScope={setScopeMode}
-        onChangeQuickFilter={setQuickFilter}
-        onOpenTask={setSelectedTaskId}
         unresolvedPersonLink={!currentPerson.personId}
         authState={authSession.state}
+        onOpenTask={setSelectedTaskId}
       />
     );
   } else if (currentTab === "timeline") {
@@ -98,7 +74,8 @@ export function MiniAppPage() {
         onOpenAdmin={() => {
           if (typeof window !== "undefined") {
             const returnTo = `${window.location.pathname}${window.location.search}${window.location.hash}`;
-            window.location.assign(`${authSession.adminHref}?return_to=${encodeURIComponent(returnTo)}`);
+            window.sessionStorage.setItem(MINI_APP_ADMIN_RETURN_KEY, returnTo);
+            window.location.assign(authSession.adminHref);
           }
         }}
       />

@@ -5,7 +5,7 @@ export function MobileAgendaList(props: {
   onOpenTask: (taskId: string) => void;
 }) {
   if (!props.groups.length) {
-    return <div className="miniAppEmpty">Нет дедлайнов для текущего фильтра.</div>;
+    return <div className="miniAppEmpty">Нет активных дедлайнов.</div>;
   }
 
   return (
@@ -23,7 +23,6 @@ export function MobileAgendaList(props: {
               >
                 <div className="miniAppAgendaItemTop">
                   <span>{item.date}</span>
-                  {item.isOverdue ? <span className="miniAppAgendaBadge isOverdue">Просрочено</span> : null}
                   {item.isToday ? <span className="miniAppAgendaBadge isToday">Сегодня</span> : null}
                 </div>
                 <div className="miniAppTaskTitle">{item.title}</div>

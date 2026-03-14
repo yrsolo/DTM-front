@@ -101,8 +101,9 @@ Tooltip может быть шире карточки, чтобы milestone labe
 ### Композиция
 
 - Mini App не пытается повторить desktop SVG timeline;
-- `mine / all` и быстрые фильтры работают как client-side presentation layer поверх общего snapshot;
-- completed (`done`) tasks в Mini App не показываются;
+- Mini App не показывает completed (`done`) tasks;
+- для admin по умолчанию показываются все активные задачи;
+- для обычного пользователя по умолчанию показываются только его активные задачи;
 - `TaskDetailsDrawer` переиспользуется как mobile sheet, а не как вторая отдельная карточка задачи.
 
 ### Переходы
