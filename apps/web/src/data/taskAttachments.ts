@@ -122,10 +122,10 @@ export async function requestTaskAttachmentUpload(args: {
 }
 
 export async function uploadTaskAttachmentBinary(contract: AttachmentUploadContract, file: File): Promise<void> {
-  const method = contract.method?.trim().toUpperCase() || "PUT";
-  let res: Response;
-  try {
-    res = await fetch(buildBackendAdminUrl("/attachments/upload-binary"), {
+  const preferredMethod = contract.method?.trim().toUpperCase() || "PUT";
+
+  async function sendBinaryUpload(method: string): Promise<Response> {
+    return fetch(buildBackendAdminUrl("/attachments/upload-binary"), {
       method: "POST",
       credentials: "include",
       headers: {
@@ -136,15 +136,26 @@ export async function uploadTaskAttachmentBinary(contract: AttachmentUploadContr
       },
       body: file,
     });
+  }
+
+  let res: Response;
+  let effectiveMethod = preferredMethod;
+  try {
+    res = await sendBinaryUpload(effectiveMethod);
+    if (res.status === 405 && effectiveMethod !== "PUT") {
+      effectiveMethod = "PUT";
+      res = await sendBinaryUpload(effectiveMethod);
+    }
   } catch (error) {
     throw new TaskAttachmentUploadError({
       stage: "upload-binary",
       message: error instanceof Error ? error.message : "upload-binary network error",
       details: error instanceof Error ? error.message : "network error",
       host: extractHost(buildBackendAdminUrl("/attachments/upload-binary")),
-      method,
+      method: effectiveMethod,
     });
   }
+
   if (!res.ok) {
     let details: string | null = null;
     try {
@@ -158,7 +169,7 @@ export async function uploadTaskAttachmentBinary(contract: AttachmentUploadContr
       status: res.status,
       details,
       host: extractHost(contract.uploadUrl),
-      method,
+      method: effectiveMethod,
     });
   }
 }
