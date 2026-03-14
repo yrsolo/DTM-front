@@ -71,6 +71,18 @@ powershell -ExecutionPolicy Bypass -File scripts/deploy_auth_function.ps1 -Targe
 
 Локальные deploy scripts пытаются взять `YC_SA_JSON_CREDENTIALS`, `AWS_ACCESS_KEY_ID` и `AWS_SECRET_ACCESS_KEY` из process env, а если их нет, читают эти значения из repo `.env`.
 
+Важно:
+- deploy auth function сам по себе не прогоняет YDB migration;
+- если в auth-коде меняется схема `users` или других auth-таблиц, migration нужно выполнять отдельно до проверки contour;
+- для production это особенно важно, иначе новые admin/auth endpoints могут отвечать YDB schema error even при успешном deploy функции.
+
+Ручной запуск migration:
+
+```powershell
+node scripts/migrate_auth_ydb.mjs --target test
+node scripts/migrate_auth_ydb.mjs --target prod
+```
+
 ## Combined contour deploy
 
 Если нужно задеплоить frontend и auth вместе:
@@ -86,6 +98,10 @@ Windows wrappers:
 scripts\deploy_test.cmd
 scripts\deploy_prod.cmd
 ```
+
+Замечание:
+- `deploy_stack.ps1`, `deploy_test.cmd` и `deploy_prod.cmd` сейчас деплоят frontend + auth, но не запускают `migrate_auth_ydb.mjs`;
+- migration остаётся отдельным обязательным шагом при schema changes в auth runtime storage.
 
 ## Gateway update
 
