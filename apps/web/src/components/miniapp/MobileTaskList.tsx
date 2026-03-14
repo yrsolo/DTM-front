@@ -56,6 +56,7 @@ function renderField(item: MiniTaskListItem, mode: MiniTaskGroupingMode): string
 export function MobileTaskList(props: {
   items: MiniTaskListItem[];
   groupingMode: MiniTaskGroupingMode;
+  toggleAllToken?: number;
   onOpenTask: (taskId: string) => void;
 }) {
   const groups = React.useMemo(
@@ -73,6 +74,19 @@ export function MobileTaskList(props: {
       return next;
     });
   }, [groups]);
+
+  React.useEffect(() => {
+    if (!props.toggleAllToken || !groups.length) return;
+    setOpenGroups((prev) => {
+      const areAllOpen = groups.every((group) => prev[group.key] ?? true);
+      const nextValue = !areAllOpen;
+      const next: Record<string, boolean> = {};
+      for (const group of groups) {
+        next[group.key] = nextValue;
+      }
+      return next;
+    });
+  }, [groups, props.toggleAllToken]);
 
   if (!props.items.length) {
     return <div className="miniAppEmpty">Нет активных задач.</div>;

@@ -40,6 +40,15 @@ export function MiniAppTasksPage(props: {
   onOpenTask: (taskId: string) => void;
 }) {
   const [groupingMode, setGroupingMode] = React.useState<MiniTaskGroupingMode>("designer");
+  const [toggleAllToken, setToggleAllToken] = React.useState(0);
+
+  function handleGroupingClick(mode: MiniTaskGroupingMode) {
+    if (groupingMode === mode) {
+      setToggleAllToken((value) => value + 1);
+      return;
+    }
+    setGroupingMode(mode);
+  }
 
   return (
     <div className="miniAppSection">
@@ -49,7 +58,7 @@ export function MiniAppTasksPage(props: {
             key={mode}
             type="button"
             className={`miniAppChip ${groupingMode === mode ? "isActive" : ""}`}
-            onClick={() => setGroupingMode(mode)}
+            onClick={() => handleGroupingClick(mode)}
           >
             {GROUPING_LABELS[mode]}
           </button>
@@ -58,7 +67,12 @@ export function MiniAppTasksPage(props: {
       {props.unresolvedPersonLink && !props.canViewAllTasks ? (
         <div className="miniAppNotice">{unresolvedPersonMessage(props.authState)}</div>
       ) : null}
-      <MobileTaskList items={props.items} groupingMode={groupingMode} onOpenTask={props.onOpenTask} />
+      <MobileTaskList
+        items={props.items}
+        groupingMode={groupingMode}
+        toggleAllToken={toggleAllToken}
+        onOpenTask={props.onOpenTask}
+      />
     </div>
   );
 }
