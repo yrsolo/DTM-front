@@ -9,6 +9,7 @@ cd /d "%REPO_ROOT%"
 echo Running frontend deploy from %REPO_ROOT%
 echo Using env file: %REPO_ROOT%\.env
 echo Using deploy config: %REPO_ROOT%\scripts\deploy.yaml
+echo Deploy target: test
 
 set "EXTRA_ARGS="
 :parse_args
@@ -35,7 +36,7 @@ pause
 exit /b 1
 
 :run_deploy
-powershell -NoProfile -ExecutionPolicy Bypass -File "%SCRIPT_DIR%deploy_frontend.ps1" -EnvFile "%REPO_ROOT%\.env" -DeployConfigFile "%REPO_ROOT%\scripts\deploy.yaml" %EXTRA_ARGS%
+powershell -NoProfile -ExecutionPolicy Bypass -File "%SCRIPT_DIR%deploy_frontend.ps1" -EnvFile "%REPO_ROOT%\.env" -DeployConfigFile "%REPO_ROOT%\scripts\deploy.yaml" -Target test %EXTRA_ARGS%
 set "EXIT_CODE=%ERRORLEVEL%"
 
 if not "%EXIT_CODE%"=="0" (

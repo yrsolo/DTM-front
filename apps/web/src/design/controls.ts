@@ -1,3 +1,5 @@
+import { resolvePublicAssetUrl } from "../config/publicPaths";
+
 export type DesignControls = {
   desktopLeftColWidth: number;
   tableRowHeight: number;
@@ -279,16 +281,16 @@ export const DEFAULT_DESIGN_CONTROLS: DesignControls = {
   workbenchDockLeft: 12,
   workbenchDockRight: 12,
   workbenchDockBottom: 12,
-  workbenchWidthMax: 1880,
-  workbenchViewportMargin: 24,
+  workbenchWidthMax: 2160,
+  workbenchViewportMargin: 12,
   workbenchBodyMaxHeightVh: 76,
   workbenchBodyPadding: 8,
   workbenchMainGap: 8,
   workbenchTabsGap: 6,
   workbenchTabFontSize: 13,
-  workbenchTabPadY: 7,
-  workbenchTabPadX: 8,
-  workbenchSideWidth: 180,
+  workbenchTabPadY: 4,
+  workbenchTabPadX: 6,
+  workbenchSideWidth: 460,
   workbenchGridMinCol: 240,
   workbenchGridGap: 8,
   workbenchGroupPadding: 8,
@@ -305,7 +307,7 @@ export const DEFAULT_DESIGN_CONTROLS: DesignControls = {
 };
 
 export const DESIGN_CONTROLS_STORAGE_KEY = "dtm.web.designControls.v1";
-export const DESIGN_CONTROLS_PUBLIC_PATH = "/config/design-controls.json";
+export const DESIGN_CONTROLS_PUBLIC_PATH = resolvePublicAssetUrl("config/design-controls.json");
 
 export type DesignControlItem = {
   key: keyof DesignControls;
@@ -401,7 +403,7 @@ export const DESIGN_CONTROL_ITEMS: DesignControlItem[] = [
   { key: "workbenchDockLeft", label: "Workbench dock left", min: 0, max: 80, step: 1 },
   { key: "workbenchDockRight", label: "Workbench dock right", min: 0, max: 80, step: 1 },
   { key: "workbenchDockBottom", label: "Workbench dock bottom", min: 0, max: 80, step: 1 },
-  { key: "workbenchWidthMax", label: "Workbench max width", min: 900, max: 2600, step: 1 },
+  { key: "workbenchWidthMax", label: "Workbench max width", min: 900, max: 3200, step: 1 },
   { key: "workbenchViewportMargin", label: "Workbench viewport margin", min: 0, max: 120, step: 1 },
   { key: "workbenchBodyMaxHeightVh", label: "Workbench max height vh", min: 30, max: 95, step: 1 },
   { key: "workbenchBodyPadding", label: "Workbench body padding", min: 4, max: 26, step: 1 },
@@ -410,7 +412,7 @@ export const DESIGN_CONTROL_ITEMS: DesignControlItem[] = [
   { key: "workbenchTabFontSize", label: "Workbench tab font", min: 10, max: 22, step: 1 },
   { key: "workbenchTabPadY", label: "Workbench tab pad Y", min: 3, max: 18, step: 1 },
   { key: "workbenchTabPadX", label: "Workbench tab pad X", min: 4, max: 24, step: 1 },
-  { key: "workbenchSideWidth", label: "Workbench side width", min: 120, max: 420, step: 1 },
+  { key: "workbenchSideWidth", label: "Workbench side width", min: 160, max: 760, step: 1 },
   { key: "workbenchGridMinCol", label: "Workbench min grid col", min: 150, max: 460, step: 1 },
   { key: "workbenchGridGap", label: "Workbench grid gap", min: 2, max: 24, step: 1 },
   { key: "workbenchGroupPadding", label: "Workbench group padding", min: 4, max: 24, step: 1 },
@@ -499,6 +501,11 @@ export const DRAWER_CONTROL_ITEMS: DesignControlItem[] = [
   { key: "drawerPanelShadowStrength", label: "Panel shadow", min: 0, max: 0.8, step: 0.01 },
   { key: "drawerPanelInsetStrength", label: "Panel inset", min: 0, max: 0.6, step: 0.01 },
   { key: "drawerPanelGlowOpacity", label: "Panel glow", min: 0, max: 0.8, step: 0.01 },
+];
+
+export const ALL_DESIGN_CONTROL_ITEMS: DesignControlItem[] = [
+  ...DESIGN_CONTROL_ITEMS,
+  ...MATERIAL_CONTROL_ITEMS,
 ];
 
 export function normalizeDesignControls(input: Partial<DesignControls>): DesignControls {

@@ -3,14 +3,20 @@
   "private": true,
   "scripts": {
     "validate:schema": "node scripts/validate_schema.mjs",
-    "check:mojibake": "node scripts/check_mojibake.mjs"
+    "check:mojibake": "node scripts/check_mojibake.mjs",
+    "check:workbench": "node scripts/check_workbench_layout.mjs"
   },
   "workspaces": [
     "apps/*",
     "packages/*"
   ],
   "devDependencies": {
+    "@types/node": "^25.4.0",
     "ajv": "^8.17.1",
-    "ajv-formats": "^3.0.1"
+    "ajv-formats": "^3.0.1",
+    "esbuild": "^0.27.3"
+  },
+  "dependencies": {
+    "ydb-sdk": "^5.11.1"
   }
 }

@@ -1,9 +1,10 @@
 import React from "react";
+import { useLocation } from "react-router-dom";
 import { useSnapshot } from "../data/useSnapshot";
+import { resolvePublicAssetUrl } from "../config/publicPaths";
 import { AppLocale, getUiText, UiText } from "../i18n/uiText";
 import {
   DEFAULT_DESIGN_CONTROLS,
-  DESIGN_CONTROLS_PUBLIC_PATH,
   DESIGN_CONTROLS_STORAGE_KEY,
   DesignControls,
   normalizeDesignControls,
@@ -14,6 +15,11 @@ import {
   KeyColors,
   normalizeKeyColors,
 } from "../design/colors";
+import {
+  LEGACY_UI_PRESET_STORAGE_KEY,
+  readStoredColorDraft,
+  readStoredLayoutDraft,
+} from "../design/presets";
 import { ControlsWorkbench } from "./ControlsWorkbench";
 import { FiltersState } from "./FiltersBar";
 import {
@@ -21,6 +27,10 @@ import {
   RuntimeDefaults,
   normalizeRuntimeDefaults,
 } from "../data/runtimeDefaults";
+import { useAuthSession } from "../auth/useAuthSession";
+
+const DEPLOY_COLOR_PRESET_PATH = resolvePublicAssetUrl("config/UI/colors/deploy.json");
+const DEPLOY_LAYOUT_PRESET_PATH = resolvePublicAssetUrl("config/UI/layouts/deploy.json");
 
 export type TimelineViewMode =
   | "brand_designer_show"
@@ -55,10 +65,17 @@ export type LayoutContextValue = {
   saveKeyColors: () => void;
   loadKeyColors: () => void;
   resetKeyColors: () => void;
+  workbenchPanelEnabled: boolean;
+  setWorkbenchPanelEnabled: React.Dispatch<React.SetStateAction<boolean>>;
+  workbenchOpen: boolean;
+  setWorkbenchOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  favoritesOpen: boolean;
+  setFavoritesOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  canUseWorkbench: boolean;
+  authSession: ReturnType<typeof useAuthSession>;
 };
 
 export const LayoutContext = React.createContext<LayoutContextValue | null>(null);
-const UI_PRESET_STORAGE_KEY = "dtm.web.uiPreset.v1";
 const VIEW_MODE_STORAGE_KEY = "dtm.viewMode.v1";
 const SORT_MODE_STORAGE_KEY = "dtm.sortMode.v1";
 const LOCALE_STORAGE_KEY = "dtm.locale.v1";
@@ -123,13 +140,16 @@ function sanitizeRuntimeDefaultsForHost(input: RuntimeDefaults): RuntimeDefaults
 }
 
 export function Layout(props: { children: React.ReactNode }) {
+  const location = useLocation();
   const INTRO_FADE_MS = 3000;
   const INTRO_VIDEO_DELAY_MS = 1000;
+  const brandIconUrl = React.useMemo(() => resolvePublicAssetUrl("dtm_ico_64x64.png"), []);
+  const introVideoUrl = React.useMemo(() => resolvePublicAssetUrl("DTM_lo.mp4"), []);
   const [locale, setLocale] = React.useState<AppLocale>("ru");
   const ui = getUiText(locale);
   const [runtimeDefaults, setRuntimeDefaults] = React.useState<RuntimeDefaults>(() => {
     try {
-      const raw = localStorage.getItem(UI_PRESET_STORAGE_KEY);
+      const raw = localStorage.getItem(LEGACY_UI_PRESET_STORAGE_KEY);
       if (!raw) return sanitizeRuntimeDefaultsForHost(DEFAULT_RUNTIME_DEFAULTS);
       const preset = normalizeUiPreset(JSON.parse(raw));
       return sanitizeRuntimeDefaultsForHost(preset.runtimeDefaults);
@@ -147,8 +167,12 @@ export function Layout(props: { children: React.ReactNode }) {
     loadLimit: runtimeDefaults.loadLimit,
   }));
   const snapshotState = useSnapshot(runtimeDefaults);
-  const [design, setDesign] = React.useState<DesignControls>(DEFAULT_DESIGN_CONTROLS);
-  const [keyColors, setKeyColors] = React.useState<KeyColors>(DEFAULT_KEY_COLORS);
+  const authSession = useAuthSession();
+  const [design, setDesign] = React.useState<DesignControls>(() => readStoredLayoutDraft());
+  const [keyColors, setKeyColors] = React.useState<KeyColors>(() => readStoredColorDraft());
+  const [workbenchPanelEnabled, setWorkbenchPanelEnabled] = React.useState(false);
+  const [workbenchOpen, setWorkbenchOpen] = React.useState(false);
+  const [favoritesOpen, setFavoritesOpen] = React.useState(false);
   const [introState, setIntroState] = React.useState<"idle" | "enter" | "playing" | "exit">("idle");
   const [introOverlayActive, setIntroOverlayActive] = React.useState(false);
   const introVideoRef = React.useRef<HTMLVideoElement | null>(null);
@@ -181,16 +205,43 @@ export function Layout(props: { children: React.ReactNode }) {
 
   const loadDeployDesign = React.useCallback(async () => {
     try {
-      const res = await fetch(DESIGN_CONTROLS_PUBLIC_PATH, {
-        headers: { accept: "application/json" },
-        cache: "no-store",
-      });
-      if (!res.ok) return;
-      const parsed = await res.json();
-      const preset = normalizeUiPreset(parsed);
-      setDesign(preset.design);
-      setKeyColors(preset.keyColors);
-      setRuntimeDefaults(sanitizeRuntimeDefaultsForHost(preset.runtimeDefaults));
+      const [colorRes, layoutRes] = await Promise.all([
+        fetch(DEPLOY_COLOR_PRESET_PATH, {
+          headers: { accept: "application/json" },
+          cache: "no-store",
+        }),
+        fetch(DEPLOY_LAYOUT_PRESET_PATH, {
+          headers: { accept: "application/json" },
+          cache: "no-store",
+        }),
+      ]);
+
+      if (!colorRes.ok && !layoutRes.ok) return;
+
+      if (colorRes.ok) {
+        const colorParsed = (await colorRes.json()) as Record<string, unknown>;
+        const nextColors =
+          colorParsed.keyColors && typeof colorParsed.keyColors === "object"
+            ? normalizeKeyColors(colorParsed.keyColors as Partial<KeyColors>)
+            : normalizeKeyColors(colorParsed as Partial<KeyColors>);
+        setKeyColors(nextColors);
+      }
+
+      if (layoutRes.ok) {
+        const layoutParsed = (await layoutRes.json()) as Record<string, unknown>;
+        const nextDesign =
+          layoutParsed.design && typeof layoutParsed.design === "object"
+            ? normalizeDesignControls(layoutParsed.design as Partial<DesignControls>)
+            : normalizeDesignControls(layoutParsed as Partial<DesignControls>);
+        setDesign(nextDesign);
+        if (layoutParsed.runtimeDefaults && typeof layoutParsed.runtimeDefaults === "object") {
+          setRuntimeDefaults(
+            sanitizeRuntimeDefaultsForHost(
+              normalizeRuntimeDefaults(layoutParsed.runtimeDefaults as Partial<RuntimeDefaults>)
+            )
+          );
+        }
+      }
     } catch {
       // ignore optional preset file errors
     }
@@ -238,40 +289,10 @@ export function Layout(props: { children: React.ReactNode }) {
     let active = true;
 
     void (async () => {
-      try {
-        const combinedRaw = localStorage.getItem(UI_PRESET_STORAGE_KEY);
-        if (combinedRaw) {
-          const preset = normalizeUiPreset(JSON.parse(combinedRaw));
-          if (!active) return;
-          setDesign(preset.design);
-          setKeyColors(preset.keyColors);
-          setRuntimeDefaults(sanitizeRuntimeDefaultsForHost(preset.runtimeDefaults));
-          return;
-        }
-      } catch {
-        // ignore invalid combined payload
-      }
-
-      try {
-        const raw = localStorage.getItem(DESIGN_CONTROLS_STORAGE_KEY);
-        if (raw) {
-          if (!active) return;
-          setDesign(normalizeDesignControls(JSON.parse(raw)));
-        }
-      } catch {
-        // ignore invalid legacy payload
-      }
-
-      try {
-        const raw = localStorage.getItem(KEY_COLORS_STORAGE_KEY);
-        if (raw) {
-          if (!active) return;
-          setKeyColors(normalizeKeyColors(JSON.parse(raw)));
-        }
-      } catch {
-        // ignore invalid legacy payload
-      }
-
+      const hasLayoutDraft = Boolean(localStorage.getItem(DESIGN_CONTROLS_STORAGE_KEY));
+      const hasColorDraft = Boolean(localStorage.getItem(KEY_COLORS_STORAGE_KEY));
+      const hasLegacyPreset = Boolean(localStorage.getItem(LEGACY_UI_PRESET_STORAGE_KEY));
+      if (hasLayoutDraft || hasColorDraft || hasLegacyPreset) return;
       await loadDeployDesign();
     })();
 
@@ -281,41 +302,29 @@ export function Layout(props: { children: React.ReactNode }) {
   }, []);
 
   const saveDesign = React.useCallback(() => {
-    localStorage.setItem(UI_PRESET_STORAGE_KEY, JSON.stringify({ design, keyColors, runtimeDefaults }));
     localStorage.setItem(DESIGN_CONTROLS_STORAGE_KEY, JSON.stringify(design));
-    localStorage.setItem(KEY_COLORS_STORAGE_KEY, JSON.stringify(keyColors));
+    localStorage.setItem(LEGACY_UI_PRESET_STORAGE_KEY, JSON.stringify({ design, keyColors, runtimeDefaults }));
   }, [design, keyColors, runtimeDefaults]);
 
   const loadDesign = React.useCallback(() => {
     try {
-      const combinedRaw = localStorage.getItem(UI_PRESET_STORAGE_KEY);
-      if (combinedRaw) {
-        const preset = normalizeUiPreset(JSON.parse(combinedRaw));
-        setDesign(preset.design);
-        setKeyColors(preset.keyColors);
-        setRuntimeDefaults(sanitizeRuntimeDefaultsForHost(preset.runtimeDefaults));
-        return;
-      }
-    } catch {
-      // ignore invalid combined payload
-    }
-
-    try {
       const raw = localStorage.getItem(DESIGN_CONTROLS_STORAGE_KEY);
       if (raw) {
         setDesign(normalizeDesignControls(JSON.parse(raw)));
+        return;
       }
     } catch {
       // ignore invalid payload
     }
 
     try {
-      const raw = localStorage.getItem(KEY_COLORS_STORAGE_KEY);
-      if (raw) {
-        setKeyColors(normalizeKeyColors(JSON.parse(raw)));
-      }
+      const combinedRaw = localStorage.getItem(LEGACY_UI_PRESET_STORAGE_KEY);
+      if (!combinedRaw) return;
+      const preset = normalizeUiPreset(JSON.parse(combinedRaw));
+      setDesign(preset.design);
+      setRuntimeDefaults(sanitizeRuntimeDefaultsForHost(preset.runtimeDefaults));
     } catch {
-      // ignore invalid payload
+      // ignore invalid combined payload
     }
   }, []);
 
@@ -323,8 +332,31 @@ export function Layout(props: { children: React.ReactNode }) {
     setDesign(DEFAULT_DESIGN_CONTROLS);
   }, []);
 
-  const saveKeyColors = React.useCallback(() => saveDesign(), [saveDesign]);
-  const loadKeyColors = React.useCallback(() => loadDesign(), [loadDesign]);
+  const saveKeyColors = React.useCallback(() => {
+    localStorage.setItem(KEY_COLORS_STORAGE_KEY, JSON.stringify(keyColors));
+    localStorage.setItem(LEGACY_UI_PRESET_STORAGE_KEY, JSON.stringify({ design, keyColors, runtimeDefaults }));
+  }, [design, keyColors, runtimeDefaults]);
+  const loadKeyColors = React.useCallback(() => {
+    try {
+      const raw = localStorage.getItem(KEY_COLORS_STORAGE_KEY);
+      if (raw) {
+        setKeyColors(normalizeKeyColors(JSON.parse(raw)));
+        return;
+      }
+    } catch {
+      // ignore invalid payload
+    }
+
+    try {
+      const combinedRaw = localStorage.getItem(LEGACY_UI_PRESET_STORAGE_KEY);
+      if (!combinedRaw) return;
+      const preset = normalizeUiPreset(JSON.parse(combinedRaw));
+      setKeyColors(preset.keyColors);
+      setRuntimeDefaults(sanitizeRuntimeDefaultsForHost(preset.runtimeDefaults));
+    } catch {
+      // ignore invalid combined payload
+    }
+  }, []);
 
   const resetKeyColors = React.useCallback(() => {
     setKeyColors(DEFAULT_KEY_COLORS);
@@ -371,6 +403,19 @@ export function Layout(props: { children: React.ReactNode }) {
     }, INTRO_FADE_MS);
     return () => window.clearTimeout(endTimer);
   }, [introState]);
+
+  const canUseWorkbench =
+    authSession.state.authenticated &&
+    authSession.state.available &&
+    authSession.state.accessMode === "full" &&
+    authSession.state.user?.status === "approved";
+
+  React.useEffect(() => {
+    if (canUseWorkbench) return;
+    setWorkbenchPanelEnabled(false);
+    setWorkbenchOpen(false);
+    setFavoritesOpen(false);
+  }, [canUseWorkbench]);
 
   React.useEffect(() => {
     if (introState === "idle") return;
@@ -547,6 +592,10 @@ export function Layout(props: { children: React.ReactNode }) {
     };
   }, [layoutVarsStyle]);
 
+  const isAdminRoute = location.pathname === "/admin";
+  const appShellClassName = isAdminRoute ? "appShell adminShell" : "appShell";
+  const containerClassName = isAdminRoute ? "container adminContainer" : "container";
+
   return (
     <LayoutContext.Provider
       value={{
@@ -573,9 +622,17 @@ export function Layout(props: { children: React.ReactNode }) {
         saveKeyColors,
         loadKeyColors,
         resetKeyColors,
+        workbenchPanelEnabled,
+        setWorkbenchPanelEnabled,
+        workbenchOpen,
+        setWorkbenchOpen,
+        favoritesOpen,
+        setFavoritesOpen,
+        canUseWorkbench,
+        authSession,
       }}
     >
-      <div className="appShell" style={layoutVarsStyle}>
+      <div className={appShellClassName} style={layoutVarsStyle}>
         <div className="topbar">
           <div className="nav">
             <div className="brand">
@@ -585,7 +642,7 @@ export function Layout(props: { children: React.ReactNode }) {
                 onClick={startLogoIntro}
                 aria-label="Play logo intro"
               >
-                <img className="brandIcon" src="/dtm_ico_64x64.png" alt="" aria-hidden="true" />
+                <img className="brandIcon" src={brandIconUrl} alt="" aria-hidden="true" />
               </button>
               <div className="brandText">
                 <strong>{ui.appTitle}</strong>
@@ -594,7 +651,7 @@ export function Layout(props: { children: React.ReactNode }) {
             </div>
           </div>
         </div>
-        <div className="container">{props.children}</div>
+        <div className={containerClassName}>{props.children}</div>
         {introState !== "idle" ? (
           <div
             className={`logoIntroOverlay ${introState === "exit" ? "isExit" : introOverlayActive ? "isActive" : ""}`}
@@ -602,7 +659,7 @@ export function Layout(props: { children: React.ReactNode }) {
             <video
               ref={introVideoRef}
               className={`logoIntroVideo ${introState === "playing" ? "isVisible" : ""}`}
-              src="/DTM_lo.mp4"
+              src={introVideoUrl}
               preload="auto"
               playsInline
               muted

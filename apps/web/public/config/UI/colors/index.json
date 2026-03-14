@@ -1,0 +1,13 @@
+{
+  "presets": [
+    {
+      "id": "builtin:deploy-colors",
+      "name": "Deploy Colors",
+      "description": "Bundled color preset based on the deployed design-controls baseline.",
+      "authorDisplayName": "DTM",
+      "assetPath": "config/UI/colors/deploy.json",
+      "revision": 1,
+      "isDefault": true
+    }
+  ]
+}

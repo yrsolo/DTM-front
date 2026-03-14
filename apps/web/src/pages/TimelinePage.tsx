@@ -9,6 +9,7 @@ import { TaskDetailsDrawer } from "../components/TaskDetailsDrawer";
 import { Tooltip, TooltipState } from "../components/Tooltip";
 import { UnifiedTimeline } from "../gantt/UnifiedTimeline";
 import { RenderTask } from "../gantt/types";
+import { readMaskingMode, writeMaskingMode } from "../auth/maskingMode";
 import { useElementWidth } from "../utils/useElementWidth";
 import { toShortPersonName } from "../utils/personName";
 
@@ -19,6 +20,143 @@ const MAX_ZOOM = 10;
 const TIMELINE_PAGE_VIEW_KEY = "dtm.timeline.pageView.v1";
 const PAGE_LABEL_TASKS = "\u0417\u0430\u0434\u0430\u0447\u0438";
 const PAGE_LABEL_DESIGNERS = "\u0414\u0438\u0437\u0430\u0439\u043d\u0435\u0440\u044b";
+
+type AuthPanelContent = {
+  title: string;
+  statusLabel: string;
+  accessBadge: string;
+  helpText: string;
+  detailText: string;
+  adminHint: string;
+  primaryActionLabel: string;
+  canOpenAdmin: boolean;
+  canToggleMasking: boolean;
+  maskingTitle: string;
+  maskingHint: string;
+};
+
+function LockIcon() {
+  return (
+    <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">
+      <path
+        d="M5.25 6V4.85a2.75 2.75 0 1 1 5.5 0V6h.65c.58 0 1.05.47 1.05 1.05v4.7c0 .58-.47 1.05-1.05 1.05H4.6c-.58 0-1.05-.47-1.05-1.05v-4.7C3.55 6.47 4.02 6 4.6 6h.65Zm1.2 0h3.1V4.85a1.55 1.55 0 1 0-3.1 0V6Z"
+        fill="currentColor"
+      />
+    </svg>
+  );
+}
+
+function UserIcon() {
+  return (
+    <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">
+      <path
+        d="M8 8.05a2.6 2.6 0 1 0 0-5.2 2.6 2.6 0 0 0 0 5.2Zm0 1.2c-2.52 0-4.85 1.19-4.85 2.75 0 .32.26.58.58.58h8.54c.32 0 .58-.26.58-.58 0-1.56-2.33-2.75-4.85-2.75Z"
+        fill="currentColor"
+      />
+    </svg>
+  );
+}
+
+function buildAuthPanelContent(params: {
+  locale: "ru" | "en";
+  loading: boolean;
+  authenticated: boolean;
+  accessMode: "masked" | "full";
+  user: {
+    displayName: string | null;
+    email: string | null;
+    role: "admin" | "viewer";
+    status: "pending" | "approved" | "blocked";
+  } | null;
+  maskingForced: boolean;
+  maskingLockedByAccess: boolean;
+}): AuthPanelContent {
+  const { locale, loading, authenticated, accessMode, user, maskingForced, maskingLockedByAccess } = params;
+
+  if (loading) {
+    return {
+      title: locale === "ru" ? "Проверяем доступ" : "Checking access",
+      statusLabel: locale === "ru" ? "Проверка статуса" : "Checking status",
+      accessBadge: locale === "ru" ? "Статус обновляется" : "Updating status",
+      helpText: locale === "ru" ? "Панель покажет ваш статус, как только auth contour ответит." : "The panel will show your status as soon as the auth contour responds.",
+      detailText: locale === "ru" ? "Если проверка затянулась, откройте панель ещё раз или обновите страницу." : "If the check takes too long, reopen the panel or refresh the page.",
+      adminHint: locale === "ru" ? "Админка станет доступна после проверки роли." : "Admin will become available after role check.",
+      primaryActionLabel: locale === "ru" ? "Обновить статус" : "Refresh status",
+      canOpenAdmin: false,
+      canToggleMasking: false,
+      maskingTitle: locale === "ru" ? "Маскирование" : "Masking",
+      maskingHint: locale === "ru" ? "Дождитесь завершения проверки доступа." : "Wait for the access check to finish.",
+    };
+  }
+
+  if (!authenticated || !user) {
+    return {
+      title: locale === "ru" ? "Гость" : "Guest",
+      statusLabel: locale === "ru" ? "Не авторизован" : "Not signed in",
+      accessBadge: locale === "ru" ? "Маскирование включено" : "Masking enabled",
+      helpText: locale === "ru" ? "Войдите, чтобы запросить или получить доступ." : "Sign in to request or get access.",
+      detailText: locale === "ru" ? "Анонимный режим работает с маскированием. После входа статус доступа обновится здесь." : "Anonymous mode works with masking. After sign in your access status will appear here.",
+      adminHint: locale === "ru" ? "Админка доступна только пользователям с ролью администратора." : "Admin is available only to administrator accounts.",
+      primaryActionLabel: locale === "ru" ? "Войти через Яндекс" : "Sign in with Yandex",
+      canOpenAdmin: false,
+      canToggleMasking: false,
+      maskingTitle: locale === "ru" ? "Маскирование" : "Masking",
+      maskingHint: locale === "ru" ? "Маскирование определяется уровнем доступа и включено для гостя." : "Masking is defined by access level and is enabled for guests.",
+    };
+  }
+
+  if (user.role === "admin") {
+    return {
+      title: user.displayName || user.email || (locale === "ru" ? "Администратор" : "Administrator"),
+      statusLabel: locale === "ru" ? "Администратор" : "Administrator",
+      accessBadge: locale === "ru" ? "Полный доступ" : "Full access",
+      helpText: locale === "ru" ? "Доступны инструменты управления доступом." : "Access management tools are available.",
+      detailText: locale === "ru" ? "Вы вошли как администратор. Отсюда можно открыть админку, управлять доступом и маскированием." : "You are signed in as an administrator. From here you can open admin, manage access and masking.",
+      adminHint: locale === "ru" ? "У вас есть права на открытие админки." : "You have permission to open admin.",
+      primaryActionLabel: locale === "ru" ? "Выйти" : "Sign out",
+      canOpenAdmin: true,
+      canToggleMasking: !maskingLockedByAccess,
+      maskingTitle: locale === "ru" ? `Принудительная маскировка: ${maskingForced ? "вкл" : "выкл"}` : `Forced masking: ${maskingForced ? "on" : "off"}`,
+      maskingHint: maskingLockedByAccess
+        ? (locale === "ru" ? "Маскирование определяется уровнем доступа." : "Masking is defined by access level.")
+        : (locale === "ru" ? "Во включённом режиме запросы к API отправляются без auth cookie." : "When enabled, API requests are sent without the auth cookie."),
+    };
+  }
+
+  if (user.status === "pending") {
+    return {
+      title: user.displayName || user.email || (locale === "ru" ? "Пользователь" : "User"),
+      statusLabel: locale === "ru" ? "Ожидает одобрения" : "Pending approval",
+      accessBadge: locale === "ru" ? "Маскирование включено" : "Masking enabled",
+      helpText: locale === "ru" ? "Ожидается одобрение администратора." : "Administrator approval is pending.",
+      detailText: locale === "ru" ? "Вы успешно вошли, но до подтверждения доступны только замаскированные данные." : "You are signed in, but only masked data is available until approval.",
+      adminHint: locale === "ru" ? "Админка появится после назначения роли администратора." : "Admin will become available after an administrator role is granted.",
+      primaryActionLabel: locale === "ru" ? "Выйти" : "Sign out",
+      canOpenAdmin: false,
+      canToggleMasking: false,
+      maskingTitle: locale === "ru" ? "Маскирование определяется уровнем доступа" : "Masking is defined by access level",
+      maskingHint: locale === "ru" ? "До одобрения принудительно доступен только masked mode." : "Until approval only masked mode is available.",
+    };
+  }
+
+  return {
+    title: user.displayName || user.email || (locale === "ru" ? "Пользователь" : "User"),
+    statusLabel: locale === "ru" ? "Пользователь" : "User",
+    accessBadge: accessMode === "full"
+      ? (locale === "ru" ? "Полный доступ" : "Full access")
+      : (locale === "ru" ? "Маскирование включено" : "Masking enabled"),
+    helpText: locale === "ru" ? "Полный доступ получен, но прав администратора нет." : "Full access is granted, but you do not have administrator rights.",
+    detailText: locale === "ru" ? "Вы успешно вошли. Здесь можно увидеть статус доступа, открыть admin-only возможности недоступно." : "You are signed in. This panel shows access status, but admin-only features are unavailable.",
+    adminHint: locale === "ru" ? "Кнопка админки видна всегда, но активна только для администратора." : "The admin button is always visible, but active only for administrators.",
+    primaryActionLabel: locale === "ru" ? "Выйти" : "Sign out",
+    canOpenAdmin: false,
+    canToggleMasking: !maskingLockedByAccess,
+    maskingTitle: locale === "ru" ? `Принудительная маскировка: ${maskingForced ? "вкл" : "выкл"}` : `Forced masking: ${maskingForced ? "on" : "off"}`,
+    maskingHint: maskingLockedByAccess
+      ? (locale === "ru" ? "Маскирование определяется уровнем доступа." : "Masking is defined by access level.")
+      : (locale === "ru" ? "Во включённом режиме запросы к API отправляются без auth cookie." : "When enabled, API requests are sent without the auth cookie."),
+  };
+}
 
 function clamp(value: number, min: number, max: number) {
   return Math.max(min, Math.min(max, value));
@@ -64,6 +202,8 @@ export function TimelinePage() {
   const [isDraggingTimeline, setIsDraggingTimeline] = React.useState(false);
   const [isRefreshPanelOpen, setIsRefreshPanelOpen] = React.useState(false);
   const [isDateFilterPanelOpen, setIsDateFilterPanelOpen] = React.useState(false);
+  const [isAuthPanelOpen, setIsAuthPanelOpen] = React.useState(false);
+  const [maskingMode, setMaskingMode] = React.useState<"auto" | "forced">(() => readMaskingMode());
   const [pageView, setPageView] = React.useState<"tasks" | "designers">(() => {
     try {
       const stored = localStorage.getItem(TIMELINE_PAGE_VIEW_KEY);
@@ -84,6 +224,7 @@ export function TimelinePage() {
   const scaleInfoRef = React.useRef<{ rangeStartMs: number; pxPerDay: number; labelW: number } | null>(null);
   const pendingZoomAnchorRef = React.useRef<{ dateMs: number; clientX: number } | null>(null);
   const pendingDateAnchorRef = React.useRef<number | null>(null);
+  const authMenuRef = React.useRef<HTMLDivElement | null>(null);
   const timelineHost = useElementWidth<HTMLDivElement>();
 
   const applyDateAnchor = (dateMs: number) => {
@@ -113,8 +254,48 @@ export function TimelinePage() {
     }
   }, [pageView]);
 
+  React.useEffect(() => {
+    if (!isAuthPanelOpen) return;
+    const onPointerDown = (event: MouseEvent) => {
+      const target = event.target as Node | null;
+      if (authMenuRef.current && target && !authMenuRef.current.contains(target)) {
+        setIsAuthPanelOpen(false);
+      }
+    };
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setIsAuthPanelOpen(false);
+      }
+    };
+    window.addEventListener("mousedown", onPointerDown);
+    window.addEventListener("keydown", onKeyDown);
+    return () => {
+      window.removeEventListener("mousedown", onPointerDown);
+      window.removeEventListener("keydown", onKeyDown);
+    };
+  }, [isAuthPanelOpen]);
+
   if (!ctx) return null;
-  const { viewMode, setViewMode, sortMode, setSortMode, filters, setFilters, snapshotState, design, setDesign, ui, locale, setLocale } = ctx;
+  const {
+    viewMode,
+    setViewMode,
+    sortMode,
+    setSortMode,
+    filters,
+    setFilters,
+    snapshotState,
+    design,
+    setDesign,
+    ui,
+    locale,
+    setLocale,
+    authSession,
+    workbenchPanelEnabled,
+    setWorkbenchPanelEnabled,
+    workbenchOpen,
+    setFavoritesOpen,
+    canUseWorkbench,
+  } = ctx;
   const {
     snapshot,
     isLoading,
@@ -322,6 +503,47 @@ export function TimelinePage() {
     });
   };
   const onLeave = () => setTooltip({ visible: false });
+  const maskingForced = maskingMode === "forced";
+  const maskingLockedByAccess = authSession.state.accessMode !== "full";
+  const maskButtonActive = maskingForced || maskingLockedByAccess;
+  const authButtonLabel = authSession.state.authenticated
+    ? authSession.state.user?.displayName || authSession.state.user?.email || "Пользователь"
+    : authSession.state.loading
+      ? (locale === "ru" ? "Проверка доступа" : "Checking access")
+      : (locale === "ru" ? "Войти через Яндекс" : "Sign in with Yandex");
+  const authPanelContent = buildAuthPanelContent({
+    locale,
+    loading: authSession.state.loading,
+    authenticated: authSession.state.authenticated,
+    accessMode: authSession.state.accessMode,
+    user: authSession.state.user,
+    maskingForced,
+    maskingLockedByAccess,
+  });
+
+  const handleMaskToggle = () => {
+    if (maskingLockedByAccess) return;
+    const nextMode = maskingForced ? "auto" : "forced";
+    writeMaskingMode(nextMode);
+    setMaskingMode(nextMode);
+    void syncFromApi();
+  };
+
+  const handleAuthButtonClick = () => {
+    setIsAuthPanelOpen((prev) => !prev);
+  };
+
+  const handlePrimaryAuthAction = () => {
+    if (authSession.state.loading) {
+      void authSession.reload();
+      return;
+    }
+    if (!authSession.state.authenticated) {
+      void authSession.startLogin();
+      return;
+    }
+    void authSession.logout();
+  };
 
   const onDesignerCardHover = (e: React.MouseEvent, task: TaskV1) => {
     const manager = task.customer?.trim() || "-";
@@ -553,6 +775,125 @@ export function TimelinePage() {
               <option value="en">{ui.localeEn}</option>
             </select>
           </label>
+          <div className="timelineTopControlSpacer" />
+          <button
+            type="button"
+            className={`iconCtlBtn authIconBtn ${maskButtonActive ? "active" : ""}`}
+            disabled
+            title={
+              maskingLockedByAccess
+                ? (locale === "ru" ? "Маскирование задаётся уровнем доступа" : "Masking is defined by access level")
+                : maskingForced
+                  ? (locale === "ru" ? "Выключить принудительную маскировку" : "Disable forced masking")
+                  : (locale === "ru" ? "Включить принудительную маскировку" : "Enable forced masking")
+            }
+            aria-label={locale === "ru" ? "Маскирование" : "Masking"}
+          >
+            <LockIcon />
+          </button>
+          <div className="authMenuWrap" ref={authMenuRef}>
+            <button
+              type="button"
+              className={`iconCtlBtn authIconBtn ${isAuthPanelOpen ? "active" : ""}`}
+              onClick={handleAuthButtonClick}
+              title={authButtonLabel}
+              aria-label={authButtonLabel}
+            >
+              <UserIcon />
+            </button>
+            {isAuthPanelOpen ? (
+              <div className="authMenuPopover">
+                <div className="authPanelSection">
+                  <div className="authMenuTitle">{authPanelContent.title}</div>
+                  <div className="authPanelStatusRow">
+                    <span className={`authBadge ${authSession.state.accessMode === "full" ? "isFull" : ""}`}>
+                      {authPanelContent.accessBadge}
+                    </span>
+                    <span className="authPanelStatusLabel">{authPanelContent.statusLabel}</span>
+                  </div>
+                  {authSession.state.user?.email ? (
+                    <div className="authPanelIdentity">{authSession.state.user.email}</div>
+                  ) : null}
+                  <div className="authPanelHint">{authPanelContent.helpText}</div>
+                  <div className="authPanelText">{authPanelContent.detailText}</div>
+                </div>
+
+                <div className="authPanelSection">
+                  <div className="authPanelLabel">{locale === "ru" ? "Маскирование" : "Masking"}</div>
+                  <div className="authPanelText">{authPanelContent.maskingTitle}</div>
+                  <div className="authPanelHint">{authPanelContent.maskingHint}</div>
+                  <button
+                    type="button"
+                    className="btn btnGhost authMenuAction"
+                    onClick={handleMaskToggle}
+                    disabled={!authPanelContent.canToggleMasking}
+                  >
+                    {maskingForced
+                      ? (locale === "ru" ? "Выключить принудительное маскирование" : "Disable forced masking")
+                      : (locale === "ru" ? "Включить принудительное маскирование" : "Enable forced masking")}
+                  </button>
+                </div>
+
+                <div className="authPanelSection">
+                  <div className="authPanelLabel">{locale === "ru" ? "Админка" : "Admin"}</div>
+                  <div className="authPanelHint">{authPanelContent.adminHint}</div>
+                  <button
+                    type="button"
+                    className="btn btnGhost authMenuAction"
+                    onClick={() => {
+                      if (!authPanelContent.canOpenAdmin) return;
+                      setIsAuthPanelOpen(false);
+                      window.location.assign(authSession.adminHref);
+                    }}
+                    disabled={!authPanelContent.canOpenAdmin}
+                  >
+                    {locale === "ru" ? "Открыть админку" : "Open admin"}
+                  </button>
+                </div>
+
+                {canUseWorkbench ? (
+                  <div className="authPanelSection">
+                    <div className="authPanelLabel">{locale === "ru" ? "Крутилки" : "Workbench"}</div>
+                    <div className="authPanelHint">
+                      {locale === "ru"
+                        ? "Показывает нижнюю кнопку открытия панели крутилок."
+                        : "Shows the bottom button that opens the workbench panel."}
+                    </div>
+                    <button
+                      type="button"
+                      className="btn btnGhost authMenuAction"
+                      onClick={() => {
+                        const next = !workbenchPanelEnabled;
+                        setWorkbenchPanelEnabled(next);
+                        if (!next) {
+                          setFavoritesOpen(false);
+                        }
+                        setIsAuthPanelOpen(false);
+                      }}
+                    >
+                      {workbenchPanelEnabled
+                        ? locale === "ru"
+                          ? "Выключить крутилки"
+                          : "Disable workbench"
+                        : locale === "ru"
+                          ? "Включить крутилки"
+                          : "Enable workbench"}
+                    </button>
+                  </div>
+                ) : null}
+
+                <div className="authPanelSection">
+                  <button
+                    type="button"
+                    className="btn authMenuAction"
+                    onClick={handlePrimaryAuthAction}
+                  >
+                    {authPanelContent.primaryActionLabel}
+                  </button>
+                </div>
+              </div>
+            ) : null}
+          </div>
         </div>
         {isRefreshPanelOpen ? <FiltersBar /> : null}
         {isDateFilterPanelOpen ? (

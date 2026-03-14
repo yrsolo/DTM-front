@@ -17,8 +17,6 @@ import {
 } from "./runtimeDefaults";
 
 type SnapshotStatus = "cold_loading" | "ready" | "refreshing" | "stale_error";
-const API_BASE_PROD = "https://dtm-api.solofarm.ru";
-const API_BASE_TEST = "https://dtm-api-test.solofarm.ru";
 
 type PersistedMeta = {
   generatedAt?: string;
@@ -158,7 +156,7 @@ export function useSnapshot(initialRuntimeDefaults?: Partial<RuntimeDefaults>) {
     }
   }, []);
 
-  const refreshFromApi = React.useCallback(async (opts?: { manual?: boolean; ignoreDemoMode?: boolean }) => {
+  const refreshFromApi = React.useCallback(async (opts?: { manual?: boolean; ignoreDemoMode?: boolean; ignoreEtag?: boolean }) => {
     if (demoMode && !opts?.ignoreDemoMode) {
       await loadDemo();
       return;
@@ -178,6 +176,7 @@ export function useSnapshot(initialRuntimeDefaults?: Partial<RuntimeDefaults>) {
     }
 
     try {
+      const cfg = await loadPublicConfig();
       const currentMeta = memoryMeta;
       const apiStatusFilterAll: ApiStatusFilter = {
         work: true,
@@ -185,13 +184,12 @@ export function useSnapshot(initialRuntimeDefaults?: Partial<RuntimeDefaults>) {
         done: true,
         wait: true,
       };
-      const apiBaseOverride = useTestApi ? API_BASE_TEST : API_BASE_PROD;
       const { payload, etag, notModified } = await fetchApiSnapshotWithMeta(
-        currentMeta?.etag ?? null,
+        opts?.ignoreEtag ? null : currentMeta?.etag ?? null,
         dateFilter,
         apiStatusFilterAll,
         loadLimit,
-        apiBaseOverride
+        null
       );
       const nowIso = new Date().toISOString();
 
@@ -274,7 +272,7 @@ export function useSnapshot(initialRuntimeDefaults?: Partial<RuntimeDefaults>) {
   }, [demoMode, loadDemo]);
 
   const syncFromApi = React.useCallback(async () => {
-    await refreshFromApi({ manual: true });
+    await refreshFromApi({ manual: true, ignoreEtag: true });
   }, [refreshFromApi]);
 
   const setRefreshIntervalMs = React.useCallback((next: number) => {
@@ -393,7 +391,7 @@ export function useSnapshot(initialRuntimeDefaults?: Partial<RuntimeDefaults>) {
       }
 
       if (!active) return;
-      const apiOn = Boolean(cfg.apiBaseUrl) || Boolean(API_BASE_PROD);
+      const apiOn = Boolean(cfg.apiBaseUrl || cfg.apiBaseUrlProd || cfg.apiBaseUrlTest);
       if (apiOn) {
         await refreshFromApi({ manual: false });
       } else if (!memorySnapshot && !snapshotRef.current) {

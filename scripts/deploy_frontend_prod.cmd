@@ -14,6 +14,7 @@ if exist "%REPO_ROOT%\.env.prod" (
 echo Running PRODUCTION frontend deploy from %REPO_ROOT%
 echo Using env file: %ENV_FILE%
 echo Using deploy config: %REPO_ROOT%\scripts\deploy.prod.yaml
+echo Deploy target: prod
 
 set "EXTRA_ARGS="
 :parse_args
@@ -40,7 +41,7 @@ pause
 exit /b 1
 
 :run_deploy
-powershell -NoProfile -ExecutionPolicy Bypass -File "%SCRIPT_DIR%deploy_frontend.ps1" -EnvFile "%ENV_FILE%" -DeployConfigFile "%REPO_ROOT%\scripts\deploy.prod.yaml" %EXTRA_ARGS%
+powershell -NoProfile -ExecutionPolicy Bypass -File "%SCRIPT_DIR%deploy_frontend.ps1" -EnvFile "%ENV_FILE%" -DeployConfigFile "%REPO_ROOT%\scripts\deploy.prod.yaml" -Target prod %EXTRA_ARGS%
 set "EXIT_CODE=%ERRORLEVEL%"
 
 if not "%EXIT_CODE%"=="0" (

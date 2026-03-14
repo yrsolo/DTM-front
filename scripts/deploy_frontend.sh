@@ -3,6 +3,7 @@ set -euo pipefail
 
 DRY_RUN=false
 RELEASE_ID="${RELEASE_ID:-}"
+TARGET="${DTM_WEB_DEPLOY_TARGET:-}"
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --dry-run)
@@ -11,6 +12,10 @@ while [[ $# -gt 0 ]]; do
       ;;
     --release-id)
       RELEASE_ID="${2:-}"
+      shift 2
+      ;;
+    --target)
+      TARGET="${2:-}"
       shift 2
       ;;
     *)
@@ -37,14 +42,33 @@ require_env() {
   fi
 }
 
+normalize_target() {
+  local value="${1:-}"
+  if [[ -z "$value" ]]; then
+    echo "test"
+    return
+  fi
+
+  case "$value" in
+    test|prod) echo "$value" ;;
+    *)
+      echo "Unsupported deploy target: $value" >&2
+      exit 1
+      ;;
+  esac
+}
+
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 WEB_DIR="$REPO_ROOT/apps/web"
 DIST_DIR="$WEB_DIR/dist"
+PUBLIC_CONFIG_DIR="$WEB_DIR/public/config"
+DEPLOY_INFRA_CONFIG="$REPO_ROOT/config/deploy.yaml"
 CONFIG_PATH="${DTM_WEB_PUBLIC_CONFIG_PATH:-$REPO_ROOT/apps/web/config/public.yaml}"
 if [[ "$CONFIG_PATH" != /* ]]; then
   CONFIG_PATH="$REPO_ROOT/$CONFIG_PATH"
 fi
+TARGET="$(normalize_target "$TARGET")"
 
 require_cmd node
 require_cmd npm
@@ -52,7 +76,6 @@ if [[ "$DRY_RUN" != "true" ]]; then
   require_cmd aws
 fi
 
-require_env YC_BUCKET_NAME
 require_env YC_ENDPOINT
 require_env AWS_DEFAULT_REGION
 if [[ "$DRY_RUN" != "true" ]]; then
@@ -64,6 +87,59 @@ if [[ ! -f "$CONFIG_PATH" ]]; then
   echo "Runtime config file not found: $CONFIG_PATH"
   exit 1
 fi
+if [[ ! -d "$PUBLIC_CONFIG_DIR" ]]; then
+  echo "Public config directory not found: $PUBLIC_CONFIG_DIR"
+  exit 1
+fi
+if [[ ! -f "$DEPLOY_INFRA_CONFIG" ]]; then
+  echo "Deploy infra config not found: $DEPLOY_INFRA_CONFIG"
+  exit 1
+fi
+
+bucket_key="frontend_bucket_test"
+site_path_label="/test/"
+if [[ "$TARGET" == "prod" ]]; then
+  bucket_key="frontend_bucket_prod"
+  site_path_label="/"
+fi
+
+BUILD_BASE="/test/"
+if [[ "$TARGET" == "prod" ]]; then
+  BUILD_BASE="/"
+fi
+export DTM_WEB_BUILD_BASE="$BUILD_BASE"
+
+BUCKET="$(node - <<NODE
+const fs = require('fs');
+const raw = fs.readFileSync('$DEPLOY_INFRA_CONFIG', 'utf8');
+const section = {};
+let inSection = false;
+for (const rawLine of raw.split(/\r?\n/)) {
+  if (!rawLine.trim() || rawLine.trimStart().startsWith('#')) continue;
+  const top = rawLine.match(/^([A-Za-z0-9_]+):\s*$/);
+  if (top) {
+    inSection = top[1] === 'yandex_cloud';
+    continue;
+  }
+  if (!inSection) continue;
+  const m = rawLine.match(/^\s+([A-Za-z0-9_]+):\s*(.*)$/);
+  if (!m) continue;
+  section[m[1]] = m[2].trim();
+}
+process.stdout.write(section['$bucket_key'] || '');
+NODE
+)"
+
+if [[ -z "$BUCKET" ]]; then
+  echo "Missing $bucket_key in config/deploy.yaml" >&2
+  exit 1
+fi
+export YC_BUCKET_NAME="$BUCKET"
+
+SITE_BUCKET_URI="s3://$YC_BUCKET_NAME"
+CONFIG_PREFIX="config"
+DATA_PREFIX="data"
+RELEASE_ROOT_URI="s3://$YC_BUCKET_NAME/releases/$TARGET"
 
 if [[ "$DRY_RUN" != "true" ]]; then
   echo "Checking AWS CLI..."
@@ -77,6 +153,7 @@ if [[ -f "$WEB_DIR/package-lock.json" ]]; then
 else
   npm install
 fi
+echo "Build base: $DTM_WEB_BUILD_BASE"
 npm run build
 popd >/dev/null
 
@@ -85,79 +162,83 @@ if [[ ! -d "$DIST_DIR" ]]; then
   exit 1
 fi
 
-BUCKET_URI="s3://$YC_BUCKET_NAME"
 if [[ -z "$RELEASE_ID" ]]; then
   DATE_PART="$(date -u +%Y%m%d-%H%M%S)"
   SHA_PART="$(git rev-parse --short HEAD 2>/dev/null || echo local)"
-  RELEASE_ID="$DATE_PART-$SHA_PART"
+  RELEASE_ID="$TARGET-$DATE_PART-$SHA_PART"
 fi
-RELEASE_PREFIX="$BUCKET_URI/releases/$RELEASE_ID"
-LATEST_RELEASE_PATH="$BUCKET_URI/releases/latest.json"
+RELEASE_PREFIX="$RELEASE_ROOT_URI/$RELEASE_ID"
+LATEST_RELEASE_PATH="$RELEASE_ROOT_URI/latest.json"
 TMP_RELEASE_FILE="$(mktemp)"
 trap 'rm -f "$TMP_RELEASE_FILE"' EXIT
 
 cat > "$TMP_RELEASE_FILE" <<EOF
 {
   "release_id": "$RELEASE_ID",
+  "deploy_target": "$TARGET",
   "generated_at_utc": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")",
   "git_ref": "${GITHUB_REF:-}",
-  "git_sha": "${GITHUB_SHA:-}"
+  "git_sha": "${GITHUB_SHA:-}",
+  "frontend_bucket": "$YC_BUCKET_NAME"
 }
 EOF
 
-echo "Uploading runtime config to /config/public.yaml ..."
+echo "Syncing dist assets (excluding index.html/config/data/releases) ..."
+SYNC_EXCLUDES=(--exclude "index.html" --exclude "config/*" --exclude "data/*" --exclude "releases/*")
 if [[ "$DRY_RUN" == "true" ]]; then
-  echo "[DRY-RUN] aws s3 cp \"$CONFIG_PATH\" \"$BUCKET_URI/config/public.yaml\" --endpoint-url \"$YC_ENDPOINT\" --content-type text/yaml --cache-control no-cache"
-  echo "[DRY-RUN] aws s3 cp \"$CONFIG_PATH\" \"$BUCKET_URI/config/public.yam\" --endpoint-url \"$YC_ENDPOINT\" --content-type text/yaml --cache-control no-cache"
+  echo "[DRY-RUN] aws s3 sync \"$DIST_DIR\" \"$SITE_BUCKET_URI\" --delete ${SYNC_EXCLUDES[*]} --endpoint-url \"$YC_ENDPOINT\" --cache-control \"public, max-age=31536000, immutable\""
 else
-  aws s3 cp \
-    "$CONFIG_PATH" \
-    "$BUCKET_URI/config/public.yaml" \
+  aws s3 sync \
+    "$DIST_DIR" \
+    "$SITE_BUCKET_URI" \
+    --delete \
+    "${SYNC_EXCLUDES[@]}" \
     --endpoint-url "$YC_ENDPOINT" \
-    --content-type "text/yaml" \
-    --cache-control "no-cache"
-  aws s3 cp \
-    "$CONFIG_PATH" \
-    "$BUCKET_URI/config/public.yam" \
+    --cache-control "public, max-age=31536000, immutable"
+fi
+
+echo "Syncing public config directory to ${site_path_label}config/ ..."
+if [[ "$DRY_RUN" == "true" ]]; then
+  echo "[DRY-RUN] aws s3 sync \"$PUBLIC_CONFIG_DIR\" \"s3://$YC_BUCKET_NAME/$CONFIG_PREFIX\" --delete --endpoint-url \"$YC_ENDPOINT\" --cache-control no-cache"
+else
+  aws s3 sync \
+    "$PUBLIC_CONFIG_DIR" \
+    "s3://$YC_BUCKET_NAME/$CONFIG_PREFIX" \
+    --delete \
     --endpoint-url "$YC_ENDPOINT" \
-    --content-type "text/yaml" \
     --cache-control "no-cache"
 fi
 
+echo "Uploading runtime config aliases to ${site_path_label}config/public.yaml ..."
+if [[ "$DRY_RUN" == "true" ]]; then
+  echo "[DRY-RUN] aws s3 cp \"$CONFIG_PATH\" \"s3://$YC_BUCKET_NAME/$CONFIG_PREFIX/public.yaml\" --endpoint-url \"$YC_ENDPOINT\" --content-type text/yaml --cache-control no-cache"
+  echo "[DRY-RUN] aws s3 cp \"$CONFIG_PATH\" \"s3://$YC_BUCKET_NAME/$CONFIG_PREFIX/public.yam\" --endpoint-url \"$YC_ENDPOINT\" --content-type text/yaml --cache-control no-cache"
+else
+  aws s3 cp "$CONFIG_PATH" "s3://$YC_BUCKET_NAME/$CONFIG_PREFIX/public.yaml" --endpoint-url "$YC_ENDPOINT" --content-type "text/yaml" --cache-control "no-cache"
+  aws s3 cp "$CONFIG_PATH" "s3://$YC_BUCKET_NAME/$CONFIG_PREFIX/public.yam" --endpoint-url "$YC_ENDPOINT" --content-type "text/yaml" --cache-control "no-cache"
+fi
+
 if [[ -f "$REPO_ROOT/data/snapshot.example.json" ]]; then
-  echo "Uploading fallback snapshot to /data/snapshot.example.json ..."
+  echo "Uploading fallback snapshot to ${site_path_label}data/snapshot.example.json ..."
   if [[ "$DRY_RUN" == "true" ]]; then
-    echo "[DRY-RUN] aws s3 cp \"$REPO_ROOT/data/snapshot.example.json\" \"$BUCKET_URI/data/snapshot.example.json\" --endpoint-url \"$YC_ENDPOINT\" --content-type application/json --cache-control no-cache"
+    echo "[DRY-RUN] aws s3 cp \"$REPO_ROOT/data/snapshot.example.json\" \"s3://$YC_BUCKET_NAME/$DATA_PREFIX/snapshot.example.json\" --endpoint-url \"$YC_ENDPOINT\" --content-type application/json --cache-control no-cache"
   else
     aws s3 cp \
       "$REPO_ROOT/data/snapshot.example.json" \
-      "$BUCKET_URI/data/snapshot.example.json" \
+      "s3://$YC_BUCKET_NAME/$DATA_PREFIX/snapshot.example.json" \
       --endpoint-url "$YC_ENDPOINT" \
       --content-type "application/json" \
       --cache-control "no-cache"
   fi
 fi
 
-echo "Syncing dist assets (excluding index.html) ..."
+echo "Uploading index.html with no-cache to ${site_path_label} ..."
 if [[ "$DRY_RUN" == "true" ]]; then
-  echo "[DRY-RUN] aws s3 sync \"$DIST_DIR\" \"$BUCKET_URI\" --delete --exclude index.html --endpoint-url \"$YC_ENDPOINT\" --cache-control \"public, max-age=31536000, immutable\""
-else
-  aws s3 sync \
-    "$DIST_DIR" \
-    "$BUCKET_URI" \
-    --delete \
-    --exclude "index.html" \
-    --endpoint-url "$YC_ENDPOINT" \
-    --cache-control "public, max-age=31536000, immutable"
-fi
-
-echo "Uploading index.html with no-cache ..."
-if [[ "$DRY_RUN" == "true" ]]; then
-  echo "[DRY-RUN] aws s3 cp \"$DIST_DIR/index.html\" \"$BUCKET_URI/index.html\" --endpoint-url \"$YC_ENDPOINT\" --content-type \"text/html; charset=utf-8\" --cache-control no-cache"
+  echo "[DRY-RUN] aws s3 cp \"$DIST_DIR/index.html\" \"s3://$YC_BUCKET_NAME/index.html\" --endpoint-url \"$YC_ENDPOINT\" --content-type \"text/html; charset=utf-8\" --cache-control no-cache"
 else
   aws s3 cp \
     "$DIST_DIR/index.html" \
-    "$BUCKET_URI/index.html" \
+    "s3://$YC_BUCKET_NAME/index.html" \
     --endpoint-url "$YC_ENDPOINT" \
     --content-type "text/html; charset=utf-8" \
     --cache-control "no-cache"
@@ -168,18 +249,8 @@ if [[ "$DRY_RUN" == "true" ]]; then
   echo "[DRY-RUN] aws s3 cp \"$TMP_RELEASE_FILE\" \"$RELEASE_PREFIX/release.json\" --endpoint-url \"$YC_ENDPOINT\" --content-type application/json --cache-control no-cache"
   echo "[DRY-RUN] aws s3 cp \"$TMP_RELEASE_FILE\" \"$LATEST_RELEASE_PATH\" --endpoint-url \"$YC_ENDPOINT\" --content-type application/json --cache-control no-cache"
 else
-  aws s3 cp \
-    "$TMP_RELEASE_FILE" \
-    "$RELEASE_PREFIX/release.json" \
-    --endpoint-url "$YC_ENDPOINT" \
-    --content-type "application/json" \
-    --cache-control "no-cache"
-  aws s3 cp \
-    "$TMP_RELEASE_FILE" \
-    "$LATEST_RELEASE_PATH" \
-    --endpoint-url "$YC_ENDPOINT" \
-    --content-type "application/json" \
-    --cache-control "no-cache"
+  aws s3 cp "$TMP_RELEASE_FILE" "$RELEASE_PREFIX/release.json" --endpoint-url "$YC_ENDPOINT" --content-type "application/json" --cache-control "no-cache"
+  aws s3 cp "$TMP_RELEASE_FILE" "$LATEST_RELEASE_PATH" --endpoint-url "$YC_ENDPOINT" --content-type "application/json" --cache-control "no-cache"
 fi
 
 echo
@@ -189,7 +260,6 @@ else
   echo "Deploy complete."
 fi
 echo "Bucket: $YC_BUCKET_NAME"
+echo "Target: $TARGET"
+echo "Site path: $site_path_label"
 echo "ReleaseId: $RELEASE_ID"
-echo "Open endpoint in Yandex Cloud Console:"
-echo "Object Storage -> $YC_BUCKET_NAME -> Website hosting -> Endpoint"
-echo "Typical format: https://<bucket>.website.yandexcloud.net"

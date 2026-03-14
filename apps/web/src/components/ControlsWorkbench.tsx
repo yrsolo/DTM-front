@@ -1,31 +1,47 @@
 ﻿import React from "react";
 import { KEY_COLOR_ITEMS, normalizeKeyColors, TASK_PALETTE_ITEMS } from "../design/colors";
 import {
-  DESIGN_CONTROL_ITEMS,
-  DESIGN_CONTROLS_PUBLIC_PATH,
+  ALL_DESIGN_CONTROL_ITEMS,
   normalizeDesignControls,
 } from "../design/controls";
 import {
   WORKBENCH_LAYOUT,
+  resolveWorkbenchTabId,
+  validateWorkbenchLayout,
   type WorkbenchControlRef,
   type WorkbenchSectionConfig,
   type WorkbenchTabId,
 } from "../design/workbenchLayout";
 import { DEFAULT_RUNTIME_DEFAULTS, normalizeRuntimeDefaults } from "../data/runtimeDefaults";
+import {
+  type PresetKind,
+  type PresetSummary,
+  loadBuiltinPresetCatalog,
+  loadCloudPresetCatalog,
+  loadColorPresetAsset,
+  loadLayoutPresetAsset,
+  mergePresetCatalogs,
+  readStoredActivePresetId,
+  writeStoredActivePresetId,
+} from "../design/presets";
+import { getAuthRequestBase } from "../config/runtimeContour";
 import { LayoutContext } from "./Layout";
 
 const FAVORITES_STORAGE_KEY = "dtm.web.workbench.favorites.v1";
+const WORKBENCH_TAB_STORAGE_KEY = "dtm.web.workbench.tab.v2";
+const DEPLOY_PRESET_HINT = "config/UI/colors/deploy.json + config/UI/layouts/deploy.json";
+type RangeItem = (typeof ALL_DESIGN_CONTROL_ITEMS)[number];
 
 type ResolvedControl = {
   id: string;
   key: string;
   kind: "range" | "color";
   label: string;
-  rangeItem?: (typeof DESIGN_CONTROL_ITEMS)[number];
+  rangeItem?: RangeItem;
   colorItem?: (typeof KEY_COLOR_ITEMS)[number];
 };
 
-function isBinaryRange(item: (typeof DESIGN_CONTROL_ITEMS)[number]): boolean {
+function isBinaryRange(item: RangeItem): boolean {
   return item.min === 0 && item.max === 1 && item.step === 1;
 }
 
@@ -67,12 +83,28 @@ function BinaryIcon({ active }: { active: boolean }) {
 
 export function ControlsWorkbench() {
   const ctx = React.useContext(LayoutContext);
-  const [open, setOpen] = React.useState(false);
-  const [favoritesOpen, setFavoritesOpen] = React.useState(false);
-  const [tab, setTab] = React.useState<WorkbenchTabId>(WORKBENCH_LAYOUT[0]?.id ?? "material");
+  const [tab, setTab] = React.useState<WorkbenchTabId>(() => {
+    try {
+      return resolveWorkbenchTabId(localStorage.getItem(WORKBENCH_TAB_STORAGE_KEY));
+    } catch {
+      return WORKBENCH_LAYOUT[0]?.id ?? "foundation";
+    }
+  });
   const [query, setQuery] = React.useState("");
   const [favorites, setFavorites] = React.useState<string[]>([]);
   const [panelMapTarget, setPanelMapTarget] = React.useState<"scene" | "drawer">("drawer");
+  const [activeColorPresetId, setActiveColorPresetId] = React.useState<string | null>(() =>
+    readStoredActivePresetId("color")
+  );
+  const [activeLayoutPresetId, setActiveLayoutPresetId] = React.useState<string | null>(() =>
+    readStoredActivePresetId("layout")
+  );
+  const [colorPresets, setColorPresets] = React.useState<PresetSummary[]>([]);
+  const [layoutPresets, setLayoutPresets] = React.useState<PresetSummary[]>([]);
+  const [cloudCatalogAvailable, setCloudCatalogAvailable] = React.useState({ color: false, layout: false });
+  const [presetNotice, setPresetNotice] = React.useState<string | null>(null);
+  const [presetError, setPresetError] = React.useState<string | null>(null);
+  const [pendingImportKind, setPendingImportKind] = React.useState<PresetKind>("layout");
   const importRef = React.useRef<HTMLInputElement | null>(null);
 
   if (!ctx) return null;
@@ -83,10 +115,19 @@ export function ControlsWorkbench() {
     setDesign,
     setKeyColors,
     saveDesign,
+    saveKeyColors,
     loadDesign,
+    loadKeyColors,
     loadDeployDesign,
     resetDesign,
     resetKeyColors,
+    workbenchPanelEnabled,
+    setWorkbenchPanelEnabled,
+    workbenchOpen,
+    setWorkbenchOpen,
+    favoritesOpen,
+    setFavoritesOpen,
+    canUseWorkbench,
     ui,
     filters,
     setFilters,
@@ -142,20 +183,46 @@ export function ControlsWorkbench() {
     }
   }, [favorites]);
 
-  const exportPreset = () => {
-    const payload = { design, keyColors, runtimeDefaults };
-    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "design-controls.json";
-    a.click();
-    URL.revokeObjectURL(url);
-  };
+  React.useEffect(() => {
+    try {
+      localStorage.setItem(WORKBENCH_TAB_STORAGE_KEY, tab);
+    } catch {
+      // ignore
+    }
+  }, [tab]);
+
+  React.useEffect(() => {
+    writeStoredActivePresetId("color", activeColorPresetId);
+  }, [activeColorPresetId]);
+
+  React.useEffect(() => {
+    writeStoredActivePresetId("layout", activeLayoutPresetId);
+  }, [activeLayoutPresetId]);
+
+  const reloadPresetCatalog = React.useCallback(async (kind: PresetKind) => {
+    const builtin = await loadBuiltinPresetCatalog(kind);
+    const cloud = await loadCloudPresetCatalog(kind);
+    const merged = mergePresetCatalogs(builtin, cloud.presets, cloud.defaultPresetId);
+    if (kind === "color") {
+      setColorPresets(merged);
+      setCloudCatalogAvailable((prev) => ({ ...prev, color: cloud.available }));
+      setActiveColorPresetId((prev) => prev ?? merged.find((item) => item.isDefault)?.id ?? merged[0]?.id ?? null);
+      return;
+    }
+
+    setLayoutPresets(merged);
+    setCloudCatalogAvailable((prev) => ({ ...prev, layout: cloud.available }));
+    setActiveLayoutPresetId((prev) => prev ?? merged.find((item) => item.isDefault)?.id ?? merged[0]?.id ?? null);
+  }, []);
+
+  React.useEffect(() => {
+    void reloadPresetCatalog("color");
+    void reloadPresetCatalog("layout");
+  }, [reloadPresetCatalog]);
 
   const rangeByKey = React.useMemo(() => {
-    const map = new Map<string, (typeof DESIGN_CONTROL_ITEMS)[number]>();
-    for (const item of DESIGN_CONTROL_ITEMS) map.set(String(item.key), item);
+    const map = new Map<string, RangeItem>();
+    for (const item of ALL_DESIGN_CONTROL_ITEMS) map.set(String(item.key), item);
     return map;
   }, []);
 
@@ -170,34 +237,13 @@ export function ControlsWorkbench() {
   React.useEffect(() => {
     if (!import.meta.env.DEV) return;
 
-    const knownRange = new Set(DESIGN_CONTROL_ITEMS.map((item) => String(item.key)));
-    const knownColor = new Set([...KEY_COLOR_ITEMS, ...TASK_PALETTE_ITEMS].map((item) => String(item.key)));
-    const rangeSeen = new Map<string, number>();
-
-    for (const section of WORKBENCH_LAYOUT) {
-      for (const group of section.groups) {
-        if (group.controls.length === 0) console.warn("[workbench-layout] Empty group:", section.id, group.title);
-        if (group.controls.length > 6) {
-          console.warn("[workbench-layout] Group has more than 6 controls:", section.id, group.title, group.controls.length);
-        }
-        for (const control of group.controls) {
-          const key = String(control.key);
-          if (control.kind === "range") {
-            rangeSeen.set(key, (rangeSeen.get(key) ?? 0) + 1);
-            if (!knownRange.has(key)) console.warn("[workbench-layout] Unknown range key:", section.id, group.title, key);
-          } else if (!knownColor.has(key)) {
-            console.warn("[workbench-layout] Unknown color key:", section.id, group.title, key);
-          }
-        }
+    for (const issue of validateWorkbenchLayout()) {
+      const prefix = `[workbench-layout] ${issue.code}:`;
+      if (issue.severity === "error") {
+        console.error(prefix, issue.message);
+      } else {
+        console.warn(prefix, issue.message);
       }
-    }
-
-    for (const [key, count] of rangeSeen) {
-      if (count > 1) console.warn("[workbench-layout] Duplicate range key across groups:", key, count);
-    }
-
-    for (const key of knownRange) {
-      if (!rangeSeen.has(key)) console.warn("[workbench-layout] Range key not assigned in layout:", key);
     }
   }, []);
 
@@ -252,6 +298,177 @@ export function ControlsWorkbench() {
     return allResolvedControls.filter((item) => fav.has(item.id));
   }, [allResolvedControls, favorites]);
 
+  const selectedColorPreset = React.useMemo(
+    () => colorPresets.find((preset) => preset.id === activeColorPresetId) ?? null,
+    [activeColorPresetId, colorPresets]
+  );
+  const selectedLayoutPreset = React.useMemo(
+    () => layoutPresets.find((preset) => preset.id === activeLayoutPresetId) ?? null,
+    [activeLayoutPresetId, layoutPresets]
+  );
+
+  const applyPreset = React.useCallback(
+    async (kind: PresetKind, preset: PresetSummary | null) => {
+      if (!preset) return;
+      setPresetError(null);
+      setPresetNotice(null);
+
+      if (kind === "color") {
+        const payload = await loadColorPresetAsset(preset.assetUrl);
+        if (!payload) {
+          setPresetError(locale === "en" ? "Failed to load color preset asset." : "Не удалось загрузить asset цветового пресета.");
+          setColorPresets((prev) =>
+            prev.map((item) => (item.id === preset.id ? { ...item, availability: "broken" } : item))
+          );
+          return;
+        }
+        setKeyColors(payload);
+        setActiveColorPresetId(preset.id);
+        setPresetNotice(locale === "en" ? `Applied color preset: ${preset.name}` : `Применена цветовая схема: ${preset.name}`);
+        return;
+      }
+
+      const payload = await loadLayoutPresetAsset(preset.assetUrl);
+      if (!payload) {
+        setPresetError(locale === "en" ? "Failed to load layout preset asset." : "Не удалось загрузить asset layout-пресета.");
+        setLayoutPresets((prev) =>
+          prev.map((item) => (item.id === preset.id ? { ...item, availability: "broken" } : item))
+        );
+        return;
+      }
+      setDesign(payload);
+      setActiveLayoutPresetId(preset.id);
+      setPresetNotice(locale === "en" ? `Applied layout preset: ${preset.name}` : `Применён UI / Layout preset: ${preset.name}`);
+    },
+    [locale, setDesign, setKeyColors]
+  );
+
+  const saveLocalDraft = React.useCallback(
+    (kind: PresetKind) => {
+      setPresetError(null);
+      setPresetNotice(null);
+      if (kind === "color") {
+        saveKeyColors();
+        setPresetNotice(locale === "en" ? "Saved current colors locally." : "Текущая цветовая схема сохранена локально.");
+        return;
+      }
+      saveDesign();
+      setPresetNotice(locale === "en" ? "Saved current layout locally." : "Текущий layout сохранён локально.");
+    },
+    [locale, saveDesign, saveKeyColors]
+  );
+
+  const loadLocalDraft = React.useCallback(
+    (kind: PresetKind) => {
+      setPresetError(null);
+      setPresetNotice(null);
+      if (kind === "color") {
+        loadKeyColors();
+        setPresetNotice(locale === "en" ? "Loaded local colors." : "Локальная цветовая схема загружена.");
+        return;
+      }
+      loadDesign();
+      setPresetNotice(locale === "en" ? "Loaded local layout." : "Локальный layout загружен.");
+    },
+    [locale, loadDesign, loadKeyColors]
+  );
+
+  const resetDraft = React.useCallback(
+    (kind: PresetKind) => {
+      setPresetError(null);
+      setPresetNotice(null);
+      if (kind === "color") {
+        resetKeyColors();
+        setActiveColorPresetId(null);
+        setPresetNotice(locale === "en" ? "Colors reset to defaults." : "Цвета сброшены к default.");
+        return;
+      }
+      resetDesign();
+      setActiveLayoutPresetId(null);
+      setPresetNotice(locale === "en" ? "Layout reset to defaults." : "Layout сброшен к default.");
+    },
+    [locale, resetDesign, resetKeyColors]
+  );
+
+  const exportPresetFile = React.useCallback(
+    (kind: PresetKind) => {
+      const payload = kind === "color" ? { keyColors } : { design };
+      const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = kind === "color" ? "dtm-color-preset.json" : "dtm-layout-preset.json";
+      a.click();
+      URL.revokeObjectURL(url);
+    },
+    [design, keyColors]
+  );
+
+  const saveCloudPreset = React.useCallback(
+    async (kind: PresetKind, preset: PresetSummary | null) => {
+      const canEdit = preset?.sourceKind === "cloud" && preset.canEdit;
+      const promptLabel =
+        locale === "en"
+          ? kind === "color"
+            ? "Color preset name"
+            : "Layout preset name"
+          : kind === "color"
+            ? "Название цветового пресета"
+            : "Название layout-пресета";
+      const nextName = window.prompt(promptLabel, preset?.name || "");
+      if (!nextName?.trim()) return;
+      const descriptionLabel =
+        locale === "en"
+          ? "Optional comment / description"
+          : "Необязательный комментарий / описание";
+      const nextDescription = window.prompt(descriptionLabel, preset?.description || "") ?? "";
+
+      setPresetError(null);
+      setPresetNotice(null);
+
+      const payload = kind === "color" ? { keyColors } : { design };
+      const shouldCloneCloudPreset = Boolean(preset && preset.sourceKind === "cloud" && !canEdit);
+      const cloneSourceId = shouldCloneCloudPreset && preset ? preset.id : null;
+      const endpoint = canEdit
+        ? `${getAuthRequestBase()}/presets/${encodeURIComponent(preset.id)}`
+        : cloneSourceId
+          ? `${getAuthRequestBase()}/presets/${encodeURIComponent(cloneSourceId)}/clone`
+          : `${getAuthRequestBase()}/presets`;
+      const method = canEdit ? "PUT" : "POST";
+      const body = canEdit
+        ? { kind, name: nextName.trim(), description: nextDescription.trim(), payload }
+        : { kind, name: nextName.trim(), description: nextDescription.trim(), payload };
+
+      try {
+        const res = await fetch(endpoint, {
+          method,
+          credentials: "include",
+          headers: { "content-type": "application/json", accept: "application/json" },
+          body: JSON.stringify(body),
+        });
+        if (!res.ok) {
+          throw new Error(`${locale === "en" ? "Preset save failed" : "Не удалось сохранить пресет"} (HTTP ${res.status})`);
+        }
+        const response = (await res.json()) as { preset?: { id?: string; name?: string } };
+        await reloadPresetCatalog(kind);
+        if (kind === "color") setActiveColorPresetId(response.preset?.id ?? activeColorPresetId);
+        else setActiveLayoutPresetId(response.preset?.id ?? activeLayoutPresetId);
+        setPresetNotice(
+          canEdit
+            ? locale === "en"
+              ? "Cloud preset updated."
+              : "Cloud preset обновлён."
+            : locale === "en"
+              ? "Cloud preset saved."
+              : "Cloud preset сохранён."
+        );
+      } catch (error) {
+        setPresetError(error instanceof Error ? error.message : locale === "en" ? "Preset save failed." : "Не удалось сохранить пресет.");
+      }
+    },
+    [activeColorPresetId, activeLayoutPresetId, design, keyColors, locale, reloadPresetCatalog]
+  );
+
   const groupsForRender = React.useMemo(() => {
     if (!selectedSection) return [] as Array<{ title: string; controls: ResolvedControl[] }>;
 
@@ -274,7 +491,7 @@ export function ControlsWorkbench() {
       if (filtered.length > 0) groups.push({ title: group.title, controls: filtered });
     }
 
-    return groups.sort((a, b) => b.controls.length - a.controls.length);
+    return groups;
   }, [selectedSection, resolveControl, normalizedQuery]);
 
   const toggleFavorite = React.useCallback((id: string) => {
@@ -636,7 +853,7 @@ export function ControlsWorkbench() {
         </div>
       );
     }
-    const showPanelsGuide = section.id === "panelGuide";
+    const showPanelsGuide = section.id === "surfaces";
     const panelGlowLeft = panelMapTarget === "scene" ? keyColors.keyBackdropLeft : keyColors.keyDrawerPanelGlowLeft;
     const panelGlowRight = panelMapTarget === "scene" ? keyColors.keyBackdropRight : keyColors.keyDrawerPanelGlowRight;
     const panelGlowBottom = panelMapTarget === "scene" ? keyColors.keyBackdropBottom : keyColors.keyDrawerPanelGlowBottom;
@@ -682,13 +899,22 @@ export function ControlsWorkbench() {
             <h4>{locale === "en" ? "Interactive panel map" : "Интерактивная схема панели"}</h4>
             <div className="wbPanelMapMode">
               <span>{locale === "en" ? "Apply to" : "Применять к"}</span>
-              <select
-                value={panelMapTarget}
-                onChange={(e) => setPanelMapTarget(e.target.value === "scene" ? "scene" : "drawer")}
-              >
-                <option value="drawer">{locale === "en" ? "Task drawer panels" : "Панели карточки задачи"}</option>
-                <option value="scene">{locale === "en" ? "Scene / table background" : "Фон сцены / таблицы"}</option>
-              </select>
+              <div className="wbSegmented">
+                <button
+                  type="button"
+                  className={`wbSegmentedBtn ${panelMapTarget === "drawer" ? "active" : ""}`}
+                  onClick={() => setPanelMapTarget("drawer")}
+                >
+                  {locale === "en" ? "Task card" : "Карточка задачи"}
+                </button>
+                <button
+                  type="button"
+                  className={`wbSegmentedBtn ${panelMapTarget === "scene" ? "active" : ""}`}
+                  onClick={() => setPanelMapTarget("scene")}
+                >
+                  {locale === "en" ? "Timeline" : "Таймлайн"}
+                </button>
+              </div>
             </div>
             <div
               className={`wbPanelMapScene ${panelMapTarget === "scene" ? "targetScene" : "targetDrawer"}`}
@@ -767,14 +993,139 @@ export function ControlsWorkbench() {
     );
   };
 
+  const renderPresetSection = (kind: PresetKind, presets: PresetSummary[], activePreset: PresetSummary | null) => (
+    <section className="wbPresetGroup">
+      <div className="wbPresetHeader">
+        <div>
+          <h4>{kind === "color" ? (locale === "en" ? "Color" : "Цвет") : "UI / Layout"}</h4>
+        </div>
+        {!cloudCatalogAvailable[kind] ? (
+          <div className="wbPresetHint">
+            {locale === "en"
+              ? "Cloud catalog unavailable. Builtin presets only."
+              : "Cloud catalog недоступен. Доступны только builtin presets."}
+          </div>
+        ) : null}
+      </div>
+
+      <label
+        className="wbPresetSelectWrap wbPresetSelectWrapTooltip"
+        data-tooltip={buildPresetTooltipText(locale, activePreset)}
+      >
+        <span className="wbPresetSelectLabel">{locale === "en" ? "Preset" : "Пресет"}</span>
+        <select
+          value={activePreset?.id ?? ""}
+          onChange={(event) => {
+            const next = presets.find((preset) => preset.id === event.target.value) ?? null;
+            if (kind === "color") setActiveColorPresetId(next?.id ?? null);
+            else setActiveLayoutPresetId(next?.id ?? null);
+            void applyPreset(kind, next);
+          }}
+        >
+          {presets.map((preset) => (
+            <option key={preset.id} value={preset.id}>
+              {preset.name}
+            </option>
+          ))}
+        </select>
+      </label>
+
+      <div className="wbPresetActions">
+        <button
+          type="button"
+          className="wbIconBtn"
+          data-tooltip={locale === "en" ? "Apply selected preset" : "Применить выбранный пресет"}
+          aria-label={locale === "en" ? "Apply selected preset" : "Применить выбранный пресет"}
+          onClick={() => void applyPreset(kind, activePreset)}
+          disabled={!activePreset}
+        >
+          <PresetActionIcon name="apply" />
+        </button>
+        <button
+          type="button"
+          className="wbIconBtn"
+          data-tooltip={locale === "en" ? "Save current values locally" : "Сохранить текущие значения локально"}
+          aria-label={locale === "en" ? "Save current values locally" : "Сохранить текущие значения локально"}
+          onClick={() => saveLocalDraft(kind)}
+        >
+          <PresetActionIcon name="save" />
+        </button>
+        <button
+          type="button"
+          className="wbIconBtn"
+          data-tooltip={locale === "en" ? "Load local draft" : "Загрузить локальный черновик"}
+          aria-label={locale === "en" ? "Load local draft" : "Загрузить локальный черновик"}
+          onClick={() => loadLocalDraft(kind)}
+        >
+          <PresetActionIcon name="load" />
+        </button>
+        <button
+          type="button"
+          className="wbIconBtn"
+          data-tooltip={locale === "en" ? "Reset current values" : "Сбросить текущие значения"}
+          aria-label={locale === "en" ? "Reset current values" : "Сбросить текущие значения"}
+          onClick={() => resetDraft(kind)}
+        >
+          <PresetActionIcon name="reset" />
+        </button>
+        <button
+          type="button"
+          className="wbIconBtn"
+          data-tooltip={locale === "en" ? "Export preset JSON" : "Экспортировать пресет в JSON"}
+          aria-label={locale === "en" ? "Export preset JSON" : "Экспортировать пресет в JSON"}
+          onClick={() => exportPresetFile(kind)}
+        >
+          <PresetActionIcon name="export" />
+        </button>
+        <button
+          type="button"
+          className="wbIconBtn"
+          data-tooltip={locale === "en" ? "Import preset JSON" : "Импортировать пресет из JSON"}
+          aria-label={locale === "en" ? "Import preset JSON" : "Импортировать пресет из JSON"}
+          onClick={() => {
+            setPendingImportKind(kind);
+            importRef.current?.click();
+          }}
+        >
+          <PresetActionIcon name="import" />
+        </button>
+        <button
+          type="button"
+          className="wbIconBtn wbIconBtnCloud"
+          data-tooltip={
+            activePreset?.sourceKind === "cloud" && activePreset.canEdit
+              ? locale === "en"
+                ? "Update cloud preset"
+                : "Обновить облачный пресет"
+              : locale === "en"
+                ? "Save as cloud preset"
+                : "Сохранить как облачный пресет"
+          }
+          aria-label={
+            activePreset?.sourceKind === "cloud" && activePreset.canEdit
+              ? locale === "en"
+                ? "Update cloud preset"
+                : "Обновить облачный пресет"
+              : locale === "en"
+                ? "Save as cloud preset"
+                : "Сохранить как облачный пресет"
+          }
+          onClick={() => void saveCloudPreset(kind, activePreset)}
+        >
+          <PresetActionIcon name="cloud" />
+        </button>
+      </div>
+    </section>
+  );
+
   return (
     <>
-      <div className={`workbench ${open ? "open" : ""}`}>
-        <button className="workbenchToggle" onClick={() => setOpen((v) => !v)}>
-          {open ? ui.workbench.toggleHide : ui.workbench.toggleShow}
+      {canUseWorkbench && workbenchPanelEnabled ? (
+      <div className={`workbench ${workbenchOpen ? "open" : ""}`}>
+        <button className="workbenchToggle" onClick={() => setWorkbenchOpen((value) => !value)}>
+          {workbenchOpen ? ui.workbench.toggleHide : ui.workbench.toggleShow}
         </button>
-
-        {open ? (
+        {workbenchOpen ? (
           <div className="workbenchBody">
             <div className="workbenchMain">
               <div>
@@ -795,24 +1146,8 @@ export function ControlsWorkbench() {
 
               <aside className="workbenchSideActions">
                 <div className="muted workbenchDeployHint">
-                  {ui.workbench.deployPathLabel}: <code>{DESIGN_CONTROLS_PUBLIC_PATH}</code>
+                  {ui.workbench.deployPathLabel}: <code>{DEPLOY_PRESET_HINT}</code>
                 </div>
-                <div className="workbenchActionGrid">
-                  <button onClick={saveDesign}>{ui.workbench.save}</button>
-                  <button onClick={loadDesign}>{ui.workbench.load}</button>
-                  <button
-                    onClick={() => {
-                      resetDesign();
-                      resetKeyColors();
-                    }}
-                  >
-                    {ui.workbench.reset}
-                  </button>
-                  <button onClick={exportPreset}>{ui.workbench.export}</button>
-                  <button onClick={() => importRef.current?.click()}>{ui.workbench.import}</button>
-                  <button onClick={() => void loadDeployDesign()}>{ui.workbench.deploy}</button>
-                </div>
-
                 <div className="wbToolbar wbToolbarSide">
                   <input
                     className="wbSearch"
@@ -821,6 +1156,32 @@ export function ControlsWorkbench() {
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
                   />
+                </div>
+
+                {presetNotice ? <div className="wbPresetMessage">{presetNotice}</div> : null}
+                {presetError ? <div className="wbPresetMessage isError">{presetError}</div> : null}
+
+                {renderPresetSection("color", colorPresets, selectedColorPreset)}
+                {renderPresetSection("layout", layoutPresets, selectedLayoutPreset)}
+
+                <div className="workbenchActionGrid">
+                  <button onClick={() => void loadDeployDesign()}>{ui.workbench.deploy}</button>
+                  <button onClick={() => setFavoritesOpen((value) => !value)}>
+                    {favoritesOpen
+                      ? locale === "en"
+                        ? "Hide favorites"
+                        : "Скрыть избранное"
+                      : locale === "en"
+                        ? "Show favorites"
+                        : "Показать избранное"}
+                  </button>
+                  <button onClick={() => {
+                    setWorkbenchOpen(false);
+                    setFavoritesOpen(false);
+                    setWorkbenchPanelEnabled(false);
+                  }}>
+                    {locale === "en" ? "Disable workbench" : "Выключить крутилки"}
+                  </button>
                 </div>
 
                 <input
@@ -835,15 +1196,16 @@ export function ControlsWorkbench() {
                     try {
                       const parsed = JSON.parse(text);
                       const rec = parsed as Record<string, unknown>;
-                      const isCombined = Boolean(rec.design || rec.keyColors);
 
-                      if (isCombined) {
-                        setDesign(normalizeDesignControls((rec.design ?? {}) as Record<string, unknown>));
-                        setKeyColors(
+                      if (pendingImportKind === "color") {
+                        const nextColors =
                           rec.keyColors && typeof rec.keyColors === "object"
                             ? normalizeKeyColors(rec.keyColors as Record<string, string>)
-                            : keyColors
-                        );
+                            : normalizeKeyColors(rec as Record<string, string>);
+                        setKeyColors(nextColors);
+                        setPresetNotice(locale === "en" ? "Imported color preset." : "Цветовой пресет импортирован.");
+                      } else if (rec.design && typeof rec.design === "object") {
+                        setDesign(normalizeDesignControls(rec.design as Record<string, unknown>));
                         setRuntimeDefaults(
                           rec.runtimeDefaults && typeof rec.runtimeDefaults === "object"
                             ? normalizeRuntimeDefaults(rec.runtimeDefaults as Record<string, unknown>)
@@ -853,7 +1215,7 @@ export function ControlsWorkbench() {
                         setDesign(normalizeDesignControls(parsed));
                       }
                     } catch {
-                      // ignore
+                      setPresetError(locale === "en" ? "Import failed." : "Импорт не выполнен.");
                     } finally {
                       e.target.value = "";
                     }
@@ -864,18 +1226,11 @@ export function ControlsWorkbench() {
           </div>
         ) : null}
       </div>
+      ) : null}
 
-      <aside className={`favoritesPanel favoritesPanelDetached ${favoritesOpen ? "open" : ""}`}>
-        <button className="favoritesPanelToggle" onClick={() => setFavoritesOpen((v) => !v)}>
-          {favoritesOpen
-            ? locale === "en"
-              ? "Hide favorites"
-              : "Скрыть избранное"
-            : locale === "en"
-              ? "Show favorites"
-              : "Показать избранное"}
-        </button>
-        {favoritesOpen ? (
+      {canUseWorkbench && workbenchPanelEnabled ? (
+      <aside className={`favoritesPanel favoritesPanelDetached ${favoritesOpen && workbenchOpen ? "open" : ""}`}>
+        {favoritesOpen && workbenchOpen ? (
           <div className="favoritesPanelBody">
             <section className="wbGroup wbFavPanel">
               <h4>{locale === "en" ? "Favorites" : "Избранное"}</h4>
@@ -890,6 +1245,64 @@ export function ControlsWorkbench() {
           </div>
         ) : null}
       </aside>
+      ) : null}
     </>
   );
+}
+
+function buildPresetTooltipText(locale: "ru" | "en", preset: PresetSummary | null): string {
+  if (!preset) return locale === "en" ? "No preset selected" : "Пресет не выбран";
+
+  const lines: string[] = [
+    preset.name,
+    preset.sourceKind === "builtin"
+      ? locale === "en"
+        ? "Builtin preset"
+        : "Встроенный пресет"
+      : locale === "en"
+        ? "Cloud preset"
+        : "Облачный пресет",
+  ];
+
+  if (preset.isDefault) {
+    lines.push(locale === "en" ? "Default preset" : "Пресет по умолчанию");
+  }
+  if (preset.authorDisplayName) {
+    lines.push(locale === "en" ? `Author: ${preset.authorDisplayName}` : `Автор: ${preset.authorDisplayName}`);
+  }
+  if (preset.description) {
+    lines.push(locale === "en" ? `Comment: ${preset.description}` : `Комментарий: ${preset.description}`);
+  }
+  if (preset.availability !== "ready") {
+    lines.push(
+      preset.availability === "broken"
+        ? locale === "en"
+          ? "Asset is broken"
+          : "Asset повреждён"
+        : locale === "en"
+          ? "Asset is temporarily unavailable"
+          : "Asset временно недоступен"
+    );
+  }
+
+  return lines.join("\n");
+}
+
+function PresetActionIcon({ name }: { name: "apply" | "save" | "load" | "reset" | "export" | "import" | "cloud" }) {
+  switch (name) {
+    case "apply":
+      return <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M5 12.5l4 4L19 7.5" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" /></svg>;
+    case "save":
+      return <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M6 4h9l3 3v13H6z" fill="none" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" /><path d="M9 4v5h6V4M9 18h6" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" /></svg>;
+    case "load":
+      return <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M12 4v11" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" /><path d="M8 11.5 12 15.5l4-4" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" /><path d="M5 19h14" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" /></svg>;
+    case "reset":
+      return <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M6 8V4H2" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" /><path d="M4.5 11a8 8 0 1 1 2.2 6" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" /></svg>;
+    case "export":
+      return <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M12 15V4" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" /><path d="m8 7.5 4-4 4 4" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" /><path d="M5 20h14" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" /></svg>;
+    case "import":
+      return <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M12 4v11" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" /><path d="m8 11.5 4 4 4-4" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" /><path d="M5 20h14" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" /></svg>;
+    case "cloud":
+      return <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M7.5 18.5h9a4 4 0 0 0 .5-8A5.5 5.5 0 0 0 6.6 9.1 3.8 3.8 0 0 0 7.5 18.5Z" fill="none" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" /><path d="M12 8.5v6" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" /><path d="m9.5 12 2.5 2.5 2.5-2.5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>;
+  }
 }

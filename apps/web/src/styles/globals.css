@@ -25,6 +25,7 @@
   --badge-fs: 11px;
   --card-p: 14px;
   --drawer-width: 520px;
+  --drawer-safe-top: 104px;
   --drawer-padding: 16px;
   --drawer-title-size: 18px;
   --drawer-meta-gap: 8px;
@@ -73,6 +74,11 @@ body,
   overflow: hidden;
 }
 
+.appShell.adminShell {
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
 a {
   color: inherit;
 }
@@ -90,8 +96,19 @@ a {
   overflow: hidden;
 }
 
+.container.adminContainer {
+  height: auto;
+  min-height: calc(100dvh - 76px);
+  overflow: visible;
+}
+
 .container > .card {
   height: 100%;
+}
+
+.container.adminContainer > .card {
+  height: auto;
+  min-height: 0;
 }
 
 .card {
@@ -475,7 +492,7 @@ button:hover {
 }
 
 .workbench {
-  width: min(var(--wb-width-max, 1880px), calc(100vw - var(--wb-viewport-margin, 24px)));
+  width: min(var(--wb-width-max, 2160px), calc(100vw - var(--wb-viewport-margin, 12px)));
 }
 
 .favoritesPanel {
@@ -507,7 +524,10 @@ button:hover {
   border: 1px solid rgba(149, 167, 221, 0.34);
   border-radius: 14px;
   padding: var(--wb-body-padding, 8px);
-  background: linear-gradient(170deg, rgba(10, 14, 28, 0.96), rgba(20, 17, 35, 0.96));
+  background: linear-gradient(170deg, rgba(10, 14, 28, 0.74), rgba(20, 17, 35, 0.7));
+  -webkit-backdrop-filter: blur(18px) saturate(150%);
+  backdrop-filter: blur(18px) saturate(150%);
+  box-shadow: 0 18px 42px rgba(5, 8, 20, 0.34);
   max-height: var(--wb-body-max-h-vh, 76vh);
   overflow: auto;
 }
@@ -519,6 +539,10 @@ button:hover {
 
 .workbenchToggle {
   width: 100%;
+  background: linear-gradient(180deg, rgba(98, 58, 122, 0.36), rgba(42, 32, 70, 0.28));
+  -webkit-backdrop-filter: blur(18px) saturate(150%);
+  backdrop-filter: blur(18px) saturate(150%);
+  box-shadow: 0 12px 28px rgba(5, 8, 20, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
 
 .workbenchBody {
@@ -526,14 +550,17 @@ button:hover {
   border: 1px solid rgba(149, 167, 221, 0.34);
   border-radius: 14px;
   padding: var(--wb-body-padding, 8px);
-  background: linear-gradient(170deg, rgba(10, 14, 28, 0.96), rgba(20, 17, 35, 0.96));
+  background: linear-gradient(170deg, rgba(10, 14, 28, 0.74), rgba(20, 17, 35, 0.7));
+  -webkit-backdrop-filter: blur(18px) saturate(150%);
+  backdrop-filter: blur(18px) saturate(150%);
+  box-shadow: 0 20px 46px rgba(5, 8, 20, 0.36);
   max-height: var(--wb-body-max-h-vh, 76vh);
   overflow: auto;
 }
 
 .workbenchMain {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) var(--wb-side-w, 180px);
+  grid-template-columns: minmax(0, 1fr) var(--wb-side-w, 460px);
   gap: var(--wb-main-gap, 8px);
   align-items: start;
 }
@@ -568,6 +595,7 @@ button:hover {
   border-radius: 10px;
   padding: 7px;
   background: linear-gradient(160deg, rgba(13, 19, 35, 0.9), rgba(20, 17, 38, 0.9));
+  min-width: 0;
 }
 
 .workbenchActionGrid {
@@ -604,6 +632,22 @@ button:hover {
   width: min(520px, 100%);
 }
 
+.wbSegmented {
+  display: inline-flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.wbSegmentedBtn {
+  padding: 7px 10px;
+  border-radius: 999px;
+}
+
+.wbSegmentedBtn.active {
+  border-color: rgba(185, 141, 255, 0.45);
+  filter: saturate(1) brightness(1.06);
+}
+
 .wbGrid {
   display: grid;
   grid-template-columns: repeat(3, minmax(var(--wb-grid-min-col, 240px), 1fr));
@@ -629,6 +673,178 @@ button:hover {
   display: grid;
   gap: var(--wb-control-gap, 8px);
   align-items: start;
+}
+
+.wbPresetGroup {
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px solid rgba(132, 154, 211, 0.18);
+}
+
+.wbPresetHeader {
+  display: grid;
+  gap: 2px;
+}
+
+.wbPresetHeader h4 {
+  margin: 0;
+  line-height: 1.1;
+}
+
+.wbPresetMetaLine {
+  line-height: 1.3;
+}
+
+.wbPresetSelectWrap {
+  margin-top: 4px;
+  display: grid;
+  gap: 4px;
+}
+
+.wbPresetSelectLabel {
+  font-size: 12px;
+  color: #d8e6ff;
+}
+
+.wbPresetSelectWrap select {
+  width: 100%;
+}
+
+.wbPresetSummary {
+  margin-top: 8px;
+  display: grid;
+  gap: 4px;
+}
+
+.wbPresetSelectWrapTooltip {
+  position: relative;
+}
+
+.wbPresetSelectWrapTooltip[data-tooltip]::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  left: 0;
+  top: calc(100% + 8px);
+  min-width: 220px;
+  max-width: 320px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(168, 188, 245, 0.34);
+  background: linear-gradient(180deg, rgba(12, 18, 35, 0.98), rgba(28, 20, 49, 0.96));
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.42);
+  color: #eef4ff;
+  font-size: 13px;
+  line-height: 1.4;
+  white-space: pre-line;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(4px);
+  transition: opacity 120ms ease, transform 120ms ease, visibility 120ms ease;
+  z-index: 6;
+}
+
+.wbPresetSelectWrapTooltip:hover::after,
+.wbPresetSelectWrapTooltip:focus-within::after {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.wbPresetHint,
+.wbPresetMessage {
+  padding: 8px 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(135, 159, 225, 0.2);
+  background: linear-gradient(180deg, rgba(10, 17, 34, 0.9) 0%, rgba(19, 21, 49, 0.82) 100%);
+  font-size: 12px;
+  line-height: 1.35;
+  color: #cbdaf8;
+}
+
+.wbPresetMessage {
+  margin-bottom: 8px;
+}
+
+.wbPresetMessage.isError {
+  border-color: rgba(255, 154, 175, 0.28);
+  color: #ffd1dd;
+}
+
+.wbPresetActions {
+  margin-top: 6px;
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.wbIconBtn {
+  min-width: 0;
+  min-height: 38px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  border-radius: 12px;
+}
+
+.wbIconBtn svg {
+  width: 14px;
+  height: 14px;
+}
+
+.wbIconBtnCloud {
+  border-color: rgba(135, 210, 243, 0.48);
+}
+
+.wbIconBtn[data-tooltip]::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 10px);
+  transform: translateX(-50%) translateY(4px);
+  min-width: 170px;
+  max-width: 240px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(168, 188, 245, 0.34);
+  background: linear-gradient(180deg, rgba(12, 18, 35, 0.98), rgba(28, 20, 49, 0.96));
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.42);
+  color: #eef4ff;
+  font-size: 13px;
+  line-height: 1.35;
+  text-align: center;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 120ms ease, transform 120ms ease, visibility 120ms ease;
+  z-index: 5;
+}
+
+.wbIconBtn[data-tooltip]::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 4px);
+  transform: translateX(-50%) translateY(4px);
+  border-left: 7px solid transparent;
+  border-right: 7px solid transparent;
+  border-top: 7px solid rgba(28, 20, 49, 0.96);
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 120ms ease, transform 120ms ease, visibility 120ms ease;
+  z-index: 5;
+}
+
+.wbIconBtn[data-tooltip]:hover::after,
+.wbIconBtn[data-tooltip]:hover::before,
+.wbIconBtn[data-tooltip]:focus-visible::after,
+.wbIconBtn[data-tooltip]:focus-visible::before {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
 }
 
 .wbPanelGuide {
@@ -1251,6 +1467,11 @@ button:hover {
   max-width: 100%;
 }
 
+.timelineTopControlSpacer {
+  flex: 1 1 auto;
+  min-width: 8px;
+}
+
 .pageSwitchCtl {
   display: inline-flex;
   align-items: center;
@@ -1443,6 +1664,12 @@ button:hover {
   line-height: 1;
 }
 
+.iconCtlBtn:disabled {
+  opacity: 0.62;
+  cursor: default;
+  box-shadow: none;
+}
+
 .filterCtlBtn {
   min-width: 32px;
   border-color: rgba(140, 180, 246, 0.45);
@@ -1453,6 +1680,99 @@ button:hover {
   box-shadow:
     0 5px 14px rgb(139 109 255 / calc(var(--mat-active-glow-a, 0.28) * 0.9)),
     inset 0 1px 0 rgba(255, 255, 255, 0.14);
+}
+
+.authIconBtn {
+  min-width: 32px;
+  width: 32px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.authMenuWrap {
+  position: relative;
+  display: inline-flex;
+}
+
+.authMenuPopover {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 20;
+  display: grid;
+  gap: 10px;
+  width: min(360px, calc(100vw - 28px));
+  min-width: 300px;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(130, 152, 216, 0.3);
+  background: linear-gradient(165deg, rgba(9, 14, 30, 0.98) 0%, rgba(17, 14, 34, 0.98) 100%);
+  box-shadow:
+    0 16px 36px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.authMenuTitle {
+  font-size: 16px;
+  font-weight: 700;
+  color: #eef4ff;
+}
+
+.authMenuAction {
+  width: 100%;
+  justify-content: center;
+}
+
+.authPanelSection {
+  display: grid;
+  gap: 6px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(133, 156, 221, 0.16);
+}
+
+.authPanelSection:last-child {
+  padding-bottom: 0;
+  border-bottom: 0;
+}
+
+.authPanelLabel {
+  font-size: 12px;
+  font-weight: 700;
+  color: #d9e6ff;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.authPanelStatusRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.authPanelStatusLabel {
+  font-size: 13px;
+  color: #eef4ff;
+}
+
+.authPanelIdentity {
+  font-size: 13px;
+  color: #dce7ff;
+  overflow-wrap: anywhere;
+}
+
+.authPanelText {
+  font-size: 13px;
+  line-height: 1.4;
+  color: #dce7ff;
+}
+
+.authPanelHint {
+  font-size: 12px;
+  line-height: 1.35;
+  color: #9fb1d9;
 }
 
 .sortToggleBtn {
@@ -1661,8 +1981,11 @@ button:hover {
   background: rgba(4, 7, 16, 0.72);
   display: flex;
   justify-content: flex-end;
+  align-items: flex-start;
+  padding-top: var(--drawer-safe-top, 104px);
   z-index: 50;
   opacity: 0;
+  box-sizing: border-box;
   transition: opacity var(--anim-drawer-duration-ms, 220ms) var(--anim-drawer-ease, ease-in-out);
 }
 
@@ -1672,9 +1995,11 @@ button:hover {
 
 .drawer {
   width: min(var(--drawer-width, 520px), 92vw);
-  height: 100%;
+  height: calc(100% - var(--drawer-safe-top, 104px));
   background: linear-gradient(170deg, #12192d 0%, #100f23 100%);
   border-left: 1px solid rgba(114, 136, 197, 0.34);
+  border-top: 1px solid rgba(114, 136, 197, 0.34);
+  border-top-left-radius: 20px;
   padding: var(--drawer-padding, 16px);
   overflow: auto;
   overscroll-behavior: contain;
@@ -2038,7 +2363,270 @@ button:hover {
   word-break: break-word;
 }
 
+.authNav {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.authBadge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 30px;
+  padding: 0 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(129, 155, 228, 0.32);
+  background: linear-gradient(180deg, rgba(9, 13, 27, 0.92) 0%, rgba(20, 18, 46, 0.86) 100%);
+  color: #d5e4ff;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.authBadge.isFull {
+  color: #c8ffd8;
+  border-color: rgba(122, 209, 150, 0.36);
+}
+
+.input {
+  min-width: 0;
+  width: 100%;
+  height: 38px;
+  padding: 0 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(135, 159, 225, 0.32);
+  background: rgba(8, 11, 23, 0.88);
+  color: #eaf4ff;
+}
+
+.tableRowGhost {
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 1px solid rgba(135, 159, 225, 0.2);
+  background: linear-gradient(180deg, rgba(10, 17, 34, 0.9) 0%, rgba(19, 21, 49, 0.82) 100%);
+}
+
+.adminUserGrid {
+  display: grid;
+  gap: 10px;
+}
+
+.adminUserGridTiles {
+  grid-template-columns: repeat(auto-fit, minmax(340px, 420px));
+  align-items: stretch;
+  justify-content: start;
+}
+
+.adminUserCard {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 10px;
+  align-items: start;
+  padding: 12px;
+  border-radius: 16px;
+  border: 1px solid rgba(135, 159, 225, 0.24);
+  background: linear-gradient(180deg, rgba(10, 17, 34, 0.94) 0%, rgba(19, 21, 49, 0.84) 100%);
+  cursor: grab;
+  touch-action: none;
+  transition: transform 180ms cubic-bezier(0.22, 1, 0.36, 1), border-color 180ms ease, box-shadow 180ms ease, opacity 180ms ease;
+}
+
+.adminUserCard.isDragging {
+  z-index: 8;
+  cursor: grabbing;
+  border-color: rgba(214, 172, 255, 0.5);
+  box-shadow: 0 28px 56px rgba(8, 12, 28, 0.48);
+}
+
+.adminUserBrick {
+  grid-template-columns: 1fr;
+  gap: 10px;
+  min-height: 0;
+  align-content: start;
+  justify-items: start;
+  text-align: left;
+}
+
+.adminUserAvatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid rgba(160, 183, 244, 0.34);
+  background: rgba(6, 10, 22, 0.78);
+}
+
+.adminUserAvatarFallback {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #eef4ff;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  background: linear-gradient(135deg, rgba(96, 128, 255, 0.42), rgba(255, 123, 197, 0.38));
+}
+
+.adminUserBody {
+  min-width: 0;
+  display: grid;
+  gap: 4px;
+  justify-items: start;
+}
+
+.adminUserName {
+  font-size: 16px;
+  font-weight: 700;
+  color: #f0f5ff;
+}
+
+.adminUserRole {
+  margin-top: 4px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 28px;
+  width: fit-content;
+  padding: 0 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(137, 164, 255, 0.22);
+  background: rgba(27, 36, 76, 0.7);
+  font-size: 12px;
+  color: #d7e5ff;
+}
+
+.adminUserRole.isAdmin {
+  border-color: rgba(197, 140, 255, 0.34);
+  background: rgba(78, 40, 112, 0.56);
+  color: #f3d9ff;
+}
+
+.adminCloseButton {
+  margin-left: auto;
+  width: 38px;
+  height: 38px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  border: 1px solid rgba(146, 170, 238, 0.28);
+  background: linear-gradient(180deg, rgba(23, 30, 58, 0.82), rgba(18, 20, 44, 0.72));
+  color: #eff5ff;
+  font-size: 24px;
+  line-height: 1;
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+  backdrop-filter: blur(14px) saturate(140%);
+  box-shadow: 0 10px 24px rgba(7, 10, 22, 0.22);
+}
+
+.adminCloseButton:hover,
+.adminCloseButton:focus-visible {
+  border-color: rgba(205, 164, 255, 0.42);
+  background: linear-gradient(180deg, rgba(74, 42, 115, 0.88), rgba(31, 26, 70, 0.82));
+}
+
+.adminUserActions {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 8px;
+  margin-top: 2px;
+  justify-content: flex-start;
+}
+
+.adminUserActions > button {
+  white-space: nowrap;
+}
+
+.adminPresetToolbar {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.adminPresetBrick {
+  position: relative;
+  min-height: 0;
+  padding-top: 38px;
+  min-width: 360px;
+}
+
+.adminPresetSplit {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+}
+
+.adminPresetColumn {
+  min-height: 0;
+  overflow: visible;
+}
+
+.adminPresetGrid {
+  grid-template-columns: repeat(auto-fit, minmax(360px, 420px));
+  justify-content: start;
+  align-content: start;
+  overflow: visible;
+}
+
+.adminPresetKindBadge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  border: 1px solid rgba(173, 196, 255, 0.22);
+  box-shadow: 0 8px 20px rgba(6, 9, 20, 0.22);
+}
+
+.adminPresetKindBadge.isColor {
+  background:
+    radial-gradient(circle at center, rgba(10, 14, 28, 0.82) 0 26%, transparent 27%),
+    conic-gradient(from 180deg, #ff6b9f, #ffd35e, #74f1b1, #63b7ff, #b97cff, #ff6b9f);
+}
+
+.adminPresetKindBadge.isLayout {
+  background: linear-gradient(180deg, rgba(17, 23, 45, 0.88), rgba(22, 18, 46, 0.86));
+  color: #f5cf62;
+  font-size: 18px;
+  line-height: 1;
+}
+
+.adminPresetDescription {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.adminPageRoot {
+  min-height: calc(100dvh - 116px);
+  overflow: visible;
+}
+
+.adminSectionCard {
+  overflow: visible;
+}
+
+.adminUserCard.isOverlay {
+  width: min(420px, calc(100vw - 48px));
+  opacity: 0.98;
+  transform: scale(1.015);
+  border-color: rgba(214, 172, 255, 0.52);
+  box-shadow: 0 36px 70px rgba(8, 12, 28, 0.56);
+  cursor: grabbing;
+}
+
 @media (max-width: 800px) {
+  :root {
+    --drawer-safe-top: 88px;
+  }
+
   .kpiGrid {
     grid-template-columns: 1fr;
   }
@@ -2056,6 +2644,10 @@ button:hover {
   }
 
   .workbenchTabs {
+    grid-template-columns: 1fr;
+  }
+
+  .adminPresetSplit {
     grid-template-columns: 1fr;
   }
 
@@ -2105,5 +2697,14 @@ button:hover {
     justify-content: space-between;
     flex-wrap: wrap;
     margin-bottom: 6px;
+  }
+
+  .authNav {
+    margin-left: 0;
+  }
+
+  .authMenuPopover {
+    right: -8px;
+    min-width: min(320px, calc(100vw - 24px));
   }
 }

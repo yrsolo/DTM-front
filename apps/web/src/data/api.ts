@@ -1,4 +1,7 @@
 import { loadPublicConfig } from "../config/publicConfig";
+import { resolvePublicAssetUrl } from "../config/publicPaths";
+import { getApiProxyRequestBase, isLocalFrontendRuntime } from "../config/runtimeContour";
+import { isMaskingForced } from "../auth/maskingMode";
 
 const MIN_API_INTERVAL_MS = 5000;
 let apiRateChain: Promise<void> = Promise.resolve();
@@ -27,9 +30,47 @@ async function runWithApiRateLimit<T>(fn: () => Promise<T>): Promise<T> {
 }
 
 function buildApiUrl(baseUrl: string, path: string, params: URLSearchParams): string {
-  const url = new URL(path, `${baseUrl.replace(/\/$/, "")}/`);
+  const normalizedPath = path.replace(/^\/+/, "");
+  const url = new URL(normalizedPath, `${baseUrl.replace(/\/+$/, "")}/`);
   url.search = params.toString();
   return url.toString();
+}
+
+function resolveBrowserApiBase(cfg: Awaited<ReturnType<typeof loadPublicConfig>>): string | null {
+  if (typeof window === "undefined") {
+    return cfg.apiBaseUrlProd || cfg.apiBaseUrlTest || cfg.apiBaseUrl;
+  }
+  return getApiProxyRequestBase();
+}
+
+function shouldIncludeCredentials(baseUrl: string): boolean {
+  if (typeof window === "undefined") return false;
+  try {
+    const base = new URL(baseUrl, window.location.origin);
+    if (base.origin === window.location.origin) return true;
+    if (isLocalFrontendRuntime()) return false;
+    if (
+      base.origin === "https://dtm.solofarm.ru" &&
+      (
+        base.pathname.startsWith("/test/ops/api") ||
+        base.pathname.startsWith("/ops/api") ||
+        base.pathname.startsWith("/test/ops/bff") ||
+        base.pathname.startsWith("/ops/bff")
+      )
+    ) {
+      return true;
+    }
+    return false;
+  } catch {
+    return false;
+  }
+}
+
+function resolveApiCredentials(baseUrl: string): RequestCredentials {
+  if (isMaskingForced()) {
+    return "omit";
+  }
+  return shouldIncludeCredentials(baseUrl) ? "include" : "same-origin";
 }
 
 export async function fetchSnapshot(): Promise<any> {
@@ -71,7 +112,7 @@ export async function fetchLocalSnapshot(): Promise<any> {
 }
 
 export async function fetchDemoSnapshot(): Promise<any> {
-  const demoPath = "/data/snapshot.test.json";
+  const demoPath = resolvePublicAssetUrl("data/snapshot.test.json");
   const res = await fetch(demoPath, {
     headers: { accept: "application/json" },
     cache: "no-store",
@@ -87,7 +128,7 @@ export async function fetchApiSnapshot(): Promise<any> {
 
 export async function isApiConfigured(): Promise<boolean> {
   const cfg = await loadPublicConfig();
-  return Boolean(cfg.apiBaseUrl);
+  return Boolean(resolveBrowserApiBase(cfg));
 }
 
 export async function fetchApiSnapshotWithMeta(
@@ -98,7 +139,8 @@ export async function fetchApiSnapshotWithMeta(
   apiBaseUrlOverride?: string | null
 ): Promise<ApiSnapshotFetchResult> {
   const cfg = await loadPublicConfig();
-  const apiBaseUrl = (apiBaseUrlOverride ?? "").trim() || cfg.apiBaseUrl;
+  const apiBaseUrl =
+    (apiBaseUrlOverride ?? "").trim() || resolveBrowserApiBase(cfg);
   if (!apiBaseUrl) {
     throw new Error("API base URL is not configured. Set api_base_url in public config.");
   }
@@ -138,12 +180,14 @@ export async function fetchApiSnapshotWithMeta(
     const timer = setTimeout(() => controller.abort(), Math.max(1000, cfg.apiTimeoutMs));
 
     try {
+      const credentials = resolveApiCredentials(apiBaseUrl);
       const res = await runWithApiRateLimit(() =>
         fetch(url, {
           headers: {
             accept: "application/json",
             ...(lastEtag ? { "If-None-Match": lastEtag } : {}),
           },
+          credentials,
           signal: controller.signal,
         })
       );
@@ -185,17 +229,22 @@ export async function fetchApiSnapshotWithMeta(
 
 export async function fetchPersonNameByOwnerId(ownerId: string): Promise<string | null> {
   const cfg = await loadPublicConfig();
-  if (!cfg.apiBaseUrl || !ownerId) return null;
+  const apiBaseUrl = resolveBrowserApiBase(cfg);
+  if (!apiBaseUrl || !ownerId) return null;
 
-  const path = `${cfg.apiFrontendPath.replace(/\/$/, "")}/entities/people/${encodeURIComponent(ownerId)}`;
-  const url = new URL(path, `${cfg.apiBaseUrl.replace(/\/$/, "")}/`).toString();
+  const path = `${cfg.apiFrontendPath.replace(/^\/+/, "").replace(/\/$/, "")}/entities/people/${encodeURIComponent(ownerId)}`;
+  const url = new URL(path, `${apiBaseUrl.replace(/\/+$/, "")}/`).toString();
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), Math.max(1000, cfg.apiTimeoutMs));
 
   try {
+    const credentials = resolveApiCredentials(apiBaseUrl);
     const res = await runWithApiRateLimit(() =>
       fetch(url, {
-        headers: { accept: "application/json" },
+        headers: {
+          accept: "application/json",
+        },
+        credentials,
         signal: controller.signal,
       })
     );

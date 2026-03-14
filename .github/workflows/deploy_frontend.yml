@@ -3,8 +3,16 @@ name: Deploy Frontend
 on:
   workflow_dispatch:
     inputs:
+      target:
+        description: "Deploy target"
+        required: true
+        default: prod
+        type: choice
+        options:
+          - prod
+          - test
       dry_run:
-        description: "Run build and print upload commands without publishing"
+        description: "Build and stage files without uploading"
         required: true
         default: true
         type: boolean
@@ -16,31 +24,32 @@ on:
   push:
     branches:
       - dev
-      - main
     paths:
       - "apps/web/**"
       - "packages/**"
+      - "config/deploy.yaml"
       - "scripts/deploy_frontend.sh"
       - "scripts/deploy_frontend.ps1"
+      - "scripts/deploy_frontend.cmd"
+      - "scripts/deploy_frontend_test.cmd"
+      - "scripts/deploy_frontend_prod.cmd"
       - "scripts/deploy.yaml"
+      - "scripts/deploy.prod.yaml"
       - ".github/workflows/deploy_frontend.yml"
 
 concurrency:
-  group: deploy-frontend-${{ github.ref }}
+  group: deploy-frontend-${{ github.ref_name }}-${{ github.event_name == 'workflow_dispatch' && inputs.target || 'test' }}
   cancel-in-progress: true
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    environment: ${{ github.event_name == 'push' && 'test' || inputs.target }}
+    env:
+      YC_ENDPOINT: https://storage.yandexcloud.net
+      AWS_DEFAULT_REGION: ru-central1
     permissions:
       contents: read
-    env:
-      YC_BUCKET_NAME: ${{ vars.YC_BUCKET_NAME }}
-      YC_ENDPOINT: ${{ vars.YC_ENDPOINT || 'https://storage.yandexcloud.net' }}
-      AWS_DEFAULT_REGION: ${{ vars.AWS_DEFAULT_REGION || 'ru-central1' }}
-      DTM_WEB_PUBLIC_CONFIG_PATH: ${{ vars.DTM_WEB_PUBLIC_CONFIG_PATH || 'apps/web/config/public.yaml' }}
-      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -51,37 +60,213 @@ jobs:
           node-version: "20"
           cache: "npm"
 
-      - name: Install AWS CLI
+      - name: Resolve deploy target
+        id: vars
+        shell: bash
         run: |
-          aws --version || {
-            sudo apt-get update
-            sudo apt-get install -y awscli
-          }
+          set -euo pipefail
 
-      - name: Validate required deploy config
-        run: |
-          test -n "$YC_BUCKET_NAME"
-          test -n "$YC_ENDPOINT"
-          test -n "$AWS_DEFAULT_REGION"
-          test -n "$DTM_WEB_PUBLIC_CONFIG_PATH"
+          if [ "${{ github.event_name }}" = "push" ]; then
+            TARGET="test"
+            DRY_RUN="false"
+          else
+            TARGET="${{ inputs.target }}"
+            DRY_RUN="${{ inputs.dry_run }}"
+          fi
 
-      - name: Build release id
-        id: release_id
-        run: |
+          case "$TARGET" in
+            test)
+              BUCKET_NAME="dtm-front-test"
+              CONFIG_PATH="apps/web/config/public.yaml"
+              SITE_PATH="/test/"
+              BUILD_BASE="/test/"
+              ;;
+            prod)
+              BUCKET_NAME="dtm-front"
+              CONFIG_PATH="apps/web/config/public.prod.yaml"
+              SITE_PATH="/"
+              BUILD_BASE="/"
+              ;;
+            *)
+              echo "Unsupported target: $TARGET" >&2
+              exit 1
+              ;;
+          esac
+
           DATE_PART="$(date -u +%Y%m%d-%H%M%S)"
           SHA_PART="$(echo "${GITHUB_SHA}" | cut -c1-7)"
           if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ -n "${{ inputs.release_id }}" ]; then
-            echo "value=${{ inputs.release_id }}" >> "$GITHUB_OUTPUT"
-          elif [ "${GITHUB_REF_NAME}" = "main" ]; then
-            echo "value=main-${DATE_PART}-${SHA_PART}" >> "$GITHUB_OUTPUT"
+            RELEASE_ID="${{ inputs.release_id }}"
           else
-            echo "value=dev-${DATE_PART}-${SHA_PART}" >> "$GITHUB_OUTPUT"
+            RELEASE_ID="${TARGET}-${DATE_PART}-${SHA_PART}"
           fi
 
-      - name: Deploy (dry-run)
-        if: ${{ (github.event_name == 'workflow_dispatch' && inputs.dry_run) || (github.event_name == 'push' && github.ref_name == 'dev') }}
-        run: bash scripts/deploy_frontend.sh --dry-run --release-id "${{ steps.release_id.outputs.value }}"
+          echo "target=$TARGET" >> "$GITHUB_OUTPUT"
+          echo "bucket_name=$BUCKET_NAME" >> "$GITHUB_OUTPUT"
+          echo "config_path=$CONFIG_PATH" >> "$GITHUB_OUTPUT"
+          echo "release_id=$RELEASE_ID" >> "$GITHUB_OUTPUT"
+          echo "dry_run=$DRY_RUN" >> "$GITHUB_OUTPUT"
+          echo "site_path=$SITE_PATH" >> "$GITHUB_OUTPUT"
+          echo "build_base=$BUILD_BASE" >> "$GITHUB_OUTPUT"
 
-      - name: Deploy (release)
-        if: ${{ (github.event_name == 'push' && github.ref_name == 'main') || (github.event_name == 'workflow_dispatch' && !inputs.dry_run) }}
-        run: bash scripts/deploy_frontend.sh --release-id "${{ steps.release_id.outputs.value }}"
+      - name: Validate required deploy config
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "${{ steps.vars.outputs.bucket_name }}"
+          test -f "${{ steps.vars.outputs.config_path }}"
+          test -f "data/snapshot.example.json"
+
+      - name: Validate upload credentials
+        if: ${{ steps.vars.outputs.dry_run != 'true' }}
+        shell: bash
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        run: |
+          set -euo pipefail
+          test -n "$AWS_ACCESS_KEY_ID"
+          test -n "$AWS_SECRET_ACCESS_KEY"
+
+      - name: Check AWS CLI
+        if: ${{ steps.vars.outputs.dry_run != 'true' }}
+        shell: bash
+        run: aws --version
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build web app
+        env:
+          DTM_WEB_BUILD_BASE: ${{ steps.vars.outputs.build_base }}
+        run: npm run build -w @dtm/web
+
+      - name: Stage deploy package
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          SITE_DIR=".deploy/site"
+          RELEASE_DIR=".deploy/release"
+
+          rm -rf .deploy
+          mkdir -p "$SITE_DIR" "$SITE_DIR/config" "$SITE_DIR/data" "$RELEASE_DIR"
+
+          cp -R apps/web/dist/. "$SITE_DIR/"
+          cp -R apps/web/public/config/. "$SITE_DIR/config/"
+          cp "${{ steps.vars.outputs.config_path }}" "$SITE_DIR/config/public.yaml"
+          cp "${{ steps.vars.outputs.config_path }}" "$SITE_DIR/config/public.yam"
+          cp data/snapshot.example.json "$SITE_DIR/data/snapshot.example.json"
+
+          cat > "$RELEASE_DIR/release.json" <<EOF
+          {
+            "release_id": "${{ steps.vars.outputs.release_id }}",
+            "deploy_target": "${{ steps.vars.outputs.target }}",
+            "generated_at_utc": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")",
+            "git_ref": "${GITHUB_REF}",
+            "git_sha": "${GITHUB_SHA}",
+            "frontend_bucket": "${{ steps.vars.outputs.bucket_name }}"
+          }
+          EOF
+          cp "$RELEASE_DIR/release.json" "$RELEASE_DIR/latest.json"
+
+      - name: Dry-run summary
+        if: ${{ steps.vars.outputs.dry_run == 'true' }}
+        shell: bash
+        run: |
+          echo "Dry-run: true"
+          echo "Target: ${{ steps.vars.outputs.target }}"
+          echo "Bucket: ${{ steps.vars.outputs.bucket_name }}"
+          echo "Site path: ${{ steps.vars.outputs.site_path }}"
+          echo "Build base: ${{ steps.vars.outputs.build_base }}"
+          echo "Runtime config: ${{ steps.vars.outputs.config_path }}"
+          echo "Release ID: ${{ steps.vars.outputs.release_id }}"
+
+      - name: Upload site assets
+        if: ${{ steps.vars.outputs.dry_run != 'true' }}
+        shell: bash
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        run: |
+          set -euo pipefail
+
+          aws s3 sync \
+            ".deploy/site" \
+            "s3://${{ steps.vars.outputs.bucket_name }}" \
+            --delete \
+            --exclude "index.html" \
+            --exclude "config/*" \
+            --exclude "data/*" \
+            --exclude "releases/*" \
+            --endpoint-url "$YC_ENDPOINT" \
+            --cache-control "public, max-age=31536000, immutable"
+
+          aws s3 sync \
+            ".deploy/site/config" \
+            "s3://${{ steps.vars.outputs.bucket_name }}/config" \
+            --delete \
+            --endpoint-url "$YC_ENDPOINT" \
+            --cache-control "no-cache"
+
+          aws s3 cp \
+            ".deploy/site/config/public.yaml" \
+            "s3://${{ steps.vars.outputs.bucket_name }}/config/public.yaml" \
+            --endpoint-url "$YC_ENDPOINT" \
+            --content-type "text/yaml" \
+            --cache-control "no-cache"
+
+          aws s3 cp \
+            ".deploy/site/config/public.yam" \
+            "s3://${{ steps.vars.outputs.bucket_name }}/config/public.yam" \
+            --endpoint-url "$YC_ENDPOINT" \
+            --content-type "text/yaml" \
+            --cache-control "no-cache"
+
+          aws s3 cp \
+            ".deploy/site/data/snapshot.example.json" \
+            "s3://${{ steps.vars.outputs.bucket_name }}/data/snapshot.example.json" \
+            --endpoint-url "$YC_ENDPOINT" \
+            --content-type "application/json" \
+            --cache-control "no-cache"
+
+          aws s3 cp \
+            ".deploy/site/index.html" \
+            "s3://${{ steps.vars.outputs.bucket_name }}/index.html" \
+            --endpoint-url "$YC_ENDPOINT" \
+            --content-type "text/html; charset=utf-8" \
+            --cache-control "no-cache"
+
+      - name: Upload release metadata
+        if: ${{ steps.vars.outputs.dry_run != 'true' }}
+        shell: bash
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        run: |
+          set -euo pipefail
+
+          aws s3 cp \
+            ".deploy/release/release.json" \
+            "s3://${{ steps.vars.outputs.bucket_name }}/releases/${{ steps.vars.outputs.target }}/${{ steps.vars.outputs.release_id }}/release.json" \
+            --endpoint-url "$YC_ENDPOINT" \
+            --content-type "application/json" \
+            --cache-control "no-cache"
+
+          aws s3 cp \
+            ".deploy/release/latest.json" \
+            "s3://${{ steps.vars.outputs.bucket_name }}/releases/${{ steps.vars.outputs.target }}/latest.json" \
+            --endpoint-url "$YC_ENDPOINT" \
+            --content-type "application/json" \
+            --cache-control "no-cache"
+
+      - name: Deploy summary
+        if: ${{ steps.vars.outputs.dry_run != 'true' }}
+        shell: bash
+        run: |
+          echo "Deploy complete"
+          echo "Target: ${{ steps.vars.outputs.target }}"
+          echo "Bucket: ${{ steps.vars.outputs.bucket_name }}"
+          echo "Site path: ${{ steps.vars.outputs.site_path }}"
+          echo "Build base: ${{ steps.vars.outputs.build_base }}"
+          echo "Release ID: ${{ steps.vars.outputs.release_id }}"

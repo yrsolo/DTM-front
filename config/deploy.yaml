@@ -1,0 +1,17 @@
+yandex_cloud:
+  folder_id: b1g42qj26s1u7gv7bufm
+  service_account_id: aje1kqd422vq2vefkbbl
+  frontend_bucket_prod: dtm-front
+  frontend_bucket_test: dtm-front-test
+  function_entrypoint: index.handler
+  function_runtime: nodejs22
+  function_timeout: 240s
+  function_memory: 512MB
+  auth_function_name_prod: auth-prod
+  auth_function_name_test: auth-test
+  lockbox_id: e6qcuqpkas6fo51qo60k
+  api_origin_test: https://dtm-api-test.solofarm.ru
+  api_origin_prod: https://dtm-api.solofarm.ru
+  ydb_endpoint: grpcs://ydb.serverless.yandexcloud.net:2135
+  ydb_database_test: /ru-central1/b1g6d49mf4scmtn4kjki/etn3csfp350eoudph4r9
+  ydb_database_prod: /ru-central1/b1g6d49mf4scmtn4kjki/etnt6npfsqbq0h3c25ls

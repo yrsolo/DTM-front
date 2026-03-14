@@ -1,6 +1,8 @@
 # Public frontend config (production API)
-api_base_url: https://dtm-api.solofarm.ru
-api_frontend_path: /api/v2/frontend
+api_base_url: https://dtm.solofarm.ru/ops/bff
+api_base_url_prod: https://dtm.solofarm.ru/ops/bff
+api_base_url_test: https://dtm.solofarm.ru/test/ops/bff
+api_frontend_path: /v2/frontend
 api_statuses: work,pre_done
 api_include_people: true
 api_limit: 200
@@ -8,4 +10,4 @@ api_timeout_ms: 12000
 api_retry_count: 1
 api_retry_delay_ms: 500
 api_refresh_interval_ms: 60000
-local_snapshot_path: /data/snapshot.example.json
+local_snapshot_path: data/snapshot.example.json

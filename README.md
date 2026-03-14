@@ -48,18 +48,40 @@ cd apps/web
 npm run dev
 ```
 
+Альтернатива из корня репозитория:
+
+```bash
+npm run dev -w @dtm/web
+```
+
+### Локальная проверка
+
+Отдельный `npm test` в проекте пока не настроен. Для локальной проверки используйте:
+
+```bash
+npm run build -w @dtm/web
+npm run validate:schema
+npm run check:mojibake
+```
+
 По умолчанию приложение читает runtime-конфиг из `/config/public.yaml`, а fallback-конфиг берёт из:
 
-- [public.yaml](n:\PROJECTS\DTM\DTM-front\apps\web\config\public.yaml)
-- [public.prod.yaml](n:\PROJECTS\DTM\DTM-front\apps\web\config\public.prod.yaml)
+- [public.yaml](apps/web/config/public.yaml)
+- [public.prod.yaml](apps/web/config/public.prod.yaml)
+
+Важно:
+- prod frontend работает в корне `https://dtm.solofarm.ru/`
+- public test frontend работает в `https://dtm.solofarm.ru/test/`
+- локальный frontend живёт на `/`, но auth/api использует test contour
+- runtime config резолвится относительно текущего app base, а не только из корня домена
 
 ## Где читать дальше
 
-- Общая карта документации: [docs/README.md](n:\PROJECTS\DTM\DTM-front\docs\README.md)
-- Архитектура: [SYSTEM_ARCHITECTURE.md](n:\PROJECTS\DTM\DTM-front\docs\architecture\SYSTEM_ARCHITECTURE.md)
-- Контракты данных и runtime config: [RUNTIME_CONFIG.md](n:\PROJECTS\DTM\DTM-front\docs\contracts\RUNTIME_CONFIG.md)
-- Дизайн-система и workbench: [WORKBENCH_CONTROLS.md](n:\PROJECTS\DTM\DTM-front\docs\design\WORKBENCH_CONTROLS.md)
-- Deploy и эксплуатация: [DEPLOY.md](n:\PROJECTS\DTM\DTM-front\docs\operations\DEPLOY.md)
+- Общая карта документации: [docs/README.md](docs/README.md)
+- Архитектура: [SYSTEM_ARCHITECTURE.md](docs/glance/SYSTEM_ARCHITECTURE.md)
+- Контракты данных и runtime config: [RUNTIME_CONFIG.md](docs/deep/RUNTIME_CONFIG.md)
+- Дизайн-система и workbench: [WORKBENCH_CONTROLS.md](docs/deep/WORKBENCH_CONTROLS.md)
+- Deploy и эксплуатация: [DEPLOY.md](docs/deep/DEPLOY.md)
 
 ## Технологии
 
@@ -74,3 +96,4 @@ npm run dev
 ## Теги
 
 `#react #typescript #vite #svg #gantt #design-system #runtime-config #localstorage #frontend #yandex-object-storage`
+

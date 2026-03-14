@@ -1,0 +1,263 @@
+name: Deploy Auth Function
+
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: "Deploy target"
+        required: true
+        default: prod
+        type: choice
+        options:
+          - prod
+          - test
+      dry_run:
+        description: "Build and validate without deploy"
+        required: true
+        default: true
+        type: boolean
+  push:
+    branches:
+      - dev
+    paths:
+      - "apps/auth/**"
+      - "apps/web/src/auth/**"
+      - "apps/web/src/config/runtimeContour.ts"
+      - "apps/web/src/data/api.ts"
+      - "apps/web/src/data/useSnapshot.ts"
+      - "config/deploy.yaml"
+      - "scripts/deploy_auth_function.sh"
+      - "scripts/migrate_auth_ydb.mjs"
+      - ".github/workflows/deploy_auth.yml"
+
+jobs:
+  deploy-auth:
+    runs-on: ubuntu-latest
+    environment: ${{ github.event_name == 'push' && 'test' || inputs.target }}
+    env:
+      YC_SA_JSON_CREDENTIALS: ${{ secrets.YC_SA_JSON_CREDENTIALS }}
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      YANDEX_CLIENT_ID_TEST: ${{ secrets.YANDEX_CLIENT_ID_TEST }}
+      YANDEX_CLIENT_SECRET_TEST: ${{ secrets.YANDEX_CLIENT_SECRET_TEST }}
+      YANDEX_CLIENT_ID_PROD: ${{ secrets.YANDEX_CLIENT_ID_PROD }}
+      YANDEX_CLIENT_SECRET_PROD: ${{ secrets.YANDEX_CLIENT_SECRET_PROD }}
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+
+      - name: Resolve auth deploy target
+        id: vars
+        shell: bash
+        env:
+          YANDEX_CLIENT_ID_TEST: ${{ secrets.YANDEX_CLIENT_ID_TEST }}
+          YANDEX_CLIENT_SECRET_TEST: ${{ secrets.YANDEX_CLIENT_SECRET_TEST }}
+          YANDEX_CLIENT_ID_PROD: ${{ secrets.YANDEX_CLIENT_ID_PROD }}
+          YANDEX_CLIENT_SECRET_PROD: ${{ secrets.YANDEX_CLIENT_SECRET_PROD }}
+        run: |
+          set -euo pipefail
+
+          if [ "${{ github.event_name }}" = "push" ]; then
+            TARGET="test"
+            DRY_RUN="false"
+          else
+            TARGET="${{ inputs.target }}"
+            DRY_RUN="${{ inputs.dry_run }}"
+          fi
+
+          CONFIG_JSON="$(node - <<'NODE'
+          const fs = require('fs');
+          const raw = fs.readFileSync('config/deploy.yaml', 'utf8');
+          const result = {};
+          let current = null;
+          for (const rawLine of raw.split(/\r?\n/)) {
+            if (!rawLine.trim() || rawLine.trimStart().startsWith('#')) continue;
+            const m = rawLine.match(/^(\s*)([A-Za-z0-9_]+):\s*(.*)$/);
+            if (!m) continue;
+            const [, indent, key, value] = m;
+            if (indent.length === 0) {
+              result[key] = {};
+              current = key;
+            } else if (current) {
+              result[current][key] = value.trim();
+            }
+          }
+          process.stdout.write(JSON.stringify(result.yandex_cloud || {}));
+          NODE
+          )"
+
+          case "$TARGET" in
+            test)
+              FUNCTION_NAME="$(node -e "const cfg=$CONFIG_JSON; process.stdout.write(cfg.auth_function_name_test || '')")"
+              YDB_DATABASE="$(node -e "const cfg=$CONFIG_JSON; process.stdout.write(cfg.ydb_database_test || '')")"
+              API_UPSTREAM_ORIGIN="$(node -e "const cfg=$CONFIG_JSON; process.stdout.write(cfg.api_origin_test || '')")"
+              AUTH_BASE_PATH="/test/ops/auth"
+              API_PROXY_BASE_PATH="/test/ops/api"
+              MASKING_SECRET_KEY="MASKING_SALT_TEST"
+              ;;
+            prod)
+              FUNCTION_NAME="$(node -e "const cfg=$CONFIG_JSON; process.stdout.write(cfg.auth_function_name_prod || '')")"
+              YDB_DATABASE="$(node -e "const cfg=$CONFIG_JSON; process.stdout.write(cfg.ydb_database_prod || '')")"
+              API_UPSTREAM_ORIGIN="$(node -e "const cfg=$CONFIG_JSON; process.stdout.write(cfg.api_origin_prod || '')")"
+              AUTH_BASE_PATH="/ops/auth"
+              API_PROXY_BASE_PATH="/ops/api"
+              MASKING_SECRET_KEY="MASKING_SALT_PROD"
+              ;;
+            *)
+              echo "Unsupported target: $TARGET" >&2
+              exit 1
+              ;;
+          esac
+
+          FOLDER_ID="$(node -e "const cfg=$CONFIG_JSON; process.stdout.write(cfg.folder_id || '')")"
+          SERVICE_ACCOUNT_ID="$(node -e "const cfg=$CONFIG_JSON; process.stdout.write(cfg.service_account_id || '')")"
+          FUNCTION_ENTRYPOINT="$(node -e "const cfg=$CONFIG_JSON; process.stdout.write(cfg.function_entrypoint || '')")"
+          FUNCTION_RUNTIME="$(node -e "const cfg=$CONFIG_JSON; process.stdout.write(cfg.function_runtime || '')")"
+          FUNCTION_TIMEOUT="$(node -e "const cfg=$CONFIG_JSON; process.stdout.write(cfg.function_timeout || '')")"
+          FUNCTION_MEMORY="$(node -e "const cfg=$CONFIG_JSON; process.stdout.write(cfg.function_memory || '')")"
+          LOCKBOX_ID="$(node -e "const cfg=$CONFIG_JSON; process.stdout.write(cfg.lockbox_id || '')")"
+          YDB_ENDPOINT="$(node -e "const cfg=$CONFIG_JSON; process.stdout.write(cfg.ydb_endpoint || '')")"
+
+          echo "target=$TARGET" >> "$GITHUB_OUTPUT"
+          echo "dry_run=$DRY_RUN" >> "$GITHUB_OUTPUT"
+          echo "folder_id=$FOLDER_ID" >> "$GITHUB_OUTPUT"
+          echo "service_account_id=$SERVICE_ACCOUNT_ID" >> "$GITHUB_OUTPUT"
+          echo "function_name=$FUNCTION_NAME" >> "$GITHUB_OUTPUT"
+          echo "function_entrypoint=$FUNCTION_ENTRYPOINT" >> "$GITHUB_OUTPUT"
+          echo "function_runtime=$FUNCTION_RUNTIME" >> "$GITHUB_OUTPUT"
+          echo "function_timeout=$FUNCTION_TIMEOUT" >> "$GITHUB_OUTPUT"
+          echo "function_memory=$FUNCTION_MEMORY" >> "$GITHUB_OUTPUT"
+          echo "lockbox_id=$LOCKBOX_ID" >> "$GITHUB_OUTPUT"
+          echo "ydb_endpoint=$YDB_ENDPOINT" >> "$GITHUB_OUTPUT"
+          echo "ydb_database=$YDB_DATABASE" >> "$GITHUB_OUTPUT"
+          echo "api_upstream_origin=$API_UPSTREAM_ORIGIN" >> "$GITHUB_OUTPUT"
+          echo "auth_base_path=$AUTH_BASE_PATH" >> "$GITHUB_OUTPUT"
+          echo "api_proxy_base_path=$API_PROXY_BASE_PATH" >> "$GITHUB_OUTPUT"
+          echo "masking_secret_key=$MASKING_SECRET_KEY" >> "$GITHUB_OUTPUT"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Validate auth deploy prerequisites
+        shell: bash
+        env:
+          YANDEX_CLIENT_ID_TEST: ${{ secrets.YANDEX_CLIENT_ID_TEST }}
+          YANDEX_CLIENT_SECRET_TEST: ${{ secrets.YANDEX_CLIENT_SECRET_TEST }}
+          YANDEX_CLIENT_ID_PROD: ${{ secrets.YANDEX_CLIENT_ID_PROD }}
+          YANDEX_CLIENT_SECRET_PROD: ${{ secrets.YANDEX_CLIENT_SECRET_PROD }}
+        run: |
+          set -euo pipefail
+          test -f "config/deploy.yaml"
+          test -n "$YC_SA_JSON_CREDENTIALS"
+          test -n "$AWS_ACCESS_KEY_ID"
+          test -n "$AWS_SECRET_ACCESS_KEY"
+          test -n "${{ steps.vars.outputs.folder_id }}"
+          test -n "${{ steps.vars.outputs.service_account_id }}"
+          test -n "${{ steps.vars.outputs.function_name }}"
+          test -n "${{ steps.vars.outputs.function_entrypoint }}"
+          test -n "${{ steps.vars.outputs.function_runtime }}"
+          test -n "${{ steps.vars.outputs.function_timeout }}"
+          test -n "${{ steps.vars.outputs.function_memory }}"
+          test -n "${{ steps.vars.outputs.lockbox_id }}"
+          test -n "${{ steps.vars.outputs.ydb_endpoint }}"
+          test -n "${{ steps.vars.outputs.ydb_database }}"
+          test -n "${{ steps.vars.outputs.api_upstream_origin }}"
+          if [ "${{ steps.vars.outputs.target }}" = "test" ]; then
+            test -n "$YANDEX_CLIENT_ID_TEST"
+            test -n "$YANDEX_CLIENT_SECRET_TEST"
+          else
+            test -n "$YANDEX_CLIENT_ID_PROD"
+            test -n "$YANDEX_CLIENT_SECRET_PROD"
+          fi
+
+      - name: Run auth YDB migration (test)
+        if: ${{ steps.vars.outputs.target == 'test' && steps.vars.outputs.dry_run != 'true' }}
+        run: node scripts/migrate_auth_ydb.mjs --target test
+
+      - name: Run auth YDB migration (prod)
+        if: ${{ steps.vars.outputs.target == 'prod' && steps.vars.outputs.dry_run != 'true' }}
+        run: node scripts/migrate_auth_ydb.mjs --target prod
+
+      - name: Build auth function
+        run: npm run build -w @dtm/auth
+
+      - name: Dry-run auth deploy
+        if: ${{ steps.vars.outputs.dry_run == 'true' }}
+        shell: bash
+        run: |
+          echo "Dry-run: true"
+          echo "Target: ${{ steps.vars.outputs.target }}"
+          echo "Function: ${{ steps.vars.outputs.function_name }}"
+          echo "Runtime: ${{ steps.vars.outputs.function_runtime }}"
+          echo "Entrypoint: ${{ steps.vars.outputs.function_entrypoint }}"
+          echo "Auth base path: ${{ steps.vars.outputs.auth_base_path }}"
+          echo "API proxy base path: ${{ steps.vars.outputs.api_proxy_base_path }}"
+          echo "API upstream origin: ${{ steps.vars.outputs.api_upstream_origin }}"
+          echo "YDB endpoint: ${{ steps.vars.outputs.ydb_endpoint }}"
+          echo "YDB database: ${{ steps.vars.outputs.ydb_database }}"
+          echo "Masking secret key: ${{ steps.vars.outputs.masking_secret_key }}"
+          echo "Browser auth proxy secret: lockbox:BROWSER_AUTH_PROXY_SECRET"
+          echo "Preset bucket: dtm-presets"
+          echo "Preset public base URL: http://dtm-presets.solofarm.ru"
+
+      - name: Deploy auth function
+        if: ${{ steps.vars.outputs.dry_run != 'true' }}
+        uses: yc-actions/yc-sls-function@v4
+        with:
+          yc-sa-json-credentials: ${{ secrets.YC_SA_JSON_CREDENTIALS }}
+          folder-id: ${{ steps.vars.outputs.folder_id }}
+          function-name: ${{ steps.vars.outputs.function_name }}
+          runtime: ${{ steps.vars.outputs.function_runtime }}
+          memory: ${{ steps.vars.outputs.function_memory }}
+          execution-timeout: ${{ steps.vars.outputs.function_timeout }}
+          entrypoint: ${{ steps.vars.outputs.function_entrypoint }}
+          service-account: ${{ steps.vars.outputs.service_account_id }}
+          source-root: apps/auth/dist
+          include: |
+            index.js
+            index.js.map
+          environment: |
+            CONTOUR=${{ steps.vars.outputs.target }}
+            BASE_URL=https://dtm.solofarm.ru
+            AUTH_BASE_PATH=${{ steps.vars.outputs.auth_base_path }}
+            API_PROXY_BASE_PATH=${{ steps.vars.outputs.api_proxy_base_path }}
+            API_UPSTREAM_ORIGIN=${{ steps.vars.outputs.api_upstream_origin }}
+            YDB_ENDPOINT=${{ steps.vars.outputs.ydb_endpoint }}
+            YDB_DATABASE=${{ steps.vars.outputs.ydb_database }}
+            YDB_METADATA_CREDENTIALS=1
+            PRESET_BUCKET=dtm-presets
+            PRESET_PUBLIC_BASE_URL=http://dtm-presets.solofarm.ru
+            PRESET_STORAGE_ENDPOINT=https://storage.yandexcloud.net
+            PRESET_STORAGE_REGION=ru-central1
+            AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}
+            AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}
+            YANDEX_CLIENT_ID_TEST=${{ secrets.YANDEX_CLIENT_ID_TEST }}
+            YANDEX_CLIENT_SECRET_TEST=${{ secrets.YANDEX_CLIENT_SECRET_TEST }}
+            YANDEX_CLIENT_ID_PROD=${{ secrets.YANDEX_CLIENT_ID_PROD }}
+            YANDEX_CLIENT_SECRET_PROD=${{ secrets.YANDEX_CLIENT_SECRET_PROD }}
+          secrets: |
+            SESSION_SIGNING_SECRET=${{ steps.vars.outputs.lockbox_id }}/latest/SESSION_SIGNING_SECRET
+            COOKIE_NAME=${{ steps.vars.outputs.lockbox_id }}/latest/COOKIE_NAME
+            COOKIE_PATH=${{ steps.vars.outputs.lockbox_id }}/latest/COOKIE_PATH
+            COOKIE_SAMESITE=${{ steps.vars.outputs.lockbox_id }}/latest/COOKIE_SAMESITE
+            COOKIE_SECURE=${{ steps.vars.outputs.lockbox_id }}/latest/COOKIE_SECURE
+            SESSION_TTL_SECONDS=${{ steps.vars.outputs.lockbox_id }}/latest/SESSION_TTL_SECONDS
+            MASKING_SALT=${{ steps.vars.outputs.lockbox_id }}/latest/${{ steps.vars.outputs.masking_secret_key }}
+            BROWSER_AUTH_PROXY_SECRET=${{ steps.vars.outputs.lockbox_id }}/latest/BROWSER_AUTH_PROXY_SECRET
+
+      - name: Deploy auth summary
+        if: ${{ always() }}
+        shell: bash
+        run: |
+          echo "Deploy auth workflow finished."
+          echo "Target: ${{ steps.vars.outputs.target }}"
+          echo "Function: ${{ steps.vars.outputs.function_name }}"
+          echo "Dry-run: ${{ steps.vars.outputs.dry_run }}"

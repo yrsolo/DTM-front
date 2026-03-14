@@ -1,8 +1,12 @@
 import rawPublicConfig from "../../config/public.yaml?raw";
 import rawPublicConfigProd from "../../config/public.prod.yaml?raw";
+import { resolvePublicAssetUrl } from "./publicPaths";
+import { getRuntimeContour } from "./runtimeContour";
 
 type PublicConfig = {
   apiBaseUrl: string | null;
+  apiBaseUrlProd: string | null;
+  apiBaseUrlTest: string | null;
   apiFrontendPath: string;
   apiStatuses: string;
   apiIncludePeople: boolean;
@@ -16,6 +20,8 @@ type PublicConfig = {
 
 const DEFAULT_CONFIG: PublicConfig = {
   apiBaseUrl: null,
+  apiBaseUrlProd: null,
+  apiBaseUrlTest: null,
   apiFrontendPath: "/api/v2/frontend",
   apiStatuses: "work,pre_done",
   apiIncludePeople: true,
@@ -24,7 +30,7 @@ const DEFAULT_CONFIG: PublicConfig = {
   apiRetryCount: 1,
   apiRetryDelayMs: 500,
   apiRefreshIntervalMs: 60000,
-  localSnapshotPath: "/data/snapshot.example.json",
+  localSnapshotPath: "data/snapshot.example.json",
 };
 
 function parseSimpleYaml(yaml: string): Record<string, string> {
@@ -69,9 +75,13 @@ function toNumber(value: string | undefined, fallback: number): number {
 
 function buildConfig(parsed: Record<string, string>): PublicConfig {
   const apiBaseUrl = parsed.api_base_url?.trim() || null;
+  const apiBaseUrlProd = parsed.api_base_url_prod?.trim() || apiBaseUrl;
+  const apiBaseUrlTest = parsed.api_base_url_test?.trim() || apiBaseUrl;
 
   return {
     apiBaseUrl,
+    apiBaseUrlProd,
+    apiBaseUrlTest,
     apiFrontendPath: parsed.api_frontend_path || DEFAULT_CONFIG.apiFrontendPath,
     apiStatuses: parsed.api_statuses || DEFAULT_CONFIG.apiStatuses,
     apiIncludePeople: toBoolean(
@@ -99,8 +109,8 @@ function pickFallbackYaml(): string {
     host === "127.0.0.1" ||
     host === "::1" ||
     host.endsWith(".local");
-  const isTestHost = host.includes("test");
-  if (isLocal || isTestHost) return rawPublicConfig;
+  const isTestRuntime = getRuntimeContour() === "test";
+  if (isLocal || isTestRuntime) return rawPublicConfig;
   return rawPublicConfigProd;
 }
 
@@ -111,7 +121,10 @@ export async function loadPublicConfig(): Promise<PublicConfig> {
 
   cachedConfigPromise = (async () => {
     try {
-      const paths = ["/config/public.yaml", "/config/public.yam"];
+      const paths = [
+        resolvePublicAssetUrl("config/public.yaml"),
+        resolvePublicAssetUrl("config/public.yam"),
+      ];
       for (const path of paths) {
         const res = await fetch(path, {
           headers: { accept: "text/yaml,text/plain" },
