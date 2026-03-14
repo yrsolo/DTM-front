@@ -52,6 +52,7 @@ Source of truth в коде:
 - badges;
 - список milestones;
 - календарь;
+- скрытая по умолчанию панель вложений с count badge;
 - history.
 
 ## Страница `Дизайнеры`
@@ -113,6 +114,10 @@ Tooltip может быть шире карточки, чтобы milestone labe
 - внутри дня milestones показываются строками `Майлстоун | Бренд | Формат | Шоу` со стандартным цветовым кодированием по milestone tone;
 - верхняя action button `Сегодня` остаётся постоянно доступной и прокручивает календарь к текущему дню;
 - `TaskDetailsDrawer` переиспользуется как mobile sheet, а не как вторая отдельная карточка задачи.
+- attachment panel по умолчанию свёрнута, но summary с количеством вложений виден сразу;
+- внутри раскрытой панели attachments показываются как compact file-icons;
+- desktop использует hover-tooltip для имени и даты загрузки attachment, Mini App — tap-friendly selection surface;
+- upload control виден только admin и использует существующий backend upload contour без изменения snapshot contract.
 
 ### Переходы
 

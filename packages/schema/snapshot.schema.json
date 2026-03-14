@@ -73,6 +73,39 @@
           },
           "notes": { "type": "string" },
           "history": { "type": ["string", "null"] },
+          "attachments": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["id", "name", "mime", "kind", "sizeBytes", "status"],
+              "properties": {
+                "id": { "type": "string" },
+                "name": { "type": "string" },
+                "mime": { "type": "string" },
+                "kind": { "type": "string" },
+                "sizeBytes": { "type": "number" },
+                "status": { "type": "string" },
+                "uploadedAt": { "type": ["string", "null"], "format": "date-time" },
+                "capabilities": { "type": "array", "items": { "type": "string" } },
+                "meta": {
+                  "type": "object",
+                  "properties": {
+                    "preview": { "type": ["string", "null"] }
+                  },
+                  "additionalProperties": false
+                },
+                "links": {
+                  "type": "object",
+                  "properties": {
+                    "view": { "type": ["string", "null"] },
+                    "download": { "type": ["string", "null"] }
+                  },
+                  "additionalProperties": false
+                }
+              },
+              "additionalProperties": false
+            }
+          },
           "hash": { "type": ["string", "null"] },
           "revision": { "type": ["string", "null"] },
           "milestones": {

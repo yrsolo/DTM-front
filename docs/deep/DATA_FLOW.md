@@ -32,7 +32,8 @@ Source of truth:
    - `allTasks`
    - mobile agenda items
    - current person link
-7. страницы `Tasks`, `Designers`, Mini App screens, drawer и tooltips рендерятся уже на нормализованных данных.
+7. attachment metadata, если backend их публикует, проходят через тот же normalize path внутри `tasks[].attachments`.
+8. страницы `Tasks`, `Designers`, Mini App screens, drawer и tooltips рендерятся уже на нормализованных данных.
 
 ## Локальный режим
 
@@ -48,6 +49,14 @@ Source of truth:
 - auth linkage даёт frontend `currentPersonId`, но не меняет состав загруженного snapshot;
 - Mini App auth bootstrap может auto-heal linkage через auth contour, но это влияет только на session/person resolution, а не на состав snapshot payload;
 - если Telegram linkage не восстановился, frontend показывает explicit unlinked state вместо silent empty `mine`.
+
+## Task attachments specifics
+
+- attachment metadata не lazy-loadятся отдельно: они приходят в общем snapshot payload;
+- attachment panel в drawer свёрнута по умолчанию, но это UX decision, а не server-load optimization;
+- read path uses payload links only;
+- admin upload flow использует отдельный browser call в backend-owned `/ops/admin/task-attachments/*` как explicit exception этой волны;
+- finalize does not mutate frontend snapshot directly: UI ждёт следующего snapshot refresh.
 
 ## Cache / persistence
 

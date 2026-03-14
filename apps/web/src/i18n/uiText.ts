@@ -68,6 +68,20 @@ export type UiText = {
     links: string;
     openSheetRow: string;
     ownerResolveHint: string;
+    attachments: string;
+    attachmentsEmpty: string;
+    attachmentsUpload: string;
+    attachmentsUploading: string;
+    attachmentsFinalize: string;
+    attachmentsWaiting: string;
+    attachmentsPreview: string;
+    attachmentsDownload: string;
+    attachmentsUnavailable: string;
+    attachmentsActionFailed: string;
+    attachmentsPreviewFailed: string;
+    attachmentsDropHint: string;
+    attachmentsUploadedAt: string;
+    attachmentsGeneric: string;
     weekdays: [string, string, string, string, string, string, string];
   };
   workbench: {
@@ -183,6 +197,20 @@ const RU_TEXT: UiText = {
     links: "Ссылки",
     openSheetRow: "Открыть строку в таблице",
     ownerResolveHint: "ownerId присутствует, но не найден в people[]",
+    attachments: "Вложения",
+    attachmentsEmpty: "Пока нет вложений",
+    attachmentsUpload: "Загрузить файл",
+    attachmentsUploading: "Получаем контракт загрузки...",
+    attachmentsFinalize: "Проверяем файл и завершаем загрузку...",
+    attachmentsWaiting: "Файл отправлен. Ждём публикацию вложения в snapshot.",
+    attachmentsPreview: "Просмотр",
+    attachmentsDownload: "Скачать",
+    attachmentsUnavailable: "Недоступно",
+    attachmentsActionFailed: "Не удалось выполнить действие с файлом",
+    attachmentsPreviewFailed: "Не удалось открыть предпросмотр файла",
+    attachmentsDropHint: "Файл загружается только по явному действию администратора",
+    attachmentsUploadedAt: "Загружен",
+    attachmentsGeneric: "Файл",
     weekdays: ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"],
   },
   workbench: {
@@ -298,6 +326,20 @@ const EN_TEXT: UiText = {
     links: "Links",
     openSheetRow: "Open sheet row",
     ownerResolveHint: "ownerId is present but absent in people[] mapping",
+    attachments: "Attachments",
+    attachmentsEmpty: "No attachments yet",
+    attachmentsUpload: "Upload file",
+    attachmentsUploading: "Requesting upload contract...",
+    attachmentsFinalize: "Verifying file and finalizing upload...",
+    attachmentsWaiting: "File uploaded. Waiting for snapshot publication.",
+    attachmentsPreview: "Preview",
+    attachmentsDownload: "Download",
+    attachmentsUnavailable: "Unavailable",
+    attachmentsActionFailed: "Failed to complete file action",
+    attachmentsPreviewFailed: "Failed to open file preview",
+    attachmentsDropHint: "File upload is available only as an explicit admin action",
+    attachmentsUploadedAt: "Uploaded",
+    attachmentsGeneric: "File",
     weekdays: ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"],
   },
   workbench: {

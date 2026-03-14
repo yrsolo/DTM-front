@@ -7,6 +7,7 @@ import { getUiText } from "../i18n/uiText";
 import { formatTaskIdForUi } from "../utils/id";
 import { resolveDayTone, resolveMilestoneTone } from "../utils/milestoneTone";
 import { toShortPersonName } from "../utils/personName";
+import { TaskAttachmentsSection } from "./attachments/TaskAttachmentsSection";
 import { LayoutContext } from "./Layout";
 
 type DayCell = {
@@ -493,6 +494,8 @@ export function TaskDetailsDrawer(props: {
             </div>
           </div>
         ) : null}
+
+        <TaskAttachmentsSection task={t} compact={presentation === "sheet"} />
 
         {t.notes ? (
           <div className="card drawerSection">

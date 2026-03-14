@@ -22,6 +22,29 @@ export type TaskLinksV1 = {
   self?: string;
 };
 
+export type TaskAttachmentLinksV1 = {
+  // Opaque backend-owned links. Frontend must not synthesize URLs from attachment ids.
+  view?: string | null;
+  download?: string | null;
+};
+
+export type TaskAttachmentMetaV1 = {
+  preview?: string | null;
+};
+
+export type TaskAttachmentV1 = {
+  id: string;
+  name: string;
+  mime: string;
+  kind: string;
+  sizeBytes: number;
+  status: string;
+  uploadedAt?: string | null;
+  capabilities?: string[];
+  meta?: TaskAttachmentMetaV1;
+  links?: TaskAttachmentLinksV1;
+};
+
 export type MilestoneV1 = {
   type: string; // storyboard, animatic, etc.
   planned?: string; // YYYY-MM-DD
@@ -49,6 +72,7 @@ export type TaskV1 = {
   notes?: string;
   history?: string | null;
   milestones?: MilestoneV1[];
+  attachments?: TaskAttachmentV1[];
   hash?: string | null;
   revision?: string | null;
 };

@@ -108,6 +108,30 @@ Frontend рассчитывает на snapshot следующего вида:
 - `format_`
 - `history`
 - `milestones`
+- `attachments`
+
+### `tasks[].attachments`
+
+Attachment metadata приходит прямо в task payload.
+
+Frontend-safe поля:
+- `id`
+- `name`
+- `mime`
+- `kind`
+- `sizeBytes`
+- `status`
+- `uploadedAt`
+- `capabilities`
+- `meta.preview`
+- `links.view`
+- `links.download`
+
+Важные правила:
+- frontend использует `links.view` и `links.download` как opaque backend-owned links;
+- frontend не синтезирует attachment URLs из `attachment_id`;
+- отсутствие `attachments` считается валидным backward-compatible payload;
+- masked payload может не содержать attachment metadata вообще.
 
 ## Структура milestone
 
