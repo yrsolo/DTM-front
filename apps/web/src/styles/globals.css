@@ -2951,8 +2951,10 @@ button:hover {
 .miniAppCalendar {
   display: grid;
   gap: 10px;
+  flex: 1 1 auto;
   min-height: 0;
   padding-bottom: 8px;
+  overflow-y: auto;
 }
 
 .miniAppCalendarDay {
@@ -3032,17 +3034,15 @@ button:hover {
 }
 
 .miniAppTimelineSection {
+  flex: 1 1 auto;
   min-height: 0;
 }
 
 .miniAppTimelineToolbar {
   display: flex;
   justify-content: flex-end;
-  position: sticky;
-  top: 0;
-  z-index: 8;
+  flex: 0 0 auto;
   padding: 4px 0 2px;
-  background: linear-gradient(180deg, rgba(8, 12, 24, 0.96), rgba(8, 12, 24, 0.72), rgba(8, 12, 24, 0));
 }
 
 .miniAppMilestoneRow.isStoryboard { border-left-color: var(--key-drawer-ms-storyboard, #5ca9ff); }

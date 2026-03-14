@@ -22,6 +22,7 @@ export function MiniAppTimelinePage(props: {
   onOpenTask: (taskId: string) => void;
 }) {
   const [holidays, setHolidays] = React.useState<Set<string>>(new Set());
+  const calendarRef = React.useRef<HTMLDivElement | null>(null);
   const todayRef = React.useRef<HTMLDivElement | null>(null);
 
   React.useEffect(() => {
@@ -56,9 +57,11 @@ export function MiniAppTimelinePage(props: {
   );
 
   const scrollToToday = React.useCallback(() => {
+    const container = calendarRef.current;
     const todayNode = todayRef.current;
-    if (!todayNode) return;
-    todayNode.scrollIntoView({ block: "start", behavior: "smooth" });
+    if (!container || !todayNode) return;
+    const top = Math.max(0, todayNode.offsetTop - 12);
+    container.scrollTo({ top, behavior: "smooth" });
   }, []);
 
   React.useEffect(() => {
@@ -80,7 +83,7 @@ export function MiniAppTimelinePage(props: {
           Сегодня
         </button>
       </div>
-      <div className="miniAppCalendar">
+      <div ref={calendarRef} className="miniAppCalendar">
         {days.map((day) => (
           <section
             key={day.key}
