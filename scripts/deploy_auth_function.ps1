@@ -16,7 +16,7 @@ function Read-DotEnvValue([string]$name) {
   return $match.Groups[1].Value.Trim()
 }
 
-foreach ($envName in @("YC_SA_JSON_CREDENTIALS", "AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY", "TELEGRAM_BOT_TOKEN", "PEOPLE_SYNC_PATH")) {
+foreach ($envName in @("YC_SA_JSON_CREDENTIALS", "AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY", "TG_TOKEN", "PEOPLE_SYNC_PATH")) {
   if (-not [Environment]::GetEnvironmentVariable($envName)) {
     $dotenvValue = Read-DotEnvValue $envName
     if ($dotenvValue) {
@@ -83,7 +83,7 @@ $summary = [ordered]@{
   oauthClientIdEnv = $oauthClientIdEnvName
   oauthClientSecretEnv = $oauthClientSecretEnvName
   browserAuthProxySecret = "lockbox:BROWSER_AUTH_PROXY_SECRET"
-  telegramBotToken = if ($env:TELEGRAM_BOT_TOKEN) { "provided" } else { "not provided" }
+  telegramBotToken = if ($env:TG_TOKEN) { "provided" } else { "not provided" }
   peopleSyncPath = $peopleSyncPath
   presetBucket = "dtm-presets"
   presetPublicBaseUrl = "https://dtm-presets.website.yandexcloud.net"
@@ -157,8 +157,8 @@ if ($env:AWS_ACCESS_KEY_ID -and $env:AWS_SECRET_ACCESS_KEY) {
   $envArgs += @("--environment", "AWS_SECRET_ACCESS_KEY=$($env:AWS_SECRET_ACCESS_KEY)")
 }
 
-if ($env:TELEGRAM_BOT_TOKEN) {
-  $envArgs += @("--environment", "TELEGRAM_BOT_TOKEN=$($env:TELEGRAM_BOT_TOKEN)")
+if ($env:TG_TOKEN) {
+  $envArgs += @("--environment", "TG_TOKEN=$($env:TG_TOKEN)")
 }
 
 $args = @(

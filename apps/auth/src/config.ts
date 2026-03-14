@@ -91,7 +91,7 @@ export function getAuthRuntimeConfig(): AuthRuntimeConfig {
     peopleSyncPath: process.env.PEOPLE_SYNC_PATH?.trim() || "/v2/frontend/entities/people",
     yandexClientId: readRequired(yandexClientIdVar),
     yandexClientSecret: readRequired(yandexClientSecretVar),
-    telegramBotToken: readOptional("TELEGRAM_BOT_TOKEN"),
+    telegramBotToken: readOptional("TG_TOKEN"),
     sessionSigningSecret: readRequired("SESSION_SIGNING_SECRET"),
     sessionTtlSeconds: readNumber("SESSION_TTL_SECONDS", 60 * 60 * 12),
     cookieName: deriveContourCookieName(readRequired("COOKIE_NAME"), contour),

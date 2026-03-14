@@ -13,7 +13,7 @@ read_dotenv_value() {
   printf '%s' "${line#*=}"
 }
 
-for env_name in YC_SA_JSON_CREDENTIALS AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY TELEGRAM_BOT_TOKEN PEOPLE_SYNC_PATH; do
+for env_name in YC_SA_JSON_CREDENTIALS AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY TG_TOKEN PEOPLE_SYNC_PATH; do
   if [[ -z "${!env_name:-}" ]]; then
     dotenv_value="$(read_dotenv_value "$env_name")"
     if [[ -n "$dotenv_value" ]]; then
@@ -118,7 +118,7 @@ if [[ "$DRY_RUN" == "true" ]]; then
   echo "oauth_client_id_env: $oauth_client_id_env_name"
   echo "oauth_client_secret_env: $oauth_client_secret_env_name"
   echo "browser_auth_proxy_secret: lockbox:BROWSER_AUTH_PROXY_SECRET"
-  echo "telegram_bot_token: ${TELEGRAM_BOT_TOKEN:+provided}"
+  echo "telegram_bot_token: ${TG_TOKEN:+provided}"
   echo "people_sync_path: $people_sync_path"
   echo "preset_bucket: dtm-presets"
   echo "preset_public_base_url: https://dtm-presets.website.yandexcloud.net"
@@ -192,9 +192,9 @@ if [[ -n "${AWS_ACCESS_KEY_ID:-}" && -n "${AWS_SECRET_ACCESS_KEY:-}" ]]; then
   )
 fi
 
-if [[ -n "${TELEGRAM_BOT_TOKEN:-}" ]]; then
+if [[ -n "${TG_TOKEN:-}" ]]; then
   env_args+=(
-    --environment "TELEGRAM_BOT_TOKEN=$TELEGRAM_BOT_TOKEN"
+    --environment "TG_TOKEN=$TG_TOKEN"
   )
 fi
 
