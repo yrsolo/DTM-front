@@ -22,7 +22,7 @@
   - screenshot of localStorage keys
   - screenshot/log snippet for timeout/retry
 
-See: `docs/operations/TROUBLESHOOTING.md`
+See: `docs/deep/TROUBLESHOOTING.md`
 
 ## Session 2026-03-07
 - [x] Milestone tone aliases: added resilient RU/EN mapping for card/calendar milestone colors using active API milestone names (work/pre_done/wait only).
