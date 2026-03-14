@@ -1,7 +1,13 @@
 import React from "react";
 import { TaskAttachmentV1, TaskV1 } from "@dtm/schema/snapshot";
 
-import { requestTaskAttachmentUpload, uploadTaskAttachmentBinary, finalizeTaskAttachmentUpload, fetchAttachmentArrayBuffer } from "../../data/taskAttachments";
+import {
+  requestTaskAttachmentUpload,
+  uploadTaskAttachmentBinary,
+  finalizeTaskAttachmentUpload,
+  fetchAttachmentArrayBuffer,
+  TaskAttachmentUploadError,
+} from "../../data/taskAttachments";
 import { getUiText } from "../../i18n/uiText";
 import { formatBytes } from "../../utils/formatBytes";
 import {
@@ -25,6 +31,22 @@ function openInNewWindow(url: string): boolean {
   if (typeof window === "undefined") return false;
   const popup = window.open(url, "_blank", "noopener,noreferrer");
   return Boolean(popup);
+}
+
+function formatUploadError(error: unknown, fallback: string): string {
+  if (error instanceof TaskAttachmentUploadError) {
+    const parts = [
+      `step=${error.stage}`,
+      error.status !== null ? `status=${error.status}` : null,
+      error.host ? `host=${error.host}` : null,
+      error.details ? `details=${error.details}` : null,
+    ].filter(Boolean);
+    return parts.join(" | ");
+  }
+  if (error instanceof Error && error.message.trim()) {
+    return error.message;
+  }
+  return fallback;
 }
 
 export function TaskAttachmentsSection(props: {
@@ -193,7 +215,7 @@ export function TaskAttachmentsSection(props: {
     } catch (error) {
       setUploadState({
         status: "error",
-        message: error instanceof Error ? error.message : ui.drawer.attachmentsActionFailed,
+        message: formatUploadError(error, ui.drawer.attachmentsActionFailed),
       });
     } finally {
       if (inputRef.current) {

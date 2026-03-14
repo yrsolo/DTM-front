@@ -14,6 +14,30 @@ export type AttachmentUploadContract = {
   headers?: Record<string, string>;
 };
 
+export type TaskAttachmentUploadStage = "request-upload" | "upload-binary" | "finalize";
+
+export class TaskAttachmentUploadError extends Error {
+  stage: TaskAttachmentUploadStage;
+  status: number | null;
+  details: string | null;
+  host: string | null;
+
+  constructor(args: {
+    stage: TaskAttachmentUploadStage;
+    message: string;
+    status?: number | null;
+    details?: string | null;
+    host?: string | null;
+  }) {
+    super(args.message);
+    this.name = "TaskAttachmentUploadError";
+    this.stage = args.stage;
+    this.status = args.status ?? null;
+    this.details = args.details ?? null;
+    this.host = args.host ?? null;
+  }
+}
+
 function buildBackendAdminUrl(path: string): string {
   return `${getBackendAdminRequestBase()}${path}`;
 }
@@ -24,6 +48,14 @@ async function parseErrorResponse(res: Response): Promise<string> {
     return typeof payload?.error === "string" ? payload.error : `HTTP ${res.status}`;
   } catch {
     return `HTTP ${res.status}`;
+  }
+}
+
+function extractHost(url: string): string | null {
+  try {
+    return new URL(url).host;
+  } catch {
+    return null;
   }
 }
 
@@ -51,7 +83,14 @@ export async function requestTaskAttachmentUpload(args: {
   });
 
   if (!res.ok) {
-    throw new Error(await parseErrorResponse(res));
+    const details = await parseErrorResponse(res);
+    throw new TaskAttachmentUploadError({
+      stage: "request-upload",
+      message: `request-upload failed (${res.status})`,
+      status: res.status,
+      details,
+      host: extractHost(buildBackendAdminUrl("/task-attachments/request-upload")),
+    });
   }
 
   return (await res.json()) as AttachmentUploadContract;
@@ -65,7 +104,19 @@ export async function uploadTaskAttachmentBinary(contract: AttachmentUploadContr
     body: file,
   });
   if (!res.ok) {
-    throw new Error(`Upload failed: HTTP ${res.status}`);
+    let details: string | null = null;
+    try {
+      details = (await res.text()).trim() || null;
+    } catch {
+      details = null;
+    }
+    throw new TaskAttachmentUploadError({
+      stage: "upload-binary",
+      message: `upload-binary failed (${res.status})`,
+      status: res.status,
+      details,
+      host: extractHost(contract.uploadUrl),
+    });
   }
 }
 
@@ -88,7 +139,14 @@ export async function finalizeTaskAttachmentUpload(args: {
     }),
   });
   if (!res.ok) {
-    throw new Error(await parseErrorResponse(res));
+    const details = await parseErrorResponse(res);
+    throw new TaskAttachmentUploadError({
+      stage: "finalize",
+      message: `finalize failed (${res.status})`,
+      status: res.status,
+      details,
+      host: extractHost(buildBackendAdminUrl("/task-attachments/finalize")),
+    });
   }
 }
 
