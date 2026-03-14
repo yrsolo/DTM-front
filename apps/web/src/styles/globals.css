@@ -2948,6 +2948,104 @@ button:hover {
   color: rgba(225, 234, 255, 0.76);
 }
 
+.miniAppCalendar {
+  display: grid;
+  gap: 10px;
+}
+
+.miniAppCalendarDay {
+  display: grid;
+  gap: 10px;
+  border: 1px solid rgba(180, 196, 255, 0.16);
+  border-radius: 18px;
+  background: linear-gradient(180deg, rgba(12, 18, 35, 0.96), rgba(19, 23, 44, 0.94));
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.18);
+  padding: 12px;
+}
+
+.miniAppCalendarDay.isWeekend {
+  border-color: rgba(141, 129, 215, 0.26);
+  background: linear-gradient(180deg, rgba(24, 23, 49, 0.96), rgba(19, 23, 44, 0.94));
+}
+
+.miniAppCalendarDay.isHoliday {
+  border-color: rgba(240, 123, 141, 0.34);
+  background: linear-gradient(180deg, rgba(46, 22, 34, 0.96), rgba(22, 20, 39, 0.94));
+}
+
+.miniAppCalendarDay.isToday {
+  border-color: rgba(117, 201, 255, 0.42);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.18), 0 0 0 1px rgba(117, 201, 255, 0.12);
+}
+
+.miniAppCalendarDayHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.miniAppCalendarDayTitle {
+  font-size: 14px;
+  font-weight: 700;
+  color: rgba(238, 244, 255, 0.92);
+  text-transform: capitalize;
+}
+
+.miniAppCalendarDayCount {
+  font-size: 12px;
+  border-radius: 999px;
+  padding: 4px 8px;
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(238, 244, 255, 0.86);
+}
+
+.miniAppCalendarDayBody {
+  display: grid;
+  gap: 8px;
+}
+
+.miniAppCalendarDayEmpty {
+  min-height: 20px;
+  color: rgba(225, 234, 255, 0.42);
+}
+
+.miniAppMilestoneRow {
+  display: grid;
+  gap: 4px;
+  width: 100%;
+  border: 1px solid rgba(180, 196, 255, 0.12);
+  border-left-width: 5px;
+  border-radius: 14px;
+  background: rgba(16, 23, 43, 0.72);
+  color: #eef4ff;
+  text-align: left;
+  padding: 10px 12px;
+  font: inherit;
+}
+
+.miniAppMilestoneTitle {
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.25;
+}
+
+.miniAppMilestoneMeta {
+  font-size: 12px;
+  line-height: 1.35;
+  color: rgba(225, 234, 255, 0.76);
+}
+
+.miniAppMilestoneRow.isStoryboard { border-left-color: var(--key-drawer-ms-storyboard, #5ca9ff); }
+.miniAppMilestoneRow.isAnimatic { border-left-color: var(--key-drawer-ms-animatic, #7ea5ff); }
+.miniAppMilestoneRow.isFeedback { border-left-color: var(--key-drawer-ms-feedback, #de83ff); }
+.miniAppMilestoneRow.isPrefinal { border-left-color: var(--key-drawer-ms-prefinal, #cc8d41); }
+.miniAppMilestoneRow.isFinal { border-left-color: var(--key-drawer-ms-final, #33a76b); }
+.miniAppMilestoneRow.isMaster { border-left-color: var(--key-drawer-ms-master, #7de3c6); }
+.miniAppMilestoneRow.isOnair { border-left-color: var(--key-drawer-ms-onair, #ff7d9d); }
+.miniAppMilestoneRow.isStart { border-left-color: var(--key-drawer-ms-start, #ffe17f); }
+.miniAppMilestoneRow.isDefault { border-left-color: var(--key-drawer-ms-default, #84c2ff); }
+
 .drawerBackdropSheet {
   align-items: flex-end;
 }

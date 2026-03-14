@@ -12,7 +12,6 @@ import {
   selectTaskById,
   sortTasksForMobile,
 } from "../data/selectors/taskSelectors";
-import { groupAgendaItemsByDay, selectAgendaItemsFromTasks } from "../data/selectors/timelineSelectors";
 import { MiniAppProfilePage } from "./MiniAppProfilePage";
 import { MiniAppTasksPage } from "./MiniAppTasksPage";
 import { MiniAppTimelinePage } from "./MiniAppTimelinePage";
@@ -84,7 +83,6 @@ export function MiniAppPage() {
       })),
     [groupsById, peopleById, scopedTasks]
   );
-  const agendaGroups = groupAgendaItemsByDay(selectAgendaItemsFromTasks(scopedTasks, snapshot));
   const selectedTask = selectTaskById(snapshot, selectedTaskId);
 
   let body: React.ReactNode;
@@ -103,7 +101,7 @@ export function MiniAppPage() {
       />
     );
   } else if (currentTab === "timeline") {
-    body = <MiniAppTimelinePage groups={agendaGroups} onOpenTask={setSelectedTaskId} />;
+    body = <MiniAppTimelinePage tasks={scopedTasks} snapshot={snapshot} onOpenTask={setSelectedTaskId} />;
   } else {
     body = (
       <MiniAppProfilePage
