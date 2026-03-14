@@ -83,7 +83,35 @@ paths:
         tag: ${latest_tag}
         service_account_id: ${service_account_id}
 
+  /test/ops/bff/{proxy+}:
+    x-yc-apigateway-any-method:
+      parameters:
+        - name: proxy
+          in: path
+          required: true
+          schema:
+            type: string
+      x-yc-apigateway-integration:
+        type: cloud_functions
+        function_id: ${auth_test_id}
+        tag: ${latest_tag}
+        service_account_id: ${service_account_id}
+
   /ops/auth/{proxy+}:
+    x-yc-apigateway-any-method:
+      parameters:
+        - name: proxy
+          in: path
+          required: true
+          schema:
+            type: string
+      x-yc-apigateway-integration:
+        type: cloud_functions
+        function_id: ${auth_prod_id}
+        tag: ${latest_tag}
+        service_account_id: ${service_account_id}
+
+  /ops/bff/{proxy+}:
     x-yc-apigateway-any-method:
       parameters:
         - name: proxy

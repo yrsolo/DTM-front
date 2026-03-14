@@ -81,7 +81,35 @@ paths:
         tag: __LATEST__
         service_account_id: $($yc.service_account_id)
 
+  /test/ops/bff/{proxy+}:
+    x-yc-apigateway-any-method:
+      parameters:
+        - name: proxy
+          in: path
+          required: true
+          schema:
+            type: string
+      x-yc-apigateway-integration:
+        type: cloud_functions
+        function_id: $authTestId
+        tag: __LATEST__
+        service_account_id: $($yc.service_account_id)
+
   /ops/auth/{proxy+}:
+    x-yc-apigateway-any-method:
+      parameters:
+        - name: proxy
+          in: path
+          required: true
+          schema:
+            type: string
+      x-yc-apigateway-integration:
+        type: cloud_functions
+        function_id: $authProdId
+        tag: __LATEST__
+        service_account_id: $($yc.service_account_id)
+
+  /ops/bff/{proxy+}:
     x-yc-apigateway-any-method:
       parameters:
         - name: proxy
