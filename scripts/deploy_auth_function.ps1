@@ -16,7 +16,7 @@ function Read-DotEnvValue([string]$name) {
   return $match.Groups[1].Value.Trim()
 }
 
-foreach ($envName in @("YC_SA_JSON_CREDENTIALS", "AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY")) {
+foreach ($envName in @("YC_SA_JSON_CREDENTIALS", "AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY", "TELEGRAM_BOT_TOKEN", "PEOPLE_SYNC_PATH")) {
   if (-not [Environment]::GetEnvironmentVariable($envName)) {
     $dotenvValue = Read-DotEnvValue $envName
     if ($dotenvValue) {
@@ -60,6 +60,7 @@ $authBasePath = if ($Target -eq "test") { "/test/ops/auth" } else { "/ops/auth" 
 $apiProxyBasePath = if ($Target -eq "test") { "/test/ops/bff" } else { "/ops/bff" }
 $apiOrigin = if ($Target -eq "test") { $yc.api_origin_test } else { $yc.api_origin_prod }
 $apiUpstreamOrigin = "$($apiOrigin.TrimEnd('/'))/api"
+$peopleSyncPath = if ($env:PEOPLE_SYNC_PATH) { $env:PEOPLE_SYNC_PATH } else { "/v2/frontend/entities/people" }
 
 if (-not $functionName) { throw "Missing auth function name for target=$Target" }
 if (-not $ydbDatabase) { throw "Missing ydb database path for target=$Target" }
@@ -82,6 +83,8 @@ $summary = [ordered]@{
   oauthClientIdEnv = $oauthClientIdEnvName
   oauthClientSecretEnv = $oauthClientSecretEnvName
   browserAuthProxySecret = "lockbox:BROWSER_AUTH_PROXY_SECRET"
+  telegramBotToken = if ($env:TELEGRAM_BOT_TOKEN) { "provided" } else { "not provided" }
+  peopleSyncPath = $peopleSyncPath
   presetBucket = "dtm-presets"
   presetPublicBaseUrl = "https://dtm-presets.website.yandexcloud.net"
 }
@@ -139,6 +142,7 @@ $envArgs = @(
   "--environment", "AUTH_BASE_PATH=$authBasePath",
   "--environment", "API_PROXY_BASE_PATH=$apiProxyBasePath",
   "--environment", "API_UPSTREAM_ORIGIN=$apiUpstreamOrigin",
+  "--environment", "PEOPLE_SYNC_PATH=$peopleSyncPath",
   "--environment", "YDB_ENDPOINT=$($yc.ydb_endpoint)",
   "--environment", "YDB_DATABASE=$ydbDatabase",
   "--environment", "YDB_METADATA_CREDENTIALS=1",
@@ -151,6 +155,10 @@ $envArgs = @(
 if ($env:AWS_ACCESS_KEY_ID -and $env:AWS_SECRET_ACCESS_KEY) {
   $envArgs += @("--environment", "AWS_ACCESS_KEY_ID=$($env:AWS_ACCESS_KEY_ID)")
   $envArgs += @("--environment", "AWS_SECRET_ACCESS_KEY=$($env:AWS_SECRET_ACCESS_KEY)")
+}
+
+if ($env:TELEGRAM_BOT_TOKEN) {
+  $envArgs += @("--environment", "TELEGRAM_BOT_TOKEN=$($env:TELEGRAM_BOT_TOKEN)")
 }
 
 $args = @(

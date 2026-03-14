@@ -138,6 +138,8 @@ Contour-specific OAuth credentials считаются canonical:
 
 Также нужны:
 - `SESSION_SIGNING_SECRET`
+- `TELEGRAM_BOT_TOKEN` for Mini App session bootstrap via `POST /telegram/session`
+- `PEOPLE_SYNC_PATH` if backend people directory lives outside the default auth-side path
 - `COOKIE_NAME`
 - `COOKIE_PATH`
 - `COOKIE_SAMESITE`
@@ -194,6 +196,12 @@ Auth YDB migration now must include:
 - `access_requests`
 - `audit_log`
 - `admin_layout_prefs`
+
+`users` now also carries linkage-related optional fields:
+- `person_id`
+- `person_name`
+- `telegram_id`
+- `telegram_username`
 
 If `admin_layout_prefs` is missing in a contour, admin overview may return `HTTP 500`.
 

@@ -9,6 +9,7 @@
 
 Source of truth в коде:
 - [TimelinePage.tsx](../../apps/web/src/pages/TimelinePage.tsx)
+- [MiniAppPage.tsx](../../apps/web/src/pages/MiniAppPage.tsx)
 - [UnifiedTimeline.tsx](../../apps/web/src/gantt/UnifiedTimeline.tsx)
 - [DesignersBoard.tsx](../../apps/web/src/components/DesignersBoard.tsx)
 - [TaskDetailsDrawer.tsx](../../apps/web/src/components/TaskDetailsDrawer.tsx)
@@ -83,6 +84,26 @@ Source of truth в коде:
 
 Tooltip может быть шире карточки, чтобы milestone labels помещались в одну-две строки.
 
+## Страница `Mini App`
+
+### Назначение слоя
+
+Дать mobile-first режим текущего frontend без второго SPA. Этот слой живёт на отдельном route `/app`, но использует тот же snapshot, ту же auth session и тот же detail layer.
+
+### Основные визуальные объекты
+
+- нижняя mobile navigation;
+- список задач в одну колонку;
+- compact agenda/timeline по дедлайнам;
+- профиль/доступ;
+- полноэкранный task details sheet.
+
+### Композиция
+
+- Mini App не пытается повторить desktop SVG timeline;
+- `mine / all` и быстрые фильтры работают как client-side presentation layer поверх общего snapshot;
+- `TaskDetailsDrawer` переиспользуется как mobile sheet, а не как вторая отдельная карточка задачи.
+
 ## Источники управления
 
 Страницы используют общие runtime controls, но для страницы `Задачи` выделена отдельная вкладка workbench `Tasks page`.
@@ -91,6 +112,7 @@ Tooltip может быть шире карточки, чтобы milestone labe
 
 - `Задачи` остаются основным аналитическим экраном.
 - `Дизайнеры` — альтернативный обзор по исполнителям.
+- `Mini App` — мобильный режим того же frontend для Telegram/webview сценариев.
 - Обе страницы работают на одном и том же snapshot и одном app shell.
 
 ## Подробнее

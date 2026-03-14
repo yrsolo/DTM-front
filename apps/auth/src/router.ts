@@ -5,13 +5,14 @@ import {
   approveUserHandler,
   listAdminData,
   makeAdminHandler,
+  refreshDesignersDirectoryHandler,
   rejectUserHandler,
   removeAdminHandler,
   removeAllowlistEmailHandler,
   revokeApprovedUserHandler,
   saveAdminLayoutOrderHandler,
 } from "./handlers/adminHandlers";
-import { callback, login, logout, me } from "./handlers/authHandlers";
+import { callback, login, logout, me, telegramSession } from "./handlers/authHandlers";
 import { proxyApiRequest } from "./handlers/apiProxy";
 import {
   clonePresetHandler,
@@ -50,11 +51,17 @@ export async function routeRequest(req: NormalizedRequest): Promise<HttpResult> 
     if (req.method === "POST" && req.routePath === "/logout") {
       return logout();
     }
+    if (req.method === "POST" && req.routePath === "/telegram/session") {
+      return telegramSession(req);
+    }
     if (req.method === "GET" && req.routePath === "/admin/overview") {
       return listAdminData(req);
     }
     if (req.method === "POST" && req.routePath === "/admin/layout-order") {
       return saveAdminLayoutOrderHandler(req);
+    }
+    if (req.method === "POST" && req.routePath === "/admin/designers/refresh") {
+      return refreshDesignersDirectoryHandler(req);
     }
     if (req.method === "GET" && req.routePath === "/presets") {
       return listPresetsHandler(req);

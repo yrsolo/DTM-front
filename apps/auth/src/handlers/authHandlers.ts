@@ -7,14 +7,18 @@ import { writeAuditLog } from "../db/auditRepo";
 import {
   createUserFromProfile,
   getUserById,
+  getUserByTelegramId,
   getUserByYandexUid,
+  linkUserToPerson,
   setUserStatus,
   syncUserProfile,
   upsertRole,
 } from "../db/usersRepo";
 import { buildMePayload, getAccessMode, isBootstrapAdmin, resolveSession } from "../middleware/auth";
+import { resolveLinkedPersonByEmail } from "../people/sync";
 import { clearSessionCookie, issueSessionCookie } from "../session/cookieSession";
 import { clearOAuthStateCookie, createOAuthStateCookie, readOAuthState } from "../session/oauthState";
+import { verifyTelegramInitData } from "../telegram/initData";
 import type { NormalizedRequest } from "../types";
 
 const ALLOWED_RETURN_TO_HOSTS = new Set([
@@ -82,6 +86,29 @@ function buildPopupClosePage(returnTo: string): string {
 </html>`;
 }
 
+async function syncUserLinkageByEmail(userId: string, email: string | null) {
+  try {
+    const linkedPerson = await resolveLinkedPersonByEmail(email);
+    await linkUserToPerson(userId, linkedPerson);
+  } catch {
+    // Linkage sync is best-effort on login. Admin refresh provides explicit recovery.
+  }
+}
+
+function buildSessionCookieForUser(user: NonNullable<Awaited<ReturnType<typeof getUserById>>>) {
+  const cfg = getAuthRuntimeConfig();
+  const now = Math.floor(Date.now() / 1000);
+  return issueSessionCookie({
+    userId: user.id,
+    yandexUid: user.yandexUid,
+    role: user.role,
+    status: user.status,
+    sv: user.sessionVersion,
+    iat: now,
+    exp: now + cfg.sessionTtlSeconds,
+  });
+}
+
 export async function callback(req: NormalizedRequest) {
   const code = req.query.get("code");
   const state = req.query.get("state");
@@ -133,6 +160,12 @@ export async function callback(req: NormalizedRequest) {
     return badRequest("Unable to create or load user");
   }
 
+  await syncUserLinkageByEmail(user.id, user.email);
+  user = await getUserById(user.id);
+  if (!user) {
+    return badRequest("User disappeared after linkage sync");
+  }
+
   await writeAuditLog({
     actorUserId: user.id,
     targetUserId: user.id,
@@ -144,17 +177,7 @@ export async function callback(req: NormalizedRequest) {
     }),
   });
 
-  const cfg = getAuthRuntimeConfig();
-  const now = Math.floor(Date.now() / 1000);
-  const sessionCookie = issueSessionCookie({
-    userId: user.id,
-    yandexUid: user.yandexUid,
-    role: user.role,
-    status: user.status,
-    sv: user.sessionVersion,
-    iat: now,
-    exp: now + cfg.sessionTtlSeconds,
-  });
+  const sessionCookie = buildSessionCookieForUser(user);
 
   const response = oauthState.popup
     ? html(200, buildPopupClosePage(oauthState.returnTo))
@@ -174,4 +197,41 @@ export async function me(req: NormalizedRequest) {
 
 export async function logout() {
   return appendSetCookie(json(200, { ok: true }), clearSessionCookie());
+}
+
+export async function telegramSession(req: NormalizedRequest) {
+  let initData = "";
+  try {
+    const parsed = req.bodyText ? JSON.parse(req.bodyText) as Record<string, unknown> : {};
+    initData = typeof parsed.initData === "string" ? parsed.initData : "";
+  } catch {
+    return badRequest("Invalid JSON body");
+  }
+
+  if (!initData) {
+    return badRequest("initData is required");
+  }
+
+  const telegramUser = verifyTelegramInitData(initData);
+  if (!telegramUser) {
+    return badRequest("Invalid Telegram init data");
+  }
+
+  let user = await getUserByTelegramId(telegramUser.id);
+  if (!user) {
+    return json(404, {
+      ok: false,
+      reason: "telegram_user_not_linked",
+      telegramUserId: telegramUser.id,
+    });
+  }
+
+  const sessionCookie = buildSessionCookieForUser(user);
+  user = await getUserById(user.id);
+  const result = json(200, {
+    ok: true,
+    accessMode: getAccessMode(user),
+    user: buildMePayload(user).user,
+  });
+  return appendSetCookie(result, sessionCookie);
 }

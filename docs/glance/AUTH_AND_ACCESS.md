@@ -7,6 +7,7 @@ Source of truth:
 - `apps/auth/src/*`
 - `apps/web/src/auth/useAuthSession.ts`
 - `apps/web/src/config/runtimeContour.ts`
+- `apps/web/src/config/telegramRuntime.ts`
 
 ## Контуры
 
@@ -22,9 +23,14 @@ Source of truth:
 
 ### Prod
 - frontend: `https://dtm.solofarm.ru/`
+- mini app SPA: `https://dtm.solofarm.ru/app`
 - admin SPA: `https://dtm.solofarm.ru/admin`
 - auth endpoints: `https://dtm.solofarm.ru/ops/auth/*`
 - browser-facing API path: `https://dtm.solofarm.ru/ops/bff/*`
+
+Mini App routes:
+- test: `https://dtm.solofarm.ru/test/app`
+- prod: `https://dtm.solofarm.ru/app`
 
 ## Модель доступа
 
@@ -79,6 +85,12 @@ Cookie/session behavior:
 - текущий runtime TTL задаётся через `SESSION_TTL_SECONDS`
 - session claims и cookie `Max-Age` используют одно и то же TTL
 
+Telegram Mini App behavior:
+- frontend может отправить `Telegram WebApp initData` в `POST /telegram/session`
+- auth contour валидирует `initData` через bot token и ищет пользователя по сохранённому `telegram id`
+- при успехе Mini App получает обычную contour-specific session cookie
+- это не создаёт отдельный data path: после выдачи cookie браузер/webview продолжает работать через те же `/ops/auth/*` и `/ops/bff/*`
+
 ## Admin surface
 
 React routes:
@@ -121,12 +133,14 @@ JSON endpoints:
 
 V1 endpoints:
 - `GET /admin/overview`
+- `POST /telegram/session`
 - `POST /admin/users/:id/approve`
 - `POST /admin/users/:id/reject`
 - `POST /admin/users/:id/revoke`
 - `POST /admin/users/:id/make-admin`
 - `POST /admin/users/:id/remove-admin`
 - `POST /admin/allowlist`
+- `POST /admin/designers/refresh`
 - `DELETE /admin/allowlist?email=...`
 - `POST /admin/layout-order`
 
@@ -151,6 +165,13 @@ Admin personal order:
 - `user.avatarUrl` может возвращаться в `/me`
 - admin overview возвращает `avatarUrl` для карточек пользователей
 - если avatar отсутствует или не загрузился, UI показывает fallback по инициалам
+
+## Person linkage
+
+- source of truth для `currentPersonId` живёт в auth runtime storage, а не во frontend selectors
+- web login best-effort синхронизирует linkage по email с backend people source
+- admin action `Обновить базу дизайнеров` повторно синхронизирует linkage и `telegram id`
+- Mini App не запрашивает отдельный `my tasks` payload: frontend получает общий snapshot и затем делает client-side filtering `mine / all`
 
 ## Подробнее
 

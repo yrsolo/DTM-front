@@ -1,12 +1,17 @@
 import React from "react";
 
 import { getAdminRoute, getAuthRequestBase } from "../config/runtimeContour";
+import { getTelegramRuntimeInfo } from "../config/telegramRuntime";
 
 export type AuthSessionUser = {
   id: string;
   email: string | null;
   displayName: string | null;
   avatarUrl?: string | null;
+  personId?: string | null;
+  personName?: string | null;
+  telegramId?: string | null;
+  telegramUsername?: string | null;
   role: "admin" | "viewer";
   status: "pending" | "approved" | "blocked";
 };
@@ -68,9 +73,36 @@ export function useAuthSession() {
     }
   }, []);
 
-  React.useEffect(() => {
-    void reload();
+  const startTelegramSession = React.useCallback(async () => {
+    const runtime = getTelegramRuntimeInfo();
+    if (!runtime.isTelegramMiniApp || !runtime.initData) return false;
+
+    try {
+      const res = await fetch(buildAuthUrl("/telegram/session"), {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "content-type": "application/json",
+          accept: "application/json",
+        },
+        body: JSON.stringify({ initData: runtime.initData }),
+      });
+      if (!res.ok) return false;
+      await reload();
+      return true;
+    } catch {
+      return false;
+    }
   }, [reload]);
+
+  React.useEffect(() => {
+    void (async () => {
+      await reload();
+      const runtime = getTelegramRuntimeInfo();
+      if (!runtime.isTelegramMiniApp) return;
+      await startTelegramSession();
+    })();
+  }, [reload, startTelegramSession]);
 
   const loginHref = React.useMemo(() => {
     const returnTo =
@@ -151,5 +183,6 @@ export function useAuthSession() {
     startLogin,
     adminHref,
     logout,
+    startTelegramSession,
   };
 }

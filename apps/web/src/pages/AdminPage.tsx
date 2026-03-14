@@ -22,6 +22,10 @@ type AdminUserCard = {
   yandexUid: string;
   email: string | null;
   displayName: string | null;
+  personId: string | null;
+  personName: string | null;
+  telegramId: string | null;
+  telegramUsername: string | null;
   status: string;
   role: string;
   requestedAt: string;
@@ -207,6 +211,8 @@ function UserCardContent(props: {
       <div className="adminUserBody">
         <div className="adminUserName">{props.user.displayName || props.user.email || props.user.id}</div>
         <div className="muted">{props.user.email || "Email не указан"}</div>
+        {props.user.personName ? <div className="muted">Дизайнер: {props.user.personName}</div> : null}
+        {props.user.telegramUsername ? <div className="muted">Telegram: @{props.user.telegramUsername}</div> : null}
         <div className="muted">Заявка: {formatRequestedAt(props.user.requestedAt)}</div>
         {props.roleText ? <div className={`adminUserRole ${props.roleClassName ?? ""}`}>{props.roleText}</div> : null}
       </div>
@@ -471,6 +477,15 @@ export function AdminPage() {
     await loadOverview();
   }, [loadOverview, newEmail]);
 
+  const refreshDesignersDirectory = React.useCallback(async () => {
+    const res = await fetch(buildAuthUrl("/admin/designers/refresh"), {
+      method: "POST",
+      credentials: "include",
+    });
+    await expectOk(res, "Не удалось обновить базу дизайнеров");
+    await loadOverview();
+  }, [loadOverview]);
+
   const removeAllowlistEmail = React.useCallback(
     async (email: string) => {
       const res = await fetch(`${buildAuthUrl("/admin/allowlist")}?email=${encodeURIComponent(email)}`, {
@@ -726,6 +741,9 @@ export function AdminPage() {
           />
           <button type="button" onClick={() => void runAdminAction(addAllowlistEmail, "Email добавлен в allowlist")}>
             Добавить в allowlist
+          </button>
+          <button type="button" className="btn btnGhost" onClick={() => void runAdminAction(refreshDesignersDirectory, "База дизайнеров обновлена")}>
+            Обновить базу дизайнеров
           </button>
         </div>
         <div style={{ display: "grid", gap: 10 }}>
