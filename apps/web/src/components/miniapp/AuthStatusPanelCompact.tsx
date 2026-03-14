@@ -1,4 +1,5 @@
 import { AuthSessionState } from "../../auth/useAuthSession";
+import { getTelegramRuntimeInfo } from "../../config/telegramRuntime";
 
 function telegramBootstrapMessage(state: AuthSessionState): string | null {
   if (state.telegramBootstrap === "linking") {
@@ -34,6 +35,8 @@ export function AuthStatusPanelCompact(props: {
 }) {
   const user = props.authState.user;
   const telegramMessage = telegramBootstrapMessage(props.authState);
+  const runtimeInfo = getTelegramRuntimeInfo();
+  const runtimeTelegramId = runtimeInfo.telegramUserId;
 
   return (
     <div className="miniAppProfileCard">
@@ -42,6 +45,8 @@ export function AuthStatusPanelCompact(props: {
         Статус: {user?.status ?? "guest"} • Доступ: {props.authState.accessMode}
       </div>
       {user?.personName ? <div className="miniAppProfileMeta">Дизайнер: {user.personName}</div> : null}
+      {runtimeTelegramId ? <div className="miniAppProfileMeta">Telegram WebApp ID: {runtimeTelegramId}</div> : null}
+      {user?.telegramId ? <div className="miniAppProfileMeta">Telegram ID в auth: {user.telegramId}</div> : null}
       {user?.telegramUsername ? <div className="miniAppProfileMeta">Telegram: @{user.telegramUsername}</div> : null}
       {telegramMessage ? <div className="miniAppNotice">{telegramMessage}</div> : null}
       <div className="miniAppActionRow">
