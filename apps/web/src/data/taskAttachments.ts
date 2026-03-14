@@ -78,21 +78,31 @@ export async function requestTaskAttachmentUpload(args: {
   size: number;
   uploadedBy: string;
 }): Promise<AttachmentUploadContract> {
-  const res = await fetch(buildBackendAdminUrl("/attachments/request-upload"), {
-    method: "POST",
-    credentials: "include",
-    headers: {
-      accept: "application/json",
-      "content-type": "application/json",
-    },
-    body: JSON.stringify({
-      task_id: args.taskId,
-      filename: args.filename,
-      mime: args.mime,
-      size: args.size,
-      uploaded_by: args.uploadedBy,
-    }),
-  });
+  let res: Response;
+  try {
+    res = await fetch(buildBackendAdminUrl("/attachments/request-upload"), {
+      method: "POST",
+      credentials: "include",
+      headers: {
+        accept: "application/json",
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({
+        task_id: args.taskId,
+        filename: args.filename,
+        mime: args.mime,
+        size: args.size,
+        uploaded_by: args.uploadedBy,
+      }),
+    });
+  } catch (error) {
+    throw new TaskAttachmentUploadError({
+      stage: "request-upload",
+      message: error instanceof Error ? error.message : "request-upload network error",
+      details: error instanceof Error ? error.message : "network error",
+      host: extractHost(buildBackendAdminUrl("/attachments/request-upload")),
+    });
+  }
 
   if (!res.ok) {
     const details = await parseErrorResponse(res);
@@ -110,11 +120,21 @@ export async function requestTaskAttachmentUpload(args: {
 
 export async function uploadTaskAttachmentBinary(contract: AttachmentUploadContract, file: File): Promise<void> {
   const method = contract.method?.trim().toUpperCase() || "PUT";
-  const res = await fetch(contract.uploadUrl, {
-    method,
-    headers: contract.headers ?? undefined,
-    body: file,
-  });
+  let res: Response;
+  try {
+    res = await fetch(contract.uploadUrl, {
+      method,
+      headers: contract.headers ?? undefined,
+      body: file,
+    });
+  } catch (error) {
+    throw new TaskAttachmentUploadError({
+      stage: "upload-binary",
+      message: error instanceof Error ? error.message : "upload-binary network error",
+      details: error instanceof Error ? error.message : "network error",
+      host: extractHost(contract.uploadUrl),
+    });
+  }
   if (!res.ok) {
     let details: string | null = null;
     try {
@@ -137,19 +157,29 @@ export async function finalizeTaskAttachmentUpload(args: {
   attachmentId: string;
   uploadedBy: string;
 }): Promise<void> {
-  const res = await fetch(buildBackendAdminUrl("/attachments/finalize"), {
-    method: "POST",
-    credentials: "include",
-    headers: {
-      accept: "application/json",
-      "content-type": "application/json",
-    },
-    body: JSON.stringify({
-      task_id: args.taskId,
-      attachment_id: args.attachmentId,
-      uploaded_by: args.uploadedBy,
-    }),
-  });
+  let res: Response;
+  try {
+    res = await fetch(buildBackendAdminUrl("/attachments/finalize"), {
+      method: "POST",
+      credentials: "include",
+      headers: {
+        accept: "application/json",
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({
+        task_id: args.taskId,
+        attachment_id: args.attachmentId,
+        uploaded_by: args.uploadedBy,
+      }),
+    });
+  } catch (error) {
+    throw new TaskAttachmentUploadError({
+      stage: "finalize",
+      message: error instanceof Error ? error.message : "finalize network error",
+      details: error instanceof Error ? error.message : "network error",
+      host: extractHost(buildBackendAdminUrl("/attachments/finalize")),
+    });
+  }
   if (!res.ok) {
     const details = await parseErrorResponse(res);
     throw new TaskAttachmentUploadError({
