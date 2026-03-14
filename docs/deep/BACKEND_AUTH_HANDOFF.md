@@ -45,6 +45,12 @@ Auth/session namespace:
 - `/ops/auth/*`
 - `/test/ops/auth/*`
 
+Attachment wrapper routes exposed to the browser:
+- `/ops/auth/attachments/*`
+- `/test/ops/auth/attachments/*`
+
+These auth wrapper routes forward attachment upload/read requests to backend-owned attachment routes with trusted proxy headers.
+
 ## Browser -> Auth proxy
 
 Frontend always calls the auth proxy for browser data requests:

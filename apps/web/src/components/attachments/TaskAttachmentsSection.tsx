@@ -6,6 +6,7 @@ import {
   uploadTaskAttachmentBinary,
   finalizeTaskAttachmentUpload,
   fetchAttachmentArrayBuffer,
+  getBrowserAttachmentUrl,
   TaskAttachmentUploadError,
 } from "../../data/taskAttachments";
 import { getUiText } from "../../i18n/uiText";
@@ -92,6 +93,7 @@ export function TaskAttachmentsSection(props: {
       setActionError(ui.drawer.attachmentsUnavailable);
       return;
     }
+    const browserViewUrl = getBrowserAttachmentUrl(viewUrl);
 
     const subtitleParts = [
       attachmentTypeLabel(attachment),
@@ -114,7 +116,7 @@ export function TaskAttachmentsSection(props: {
       });
 
       try {
-        const arrayBuffer = await fetchAttachmentArrayBuffer(viewUrl);
+        const arrayBuffer = await fetchAttachmentArrayBuffer(browserViewUrl);
         const mammoth = await import("mammoth/mammoth.browser");
         const result = await mammoth.convertToHtml({ arrayBuffer });
         setPreviewState({
@@ -152,7 +154,7 @@ export function TaskAttachmentsSection(props: {
         title: attachment.name,
         subtitle,
         mode: "image",
-        src: viewUrl,
+        src: browserViewUrl,
         closeLabel: ui.drawer.close,
         downloadLabel: ui.drawer.attachmentsDownload,
         unavailableLabel: ui.drawer.attachmentsUnavailable,
@@ -162,7 +164,7 @@ export function TaskAttachmentsSection(props: {
       return;
     }
 
-    if (!openInNewWindow(viewUrl)) {
+    if (!openInNewWindow(browserViewUrl)) {
       setActionError(ui.drawer.attachmentsActionFailed);
     }
   }
@@ -174,9 +176,10 @@ export function TaskAttachmentsSection(props: {
       setActionError(ui.drawer.attachmentsUnavailable);
       return;
     }
+    const browserDownloadUrl = getBrowserAttachmentUrl(downloadUrl);
     if (typeof document === "undefined") return;
     const anchor = document.createElement("a");
-    anchor.href = downloadUrl;
+    anchor.href = browserDownloadUrl;
     anchor.target = "_blank";
     anchor.rel = "noreferrer";
     document.body.appendChild(anchor);

@@ -12,6 +12,7 @@ import {
   revokeApprovedUserHandler,
   saveAdminLayoutOrderHandler,
 } from "./handlers/adminHandlers";
+import { proxyAttachmentAdminRequest, proxyAttachmentReadRequest } from "./handlers/attachmentProxy";
 import { callback, login, logout, me, telegramSession } from "./handlers/authHandlers";
 import { proxyApiRequest } from "./handlers/apiProxy";
 import {
@@ -62,6 +63,15 @@ export async function routeRequest(req: NormalizedRequest): Promise<HttpResult> 
     }
     if (req.method === "POST" && req.routePath === "/admin/designers/refresh") {
       return refreshDesignersDirectoryHandler(req);
+    }
+    if (req.method === "POST" && req.routePath === "/attachments/request-upload") {
+      return proxyAttachmentAdminRequest(req, "request-upload");
+    }
+    if (req.method === "POST" && req.routePath === "/attachments/finalize") {
+      return proxyAttachmentAdminRequest(req, "finalize");
+    }
+    if (req.method === "POST" && req.routePath === "/attachments/delete") {
+      return proxyAttachmentAdminRequest(req, "delete");
     }
     if (req.method === "GET" && req.routePath === "/presets") {
       return listPresetsHandler(req);
@@ -128,6 +138,11 @@ export async function routeRequest(req: NormalizedRequest): Promise<HttpResult> 
     const presetExportMatch = req.routePath.match(/^\/presets\/([^/]+)\/export$/);
     if (req.method === "GET" && presetExportMatch) {
       return exportPresetHandler(req, presetExportMatch[1]);
+    }
+
+    const attachmentReadMatch = req.routePath.match(/^\/attachments\/([^/]+)\/(view|download)$/);
+    if (req.method === "GET" && attachmentReadMatch) {
+      return proxyAttachmentReadRequest(req, attachmentReadMatch[1], attachmentReadMatch[2] as "view" | "download");
     }
 
     return notFound(`Unknown auth route: ${req.routePath}`);

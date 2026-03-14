@@ -1,4 +1,4 @@
-import { getBackendAdminRequestBase } from "../config/runtimeContour";
+import { getAuthRequestBase } from "../config/runtimeContour";
 
 export type AttachmentUploadContract = {
   task_id: string;
@@ -39,7 +39,19 @@ export class TaskAttachmentUploadError extends Error {
 }
 
 function buildBackendAdminUrl(path: string): string {
-  return `${getBackendAdminRequestBase()}${path}`;
+  return `${getAuthRequestBase()}${path}`;
+}
+
+function rewriteAttachmentUrl(url: string): string {
+  try {
+    const parsed = new URL(url, typeof window !== "undefined" ? window.location.origin : "https://dtm.solofarm.ru");
+    const match = parsed.pathname.match(/^(\/test)?\/ops\/api\/task-attachments\/([^/]+)\/(view|download)$/);
+    if (!match) return parsed.toString();
+    const contourPrefix = match[1] ?? "";
+    return `${parsed.origin}${contourPrefix}/ops/auth/attachments/${match[2]}/${match[3]}`;
+  } catch {
+    return url;
+  }
 }
 
 async function parseErrorResponse(res: Response): Promise<string> {
@@ -151,7 +163,7 @@ export async function finalizeTaskAttachmentUpload(args: {
 }
 
 export async function fetchAttachmentArrayBuffer(url: string): Promise<ArrayBuffer> {
-  const res = await fetch(url, {
+  const res = await fetch(rewriteAttachmentUrl(url), {
     credentials: "include",
     headers: { accept: "*/*" },
     cache: "no-store",
@@ -160,4 +172,8 @@ export async function fetchAttachmentArrayBuffer(url: string): Promise<ArrayBuff
     throw new Error(`HTTP ${res.status}`);
   }
   return await res.arrayBuffer();
+}
+
+export function getBrowserAttachmentUrl(url: string): string {
+  return rewriteAttachmentUrl(url);
 }
