@@ -2776,6 +2776,42 @@ button:hover {
   gap: 10px;
 }
 
+.miniAppTaskGroups,
+.miniAppTaskGroup {
+  display: grid;
+  gap: 10px;
+}
+
+.miniAppTaskGroupToggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  border: 1px solid rgba(180, 196, 255, 0.16);
+  background: rgba(16, 23, 43, 0.72);
+  color: #eef4ff;
+  border-radius: 16px;
+  padding: 12px 14px;
+  font: inherit;
+  text-align: left;
+}
+
+.miniAppTaskGroupToggle.isOpen {
+  background: rgba(22, 31, 58, 0.92);
+}
+
+.miniAppTaskGroupLabel {
+  font-weight: 700;
+}
+
+.miniAppTaskGroupCount {
+  font-size: 12px;
+  border-radius: 999px;
+  padding: 4px 8px;
+  background: rgba(255, 255, 255, 0.08);
+}
+
 .miniAppTaskCard,
 .miniAppAgendaItem,
 .miniAppProfileCard {
@@ -2817,6 +2853,37 @@ button:hover {
   border-radius: 999px;
   padding: 4px 8px;
   background: rgba(255, 255, 255, 0.08);
+}
+
+.miniAppTaskCardCompact {
+  padding: 10px 12px;
+}
+
+.miniAppTaskRowMain {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+}
+
+.miniAppTaskRowFields {
+  min-width: 0;
+  font-size: 13px;
+  line-height: 1.35;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: rgba(238, 244, 255, 0.9);
+}
+
+.miniAppTaskDueBubble {
+  font-size: 12px;
+  line-height: 1.2;
+  white-space: nowrap;
+  border-radius: 999px;
+  padding: 6px 10px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #eef4ff;
 }
 
 .miniAppAgendaBadge.isOverdue {

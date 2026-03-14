@@ -3,6 +3,7 @@ import React from "react";
 import { LayoutContext } from "../components/Layout";
 import { TaskDetailsDrawer } from "../components/TaskDetailsDrawer";
 import { MiniAppShell, MiniAppTab } from "../components/miniapp/MiniAppShell";
+import { MiniTaskListItem } from "../components/miniapp/MobileTaskList";
 import { initTelegramMiniApp } from "../config/telegramRuntime";
 import { selectCurrentPersonLink } from "../data/selectors/sessionSelectors";
 import {
@@ -17,6 +18,16 @@ import { MiniAppTasksPage } from "./MiniAppTasksPage";
 import { MiniAppTimelinePage } from "./MiniAppTimelinePage";
 
 const MINI_APP_ADMIN_RETURN_KEY = "dtm-miniapp-admin-return-to";
+
+function formatDueLabel(rawDate: string | null): string {
+  if (!rawDate) return "Без даты";
+  const parsed = new Date(`${rawDate.slice(0, 10)}T00:00:00`);
+  if (Number.isNaN(parsed.getTime())) return "Без даты";
+  return parsed.toLocaleDateString("ru-RU", {
+    day: "numeric",
+    month: "long",
+  });
+}
 
 export function MiniAppPage() {
   const ctx = React.useContext(LayoutContext);
@@ -35,10 +46,27 @@ export function MiniAppPage() {
     authSession: authSession.state,
     snapshot,
   });
+  const groupsById = React.useMemo(
+    () => new Map((snapshot?.groups ?? []).map((group) => [group.id, group.name] as const)),
+    [snapshot?.groups]
+  );
   const canViewAllTasks = authSession.state.user?.role === "admin";
   const scopedTasks = canViewAllTasks
     ? sortTasksForMobile(selectAllTasks(snapshot))
     : sortTasksForMobile(selectMyTasks(snapshot, currentPerson.personId));
+  const taskItems = React.useMemo<MiniTaskListItem[]>(
+    () =>
+      scopedTasks.map((task) => ({
+        id: task.id,
+        title: task.title,
+        ownerName: task.ownerName?.trim() || null,
+        brand: task.brand?.trim() || null,
+        format: task.format_?.trim() || task.type?.trim() || null,
+        showName: (task.groupId ? groupsById.get(task.groupId) : null) ?? null,
+        dueLabel: formatDueLabel(task.nextDue ?? task.end ?? task.start ?? null),
+      })),
+    [groupsById, scopedTasks]
+  );
   const agendaGroups = groupAgendaItemsByDay(selectAgendaItemsFromTasks(scopedTasks, snapshot));
   const selectedTask = selectTaskById(snapshot, selectedTaskId);
 
@@ -50,7 +78,7 @@ export function MiniAppPage() {
   } else if (currentTab === "tasks") {
     body = (
       <MiniAppTasksPage
-        tasks={scopedTasks}
+        items={taskItems}
         canViewAllTasks={canViewAllTasks}
         unresolvedPersonLink={!currentPerson.personId}
         authState={authSession.state}
@@ -85,10 +113,7 @@ export function MiniAppPage() {
 
   return (
     <>
-      <MiniAppShell
-        currentTab={currentTab}
-        onTabChange={setCurrentTab}
-      >
+      <MiniAppShell currentTab={currentTab} onTabChange={setCurrentTab}>
         {body}
       </MiniAppShell>
 

@@ -1,7 +1,11 @@
-import { TaskV1 } from "@dtm/schema/snapshot";
+import React from "react";
 
 import { AuthSessionState } from "../auth/useAuthSession";
-import { MobileTaskList } from "../components/miniapp/MobileTaskList";
+import {
+  MiniTaskGroupingMode,
+  MiniTaskListItem,
+  MobileTaskList,
+} from "../components/miniapp/MobileTaskList";
 
 function unresolvedPersonMessage(authState: AuthSessionState): string {
   if (authState.telegramBootstrapReason === "telegram_person_not_found") {
@@ -22,22 +26,39 @@ function unresolvedPersonMessage(authState: AuthSessionState): string {
   return "Для списка задач пока нет подтверждённой связи с дизайнером.";
 }
 
+const GROUPING_LABELS: Record<MiniTaskGroupingMode, string> = {
+  designer: "Дизайнер",
+  brand: "Бренд",
+  show: "Шоу",
+};
+
 export function MiniAppTasksPage(props: {
-  tasks: TaskV1[];
+  items: MiniTaskListItem[];
   canViewAllTasks: boolean;
   unresolvedPersonLink: boolean;
   authState: AuthSessionState;
   onOpenTask: (taskId: string) => void;
 }) {
+  const [groupingMode, setGroupingMode] = React.useState<MiniTaskGroupingMode>("designer");
+
   return (
     <div className="miniAppSection">
-      <div className="miniAppNotice">
-        {props.canViewAllTasks ? "Показаны все активные задачи." : "Показаны только ваши активные задачи."}
+      <div className="miniAppSegmented">
+        {(["designer", "brand", "show"] as MiniTaskGroupingMode[]).map((mode) => (
+          <button
+            key={mode}
+            type="button"
+            className={`miniAppChip ${groupingMode === mode ? "isActive" : ""}`}
+            onClick={() => setGroupingMode(mode)}
+          >
+            {GROUPING_LABELS[mode]}
+          </button>
+        ))}
       </div>
       {props.unresolvedPersonLink && !props.canViewAllTasks ? (
         <div className="miniAppNotice">{unresolvedPersonMessage(props.authState)}</div>
       ) : null}
-      <MobileTaskList tasks={props.tasks} onOpenTask={props.onOpenTask} />
+      <MobileTaskList items={props.items} groupingMode={groupingMode} onOpenTask={props.onOpenTask} />
     </div>
   );
 }
