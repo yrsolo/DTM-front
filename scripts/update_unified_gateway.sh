@@ -188,6 +188,18 @@ paths:
         type: http
         url: https://${frontend_bucket_test}.website.yandexcloud.net/index.html
 
+  /test/app:
+    x-yc-apigateway-any-method:
+      x-yc-apigateway-integration:
+        type: http
+        url: https://${frontend_bucket_test}.website.yandexcloud.net/index.html
+
+  /test/app/:
+    x-yc-apigateway-any-method:
+      x-yc-apigateway-integration:
+        type: http
+        url: https://${frontend_bucket_test}.website.yandexcloud.net/index.html
+
   /test/{path+}:
     x-yc-apigateway-any-method:
       parameters:
@@ -205,6 +217,18 @@ paths:
       x-yc-apigateway-integration:
         type: http
         url: https://${frontend_bucket_prod}.website.yandexcloud.net/
+
+  /app:
+    x-yc-apigateway-any-method:
+      x-yc-apigateway-integration:
+        type: http
+        url: https://${frontend_bucket_prod}.website.yandexcloud.net/index.html
+
+  /app/:
+    x-yc-apigateway-any-method:
+      x-yc-apigateway-integration:
+        type: http
+        url: https://${frontend_bucket_prod}.website.yandexcloud.net/index.html
 
   /{path+}:
     x-yc-apigateway-any-method:

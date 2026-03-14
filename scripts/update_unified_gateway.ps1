@@ -186,6 +186,18 @@ paths:
         type: http
         url: $testFrontend/index.html
 
+  /test/app:
+    x-yc-apigateway-any-method:
+      x-yc-apigateway-integration:
+        type: http
+        url: $testFrontend/index.html
+
+  /test/app/:
+    x-yc-apigateway-any-method:
+      x-yc-apigateway-integration:
+        type: http
+        url: $testFrontend/index.html
+
   /test/{path+}:
     x-yc-apigateway-any-method:
       parameters:
@@ -203,6 +215,18 @@ paths:
       x-yc-apigateway-integration:
         type: http
         url: $prodFrontend/
+
+  /app:
+    x-yc-apigateway-any-method:
+      x-yc-apigateway-integration:
+        type: http
+        url: $prodFrontend/index.html
+
+  /app/:
+    x-yc-apigateway-any-method:
+      x-yc-apigateway-integration:
+        type: http
+        url: $prodFrontend/index.html
 
   /{path+}:
     x-yc-apigateway-any-method:
