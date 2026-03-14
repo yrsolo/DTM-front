@@ -2714,30 +2714,8 @@ button:hover {
   min-height: calc(100vh - 92px);
   display: flex;
   flex-direction: column;
-  gap: 16px;
   padding-bottom: 88px;
   overflow: hidden;
-}
-
-.miniAppHeader {
-  padding: 12px 4px 0;
-}
-
-.miniAppEyebrow {
-  font-size: 12px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: rgba(225, 234, 255, 0.62);
-}
-
-.miniAppTitle {
-  margin: 6px 0 0;
-  font-size: 28px;
-}
-
-.miniAppSubtitle {
-  margin-top: 6px;
-  color: rgba(225, 234, 255, 0.78);
 }
 
 .miniAppMain {

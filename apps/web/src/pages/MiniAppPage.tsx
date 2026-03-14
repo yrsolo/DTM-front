@@ -86,12 +86,6 @@ export function MiniAppPage() {
   return (
     <>
       <MiniAppShell
-        title="DTM"
-        subtitle={
-          currentPerson.personName
-            ? `Рабочий кабинет: ${currentPerson.personName}`
-            : "Mobile-first режим текущего frontend"
-        }
         currentTab={currentTab}
         onTabChange={setCurrentTab}
       >
