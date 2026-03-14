@@ -40,6 +40,7 @@ function formatUploadError(error: unknown, fallback: string): string {
       `step=${error.stage}`,
       error.status !== null ? `status=${error.status}` : null,
       error.host ? `host=${error.host}` : null,
+      error.method ? `method=${error.method}` : null,
       error.details ? `details=${error.details}` : null,
     ].filter(Boolean);
     return parts.join(" | ");
@@ -69,6 +70,19 @@ export function TaskAttachmentsSection(props: {
   const [tooltipState, setTooltipState] = React.useState<TooltipState>({ visible: false });
   const [previewState, setPreviewState] = React.useState<AttachmentPreviewState>({ open: false });
   const inputRef = React.useRef<HTMLInputElement | null>(null);
+
+  async function waitForAttachmentPublication(expectedAttachmentId: string): Promise<boolean> {
+    if (!ctx?.snapshotState.syncFromApi) return false;
+    for (let attempt = 0; attempt < 8; attempt += 1) {
+      await ctx.snapshotState.syncFromApi();
+      const currentTask = ctx.snapshotState.snapshot?.tasks.find((task) => task.id === props.task.id);
+      if (currentTask?.attachments?.some((attachment) => attachment.id === expectedAttachmentId)) {
+        return true;
+      }
+      await new Promise((resolve) => window.setTimeout(resolve, 1500));
+    }
+    return false;
+  }
 
   React.useEffect(() => {
     setExpanded(false);
@@ -214,7 +228,12 @@ export function TaskAttachmentsSection(props: {
       });
 
       setUploadState({ status: "waiting", message: ui.drawer.attachmentsWaiting });
-      await ctx?.snapshotState.syncFromApi();
+      const published = await waitForAttachmentPublication(contract.attachment_id);
+      setUploadState(
+        published
+          ? { status: "idle" }
+          : { status: "waiting", message: ui.drawer.attachmentsWaiting }
+      );
     } catch (error) {
       setUploadState({
         status: "error",

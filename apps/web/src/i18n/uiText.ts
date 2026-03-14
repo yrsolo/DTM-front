@@ -74,6 +74,7 @@ export type UiText = {
     attachmentsUploading: string;
     attachmentsFinalize: string;
     attachmentsWaiting: string;
+    attachmentsUploaded: string;
     attachmentsPreview: string;
     attachmentsDownload: string;
     attachmentsUnavailable: string;
@@ -203,6 +204,7 @@ const RU_TEXT: UiText = {
     attachmentsUploading: "Получаем контракт загрузки...",
     attachmentsFinalize: "Проверяем файл и завершаем загрузку...",
     attachmentsWaiting: "Файл отправлен. Ждём публикацию вложения в snapshot.",
+    attachmentsUploaded: "Вложение опубликовано.",
     attachmentsPreview: "Просмотр",
     attachmentsDownload: "Скачать",
     attachmentsUnavailable: "Недоступно",
@@ -332,6 +334,7 @@ const EN_TEXT: UiText = {
     attachmentsUploading: "Requesting upload contract...",
     attachmentsFinalize: "Verifying file and finalizing upload...",
     attachmentsWaiting: "File uploaded. Waiting for snapshot publication.",
+    attachmentsUploaded: "Attachment published.",
     attachmentsPreview: "Preview",
     attachmentsDownload: "Download",
     attachmentsUnavailable: "Unavailable",

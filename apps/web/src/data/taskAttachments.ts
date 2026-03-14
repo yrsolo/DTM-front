@@ -21,6 +21,7 @@ export class TaskAttachmentUploadError extends Error {
   status: number | null;
   details: string | null;
   host: string | null;
+  method: string | null;
 
   constructor(args: {
     stage: TaskAttachmentUploadStage;
@@ -28,6 +29,7 @@ export class TaskAttachmentUploadError extends Error {
     status?: number | null;
     details?: string | null;
     host?: string | null;
+    method?: string | null;
   }) {
     super(args.message);
     this.name = "TaskAttachmentUploadError";
@@ -35,6 +37,7 @@ export class TaskAttachmentUploadError extends Error {
     this.status = args.status ?? null;
     this.details = args.details ?? null;
     this.host = args.host ?? null;
+    this.method = args.method ?? null;
   }
 }
 
@@ -139,6 +142,7 @@ export async function uploadTaskAttachmentBinary(contract: AttachmentUploadContr
       message: error instanceof Error ? error.message : "upload-binary network error",
       details: error instanceof Error ? error.message : "network error",
       host: extractHost(buildBackendAdminUrl("/attachments/upload-binary")),
+      method,
     });
   }
   if (!res.ok) {
@@ -154,6 +158,7 @@ export async function uploadTaskAttachmentBinary(contract: AttachmentUploadContr
       status: res.status,
       details,
       host: extractHost(contract.uploadUrl),
+      method,
     });
   }
 }
