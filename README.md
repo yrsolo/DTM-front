@@ -66,8 +66,8 @@ npm run check:mojibake
 
 По умолчанию приложение читает runtime-конфиг из `/config/public.yaml`, а fallback-конфиг берёт из:
 
-- [public.yaml](n:\PROJECTS\DTM\DTM-front\apps\web\config\public.yaml)
-- [public.prod.yaml](n:\PROJECTS\DTM\DTM-front\apps\web\config\public.prod.yaml)
+- [public.yaml](apps/web/config/public.yaml)
+- [public.prod.yaml](apps/web/config/public.prod.yaml)
 
 Важно:
 - prod frontend работает в корне `https://dtm.solofarm.ru/`
@@ -77,11 +77,11 @@ npm run check:mojibake
 
 ## Где читать дальше
 
-- Общая карта документации: [docs/README.md](n:\PROJECTS\DTM\DTM-front\docs\README.md)
-- Архитектура: [SYSTEM_ARCHITECTURE.md](n:\PROJECTS\DTM\DTM-front\docs\architecture\SYSTEM_ARCHITECTURE.md)
-- Контракты данных и runtime config: [RUNTIME_CONFIG.md](n:\PROJECTS\DTM\DTM-front\docs\contracts\RUNTIME_CONFIG.md)
-- Дизайн-система и workbench: [WORKBENCH_CONTROLS.md](n:\PROJECTS\DTM\DTM-front\docs\design\WORKBENCH_CONTROLS.md)
-- Deploy и эксплуатация: [DEPLOY.md](n:\PROJECTS\DTM\DTM-front\docs\operations\DEPLOY.md)
+- Общая карта документации: [docs/README.md](docs/README.md)
+- Архитектура: [SYSTEM_ARCHITECTURE.md](docs/glance/SYSTEM_ARCHITECTURE.md)
+- Контракты данных и runtime config: [RUNTIME_CONFIG.md](docs/deep/RUNTIME_CONFIG.md)
+- Дизайн-система и workbench: [WORKBENCH_CONTROLS.md](docs/deep/WORKBENCH_CONTROLS.md)
+- Deploy и эксплуатация: [DEPLOY.md](docs/deep/DEPLOY.md)
 
 ## Технологии
 
@@ -96,3 +96,4 @@ npm run check:mojibake
 ## Теги
 
 `#react #typescript #vite #svg #gantt #design-system #runtime-config #localstorage #frontend #yandex-object-storage`
+

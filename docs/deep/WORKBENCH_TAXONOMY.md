@@ -1,4 +1,4 @@
-# Workbench taxonomy
+﻿# Workbench taxonomy
 
 Этот документ фиксирует закон группировки крутилок и нужен как canonical reference для дальнейших изменений.
 
@@ -52,3 +52,4 @@
 - `(2)`
 - смешение page-specific и system-wide controls в одной группе
 - смешение visual tokens и optimization controls без сильного основания
+

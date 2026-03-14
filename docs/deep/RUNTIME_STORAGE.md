@@ -8,8 +8,8 @@
 - релиз-инженер, разбирающийся в runtime-поведении после reload.
 
 Source of truth в коде:
-- [Layout.tsx](n:\PROJECTS\DTM\DTM-front\apps\web\src\components\Layout.tsx)
-- [useSnapshot.ts](n:\PROJECTS\DTM\DTM-front\apps\web\src\data\useSnapshot.ts)
+- [Layout.tsx](../../apps/web/src/components/Layout.tsx)
+- [useSnapshot.ts](../../apps/web/src/data/useSnapshot.ts)
 - `rg "localStorage|sessionStorage" apps/web/src`
 
 ## Ключи localStorage
@@ -62,3 +62,4 @@ Defaults нового сеанса задаются отдельно через 
 - нет ли устаревших `dtm.web.designControls.v1`;
 - не включён ли неожиданно demo mode в persisted state;
 - есть ли валидные `dtm.snapshot.v1` и `dtm.snapshot.meta`.
+

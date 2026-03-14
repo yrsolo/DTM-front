@@ -1,4 +1,4 @@
-# Workbench-крутилки
+﻿# Workbench-крутилки
 
 Этот документ фиксирует текущую каноническую структуру runtime workbench.
 
@@ -8,11 +8,11 @@
 - владелец, который настраивает визуальную систему без пересборки.
 
 Source of truth в коде:
-- [ControlsWorkbench.tsx](n:\PROJECTS\DTM\DTM-front\apps\web\src\components\ControlsWorkbench.tsx)
-- [workbenchLayout.ts](n:\PROJECTS\DTM\DTM-front\apps\web\src\design\workbenchLayout.ts)
-- [controls.ts](n:\PROJECTS\DTM\DTM-front\apps\web\src\design\controls.ts)
-- [colors.ts](n:\PROJECTS\DTM\DTM-front\apps\web\src\design\colors.ts)
-- [runtimeDefaults.ts](n:\PROJECTS\DTM\DTM-front\apps\web\src\data\runtimeDefaults.ts)
+- [ControlsWorkbench.tsx](../../apps/web/src/components/ControlsWorkbench.tsx)
+- [workbenchLayout.ts](../../apps/web/src/design/workbenchLayout.ts)
+- [controls.ts](../../apps/web/src/design/controls.ts)
+- [colors.ts](../../apps/web/src/design/colors.ts)
+- [runtimeDefaults.ts](../../apps/web/src/data/runtimeDefaults.ts)
 
 ## Назначение слоя
 
@@ -57,3 +57,4 @@ Workbench управляет тремя типами runtime-данных:
 - `Surfaces` использует интерактивную panel map как инструмент для surface-зон. Это осознанный special-case UI, а не второй канонический ownership тех же controls.
 - `Defaults` — это не текущий runtime state, а defaults нового сеанса.
 - Persisted design values не зависят от порядка вкладок и не должны слетать при реорганизации taxonomy.
+

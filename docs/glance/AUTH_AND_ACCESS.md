@@ -1,4 +1,4 @@
-# Auth And Access
+﻿# Auth And Access
 
 Назначение:
 - зафиксировать текущий V1-контракт авторизации и access modes.
@@ -154,6 +154,7 @@ Admin personal order:
 
 ## Подробнее
 
-- Backend/proxy handoff: [BACKEND_AUTH_HANDOFF.md](n:\PROJECTS\DTM\DTM-front\docs\deep\BACKEND_AUTH_HANDOFF.md)
-- Deploy и runtime auth details: [AUTH_DEPLOY.md](n:\PROJECTS\DTM\DTM-front\docs\deep\AUTH_DEPLOY.md)
-- Troubleshooting: [AUTH_TROUBLESHOOTING.md](n:\PROJECTS\DTM\DTM-front\docs\deep\AUTH_TROUBLESHOOTING.md)
+- Backend/proxy handoff: [BACKEND_AUTH_HANDOFF.md](../deep/BACKEND_AUTH_HANDOFF.md)
+- Deploy и runtime auth details: [AUTH_DEPLOY.md](../deep/AUTH_DEPLOY.md)
+- Troubleshooting: [AUTH_TROUBLESHOOTING.md](../deep/AUTH_TROUBLESHOOTING.md)
+

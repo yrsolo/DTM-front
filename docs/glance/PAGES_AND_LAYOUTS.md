@@ -8,10 +8,10 @@
 - владелец продукта.
 
 Source of truth в коде:
-- [TimelinePage.tsx](n:\PROJECTS\DTM\DTM-front\apps\web\src\pages\TimelinePage.tsx)
-- [UnifiedTimeline.tsx](n:\PROJECTS\DTM\DTM-front\apps\web\src\gantt\UnifiedTimeline.tsx)
-- [DesignersBoard.tsx](n:\PROJECTS\DTM\DTM-front\apps\web\src\components\DesignersBoard.tsx)
-- [TaskDetailsDrawer.tsx](n:\PROJECTS\DTM\DTM-front\apps\web\src\components\TaskDetailsDrawer.tsx)
+- [TimelinePage.tsx](../../apps/web/src/pages/TimelinePage.tsx)
+- [UnifiedTimeline.tsx](../../apps/web/src/gantt/UnifiedTimeline.tsx)
+- [DesignersBoard.tsx](../../apps/web/src/components/DesignersBoard.tsx)
+- [TaskDetailsDrawer.tsx](../../apps/web/src/components/TaskDetailsDrawer.tsx)
 
 ## Страница `Задачи`
 
@@ -95,6 +95,7 @@ Tooltip может быть шире карточки, чтобы milestone labe
 
 ## Подробнее
 
-- Общая продуктовая роль страниц: [PRODUCT_OVERVIEW.md](n:\PROJECTS\DTM\DTM-front\docs\glance\PRODUCT_OVERVIEW.md)
-- Архитектура shell и рендеринга: [SYSTEM_ARCHITECTURE.md](n:\PROJECTS\DTM\DTM-front\docs\glance\SYSTEM_ARCHITECTURE.md)
-- Workbench и runtime design details: [WORKBENCH_CONTROLS.md](n:\PROJECTS\DTM\DTM-front\docs\deep\WORKBENCH_CONTROLS.md)
+- Общая продуктовая роль страниц: [PRODUCT_OVERVIEW.md](PRODUCT_OVERVIEW.md)
+- Архитектура shell и рендеринга: [SYSTEM_ARCHITECTURE.md](SYSTEM_ARCHITECTURE.md)
+- Workbench и runtime design details: [WORKBENCH_CONTROLS.md](../deep/WORKBENCH_CONTROLS.md)
+

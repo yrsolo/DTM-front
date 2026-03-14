@@ -36,4 +36,5 @@ Source of truth:
 
 ## Cache / persistence
 
-SWR-like поведение, snapshot cache и runtime defaults живут в browser storage и описаны отдельно в `docs/contracts/RUNTIME_CONFIG.md` и `docs/operations/RUNTIME_STORAGE.md`.
+SWR-like поведение, snapshot cache и runtime defaults живут в browser storage и описаны отдельно в `docs/deep/RUNTIME_CONFIG.md` и `docs/deep/RUNTIME_STORAGE.md`.
+

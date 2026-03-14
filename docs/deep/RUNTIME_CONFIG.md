@@ -78,7 +78,7 @@ Canonical поведение:
 - `dtm.timeline.pageView.v1`
 - `dtm.web.workbench.favorites.v1`
 
-Подробнее по каждому ключу см. `docs/operations/RUNTIME_STORAGE.md`.
+Подробнее по каждому ключу см. `docs/deep/RUNTIME_STORAGE.md`.
 
 ## Инварианты
 
@@ -86,3 +86,4 @@ Canonical поведение:
 - host-specific логика не расползается по UI-компонентам;
 - runtime asset paths работают и из `/`, и из `/test/`;
 - fallback на `config/public.yam` сохранён как совместимость.
+

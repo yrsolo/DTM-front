@@ -8,10 +8,10 @@
 - владелец проекта, которому нужно понимать систему, а не набор случайных крутилок.
 
 Source of truth в коде:
-- [globals.css](n:\PROJECTS\DTM\DTM-front\apps\web\src\styles\globals.css)
-- [colors.ts](n:\PROJECTS\DTM\DTM-front\apps\web\src\design\colors.ts)
-- [controls.ts](n:\PROJECTS\DTM\DTM-front\apps\web\src\design\controls.ts)
-- [Layout.tsx](n:\PROJECTS\DTM\DTM-front\apps\web\src\components\Layout.tsx)
+- [globals.css](../../apps/web/src/styles/globals.css)
+- [colors.ts](../../apps/web/src/design/colors.ts)
+- [controls.ts](../../apps/web/src/design/controls.ts)
+- [Layout.tsx](../../apps/web/src/components/Layout.tsx)
 
 ## Назначение слоя
 
@@ -75,7 +75,7 @@ Source of truth в коде:
 - defaults;
 - workbench itself.
 
-Полная карта описана в [WORKBENCH_CONTROLS.md](n:\PROJECTS\DTM\DTM-front\docs\design\WORKBENCH_CONTROLS.md).
+Полная карта описана в [WORKBENCH_CONTROLS.md](../deep/WORKBENCH_CONTROLS.md).
 
 ## Инварианты
 
@@ -92,6 +92,7 @@ Source of truth в коде:
 
 ## Подробнее
 
-- Страницы и композиции: [PAGES_AND_LAYOUTS.md](n:\PROJECTS\DTM\DTM-front\docs\glance\PAGES_AND_LAYOUTS.md)
-- Workbench taxonomy: [WORKBENCH_TAXONOMY.md](n:\PROJECTS\DTM\DTM-front\docs\deep\WORKBENCH_TAXONOMY.md)
-- Полная карта контролов: [WORKBENCH_CONTROLS.md](n:\PROJECTS\DTM\DTM-front\docs\deep\WORKBENCH_CONTROLS.md)
+- Страницы и композиции: [PAGES_AND_LAYOUTS.md](PAGES_AND_LAYOUTS.md)
+- Workbench taxonomy: [WORKBENCH_TAXONOMY.md](../deep/WORKBENCH_TAXONOMY.md)
+- Полная карта контролов: [WORKBENCH_CONTROLS.md](../deep/WORKBENCH_CONTROLS.md)
+

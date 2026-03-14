@@ -8,8 +8,8 @@
 - любой разработчик, которому нужно понять разницу между raw API payload и UI model.
 
 Source of truth в коде:
-- [normalize.ts](n:\PROJECTS\DTM\DTM-front\apps\web\src\data\normalize.ts)
-- [useSnapshot.ts](n:\PROJECTS\DTM\DTM-front\apps\web\src\data\useSnapshot.ts)
+- [normalize.ts](../../apps/web/src/data/normalize.ts)
+- [useSnapshot.ts](../../apps/web/src/data/useSnapshot.ts)
 
 ## Назначение нормализованной модели
 
@@ -104,3 +104,4 @@ UI model:
 - rendering-компоненты не должны вручную реализовывать свою собственную нормализацию;
 - нормализация должна оставаться единой boundary между data layer и UI;
 - любые изменения формы API нужно сначала отражать в `normalize.ts`, а потом документировать здесь.
+

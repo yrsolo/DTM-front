@@ -8,9 +8,9 @@
 - инженер поддержки.
 
 Source of truth в коде:
-- [api.ts](n:\PROJECTS\DTM\DTM-front\apps\web\src\data\api.ts)
-- [normalize.ts](n:\PROJECTS\DTM\DTM-front\apps\web\src\data\normalize.ts)
-- пример ответа: [snapshot.test.json](n:\PROJECTS\DTM\DTM-front\apps\web\public\data\snapshot.test.json)
+- [api.ts](../../apps/web/src/data/api.ts)
+- [normalize.ts](../../apps/web/src/data/normalize.ts)
+- пример ответа: [snapshot.test.json](../../apps/web/public/data/snapshot.test.json)
 
 ## Endpoint
 
@@ -150,3 +150,4 @@ Frontend умеет переживать:
 - если свежая загрузка не удалась, может использовать persisted snapshot;
 - если milestone type не распознан, окрашивает его через категорию `default`;
 - если часть entities отсутствует, показывает fallback вместо полного имени или названия группы.
+

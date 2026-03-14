@@ -9,9 +9,9 @@
 - инженер, которому важно понять пользовательский путь до чтения архитектуры.
 
 Source of truth в коде:
-- [TimelinePage.tsx](n:\PROJECTS\DTM\DTM-front\apps\web\src\pages\TimelinePage.tsx)
-- [DesignersBoard.tsx](n:\PROJECTS\DTM\DTM-front\apps\web\src\components\DesignersBoard.tsx)
-- [TaskDetailsDrawer.tsx](n:\PROJECTS\DTM\DTM-front\apps\web\src\components\TaskDetailsDrawer.tsx)
+- [TimelinePage.tsx](../../apps/web/src/pages/TimelinePage.tsx)
+- [DesignersBoard.tsx](../../apps/web/src/components/DesignersBoard.tsx)
+- [TaskDetailsDrawer.tsx](../../apps/web/src/components/TaskDetailsDrawer.tsx)
 
 ## Сценарий: работа со страницей `Задачи`
 
@@ -100,6 +100,7 @@ Source of truth в коде:
 
 ## Подробнее
 
-- Общая картина продукта: [PRODUCT_OVERVIEW.md](n:\PROJECTS\DTM\DTM-front\docs\glance\PRODUCT_OVERVIEW.md)
-- Архитектура и flow данных: [SYSTEM_ARCHITECTURE.md](n:\PROJECTS\DTM\DTM-front\docs\glance\SYSTEM_ARCHITECTURE.md), [DATA_FLOW.md](n:\PROJECTS\DTM\DTM-front\docs\deep\DATA_FLOW.md)
-- Auth/access: [AUTH_AND_ACCESS.md](n:\PROJECTS\DTM\DTM-front\docs\glance\AUTH_AND_ACCESS.md)
+- Общая картина продукта: [PRODUCT_OVERVIEW.md](PRODUCT_OVERVIEW.md)
+- Архитектура и flow данных: [SYSTEM_ARCHITECTURE.md](SYSTEM_ARCHITECTURE.md), [DATA_FLOW.md](../deep/DATA_FLOW.md)
+- Auth/access: [AUTH_AND_ACCESS.md](AUTH_AND_ACCESS.md)
+

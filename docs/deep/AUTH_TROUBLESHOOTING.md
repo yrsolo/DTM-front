@@ -119,7 +119,7 @@ Backend не должен анализировать browser cookie самост
 - `x-dtm-user-status`
 
 Полный handoff описан в:
-- `docs/contracts/BACKEND_AUTH_HANDOFF.md`
+- `docs/deep/BACKEND_AUTH_HANDOFF.md`
 
 If localhost opens `/ops/auth/...` instead of `/test/ops/auth/...`:
 - check `apps/web/src/config/runtimeContour.ts`
@@ -194,3 +194,4 @@ Dry-run:
 ```powershell
 powershell -ExecutionPolicy Bypass -File scripts/update_unified_gateway.ps1 -DryRun
 ```
+

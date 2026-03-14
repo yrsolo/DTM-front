@@ -1,4 +1,4 @@
-# Backend Auth Handoff
+﻿# Backend Auth Handoff
 
 Назначение:
 - зафиксировать browser-facing auth/data contract между frontend, auth proxy и backend;
@@ -11,7 +11,7 @@ Source of truth:
 - `apps/web/src/data/api.ts`
 - `apps/web/src/config/runtimeContour.ts`
 
-Если нужен только общий контекст, сначала прочитайте [AUTH_AND_ACCESS.md](n:\PROJECTS\DTM\DTM-front\docs\glance\AUTH_AND_ACCESS.md).
+Если нужен только общий контекст, сначала прочитайте [AUTH_AND_ACCESS.md](../glance/AUTH_AND_ACCESS.md).
 
 ## Public browser contract
 
@@ -146,3 +146,4 @@ Preset assets are publicly readable JSON files served from:
 Graceful degradation:
 - preset catalog or preset asset outage must not break auth flow, snapshot loading or API proxy behavior;
 - application should stay operational in builtin-only preset mode.
+

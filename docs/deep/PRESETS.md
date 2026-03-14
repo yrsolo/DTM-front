@@ -1,11 +1,11 @@
-# Preset System
+﻿# Preset System
 
 Назначение:
 - зафиксировать, как устроены builtin и cloud presets;
 - объяснить graceful fallback, если preset domain или catalog backend недоступен;
 - описать ownership и admin governance.
 
-Если нужен только общий контекст, сначала прочитайте [DESIGN_SYSTEM.md](n:\PROJECTS\DTM\DTM-front\docs\glance\DESIGN_SYSTEM.md).
+Если нужен только общий контекст, сначала прочитайте [DESIGN_SYSTEM.md](../glance/DESIGN_SYSTEM.md).
 
 ## Контур
 
@@ -36,8 +36,8 @@ Catalog общий для `test` и `prod`.
 ### Builtin
 
 Builtin presets лежат в frontend repo:
-- [colors index](n:\PROJECTS\DTM\DTM-front\apps\web\public\config\UI\colors\index.json)
-- [layouts index](n:\PROJECTS\DTM\DTM-front\apps\web\public\config\UI\layouts\index.json)
+- [colors index](../../apps/web/public/config/UI/colors/index.json)
+- [layouts index](../../apps/web/public/config/UI/layouts/index.json)
 
 Они всегда доступны как baseline и не зависят от cloud catalog.
 
@@ -109,3 +109,4 @@ Admin actions:
 - экспорт;
 - удалить;
 - назначить default.
+

@@ -8,10 +8,10 @@
 - владелец проекта, которому нужен инженерный обзор без чтения всех исходников.
 
 Source of truth в коде:
-- [App.tsx](n:\PROJECTS\DTM\DTM-front\apps\web\src\app\App.tsx)
-- [Layout.tsx](n:\PROJECTS\DTM\DTM-front\apps\web\src\components\Layout.tsx)
-- [TimelinePage.tsx](n:\PROJECTS\DTM\DTM-front\apps\web\src\pages\TimelinePage.tsx)
-- [useSnapshot.ts](n:\PROJECTS\DTM\DTM-front\apps\web\src\data\useSnapshot.ts)
+- [App.tsx](../../apps/web/src/app/App.tsx)
+- [Layout.tsx](../../apps/web/src/components/Layout.tsx)
+- [TimelinePage.tsx](../../apps/web/src/pages/TimelinePage.tsx)
+- [useSnapshot.ts](../../apps/web/src/data/useSnapshot.ts)
 
 ## Назначение системы
 
@@ -88,6 +88,7 @@ Tooltip-система и интерактивные оверлеи рендер
 
 ## Подробнее
 
-- Поток данных: [DATA_FLOW.md](n:\PROJECTS\DTM\DTM-front\docs\deep\DATA_FLOW.md)
-- Структура исходников: [FRONTEND_STRUCTURE.md](n:\PROJECTS\DTM\DTM-front\docs\deep\FRONTEND_STRUCTURE.md)
-- Auth и access: [AUTH_AND_ACCESS.md](n:\PROJECTS\DTM\DTM-front\docs\glance\AUTH_AND_ACCESS.md)
+- Поток данных: [DATA_FLOW.md](../deep/DATA_FLOW.md)
+- Структура исходников: [FRONTEND_STRUCTURE.md](../deep/FRONTEND_STRUCTURE.md)
+- Auth и access: [AUTH_AND_ACCESS.md](AUTH_AND_ACCESS.md)
+

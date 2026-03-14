@@ -1,4 +1,4 @@
-# Troubleshooting
+﻿# Troubleshooting
 
 Этот документ собирает типовые runtime, deploy и data-loading проблемы для текущего frontend-контура.
 
@@ -142,3 +142,4 @@ powershell -ExecutionPolicy Bypass -File scripts/update_unified_gateway.ps1 -Dry
 1. проверьте кодировку файла;
 2. не открывался ли файл/вывод в ANSI/Windows-1251;
 3. используйте UTF-8 для docs и shell-вывода.
+

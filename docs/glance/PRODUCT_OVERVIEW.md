@@ -9,9 +9,9 @@
 - новый инженер, которому нужно понять контекст до погружения в код.
 
 Source of truth в коде:
-- [TimelinePage.tsx](n:\PROJECTS\DTM\DTM-front\apps\web\src\pages\TimelinePage.tsx)
-- [Layout.tsx](n:\PROJECTS\DTM\DTM-front\apps\web\src\components\Layout.tsx)
-- [TaskDetailsDrawer.tsx](n:\PROJECTS\DTM\DTM-front\apps\web\src\components\TaskDetailsDrawer.tsx)
+- [TimelinePage.tsx](../../apps/web/src/pages/TimelinePage.tsx)
+- [Layout.tsx](../../apps/web/src/components/Layout.tsx)
+- [TaskDetailsDrawer.tsx](../../apps/web/src/components/TaskDetailsDrawer.tsx)
 
 ## Что решает проект
 
@@ -83,6 +83,7 @@ Backend, таблицы, процессы синхронизации и адми
 
 ## Подробнее
 
-- Общая архитектура: [SYSTEM_ARCHITECTURE.md](n:\PROJECTS\DTM\DTM-front\docs\glance\SYSTEM_ARCHITECTURE.md)
-- Поток данных: [DATA_FLOW.md](n:\PROJECTS\DTM\DTM-front\docs\deep\DATA_FLOW.md)
-- Дизайн и workbench: [DESIGN_SYSTEM.md](n:\PROJECTS\DTM\DTM-front\docs\glance\DESIGN_SYSTEM.md)
+- Общая архитектура: [SYSTEM_ARCHITECTURE.md](SYSTEM_ARCHITECTURE.md)
+- Поток данных: [DATA_FLOW.md](../deep/DATA_FLOW.md)
+- Дизайн и workbench: [DESIGN_SYSTEM.md](DESIGN_SYSTEM.md)
+
