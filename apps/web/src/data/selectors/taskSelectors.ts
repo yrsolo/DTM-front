@@ -10,6 +10,10 @@ export type TaskListStats = {
   week: number;
 };
 
+function isCompletedTask(task: TaskV1): boolean {
+  return (task.status ?? "").trim().toLowerCase() === "done";
+}
+
 function resolveTaskDate(task: TaskV1): string | null {
   return task.nextDue ?? task.end ?? task.start ?? null;
 }
@@ -25,12 +29,12 @@ function addDays(value: Date, days: number): Date {
 }
 
 export function selectAllTasks(snapshot: SnapshotV1 | null): TaskV1[] {
-  return snapshot?.tasks ?? [];
+  return (snapshot?.tasks ?? []).filter((task) => !isCompletedTask(task));
 }
 
 export function selectMyTasks(snapshot: SnapshotV1 | null, personId: string | null): TaskV1[] {
   if (!snapshot || !personId) return [];
-  return snapshot.tasks.filter((task) => task.ownerId === personId);
+  return snapshot.tasks.filter((task) => task.ownerId === personId && !isCompletedTask(task));
 }
 
 export function selectTaskById(snapshot: SnapshotV1 | null, taskId: string | null): TaskV1 | null {

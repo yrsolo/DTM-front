@@ -84,6 +84,16 @@ function buildAuthUrl(path: string): string {
 
 function goToTimeline(): void {
   if (typeof window === "undefined") return;
+  try {
+    const url = new URL(window.location.href);
+    const returnTo = url.searchParams.get("return_to")?.trim() || "";
+    if (returnTo === "/app" || returnTo.startsWith("/app?") || returnTo === "/test/app" || returnTo.startsWith("/test/app?")) {
+      window.location.assign(returnTo);
+      return;
+    }
+  } catch {
+    // fall through to default timeline route
+  }
   window.location.assign(getTasksRoute());
 }
 

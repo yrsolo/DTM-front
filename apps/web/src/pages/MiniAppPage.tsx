@@ -97,7 +97,8 @@ export function MiniAppPage() {
         }}
         onOpenAdmin={() => {
           if (typeof window !== "undefined") {
-            window.location.assign(authSession.adminHref);
+            const returnTo = `${window.location.pathname}${window.location.search}${window.location.hash}`;
+            window.location.assign(`${authSession.adminHref}?return_to=${encodeURIComponent(returnTo)}`);
           }
         }}
       />
