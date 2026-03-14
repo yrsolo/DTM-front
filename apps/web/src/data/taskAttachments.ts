@@ -78,7 +78,7 @@ export async function requestTaskAttachmentUpload(args: {
   size: number;
   uploadedBy: string;
 }): Promise<AttachmentUploadContract> {
-  const res = await fetch(buildBackendAdminUrl("/task-attachments/request-upload"), {
+  const res = await fetch(buildBackendAdminUrl("/attachments/request-upload"), {
     method: "POST",
     credentials: "include",
     headers: {
@@ -101,7 +101,7 @@ export async function requestTaskAttachmentUpload(args: {
       message: `request-upload failed (${res.status})`,
       status: res.status,
       details,
-      host: extractHost(buildBackendAdminUrl("/task-attachments/request-upload")),
+      host: extractHost(buildBackendAdminUrl("/attachments/request-upload")),
     });
   }
 
@@ -137,7 +137,7 @@ export async function finalizeTaskAttachmentUpload(args: {
   attachmentId: string;
   uploadedBy: string;
 }): Promise<void> {
-  const res = await fetch(buildBackendAdminUrl("/task-attachments/finalize"), {
+  const res = await fetch(buildBackendAdminUrl("/attachments/finalize"), {
     method: "POST",
     credentials: "include",
     headers: {
@@ -157,7 +157,7 @@ export async function finalizeTaskAttachmentUpload(args: {
       message: `finalize failed (${res.status})`,
       status: res.status,
       details,
-      host: extractHost(buildBackendAdminUrl("/task-attachments/finalize")),
+      host: extractHost(buildBackendAdminUrl("/attachments/finalize")),
     });
   }
 }
