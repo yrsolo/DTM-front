@@ -212,6 +212,7 @@ function UserCardContent(props: {
         <div className="adminUserName">{props.user.displayName || props.user.email || props.user.id}</div>
         <div className="muted">{props.user.email || "Email не указан"}</div>
         {props.user.personName ? <div className="muted">Дизайнер: {props.user.personName}</div> : null}
+        {props.user.telegramId ? <div className="muted">Telegram ID: {props.user.telegramId}</div> : null}
         {props.user.telegramUsername ? <div className="muted">Telegram: @{props.user.telegramUsername}</div> : null}
         <div className="muted">Заявка: {formatRequestedAt(props.user.requestedAt)}</div>
         {props.roleText ? <div className={`adminUserRole ${props.roleClassName ?? ""}`}>{props.roleText}</div> : null}
