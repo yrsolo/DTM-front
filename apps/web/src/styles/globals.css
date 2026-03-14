@@ -102,6 +102,11 @@ a {
   overflow: visible;
 }
 
+.container.miniAppContainer {
+  padding-top: 12px;
+  height: 100dvh;
+}
+
 .container > .card {
   height: 100%;
 }
