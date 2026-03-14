@@ -2,7 +2,7 @@
 
 Эта папка описывает текущее состояние проекта. Источником истины для документации считаются код, актуальные runtime-конфиги и deploy-скрипты, а не исторические планы.
 
-Структура чтения теперь двухслойная:
+Структура чтения двухслойная:
 - `docs/glance/` — быстрый вход и верхнеуровневые схемы;
 - `docs/deep/` — углублённые технические материалы;
 - `docs/archive/` — retired и historical reference docs;
@@ -53,19 +53,16 @@ npm run check:mojibake
 
 ## Углублённо
 
-См. тематическую карту:
-- [deep/README.md](n:\PROJECTS\DTM\DTM-front\docs\deep\README.md)
-
-Ключевые deep docs:
-- [DATA_FLOW.md](n:\PROJECTS\DTM\DTM-front\docs\architecture\DATA_FLOW.md)
-- [FRONTEND_STRUCTURE.md](n:\PROJECTS\DTM\DTM-front\docs\architecture\FRONTEND_STRUCTURE.md)
-- [RUNTIME_CONFIG.md](n:\PROJECTS\DTM\DTM-front\docs\contracts\RUNTIME_CONFIG.md)
+- [DATA_FLOW.md](n:\PROJECTS\DTM\DTM-front\docs\deep\DATA_FLOW.md)
+- [FRONTEND_STRUCTURE.md](n:\PROJECTS\DTM\DTM-front\docs\deep\FRONTEND_STRUCTURE.md)
+- [RUNTIME_CONFIG.md](n:\PROJECTS\DTM\DTM-front\docs\deep\RUNTIME_CONFIG.md)
 - [BACKEND_AUTH_HANDOFF.md](n:\PROJECTS\DTM\DTM-front\docs\deep\BACKEND_AUTH_HANDOFF.md)
-- [AUTH_DEPLOY.md](n:\PROJECTS\DTM\DTM-front\docs\operations\AUTH_DEPLOY.md)
-- [WORKBENCH_CONTROLS.md](n:\PROJECTS\DTM\DTM-front\docs\design\WORKBENCH_CONTROLS.md)
+- [AUTH_DEPLOY.md](n:\PROJECTS\DTM\DTM-front\docs\deep\AUTH_DEPLOY.md)
+- [WORKBENCH_CONTROLS.md](n:\PROJECTS\DTM\DTM-front\docs\deep\WORKBENCH_CONTROLS.md)
+- Полная карта: [deep/README.md](n:\PROJECTS\DTM\DTM-front\docs\deep\README.md)
 
 ## Переходный период
 
-Часть deep-доков ещё физически лежит в старых тематических папках (`architecture/`, `contracts/`, `design/`, `operations/`), но канонический маршрут чтения уже идёт через `glance/` и `deep/`.
+Старые тематические папки (`overview/`, `architecture/`, `contracts/`, `design/`, `operations/`) больше не являются основной taxonomy. Они остаются как совместимый redirect-слой, чтобы не ломать старые ссылки резко.
 
-Если документ в старой папке показывает `Redirect`, используйте новый путь. Если документ ещё не перенесён физически, его canonical место всё равно определяется через `docs/deep/README.md`.
+Если документ в старой папке показывает `Redirect`, используйте новый canonical путь.
