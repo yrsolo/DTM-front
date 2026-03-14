@@ -83,7 +83,35 @@ paths:
         tag: ${latest_tag}
         service_account_id: ${service_account_id}
 
+  /test/ops/bff/{proxy+}:
+    x-yc-apigateway-any-method:
+      parameters:
+        - name: proxy
+          in: path
+          required: true
+          schema:
+            type: string
+      x-yc-apigateway-integration:
+        type: cloud_functions
+        function_id: ${auth_test_id}
+        tag: ${latest_tag}
+        service_account_id: ${service_account_id}
+
   /ops/auth/{proxy+}:
+    x-yc-apigateway-any-method:
+      parameters:
+        - name: proxy
+          in: path
+          required: true
+          schema:
+            type: string
+      x-yc-apigateway-integration:
+        type: cloud_functions
+        function_id: ${auth_prod_id}
+        tag: ${latest_tag}
+        service_account_id: ${service_account_id}
+
+  /ops/bff/{proxy+}:
     x-yc-apigateway-any-method:
       parameters:
         - name: proxy
@@ -188,6 +216,18 @@ paths:
         type: http
         url: https://${frontend_bucket_test}.website.yandexcloud.net/index.html
 
+  /test/app:
+    x-yc-apigateway-any-method:
+      x-yc-apigateway-integration:
+        type: http
+        url: https://${frontend_bucket_test}.website.yandexcloud.net/index.html
+
+  /test/app/:
+    x-yc-apigateway-any-method:
+      x-yc-apigateway-integration:
+        type: http
+        url: https://${frontend_bucket_test}.website.yandexcloud.net/index.html
+
   /test/{path+}:
     x-yc-apigateway-any-method:
       parameters:
@@ -205,6 +245,18 @@ paths:
       x-yc-apigateway-integration:
         type: http
         url: https://${frontend_bucket_prod}.website.yandexcloud.net/
+
+  /app:
+    x-yc-apigateway-any-method:
+      x-yc-apigateway-integration:
+        type: http
+        url: https://${frontend_bucket_prod}.website.yandexcloud.net/index.html
+
+  /app/:
+    x-yc-apigateway-any-method:
+      x-yc-apigateway-integration:
+        type: http
+        url: https://${frontend_bucket_prod}.website.yandexcloud.net/index.html
 
   /{path+}:
     x-yc-apigateway-any-method:

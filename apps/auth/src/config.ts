@@ -6,8 +6,10 @@ export type AuthRuntimeConfig = {
   authBasePath: string;
   apiProxyBasePath: string;
   apiUpstreamOrigin: string;
+  peopleSyncPath: string;
   yandexClientId: string;
   yandexClientSecret: string;
+  telegramBotToken: string | null;
   sessionSigningSecret: string;
   sessionTtlSeconds: number;
   cookieName: string;
@@ -86,8 +88,10 @@ export function getAuthRuntimeConfig(): AuthRuntimeConfig {
     authBasePath,
     apiProxyBasePath,
     apiUpstreamOrigin,
+    peopleSyncPath: process.env.PEOPLE_SYNC_PATH?.trim() || "/v2/people",
     yandexClientId: readRequired(yandexClientIdVar),
     yandexClientSecret: readRequired(yandexClientSecretVar),
+    telegramBotToken: readOptional("TG_TOKEN"),
     sessionSigningSecret: readRequired("SESSION_SIGNING_SECRET"),
     sessionTtlSeconds: readNumber("SESSION_TTL_SECONDS", 60 * 60 * 12),
     cookieName: deriveContourCookieName(readRequired("COOKIE_NAME"), contour),

@@ -73,6 +73,7 @@ export function TaskDetailsDrawer(props: {
   groups?: GroupV1[];
   statusLabels?: Record<string, string>;
   milestoneTypeLabels?: Record<string, string>;
+  presentation?: "drawer" | "sheet";
   onClose: () => void;
   onExited?: () => void;
 }) {
@@ -325,12 +326,15 @@ export function TaskDetailsDrawer(props: {
   }, [isCalendarDragging]);
 
   if (!t) return null;
+  const presentation = props.presentation ?? "drawer";
+  const backdropClassName = presentation === "sheet" ? "drawerBackdrop drawerBackdropSheet" : "drawerBackdrop";
+  const drawerClassName = presentation === "sheet" ? "drawer drawerSheet" : "drawer";
 
   const drawerNode = (
-    <div className={`drawerBackdrop drawerAnim-${animState}`} onClick={props.onClose}>
+    <div className={`${backdropClassName} drawerAnim-${animState}`} onClick={props.onClose}>
       <div
         ref={drawerRef}
-        className={`drawer drawerAnim-${animState}`}
+        className={`${drawerClassName} drawerAnim-${animState}`}
         onClick={(e) => e.stopPropagation()}
         onWheel={(e) => e.stopPropagation()}
         onTouchMove={(e) => e.stopPropagation()}

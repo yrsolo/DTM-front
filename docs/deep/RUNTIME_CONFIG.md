@@ -10,6 +10,7 @@
 Source of truth:
 - `apps/web/src/config/publicConfig.ts`
 - `apps/web/src/config/runtimeContour.ts`
+- `apps/web/src/config/telegramRuntime.ts`
 - `apps/web/src/data/runtimeDefaults.ts`
 - `apps/web/src/data/useSnapshot.ts`
 
@@ -57,6 +58,11 @@ Canonical поведение:
 - public test -> contour `test`, frontend base `/test/`
 - prod -> contour `prod`, frontend base `/`
 
+Отдельный Mini App route не меняет contour model:
+- prod Mini App -> `/app`
+- test Mini App -> `/test/app`
+- browser-facing auth/data пути остаются теми же, что и для desktop shell
+
 Из contour выводятся browser-facing пути:
 - test auth -> `/test/ops/auth`
 - prod auth -> `/ops/auth`
@@ -83,6 +89,7 @@ Canonical поведение:
 ## Инварианты
 
 - runtime-конфиг читается из одного конфигурационного модуля;
+- Telegram runtime detection централизована в отдельном config module;
 - host-specific логика не расползается по UI-компонентам;
 - runtime asset paths работают и из `/`, и из `/test/`;
 - fallback на `config/public.yam` сохранён как совместимость.

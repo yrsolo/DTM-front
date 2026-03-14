@@ -5,7 +5,8 @@ import { writeAuditLog } from "../db/auditRepo";
 import { getAdminLayoutPrefs, saveAdminLayoutOrder, type AdminLayoutListKey } from "../db/adminLayoutPrefsRepo";
 import { ensureAdminRole, resolveSession } from "../middleware/auth";
 import { listPresetEntries } from "../presets/catalog";
-import { incrementSessionVersion, listUsersByStatus, setUserStatus, upsertRole } from "../db/usersRepo";
+import { incrementSessionVersion, linkUserToPerson, listUsersByStatus, setUserStatus, upsertRole } from "../db/usersRepo";
+import { computePeopleDirectoryHash, fetchPeopleDirectory, findLinkedPersonByEmail } from "../people/sync";
 import type { NormalizedRequest } from "../types";
 
 async function requireAdmin(req: NormalizedRequest) {
@@ -72,6 +73,10 @@ export async function listAdminData(req: NormalizedRequest) {
     yandexUid: user.yandexUid,
     email: user.email,
     displayName: user.displayName,
+    personId: user.personId,
+    personName: user.personName,
+    telegramId: user.telegramId,
+    telegramUsername: user.telegramUsername,
     status: user.status,
     role: user.role,
     requestedAt: latestRequestByUserId.get(user.id) ?? user.createdAt,
@@ -244,4 +249,42 @@ export async function removeAllowlistEmailHandler(req: NormalizedRequest) {
     payloadJson: JSON.stringify({ email }),
   });
   return json(200, { ok: true });
+}
+
+export async function refreshDesignersDirectoryHandler(req: NormalizedRequest) {
+  const auth = await requireAdmin(req);
+  if (auth.error) return auth.error;
+
+  const users = await listUsersByStatus();
+  const directory = await fetchPeopleDirectory();
+  const directoryHash = computePeopleDirectoryHash(directory);
+  let linked = 0;
+  let cleared = 0;
+
+  for (const user of users) {
+    const nextLink = findLinkedPersonByEmail(directory, user.email);
+    await linkUserToPerson(user.id, nextLink);
+    if (nextLink) linked += 1;
+    else cleared += 1;
+  }
+
+  await writeAuditLog({
+    actorUserId: auth.user.id,
+    targetUserId: null,
+    action: "admin.refresh_designers_directory",
+    payloadJson: JSON.stringify({
+      usersProcessed: users.length,
+      linked,
+      cleared,
+      directoryHash,
+    }),
+  });
+
+  return json(200, {
+    ok: true,
+    usersProcessed: users.length,
+    linked,
+    cleared,
+    directoryHash,
+  });
 }

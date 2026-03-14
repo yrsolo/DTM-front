@@ -20,6 +20,10 @@ export type AuthUser = {
   email: string | null;
   displayName: string | null;
   avatarUrl: string | null;
+  personId: string | null;
+  personName: string | null;
+  telegramId: string | null;
+  telegramUsername: string | null;
   status: UserStatus;
   role: UserRole;
   sessionVersion: number;
@@ -58,4 +62,12 @@ export type YandexProfile = {
   login?: string;
   default_avatar_id?: string;
   is_avatar_empty?: boolean;
+};
+
+export type LinkedPersonRecord = {
+  personId: string;
+  personName: string | null;
+  email: string | null;
+  telegramId: string | null;
+  telegramUsername: string | null;
 };

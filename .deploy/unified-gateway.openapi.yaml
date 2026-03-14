@@ -21,7 +21,35 @@ paths:
         tag: $latest
         service_account_id: aje1kqd422vq2vefkbbl
 
+  /test/ops/bff/{proxy+}:
+    x-yc-apigateway-any-method:
+      parameters:
+        - name: proxy
+          in: path
+          required: true
+          schema:
+            type: string
+      x-yc-apigateway-integration:
+        type: cloud_functions
+        function_id: d4ebtgp4dhnbu1476gfu
+        tag: $latest
+        service_account_id: aje1kqd422vq2vefkbbl
+
   /ops/auth/{proxy+}:
+    x-yc-apigateway-any-method:
+      parameters:
+        - name: proxy
+          in: path
+          required: true
+          schema:
+            type: string
+      x-yc-apigateway-integration:
+        type: cloud_functions
+        function_id: d4ecpcsedh5k7l81d3lp
+        tag: $latest
+        service_account_id: aje1kqd422vq2vefkbbl
+
+  /ops/bff/{proxy+}:
     x-yc-apigateway-any-method:
       parameters:
         - name: proxy
@@ -126,6 +154,18 @@ paths:
         type: http
         url: https://dtm-front-test.website.yandexcloud.net/index.html
 
+  /test/app:
+    x-yc-apigateway-any-method:
+      x-yc-apigateway-integration:
+        type: http
+        url: https://dtm-front-test.website.yandexcloud.net/index.html
+
+  /test/app/:
+    x-yc-apigateway-any-method:
+      x-yc-apigateway-integration:
+        type: http
+        url: https://dtm-front-test.website.yandexcloud.net/index.html
+
   /test/{path+}:
     x-yc-apigateway-any-method:
       parameters:
@@ -143,6 +183,18 @@ paths:
       x-yc-apigateway-integration:
         type: http
         url: https://dtm-front.website.yandexcloud.net/
+
+  /app:
+    x-yc-apigateway-any-method:
+      x-yc-apigateway-integration:
+        type: http
+        url: https://dtm-front.website.yandexcloud.net/index.html
+
+  /app/:
+    x-yc-apigateway-any-method:
+      x-yc-apigateway-integration:
+        type: http
+        url: https://dtm-front.website.yandexcloud.net/index.html
 
   /{path+}:
     x-yc-apigateway-any-method:

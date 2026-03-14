@@ -130,6 +130,10 @@ async function main() {
         new Column("email", optional(Types.UTF8)),
         new Column("display_name", optional(Types.UTF8)),
         new Column("avatar_url", optional(Types.UTF8)),
+        new Column("person_id", optional(Types.UTF8)),
+        new Column("person_name", optional(Types.UTF8)),
+        new Column("telegram_id", optional(Types.UTF8)),
+        new Column("telegram_username", optional(Types.UTF8)),
         new Column("status", Types.UTF8),
         new Column("role", Types.UTF8),
         new Column("session_version", Types.INT32),
@@ -185,7 +189,13 @@ async function main() {
     await ensureTable(driver, "access_requests", accessRequests);
     await ensureTable(driver, "audit_log", auditLog);
     await ensureTable(driver, "admin_layout_prefs", adminLayoutPrefs);
-    await ensureOptionalColumns(driver, "users", [new Column("avatar_url", optional(Types.UTF8))]);
+    await ensureOptionalColumns(driver, "users", [
+      new Column("avatar_url", optional(Types.UTF8)),
+      new Column("person_id", optional(Types.UTF8)),
+      new Column("person_name", optional(Types.UTF8)),
+      new Column("telegram_id", optional(Types.UTF8)),
+      new Column("telegram_username", optional(Types.UTF8)),
+    ]);
 
     console.log(`Auth YDB migration completed for ${target}`);
   } finally {

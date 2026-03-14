@@ -102,6 +102,11 @@ a {
   overflow: visible;
 }
 
+.container.miniAppContainer {
+  padding-top: 12px;
+  height: 100dvh;
+}
+
 .container > .card {
   height: 100%;
 }
@@ -2703,8 +2708,375 @@ button:hover {
     margin-left: 0;
   }
 
-  .authMenuPopover {
-    right: -8px;
-    min-width: min(320px, calc(100vw - 24px));
+.authMenuPopover {
+  right: -8px;
+  min-width: min(320px, calc(100vw - 24px));
+}
+}
+
+.miniAppShell {
+  height: calc(100vh - 72px);
+  min-height: calc(100vh - 72px);
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 68px;
+  overflow: hidden;
+}
+
+.miniAppMain {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow-y: auto;
+  padding-right: 2px;
+}
+
+.miniAppSection {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.miniAppControls,
+.miniAppQuickFilters,
+.miniAppSegmented,
+.miniAppActionRow {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.miniAppChip,
+.miniAppButton,
+.miniAppNavButton {
+  border: 1px solid rgba(180, 196, 255, 0.18);
+  background: rgba(16, 23, 43, 0.92);
+  color: #eef4ff;
+  border-radius: 14px;
+  padding: 10px 14px;
+  font: inherit;
+}
+
+.miniAppButtonGhost,
+.miniAppNavButton {
+  background: rgba(16, 23, 43, 0.68);
+}
+
+.miniAppChip.isActive,
+.miniAppNavButton.isActive {
+  background: linear-gradient(180deg, rgba(71, 116, 255, 0.42), rgba(37, 70, 154, 0.82));
+  border-color: rgba(158, 188, 255, 0.5);
+}
+
+.miniAppTaskList,
+.miniAppAgendaItems {
+  display: grid;
+  gap: 10px;
+}
+
+.miniAppTaskGroups,
+.miniAppTaskGroup {
+  display: grid;
+  gap: 10px;
+}
+
+.miniAppTaskGroup {
+  border: 1px solid rgba(180, 196, 255, 0.16);
+  border-radius: 18px;
+  background: linear-gradient(180deg, rgba(12, 18, 35, 0.96), rgba(19, 23, 44, 0.94));
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.18);
+  overflow: hidden;
+}
+
+.miniAppTaskGroupToggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  border: 0;
+  background: rgba(16, 23, 43, 0.78);
+  color: #eef4ff;
+  padding: 12px 14px;
+  font: inherit;
+  text-align: left;
+  border-bottom: 1px solid rgba(180, 196, 255, 0.12);
+}
+
+.miniAppTaskGroupToggle.isOpen {
+  background: rgba(22, 31, 58, 0.92);
+}
+
+.miniAppTaskGroupLabel {
+  font-weight: 700;
+}
+
+.miniAppTaskGroupCount {
+  font-size: 12px;
+  border-radius: 999px;
+  padding: 4px 8px;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.miniAppTaskCard,
+.miniAppAgendaItem,
+.miniAppProfileCard {
+  border: 1px solid rgba(180, 196, 255, 0.16);
+  background: linear-gradient(180deg, rgba(12, 18, 35, 0.96), rgba(19, 23, 44, 0.94));
+  color: #eef4ff;
+  border-radius: 18px;
+  padding: 14px;
+  text-align: left;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.18);
+}
+
+.miniAppTaskCardTop,
+.miniAppAgendaItemTop {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.miniAppTaskTitle {
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.miniAppTaskMeta,
+.miniAppProfileMeta {
+  margin-top: 8px;
+  color: rgba(225, 234, 255, 0.76);
+  line-height: 1.45;
+}
+
+.miniAppTaskDue,
+.miniAppAgendaBadge,
+.miniAppTaskStatus {
+  font-size: 12px;
+  border-radius: 999px;
+  padding: 4px 8px;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.miniAppTaskCardCompact {
+  padding: 10px 12px;
+  border-radius: 14px;
+  box-shadow: none;
+}
+
+.miniAppTaskRowMain {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+}
+
+.miniAppTaskRowFields {
+  min-width: 0;
+  font-size: 13px;
+  line-height: 1.35;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: rgba(238, 244, 255, 0.9);
+}
+
+.miniAppTaskDueBubble {
+  font-size: 12px;
+  line-height: 1.2;
+  white-space: nowrap;
+  border-radius: 999px;
+  padding: 6px 10px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #eef4ff;
+}
+
+.miniAppTaskGroup .miniAppTaskList {
+  padding: 12px;
+}
+
+.miniAppAgendaBadge.isOverdue {
+  background: rgba(255, 116, 116, 0.18);
+}
+
+.miniAppAgendaBadge.isToday {
+  background: rgba(114, 255, 203, 0.18);
+}
+
+.miniAppProfileName {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.miniAppBottomNav {
+  position: fixed;
+  left: 12px;
+  right: 12px;
+  bottom: 12px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  padding: 10px;
+  border-radius: 20px;
+  background: rgba(8, 12, 24, 0.92);
+  border: 1px solid rgba(180, 196, 255, 0.16);
+  backdrop-filter: blur(18px);
+  z-index: 30;
+}
+
+.miniAppNotice,
+.miniAppEmpty {
+  color: rgba(225, 234, 255, 0.74);
+  padding: 12px 14px;
+  border-radius: 16px;
+  border: 1px dashed rgba(180, 196, 255, 0.18);
+}
+
+.miniAppAgendaGroup {
+  display: grid;
+  gap: 8px;
+}
+
+.miniAppAgendaTitle {
+  margin: 4px 0 0;
+  font-size: 15px;
+  color: rgba(225, 234, 255, 0.76);
+}
+
+.miniAppCalendar {
+  display: grid;
+  gap: 10px;
+  flex: 1 1 auto;
+  min-height: 0;
+  padding-bottom: 8px;
+  overflow-y: auto;
+}
+
+.miniAppCalendarDay {
+  display: grid;
+  gap: 8px;
+  border-bottom: 1px solid rgba(180, 196, 255, 0.12);
+  padding: 10px 2px 12px;
+}
+
+.miniAppCalendarDay.isWeekend {
+  background: rgba(109, 92, 184, 0.08);
+}
+
+.miniAppCalendarDay.isHoliday {
+  background: rgba(224, 106, 139, 0.1);
+}
+
+.miniAppCalendarDay.isToday {
+  border-bottom-color: rgba(117, 201, 255, 0.42);
+  box-shadow: inset 3px 0 0 rgba(117, 201, 255, 0.42);
+}
+
+.miniAppCalendarDayHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 0 4px;
+}
+
+.miniAppCalendarDayTitle {
+  font-size: 14px;
+  font-weight: 700;
+  color: rgba(238, 244, 255, 0.92);
+  text-transform: capitalize;
+}
+
+.miniAppCalendarDayCount {
+  font-size: 11px;
+  color: rgba(238, 244, 255, 0.56);
+}
+
+.miniAppCalendarDayBody {
+  display: grid;
+  gap: 6px;
+}
+
+.miniAppCalendarDayEmpty {
+  min-height: 12px;
+}
+
+.miniAppMilestoneRow {
+  display: grid;
+  gap: 2px;
+  width: 100%;
+  border: 0;
+  border-left-width: 4px;
+  border-left-style: solid;
+  border-radius: 0;
+  background: transparent;
+  color: #eef4ff;
+  text-align: left;
+  padding: 4px 8px;
+  font: inherit;
+}
+
+.miniAppMilestoneTitle {
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.25;
+}
+
+.miniAppMilestoneMeta {
+  font-size: 12px;
+  line-height: 1.35;
+  color: rgba(225, 234, 255, 0.76);
+}
+
+.miniAppTimelineSection {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.miniAppTimelineToolbar {
+  display: flex;
+  justify-content: flex-end;
+  flex: 0 0 auto;
+  padding: 4px 0 2px;
+}
+
+.miniAppMilestoneRow.isStoryboard { border-left-color: var(--key-drawer-ms-storyboard, #5ca9ff); }
+.miniAppMilestoneRow.isAnimatic { border-left-color: var(--key-drawer-ms-animatic, #7ea5ff); }
+.miniAppMilestoneRow.isFeedback { border-left-color: var(--key-drawer-ms-feedback, #de83ff); }
+.miniAppMilestoneRow.isPrefinal { border-left-color: var(--key-drawer-ms-prefinal, #cc8d41); }
+.miniAppMilestoneRow.isFinal { border-left-color: var(--key-drawer-ms-final, #33a76b); }
+.miniAppMilestoneRow.isMaster { border-left-color: var(--key-drawer-ms-master, #7de3c6); }
+.miniAppMilestoneRow.isOnair { border-left-color: var(--key-drawer-ms-onair, #ff7d9d); }
+.miniAppMilestoneRow.isStart { border-left-color: var(--key-drawer-ms-start, #ffe17f); }
+.miniAppMilestoneRow.isDefault { border-left-color: var(--key-drawer-ms-default, #84c2ff); }
+
+.drawerBackdropSheet {
+  align-items: flex-end;
+}
+
+.drawerSheet {
+  width: min(100%, 720px);
+  max-width: 100%;
+  height: min(92vh, 920px);
+  border-radius: 24px 24px 0 0;
+  margin: 0 auto;
+}
+
+@media (min-width: 901px) {
+  .miniAppShell {
+    max-width: 760px;
+    margin: 0 auto;
+  }
+
+  .miniAppBottomNav {
+    left: 50%;
+    right: auto;
+    width: min(720px, calc(100vw - 24px));
+    transform: translateX(-50%);
   }
 }

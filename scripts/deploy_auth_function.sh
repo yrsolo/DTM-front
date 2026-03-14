@@ -13,7 +13,7 @@ read_dotenv_value() {
   printf '%s' "${line#*=}"
 }
 
-for env_name in YC_SA_JSON_CREDENTIALS AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY; do
+for env_name in YC_SA_JSON_CREDENTIALS AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY TG_TOKEN PEOPLE_SYNC_PATH; do
   if [[ -z "${!env_name:-}" ]]; then
     dotenv_value="$(read_dotenv_value "$env_name")"
     if [[ -n "$dotenv_value" ]]; then
@@ -94,6 +94,8 @@ else
   oauth_client_secret_env_name="YANDEX_CLIENT_SECRET_PROD"
 fi
 
+people_sync_path="${PEOPLE_SYNC_PATH:-/v2/people}"
+
 oauth_client_id_value="${!oauth_client_id_env_name:-}"
 oauth_client_secret_value="${!oauth_client_secret_env_name:-}"
 
@@ -116,6 +118,8 @@ if [[ "$DRY_RUN" == "true" ]]; then
   echo "oauth_client_id_env: $oauth_client_id_env_name"
   echo "oauth_client_secret_env: $oauth_client_secret_env_name"
   echo "browser_auth_proxy_secret: lockbox:BROWSER_AUTH_PROXY_SECRET"
+  echo "telegram_bot_token: ${TG_TOKEN:+provided}"
+  echo "people_sync_path: $people_sync_path"
   echo "preset_bucket: dtm-presets"
   echo "preset_public_base_url: https://dtm-presets.website.yandexcloud.net"
   exit 0
@@ -171,6 +175,7 @@ env_args=(
   --environment "AUTH_BASE_PATH=$auth_base_path"
   --environment "API_PROXY_BASE_PATH=$api_proxy_base_path"
   --environment "API_UPSTREAM_ORIGIN=$api_upstream_origin"
+  --environment "PEOPLE_SYNC_PATH=$people_sync_path"
   --environment "YDB_ENDPOINT=$ydb_endpoint"
   --environment "YDB_DATABASE=$ydb_database"
   --environment "YDB_METADATA_CREDENTIALS=1"
@@ -184,6 +189,12 @@ if [[ -n "${AWS_ACCESS_KEY_ID:-}" && -n "${AWS_SECRET_ACCESS_KEY:-}" ]]; then
   env_args+=(
     --environment "AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID"
     --environment "AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY"
+  )
+fi
+
+if [[ -n "${TG_TOKEN:-}" ]]; then
+  env_args+=(
+    --environment "TG_TOKEN=$TG_TOKEN"
   )
 fi
 

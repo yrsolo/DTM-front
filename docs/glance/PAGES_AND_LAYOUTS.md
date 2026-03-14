@@ -9,6 +9,7 @@
 
 Source of truth в коде:
 - [TimelinePage.tsx](../../apps/web/src/pages/TimelinePage.tsx)
+- [MiniAppPage.tsx](../../apps/web/src/pages/MiniAppPage.tsx)
 - [UnifiedTimeline.tsx](../../apps/web/src/gantt/UnifiedTimeline.tsx)
 - [DesignersBoard.tsx](../../apps/web/src/components/DesignersBoard.tsx)
 - [TaskDetailsDrawer.tsx](../../apps/web/src/components/TaskDetailsDrawer.tsx)
@@ -83,6 +84,41 @@ Source of truth в коде:
 
 Tooltip может быть шире карточки, чтобы milestone labels помещались в одну-две строки.
 
+## Страница `Mini App`
+
+### Назначение слоя
+
+Дать mobile-first режим текущего frontend без второго SPA. Этот слой живёт на отдельном route `/app`, но использует тот же snapshot, ту же auth session и тот же detail layer.
+
+### Основные визуальные объекты
+
+- нижняя mobile navigation;
+- список задач в одну колонку;
+- compact agenda/timeline по дедлайнам;
+- профиль/доступ;
+- полноэкранный task details sheet.
+
+### Композиция
+
+- Mini App не пытается повторить desktop SVG timeline;
+- Mini App не показывает completed (`done`) tasks;
+- для admin по умолчанию показываются все активные задачи;
+- для обычного пользователя по умолчанию показываются только его активные задачи;
+- задача в Mini App рендерится как компактная однострочная карточка с bubble даты финала справа;
+- в `Задачах` есть grouping buttons `Дизайнер`, `Бренд`, `Шоу`, а сами группы раскрываются и скрываются как секции;
+- повторный тап по уже активной grouping button массово схлопывает или раскрывает все текущие секции;
+- поле, по которому сейчас сделана группировка, не дублируется внутри карточки задачи;
+- вкладка `Таймлайн` рендерится как вертикальная календарная сетка по дням;
+- пустые дни остаются видимыми, а выходные и праздники выделяются отдельно;
+- внутри дня milestones показываются строками `Майлстоун | Бренд | Формат | Шоу` со стандартным цветовым кодированием по milestone tone;
+- верхняя action button `Сегодня` остаётся постоянно доступной и прокручивает календарь к текущему дню;
+- `TaskDetailsDrawer` переиспользуется как mobile sheet, а не как вторая отдельная карточка задачи.
+
+### Переходы
+
+- если admin route открыт из Mini App profile, кнопка закрытия возвращает пользователя обратно в Mini App;
+- если admin route открыт как обычная desktop/admin поверхность, кнопка закрытия возвращает на основной timeline.
+
 ## Источники управления
 
 Страницы используют общие runtime controls, но для страницы `Задачи` выделена отдельная вкладка workbench `Tasks page`.
@@ -91,6 +127,7 @@ Tooltip может быть шире карточки, чтобы milestone labe
 
 - `Задачи` остаются основным аналитическим экраном.
 - `Дизайнеры` — альтернативный обзор по исполнителям.
+- `Mini App` — мобильный режим того же frontend для Telegram/webview сценариев.
 - Обе страницы работают на одном и том же snapshot и одном app shell.
 
 ## Подробнее

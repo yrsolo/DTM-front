@@ -53,12 +53,16 @@ export function buildMePayload(user: AuthUser | null) {
   return {
     authenticated: Boolean(user),
     accessMode: getAccessMode(user),
-        user: user
+    user: user
       ? {
           id: user.id,
           email: user.email,
           displayName: user.displayName,
           avatarUrl: user.avatarUrl,
+          personId: user.personId,
+          personName: user.personName,
+          telegramId: user.telegramId,
+          telegramUsername: user.telegramUsername,
           role: user.role,
           status: user.status,
         }

@@ -1,15 +1,30 @@
 import React from "react";
 
 import { getAdminRoute, getAuthRequestBase } from "../config/runtimeContour";
+import { getTelegramRuntimeInfo } from "../config/telegramRuntime";
 
 export type AuthSessionUser = {
   id: string;
   email: string | null;
   displayName: string | null;
   avatarUrl?: string | null;
+  personId?: string | null;
+  personName?: string | null;
+  telegramId?: string | null;
+  telegramUsername?: string | null;
   role: "admin" | "viewer";
   status: "pending" | "approved" | "blocked";
 };
+
+export type TelegramBootstrapReason =
+  | "telegram_person_not_found"
+  | "telegram_person_missing_email"
+  | "telegram_user_not_found_by_email"
+  | "telegram_user_not_linked"
+  | "invalid_init_data"
+  | "unknown";
+
+export type TelegramBootstrapState = "idle" | "linking" | "linked" | "unlinked" | "error";
 
 export type AuthSessionState = {
   loading: boolean;
@@ -17,6 +32,8 @@ export type AuthSessionState = {
   accessMode: "masked" | "full";
   user: AuthSessionUser | null;
   available: boolean;
+  telegramBootstrap: TelegramBootstrapState;
+  telegramBootstrapReason: TelegramBootstrapReason | null;
 };
 
 const DEFAULT_STATE: AuthSessionState = {
@@ -25,6 +42,8 @@ const DEFAULT_STATE: AuthSessionState = {
   accessMode: "masked",
   user: null,
   available: true,
+  telegramBootstrap: "idle",
+  telegramBootstrapReason: null,
 };
 
 function buildAuthUrl(path: string): string {
@@ -45,32 +64,113 @@ export function useAuthSession() {
         cache: "no-store",
       });
       if (!res.ok) {
-        setState({
+        const nextState: AuthSessionState = {
           loading: false,
           authenticated: false,
           accessMode: "masked",
           user: null,
           available: true,
-        });
-        return;
+          telegramBootstrap: "idle",
+          telegramBootstrapReason: null,
+        };
+        setState((prev) => ({
+          ...prev,
+          ...nextState,
+        }));
+        return nextState;
       }
 
       const payload = await res.json();
-      setState({
+      const nextState: AuthSessionState = {
         loading: false,
         authenticated: Boolean(payload?.authenticated),
         accessMode: payload?.accessMode === "full" ? "full" : "masked",
         user: payload?.user ?? null,
         available: true,
-      });
+        telegramBootstrap: payload?.authenticated ? "linked" : "idle",
+        telegramBootstrapReason: null,
+      };
+      setState((prev) => ({
+        ...prev,
+        ...nextState,
+      }));
+      return nextState;
     } catch {
-      setState(DEFAULT_STATE);
+      setState((prev) => ({ ...prev, ...DEFAULT_STATE }));
+      return DEFAULT_STATE;
     }
   }, []);
 
-  React.useEffect(() => {
-    void reload();
+  const startTelegramSession = React.useCallback(async () => {
+    const runtime = getTelegramRuntimeInfo();
+    if (!runtime.isTelegramMiniApp || !runtime.initData) return { ok: false as const, reason: "unknown" as const };
+
+    setState((prev) => ({
+      ...prev,
+      telegramBootstrap: "linking",
+      telegramBootstrapReason: null,
+    }));
+
+    try {
+      const res = await fetch(buildAuthUrl("/telegram/session"), {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "content-type": "application/json",
+          accept: "application/json",
+        },
+        body: JSON.stringify({ initData: runtime.initData }),
+      });
+      if (!res.ok) {
+        let reason: TelegramBootstrapReason = "unknown";
+        try {
+          const payload = await res.json();
+          if (typeof payload?.reason === "string") {
+            reason = payload.reason as TelegramBootstrapReason;
+          }
+        } catch {
+          // ignore malformed error payload
+        }
+        setState((prev) => ({
+          ...prev,
+          telegramBootstrap: reason === "unknown" ? "error" : "unlinked",
+          telegramBootstrapReason: reason,
+        }));
+        return { ok: false as const, reason };
+      }
+      await reload();
+      setState((prev) => ({
+        ...prev,
+        telegramBootstrap: "linked",
+        telegramBootstrapReason: null,
+      }));
+      return { ok: true as const };
+    } catch {
+      setState((prev) => ({
+        ...prev,
+        telegramBootstrap: "error",
+        telegramBootstrapReason: "unknown",
+      }));
+      return { ok: false as const, reason: "unknown" as const };
+    }
   }, [reload]);
+
+  React.useEffect(() => {
+    void (async () => {
+      const nextState = await reload();
+      const runtime = getTelegramRuntimeInfo();
+      if (!runtime.isTelegramMiniApp) return;
+      if (nextState.authenticated) {
+        setState((prev) => ({
+          ...prev,
+          telegramBootstrap: "linked",
+          telegramBootstrapReason: null,
+        }));
+        return;
+      }
+      await startTelegramSession();
+    })();
+  }, [reload, startTelegramSession]);
 
   const loginHref = React.useMemo(() => {
     const returnTo =
@@ -151,5 +251,6 @@ export function useAuthSession() {
     startLogin,
     adminHref,
     logout,
+    startTelegramSession,
   };
 }

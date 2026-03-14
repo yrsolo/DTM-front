@@ -1,6 +1,8 @@
 ﻿# NOW - tasks
 
 ## Active
+- [x] CAM-TELEGRAM-MINIAPP-V1 - auth linkage, `/app` shell, client-side mine/all selectors, mobile task/agenda/profile UX, docs refresh.
+- [x] CAM-TELEGRAM-MINIAPP-V1 follow-up - Telegram linkage recovery fixed: auth auto-heal via `telegramId -> yandexEmail`, explicit Mini App unlinked state, docs refreshed.
 - [ ] CAM-API-V2-LOADING-SWR-CACHE - finalize manual evidence pack.
 - [x] CAM-SCHEMA-CONTRACT-GOVERNANCE - schema/types sync + validate:schema + guarantees.
 - [ ] CAM-DOCS-CANONICAL-REWRITE - rebuild root README and docs tree around current frontend state.
@@ -20,7 +22,7 @@
   - screenshot of localStorage keys
   - screenshot/log snippet for timeout/retry
 
-See: `docs/operations/TROUBLESHOOTING.md`
+See: `docs/deep/TROUBLESHOOTING.md`
 
 ## Session 2026-03-07
 - [x] Milestone tone aliases: added resilient RU/EN mapping for card/calendar milestone colors using active API milestone names (work/pre_done/wait only).

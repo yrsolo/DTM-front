@@ -593,8 +593,9 @@ export function Layout(props: { children: React.ReactNode }) {
   }, [layoutVarsStyle]);
 
   const isAdminRoute = location.pathname === "/admin";
+  const isMiniAppRoute = location.pathname === "/app";
   const appShellClassName = isAdminRoute ? "appShell adminShell" : "appShell";
-  const containerClassName = isAdminRoute ? "container adminContainer" : "container";
+  const containerClassName = `${isAdminRoute ? "container adminContainer" : "container"}${isMiniAppRoute ? " miniAppContainer" : ""}`;
 
   return (
     <LayoutContext.Provider
@@ -633,24 +634,26 @@ export function Layout(props: { children: React.ReactNode }) {
       }}
     >
       <div className={appShellClassName} style={layoutVarsStyle}>
-        <div className="topbar">
-          <div className="nav">
-            <div className="brand">
-              <button
-                type="button"
-                className="brandIconButton"
-                onClick={startLogoIntro}
-                aria-label="Play logo intro"
-              >
-                <img className="brandIcon" src={brandIconUrl} alt="" aria-hidden="true" />
-              </button>
-              <div className="brandText">
-                <strong>{ui.appTitle}</strong>
-                <span className="muted">{ui.appSubtitle}</span>
+        {!isMiniAppRoute ? (
+          <div className="topbar">
+            <div className="nav">
+              <div className="brand">
+                <button
+                  type="button"
+                  className="brandIconButton"
+                  onClick={startLogoIntro}
+                  aria-label="Play logo intro"
+                >
+                  <img className="brandIcon" src={brandIconUrl} alt="" aria-hidden="true" />
+                </button>
+                <div className="brandText">
+                  <strong>{ui.appTitle}</strong>
+                  <span className="muted">{ui.appSubtitle}</span>
+                </div>
               </div>
             </div>
           </div>
-        </div>
+        ) : null}
         <div className={containerClassName}>{props.children}</div>
         {introState !== "idle" ? (
           <div

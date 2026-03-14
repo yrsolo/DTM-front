@@ -6,15 +6,20 @@ import { ensureOpenAccessRequest } from "../db/accessRequestsRepo";
 import { writeAuditLog } from "../db/auditRepo";
 import {
   createUserFromProfile,
+  getUserByEmail,
   getUserById,
+  getUserByTelegramId,
   getUserByYandexUid,
+  linkUserToPerson,
   setUserStatus,
   syncUserProfile,
   upsertRole,
 } from "../db/usersRepo";
 import { buildMePayload, getAccessMode, isBootstrapAdmin, resolveSession } from "../middleware/auth";
+import { fetchPeopleDirectory, findLinkedPersonByTelegramId, resolveLinkedPersonByEmail } from "../people/sync";
 import { clearSessionCookie, issueSessionCookie } from "../session/cookieSession";
 import { clearOAuthStateCookie, createOAuthStateCookie, readOAuthState } from "../session/oauthState";
+import { verifyTelegramInitData } from "../telegram/initData";
 import type { NormalizedRequest } from "../types";
 
 const ALLOWED_RETURN_TO_HOSTS = new Set([
@@ -82,6 +87,29 @@ function buildPopupClosePage(returnTo: string): string {
 </html>`;
 }
 
+async function syncUserLinkageByEmail(userId: string, email: string | null) {
+  try {
+    const linkedPerson = await resolveLinkedPersonByEmail(email);
+    await linkUserToPerson(userId, linkedPerson);
+  } catch {
+    // Linkage sync is best-effort on login. Admin refresh provides explicit recovery.
+  }
+}
+
+function buildSessionCookieForUser(user: NonNullable<Awaited<ReturnType<typeof getUserById>>>) {
+  const cfg = getAuthRuntimeConfig();
+  const now = Math.floor(Date.now() / 1000);
+  return issueSessionCookie({
+    userId: user.id,
+    yandexUid: user.yandexUid,
+    role: user.role,
+    status: user.status,
+    sv: user.sessionVersion,
+    iat: now,
+    exp: now + cfg.sessionTtlSeconds,
+  });
+}
+
 export async function callback(req: NormalizedRequest) {
   const code = req.query.get("code");
   const state = req.query.get("state");
@@ -133,6 +161,12 @@ export async function callback(req: NormalizedRequest) {
     return badRequest("Unable to create or load user");
   }
 
+  await syncUserLinkageByEmail(user.id, user.email);
+  user = await getUserById(user.id);
+  if (!user) {
+    return badRequest("User disappeared after linkage sync");
+  }
+
   await writeAuditLog({
     actorUserId: user.id,
     targetUserId: user.id,
@@ -144,17 +178,7 @@ export async function callback(req: NormalizedRequest) {
     }),
   });
 
-  const cfg = getAuthRuntimeConfig();
-  const now = Math.floor(Date.now() / 1000);
-  const sessionCookie = issueSessionCookie({
-    userId: user.id,
-    yandexUid: user.yandexUid,
-    role: user.role,
-    status: user.status,
-    sv: user.sessionVersion,
-    iat: now,
-    exp: now + cfg.sessionTtlSeconds,
-  });
+  const sessionCookie = buildSessionCookieForUser(user);
 
   const response = oauthState.popup
     ? html(200, buildPopupClosePage(oauthState.returnTo))
@@ -174,4 +198,78 @@ export async function me(req: NormalizedRequest) {
 
 export async function logout() {
   return appendSetCookie(json(200, { ok: true }), clearSessionCookie());
+}
+
+function telegramSessionError(
+  status: number,
+  reason:
+    | "invalid_init_data"
+    | "telegram_person_not_found"
+    | "telegram_person_missing_email"
+    | "telegram_user_not_found_by_email"
+    | "telegram_user_not_linked",
+  telegramUserId: string | null
+) {
+  return json(status, {
+    ok: false,
+    reason,
+    telegramUserId,
+  });
+}
+
+export async function telegramSession(req: NormalizedRequest) {
+  let initData = "";
+  try {
+    const parsed = req.bodyText ? JSON.parse(req.bodyText) as Record<string, unknown> : {};
+    initData = typeof parsed.initData === "string" ? parsed.initData : "";
+  } catch {
+    return badRequest("Invalid JSON body");
+  }
+
+  if (!initData) {
+    return badRequest("initData is required");
+  }
+
+  let telegramUser;
+  try {
+    telegramUser = verifyTelegramInitData(initData);
+  } catch {
+    return telegramSessionError(400, "invalid_init_data", null);
+  }
+  if (!telegramUser) {
+    return telegramSessionError(400, "invalid_init_data", null);
+  }
+
+  let user = await getUserByTelegramId(telegramUser.id);
+  if (!user) {
+    const directory = await fetchPeopleDirectory();
+    const linkedPerson = findLinkedPersonByTelegramId(directory, telegramUser.id);
+    if (!linkedPerson) {
+      return telegramSessionError(404, "telegram_person_not_found", telegramUser.id);
+    }
+    if (!linkedPerson.email) {
+      return telegramSessionError(409, "telegram_person_missing_email", telegramUser.id);
+    }
+
+    user = await getUserByEmail(linkedPerson.email);
+    if (!user) {
+      return telegramSessionError(404, "telegram_user_not_found_by_email", telegramUser.id);
+    }
+
+    await linkUserToPerson(user.id, linkedPerson);
+    user = await getUserById(user.id);
+  }
+
+  if (!user) {
+    return telegramSessionError(404, "telegram_user_not_linked", telegramUser.id);
+  }
+
+  const sessionCookie = buildSessionCookieForUser(user);
+  user = await getUserById(user.id);
+  const result = json(200, {
+    ok: true,
+    accessMode: getAccessMode(user),
+    user: buildMePayload(user).user,
+  });
+  return appendSetCookie(result, sessionCookie);
 }
