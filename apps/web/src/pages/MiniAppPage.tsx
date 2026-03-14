@@ -75,7 +75,8 @@ export function MiniAppPage() {
           if (typeof window !== "undefined") {
             const returnTo = `${window.location.pathname}${window.location.search}${window.location.hash}`;
             window.sessionStorage.setItem(MINI_APP_ADMIN_RETURN_KEY, returnTo);
-            window.location.assign(authSession.adminHref);
+            window.localStorage.setItem(MINI_APP_ADMIN_RETURN_KEY, returnTo);
+            window.location.assign(`${authSession.adminHref}?mini_app=1`);
           }
         }}
       />

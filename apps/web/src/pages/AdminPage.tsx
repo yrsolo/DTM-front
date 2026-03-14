@@ -87,10 +87,21 @@ function buildAuthUrl(path: string): string {
 function goToTimeline(): void {
   if (typeof window === "undefined") return;
   try {
-    const returnTo = window.sessionStorage.getItem(MINI_APP_ADMIN_RETURN_KEY)?.trim() || "";
+    const url = new URL(window.location.href);
+    const miniAppRequested = url.searchParams.get("mini_app") === "1";
+    const returnTo =
+      window.sessionStorage.getItem(MINI_APP_ADMIN_RETURN_KEY)?.trim() ||
+      window.localStorage.getItem(MINI_APP_ADMIN_RETURN_KEY)?.trim() ||
+      "";
     if (returnTo === "/app" || returnTo.startsWith("/app?") || returnTo === "/test/app" || returnTo.startsWith("/test/app?")) {
       window.sessionStorage.removeItem(MINI_APP_ADMIN_RETURN_KEY);
+      window.localStorage.removeItem(MINI_APP_ADMIN_RETURN_KEY);
       window.location.assign(returnTo);
+      return;
+    }
+    if (miniAppRequested) {
+      const fallbackMiniAppRoute = window.location.pathname.startsWith("/test/") ? "/test/app" : "/app";
+      window.location.assign(fallbackMiniAppRoute);
       return;
     }
   } catch {
