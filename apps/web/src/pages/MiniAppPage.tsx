@@ -58,14 +58,12 @@ export function MiniAppPage() {
     overdue: stats.overdue,
     week: stats.week,
   };
-  const agendaGroups = groupAgendaItemsByDay(
-    selectAgendaItemsFromTasks(filteredTasks, snapshot)
-  );
+  const agendaGroups = groupAgendaItemsByDay(selectAgendaItemsFromTasks(filteredTasks, snapshot));
   const selectedTask = selectTaskById(snapshot, selectedTaskId);
 
   let body: React.ReactNode;
   if (snapshotState.isLoading && !snapshot) {
-    body = <div className="miniAppEmpty">Загружаем snapshot…</div>;
+    body = <div className="miniAppEmpty">Загружаем snapshot...</div>;
   } else if (!snapshot && snapshotState.error) {
     body = <div className="miniAppNotice">Не удалось загрузить данные: {String(snapshotState.error)}</div>;
   } else if (currentTab === "tasks") {
@@ -80,6 +78,7 @@ export function MiniAppPage() {
         onChangeQuickFilter={setQuickFilter}
         onOpenTask={setSelectedTaskId}
         unresolvedPersonLink={!currentPerson.personId}
+        authState={authSession.state}
       />
     );
   } else if (currentTab === "timeline") {
@@ -90,7 +89,12 @@ export function MiniAppPage() {
         authState={authSession.state}
         onLogin={() => { void authSession.startLogin(); }}
         onLogout={() => { void authSession.logout(); }}
-        onReload={() => { void authSession.reload(); }}
+        onReload={() => {
+          void (async () => {
+            await authSession.reload();
+            await authSession.startTelegramSession();
+          })();
+        }}
         onOpenAdmin={() => {
           if (typeof window !== "undefined") {
             window.location.assign(authSession.adminHref);
@@ -104,7 +108,11 @@ export function MiniAppPage() {
     <>
       <MiniAppShell
         title="DTM"
-        subtitle={currentPerson.personName ? `Рабочий кабинет: ${currentPerson.personName}` : "Mobile-first режим текущего frontend"}
+        subtitle={
+          currentPerson.personName
+            ? `Рабочий кабинет: ${currentPerson.personName}`
+            : "Mobile-first режим текущего frontend"
+        }
         currentTab={currentTab}
         onTabChange={setCurrentTab}
       >

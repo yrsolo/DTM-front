@@ -71,6 +71,22 @@ export async function getUserById(userId: string): Promise<AuthUser | null> {
   return rows[0] ? mapUser(rows[0]) : null;
 }
 
+export async function getUserByEmail(email: string): Promise<AuthUser | null> {
+  const normalizedEmail = normalizeEmail(email);
+  if (!normalizedEmail) return null;
+  const rows = await executeQuery<UserRow>(
+    `
+      DECLARE $email AS Utf8;
+      SELECT id, yandex_uid, email, display_name, avatar_url, person_id, person_name, telegram_id, telegram_username, status, role, session_version, created_at, last_login_at
+      FROM ${AUTH_TABLES.users}
+      WHERE email = $email
+      LIMIT 1;
+    `,
+    { $email: utf8(normalizedEmail) }
+  );
+  return rows[0] ? mapUser(rows[0]) : null;
+}
+
 export async function listUsersByStatus(status?: UserStatus): Promise<AuthUser[]> {
   const predicate = status ? "WHERE status = $status" : "";
   const params = status ? ({ $status: utf8(status) } as const) : undefined;

@@ -45,7 +45,9 @@ Source of truth:
 - Mini App не делает отдельный запрос “только мои задачи”;
 - browser/webview получает общий snapshot через existing `bff`;
 - фильтрация `mine / all` происходит client-side в selector layer;
-- auth linkage даёт frontend `currentPersonId`, но не меняет состав загруженного snapshot.
+- auth linkage даёт frontend `currentPersonId`, но не меняет состав загруженного snapshot;
+- Mini App auth bootstrap может auto-heal linkage через auth contour, но это влияет только на session/person resolution, а не на состав snapshot payload;
+- если Telegram linkage не восстановился, frontend показывает explicit unlinked state вместо silent empty `mine`.
 
 ## Cache / persistence
 

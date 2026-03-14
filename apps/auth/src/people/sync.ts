@@ -145,3 +145,12 @@ export function findLinkedPersonByEmail(
   if (!normalized) return null;
   return people.find((person) => person.email === normalized) ?? null;
 }
+
+export function findLinkedPersonByTelegramId(
+  people: LinkedPersonRecord[],
+  telegramId: string | null
+): LinkedPersonRecord | null {
+  const normalized = typeof telegramId === "string" ? telegramId.trim() : "";
+  if (!normalized) return null;
+  return people.find((person) => person.telegramId === normalized) ?? null;
+}

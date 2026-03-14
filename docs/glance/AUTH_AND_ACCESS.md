@@ -87,8 +87,13 @@ Cookie/session behavior:
 
 Telegram Mini App behavior:
 - frontend может отправить `Telegram WebApp initData` в `POST /telegram/session`
-- auth contour валидирует `initData` через bot token и ищет пользователя по сохранённому `telegram id`
+- auth contour валидирует `initData` через bot token и сначала ищет пользователя по сохранённому `telegram id`
+- если `telegram id` ещё не записан в auth runtime storage, auth делает auto-heal linkage:
+  - ищет человека в backend people directory по `telegramId`
+  - берёт `yandexEmail` как основной email key (`contactEmail` остаётся fallback)
+  - ищет существующего auth user по email и записывает linkage в auth runtime storage
 - при успехе Mini App получает обычную contour-specific session cookie
+- если linkage не удалось восстановить, frontend показывает явный Telegram unlinked state вместо тихого `guest`
 - это не создаёт отдельный data path: после выдачи cookie браузер/webview продолжает работать через те же `/ops/auth/*` и `/ops/bff/*`
 
 ## Admin surface
@@ -171,6 +176,7 @@ Admin personal order:
 - source of truth для `currentPersonId` живёт в auth runtime storage, а не во frontend selectors
 - web login best-effort синхронизирует linkage по email с backend people source
 - admin action `Обновить базу дизайнеров` повторно синхронизирует linkage и `telegram id`
+- `POST /telegram/session` умеет on-demand восстанавливать linkage по цепочке `telegramId -> people directory -> yandexEmail -> auth user`
 - Mini App не запрашивает отдельный `my tasks` payload: frontend получает общий snapshot и затем делает client-side filtering `mine / all`
 
 ## Подробнее
