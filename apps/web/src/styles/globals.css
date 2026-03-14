@@ -2715,11 +2715,11 @@ button:hover {
 }
 
 .miniAppShell {
-  height: calc(100vh - 92px);
-  min-height: calc(100vh - 92px);
+  height: calc(100vh - 72px);
+  min-height: calc(100vh - 72px);
   display: flex;
   flex-direction: column;
-  padding-bottom: 88px;
+  padding-bottom: 68px;
   overflow: hidden;
 }
 
@@ -2728,7 +2728,7 @@ button:hover {
   min-height: 0;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 12px;
   overflow-y: auto;
   padding-right: 2px;
 }
@@ -2951,31 +2951,28 @@ button:hover {
 .miniAppCalendar {
   display: grid;
   gap: 10px;
+  min-height: 0;
+  padding-bottom: 8px;
 }
 
 .miniAppCalendarDay {
   display: grid;
-  gap: 10px;
-  border: 1px solid rgba(180, 196, 255, 0.16);
-  border-radius: 18px;
-  background: linear-gradient(180deg, rgba(12, 18, 35, 0.96), rgba(19, 23, 44, 0.94));
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.18);
-  padding: 12px;
+  gap: 8px;
+  border-bottom: 1px solid rgba(180, 196, 255, 0.12);
+  padding: 10px 2px 12px;
 }
 
 .miniAppCalendarDay.isWeekend {
-  border-color: rgba(141, 129, 215, 0.26);
-  background: linear-gradient(180deg, rgba(24, 23, 49, 0.96), rgba(19, 23, 44, 0.94));
+  background: rgba(109, 92, 184, 0.08);
 }
 
 .miniAppCalendarDay.isHoliday {
-  border-color: rgba(240, 123, 141, 0.34);
-  background: linear-gradient(180deg, rgba(46, 22, 34, 0.96), rgba(22, 20, 39, 0.94));
+  background: rgba(224, 106, 139, 0.1);
 }
 
 .miniAppCalendarDay.isToday {
-  border-color: rgba(117, 201, 255, 0.42);
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.18), 0 0 0 1px rgba(117, 201, 255, 0.12);
+  border-bottom-color: rgba(117, 201, 255, 0.42);
+  box-shadow: inset 3px 0 0 rgba(117, 201, 255, 0.42);
 }
 
 .miniAppCalendarDayHeader {
@@ -2983,6 +2980,7 @@ button:hover {
   align-items: center;
   justify-content: space-between;
   gap: 12px;
+  padding: 0 4px;
 }
 
 .miniAppCalendarDayTitle {
@@ -2993,34 +2991,31 @@ button:hover {
 }
 
 .miniAppCalendarDayCount {
-  font-size: 12px;
-  border-radius: 999px;
-  padding: 4px 8px;
-  background: rgba(255, 255, 255, 0.08);
-  color: rgba(238, 244, 255, 0.86);
+  font-size: 11px;
+  color: rgba(238, 244, 255, 0.56);
 }
 
 .miniAppCalendarDayBody {
   display: grid;
-  gap: 8px;
+  gap: 6px;
 }
 
 .miniAppCalendarDayEmpty {
-  min-height: 20px;
-  color: rgba(225, 234, 255, 0.42);
+  min-height: 12px;
 }
 
 .miniAppMilestoneRow {
   display: grid;
-  gap: 4px;
+  gap: 2px;
   width: 100%;
-  border: 1px solid rgba(180, 196, 255, 0.12);
-  border-left-width: 5px;
-  border-radius: 14px;
-  background: rgba(16, 23, 43, 0.72);
+  border: 0;
+  border-left-width: 4px;
+  border-left-style: solid;
+  border-radius: 0;
+  background: transparent;
   color: #eef4ff;
   text-align: left;
-  padding: 10px 12px;
+  padding: 4px 8px;
   font: inherit;
 }
 
@@ -3034,6 +3029,15 @@ button:hover {
   font-size: 12px;
   line-height: 1.35;
   color: rgba(225, 234, 255, 0.76);
+}
+
+.miniAppTimelineSection {
+  min-height: 0;
+}
+
+.miniAppTimelineToolbar {
+  display: flex;
+  justify-content: flex-end;
 }
 
 .miniAppMilestoneRow.isStoryboard { border-left-color: var(--key-drawer-ms-storyboard, #5ca9ff); }

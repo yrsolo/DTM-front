@@ -76,11 +76,13 @@ function addDays(date: Date, days: number): Date {
 }
 
 function formatCalendarDayLabel(date: Date): string {
-  return date.toLocaleDateString("ru-RU", {
+  const weekday = date.toLocaleDateString("ru-RU", { weekday: "short" });
+  const capitalizedWeekday = weekday ? `${weekday[0].toUpperCase()}${weekday.slice(1)}` : "";
+  const dayAndMonth = date.toLocaleDateString("ru-RU", {
     day: "numeric",
     month: "long",
-    weekday: "long",
   });
+  return `${capitalizedWeekday} ${dayAndMonth}`;
 }
 
 function toIsoDate(date: Date): string {

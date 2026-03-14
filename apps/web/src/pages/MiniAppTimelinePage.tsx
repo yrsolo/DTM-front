@@ -22,6 +22,8 @@ export function MiniAppTimelinePage(props: {
   onOpenTask: (taskId: string) => void;
 }) {
   const [holidays, setHolidays] = React.useState<Set<string>>(new Set());
+  const calendarRef = React.useRef<HTMLDivElement | null>(null);
+  const todayRef = React.useRef<HTMLDivElement | null>(null);
 
   React.useEffect(() => {
     const milestoneDates = props.tasks
@@ -54,16 +56,38 @@ export function MiniAppTimelinePage(props: {
     [holidays, props.snapshot, props.tasks]
   );
 
+  const scrollToToday = React.useCallback(() => {
+    const container = calendarRef.current;
+    const todayNode = todayRef.current;
+    if (!container || !todayNode) return;
+    const top = Math.max(0, todayNode.offsetTop - 12);
+    container.scrollTo({ top, behavior: "smooth" });
+  }, []);
+
+  React.useEffect(() => {
+    if (!days.length) return;
+    const frame = window.requestAnimationFrame(() => {
+      scrollToToday();
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [days, scrollToToday]);
+
   if (!days.length) {
     return <div className="miniAppEmpty">Нет активных майлстоунов.</div>;
   }
 
   return (
-    <div className="miniAppSection">
-      <div className="miniAppCalendar">
+    <div className="miniAppSection miniAppTimelineSection">
+      <div className="miniAppTimelineToolbar">
+        <button type="button" className="miniAppButton miniAppButtonGhost" onClick={scrollToToday}>
+          Сегодня
+        </button>
+      </div>
+      <div ref={calendarRef} className="miniAppCalendar">
         {days.map((day) => (
           <section
             key={day.key}
+            ref={day.isToday ? todayRef : null}
             className={`miniAppCalendarDay ${day.isToday ? "isToday" : ""} ${day.isWeekend ? "isWeekend" : ""} ${day.isHoliday ? "isHoliday" : ""}`}
           >
             <div className="miniAppCalendarDayHeader">
@@ -86,7 +110,7 @@ export function MiniAppTimelinePage(props: {
                   </button>
                 ))
               ) : (
-                <div className="miniAppCalendarDayEmpty">—</div>
+                <div className="miniAppCalendarDayEmpty" />
               )}
             </div>
           </section>
