@@ -1,6 +1,11 @@
-﻿# Документация DTM-front
+# Документация DTM-front
 
 Эта папка описывает текущее состояние проекта. Источником истины для документации считаются код, актуальные runtime-конфиги и deploy-скрипты, а не исторические планы.
+
+Правило простое:
+- `docs/` содержит только current/canonical материалы;
+- `docs/archive/` хранит retired и historical reference docs;
+- `work/archive/` хранит process history, а не продуктовую документацию.
 
 ## Быстрый локальный запуск
 
@@ -32,6 +37,7 @@ npm run check:mojibake
 - `contracts/` — API, snapshot-модель, runtime-конфиг и auth/access contracts.
 - `design/` — визуальная система, страницы, workbench и milestones.
 - `operations/` — deploy, browser storage и troubleshooting.
+- `archive/` — historical и legacy/reference docs, не являющиеся source of truth.
 
 ## Кому что читать
 
@@ -89,6 +95,10 @@ npm run check:mojibake
 - [AUTH_TROUBLESHOOTING.md](n:\PROJECTS\DTM\DTM-front\docs\operations\AUTH_TROUBLESHOOTING.md)
 - [RUNTIME_STORAGE.md](n:\PROJECTS\DTM\DTM-front\docs\operations\RUNTIME_STORAGE.md)
 - [TROUBLESHOOTING.md](n:\PROJECTS\DTM\DTM-front\docs\operations\TROUBLESHOOTING.md)
+
+### Архив
+
+- [README.md](n:\PROJECTS\DTM\DTM-front\docs\archive\README.md)
 
 ## Где искать источник истины
 

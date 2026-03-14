@@ -1,4 +1,4 @@
-﻿# Auth And Access
+# Auth And Access
 
 Назначение:
 - зафиксировать текущий V1-контракт авторизации и access modes.
@@ -61,7 +61,7 @@ Source of truth:
   - `sv`
   - `iat`
   - `exp`
-- при каждом привилегированном запросе `sv` сверяется с YDB
+- при каждом привилегированном запросе `sv` сверяется с auth runtime storage
 
 ## Login procedure
 
@@ -139,32 +139,14 @@ Admin personal order:
   - layout presets
 - `GET /admin/overview` возвращает эти списки уже в персональном порядке текущего администратора
 
-## YDB contours
-
-Используются две отдельные serverless YDB базы:
-- test auth DB
-- prod auth DB
-
-Они не делят:
-- users
-- allowlist
-- access requests
-- audit log
-- session versions
-
 ## OAuth apps
 
 Используются две отдельные Yandex OAuth apps:
 - test -> callback `https://dtm.solofarm.ru/test/ops/auth/callback`
 - prod -> callback `https://dtm.solofarm.ru/ops/auth/callback`
 
-Canonical env contract:
-- `YANDEX_CLIENT_ID_TEST`
-- `YANDEX_CLIENT_SECRET_TEST`
-- `YANDEX_CLIENT_ID_PROD`
-- `YANDEX_CLIENT_SECRET_PROD`
+## Avatar contract
 
-Avatar contract:
 - auth service читает avatar metadata из Yandex profile (`default_avatar_id`)
 - `user.avatarUrl` может возвращаться в `/me`
 - admin overview возвращает `avatarUrl` для карточек пользователей

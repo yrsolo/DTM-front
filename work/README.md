@@ -9,7 +9,7 @@ This folder contains **delivery/process** artifacts (not system documentation).
 
 ## Campaign IDs
 Campaigns are identified as:
-- `CAM-<NAME>-P##-T###` (campaign → phase → task)
+- `CAM-<NAME>-P##-T###` (campaign -> phase -> task)
 
 Rules:
 - Numbering is local inside a campaign.

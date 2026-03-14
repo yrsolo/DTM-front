@@ -1,12 +1,12 @@
 # Troubleshooting
 
-Этот документ собирает типовые проблемы runtime, deploy и data-loading для текущего frontend/auth контура.
+Этот документ собирает типовые runtime, deploy и data-loading проблемы для текущего frontend-контура.
 
 Source of truth:
 - `apps/web/src/config/publicConfig.ts`
 - `apps/web/src/config/runtimeContour.ts`
-- `apps/web/src\data\api.ts`
-- `apps/web/src\data\useSnapshot.ts`
+- `apps/web/src/data/api.ts`
+- `apps/web/src/data/useSnapshot.ts`
 - `scripts/deploy_frontend.ps1`
 - `scripts/deploy_auth_function.ps1`
 - `scripts/update_unified_gateway.ps1`
@@ -50,26 +50,26 @@ Canonical поведение:
 - localhost = `test` contour для auth/api;
 - localhost SPA base path остаётся `/`;
 - login должен идти в `https://dtm.solofarm.ru/test/ops/auth/login?...`;
-- data requests должны идти в `https://dtm.solofarm.ru/test/ops/api/*`.
+- browser-facing data requests должны идти в `https://dtm.solofarm.ru/test/ops/bff/*`.
 
 Если локально открывается `/ops/auth/...` вместо `/test/ops/auth/...`:
 1. проверьте `apps/web/src/config/runtimeContour.ts`;
 2. проверьте, что localhost распознан как local frontend runtime;
 3. проверьте, что `getFrontendBasePath()` для localhost возвращает `/`, а не `/test/`.
 
-## Локально есть CORS-ошибка на `/test/ops/api/*`
+## Локально есть CORS-ошибка на `/test/ops/bff/*`
 
 Это ожидаемая точка риска.
 
 Важно:
-- локальный frontend ходит cross-origin в `https://dtm.solofarm.ru/test/ops/api/*`;
-- credentialed requests (`credentials: include`) не совместимы с `Access-Control-Allow-Origin: *`.
+- локальный frontend ходит cross-origin в `https://dtm.solofarm.ru/test/ops/bff/*`;
+- credentialed requests (`credentials: include`) несовместимы с `Access-Control-Allow-Origin: *`.
 
 Если нужен локальный masked/guest режим:
 - frontend может ходить без credentials.
 
 Если нужен локальный full-access режим:
-1. backend/test service route должен отдавать exact `Access-Control-Allow-Origin` для `http://localhost:5173`;
+1. browser-facing auth/bff route должен отдавать exact `Access-Control-Allow-Origin` для `http://localhost:5173`;
 2. должен быть `Access-Control-Allow-Credentials: true`;
 3. auth cookie и callback flow должны быть корректно настроены для test contour.
 
@@ -131,6 +131,8 @@ powershell -ExecutionPolicy Bypass -File scripts/update_unified_gateway.ps1 -Dry
 Проверьте, что:
 - `/ops/auth/*` -> `auth-prod`
 - `/test/ops/auth/*` -> `auth-test`
+- `/ops/bff/*` -> `auth-prod`
+- `/test/ops/bff/*` -> `auth-test`
 - `/ops/*` и `/test/ops/*` не уходят в SPA fallback
 - `/grafana/*` обслуживается отдельно от `ops`
 
