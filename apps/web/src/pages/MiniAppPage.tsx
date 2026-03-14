@@ -16,6 +16,7 @@ import { groupAgendaItemsByDay, selectAgendaItemsFromTasks } from "../data/selec
 import { MiniAppProfilePage } from "./MiniAppProfilePage";
 import { MiniAppTasksPage } from "./MiniAppTasksPage";
 import { MiniAppTimelinePage } from "./MiniAppTimelinePage";
+import { resolveMilestoneTone } from "../utils/milestoneTone";
 
 const MINI_APP_ADMIN_RETURN_KEY = "dtm-miniapp-admin-return-to";
 
@@ -27,6 +28,18 @@ function formatDueLabel(rawDate: string | null): string {
     day: "numeric",
     month: "long",
   });
+}
+
+function resolveFinalMilestoneDate(task: {
+  milestones?: Array<{ type?: string | null; planned?: string; actual?: string | null }> | null;
+  nextDue?: string | null;
+  end?: string;
+  start?: string;
+}): string | null {
+  const finalMilestone = (task.milestones ?? []).find((milestone) =>
+    resolveMilestoneTone(milestone.type ?? null, milestone.type ?? null) === "final"
+  );
+  return finalMilestone?.actual ?? finalMilestone?.planned ?? task.nextDue ?? task.end ?? task.start ?? null;
 }
 
 export function MiniAppPage() {
@@ -50,6 +63,10 @@ export function MiniAppPage() {
     () => new Map((snapshot?.groups ?? []).map((group) => [group.id, group.name] as const)),
     [snapshot?.groups]
   );
+  const peopleById = React.useMemo(
+    () => new Map((snapshot?.people ?? []).map((person) => [person.id, person.name] as const)),
+    [snapshot?.people]
+  );
   const canViewAllTasks = authSession.state.user?.role === "admin";
   const scopedTasks = canViewAllTasks
     ? sortTasksForMobile(selectAllTasks(snapshot))
@@ -59,13 +76,13 @@ export function MiniAppPage() {
       scopedTasks.map((task) => ({
         id: task.id,
         title: task.title,
-        ownerName: task.ownerName?.trim() || null,
+        ownerName: ((task.ownerId ? peopleById.get(task.ownerId) : null) ?? task.ownerName?.trim()) || null,
         brand: task.brand?.trim() || null,
         format: task.format_?.trim() || task.type?.trim() || null,
         showName: (task.groupId ? groupsById.get(task.groupId) : null) ?? null,
-        dueLabel: formatDueLabel(task.nextDue ?? task.end ?? task.start ?? null),
+        dueLabel: formatDueLabel(resolveFinalMilestoneDate(task)),
       })),
-    [groupsById, scopedTasks]
+    [groupsById, peopleById, scopedTasks]
   );
   const agendaGroups = groupAgendaItemsByDay(selectAgendaItemsFromTasks(scopedTasks, snapshot));
   const selectedTask = selectTaskById(snapshot, selectedTaskId);

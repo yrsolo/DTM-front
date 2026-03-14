@@ -2782,19 +2782,27 @@ button:hover {
   gap: 10px;
 }
 
+.miniAppTaskGroup {
+  border: 1px solid rgba(180, 196, 255, 0.16);
+  border-radius: 18px;
+  background: linear-gradient(180deg, rgba(12, 18, 35, 0.96), rgba(19, 23, 44, 0.94));
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.18);
+  overflow: hidden;
+}
+
 .miniAppTaskGroupToggle {
   width: 100%;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 10px;
-  border: 1px solid rgba(180, 196, 255, 0.16);
-  background: rgba(16, 23, 43, 0.72);
+  border: 0;
+  background: rgba(16, 23, 43, 0.78);
   color: #eef4ff;
-  border-radius: 16px;
   padding: 12px 14px;
   font: inherit;
   text-align: left;
+  border-bottom: 1px solid rgba(180, 196, 255, 0.12);
 }
 
 .miniAppTaskGroupToggle.isOpen {
@@ -2857,6 +2865,8 @@ button:hover {
 
 .miniAppTaskCardCompact {
   padding: 10px 12px;
+  border-radius: 14px;
+  box-shadow: none;
 }
 
 .miniAppTaskRowMain {
@@ -2884,6 +2894,10 @@ button:hover {
   padding: 6px 10px;
   background: rgba(255, 255, 255, 0.08);
   color: #eef4ff;
+}
+
+.miniAppTaskGroup .miniAppTaskList {
+  padding: 12px;
 }
 
 .miniAppAgendaBadge.isOverdue {
