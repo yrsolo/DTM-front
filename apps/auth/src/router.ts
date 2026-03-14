@@ -12,7 +12,11 @@ import {
   revokeApprovedUserHandler,
   saveAdminLayoutOrderHandler,
 } from "./handlers/adminHandlers";
-import { proxyAttachmentAdminRequest, proxyAttachmentReadRequest } from "./handlers/attachmentProxy";
+import {
+  proxyAttachmentAdminRequest,
+  proxyAttachmentBinaryUpload,
+  proxyAttachmentReadRequest,
+} from "./handlers/attachmentProxy";
 import { callback, login, logout, me, telegramSession } from "./handlers/authHandlers";
 import { proxyApiRequest } from "./handlers/apiProxy";
 import {
@@ -66,6 +70,9 @@ export async function routeRequest(req: NormalizedRequest): Promise<HttpResult> 
     }
     if (req.method === "POST" && req.routePath === "/attachments/request-upload") {
       return proxyAttachmentAdminRequest(req, "request-upload");
+    }
+    if (req.method === "POST" && req.routePath === "/attachments/upload-binary") {
+      return proxyAttachmentBinaryUpload(req);
     }
     if (req.method === "POST" && req.routePath === "/attachments/finalize") {
       return proxyAttachmentAdminRequest(req, "finalize");

@@ -1,4 +1,5 @@
 import { getAuthRuntimeConfig } from "../config";
+import { badRequest, forbidden } from "../http";
 import { clearSessionCookie } from "../session/cookieSession";
 import { getAccessMode, resolveSession } from "../middleware/auth";
 import type { HttpResult, NormalizedRequest } from "../types";
@@ -114,4 +115,78 @@ export function proxyAttachmentReadRequest(
   action: "view" | "download"
 ): Promise<HttpResult> {
   return proxyTrustedRequest(req, `/task-attachments/${attachmentId}/${action}`);
+}
+
+function decodeHeaderValue(value: string | undefined): string | null {
+  const raw = value?.trim();
+  if (!raw) return null;
+  try {
+    return decodeURIComponent(raw);
+  } catch {
+    return raw;
+  }
+}
+
+function parseUploadHeaders(value: string | undefined): Record<string, string> {
+  const decoded = decodeHeaderValue(value);
+  if (!decoded) return {};
+  try {
+    const parsed = JSON.parse(decoded);
+    if (!parsed || typeof parsed !== "object") return {};
+    return Object.fromEntries(
+      Object.entries(parsed).filter((entry): entry is [string, string] => typeof entry[0] === "string" && typeof entry[1] === "string")
+    );
+  } catch {
+    return {};
+  }
+}
+
+export async function proxyAttachmentBinaryUpload(req: NormalizedRequest): Promise<HttpResult> {
+  const { user, clearCookie } = await resolveSession(req.headers.cookie);
+  if (!user || user.status !== "approved" || user.role !== "admin" || getAccessMode(user) !== "full") {
+    return forbidden("Admin access required");
+  }
+
+  const uploadUrl = decodeHeaderValue(req.headers["x-dtm-upload-url"]);
+  if (!uploadUrl) {
+    return badRequest("Missing x-dtm-upload-url");
+  }
+
+  const uploadMethod = (decodeHeaderValue(req.headers["x-dtm-upload-method"]) || "PUT").toUpperCase();
+  const uploadHeaders = parseUploadHeaders(req.headers["x-dtm-upload-headers"]);
+
+  let upstreamUrl: URL;
+  try {
+    upstreamUrl = new URL(uploadUrl);
+  } catch {
+    return badRequest("Invalid x-dtm-upload-url");
+  }
+
+  const upstreamRes = await fetch(upstreamUrl, {
+    method: uploadMethod,
+    headers: uploadHeaders,
+    body: req.bodyBytes ? Buffer.from(req.bodyBytes) : req.bodyText || "",
+  });
+
+  const responseHeaders: Record<string, string> = {};
+  upstreamRes.headers.forEach((value, key) => {
+    const normalizedKey = key.toLowerCase();
+    if (HOP_BY_HOP_HEADERS.has(normalizedKey) || STRIP_RESPONSE_HEADERS.has(normalizedKey)) return;
+    responseHeaders[key] = value;
+  });
+
+  const result: HttpResult = {
+    statusCode: upstreamRes.status,
+    headers: responseHeaders,
+  };
+
+  const bodyBuffer = Buffer.from(await upstreamRes.arrayBuffer());
+  result.body = bodyBuffer.length > 0 ? bodyBuffer.toString("base64") : "";
+  result.isBase64Encoded = true;
+
+  if (clearCookie) {
+    result.multiValueHeaders = { "set-cookie": [clearSessionCookie()] };
+  }
+
+  return result;
 }

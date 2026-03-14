@@ -51,6 +51,8 @@ Attachment wrapper routes exposed to the browser:
 
 These auth wrapper routes forward attachment upload/read requests to backend-owned attachment routes with trusted proxy headers.
 
+For binary upload specifically, browser sends file bytes to `/ops/auth/attachments/upload-binary` (or `/test/...`), and auth wrapper performs the presigned Object Storage upload server-side to avoid browser CORS issues.
+
 ## Browser -> Auth proxy
 
 Frontend always calls the auth proxy for browser data requests:

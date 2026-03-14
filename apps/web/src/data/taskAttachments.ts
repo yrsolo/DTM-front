@@ -122,9 +122,15 @@ export async function uploadTaskAttachmentBinary(contract: AttachmentUploadContr
   const method = contract.method?.trim().toUpperCase() || "PUT";
   let res: Response;
   try {
-    res = await fetch(contract.uploadUrl, {
-      method,
-      headers: contract.headers ?? undefined,
+    res = await fetch(buildBackendAdminUrl("/attachments/upload-binary"), {
+      method: "POST",
+      credentials: "include",
+      headers: {
+        "content-type": file.type || "application/octet-stream",
+        "x-dtm-upload-url": encodeURIComponent(contract.uploadUrl),
+        "x-dtm-upload-method": encodeURIComponent(method),
+        "x-dtm-upload-headers": encodeURIComponent(JSON.stringify(contract.headers ?? {})),
+      },
       body: file,
     });
   } catch (error) {
@@ -132,7 +138,7 @@ export async function uploadTaskAttachmentBinary(contract: AttachmentUploadContr
       stage: "upload-binary",
       message: error instanceof Error ? error.message : "upload-binary network error",
       details: error instanceof Error ? error.message : "network error",
-      host: extractHost(contract.uploadUrl),
+      host: extractHost(buildBackendAdminUrl("/attachments/upload-binary")),
     });
   }
   if (!res.ok) {
