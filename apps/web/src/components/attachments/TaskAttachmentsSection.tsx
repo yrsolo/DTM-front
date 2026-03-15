@@ -2,6 +2,7 @@ import React from "react";
 import { TaskAttachmentV1, TaskV1 } from "@dtm/schema/snapshot";
 
 import {
+  AttachmentUploadContract,
   requestTaskAttachmentUpload,
   uploadTaskAttachmentBinary,
   finalizeTaskAttachmentUpload,
@@ -27,6 +28,18 @@ type UploadState =
   | { status: "idle" }
   | { status: "requesting" | "uploading" | "finalizing" | "waiting"; message: string }
   | { status: "error"; message: string };
+
+function formatContractDebug(contract: AttachmentUploadContract): string {
+  const method = contract.method?.trim().toUpperCase() || "PUT";
+  const headerKeys = Object.keys(contract.headers ?? {}).sort();
+  let host = "unknown";
+  try {
+    host = new URL(contract.uploadUrl).host;
+  } catch {
+    host = "invalid-url";
+  }
+  return `uploadHost=${host} | method=${method} | headerKeys=${headerKeys.join(",") || "none"}`;
+}
 
 function openInNewWindow(url: string): boolean {
   if (typeof window === "undefined") return false;
@@ -67,6 +80,7 @@ export function TaskAttachmentsSection(props: {
   const [selectedId, setSelectedId] = React.useState<string | null>(null);
   const [uploadState, setUploadState] = React.useState<UploadState>({ status: "idle" });
   const [actionError, setActionError] = React.useState<string | null>(null);
+  const [uploadDebug, setUploadDebug] = React.useState<string | null>(null);
   const [tooltipState, setTooltipState] = React.useState<TooltipState>({ visible: false });
   const [previewState, setPreviewState] = React.useState<AttachmentPreviewState>({ open: false });
   const inputRef = React.useRef<HTMLInputElement | null>(null);
@@ -89,6 +103,7 @@ export function TaskAttachmentsSection(props: {
     setSelectedId(null);
     setUploadState({ status: "idle" });
     setActionError(null);
+    setUploadDebug(null);
     setPreviewState({ open: false });
     setTooltipState({ visible: false });
   }, [props.task.id]);
@@ -216,6 +231,7 @@ export function TaskAttachmentsSection(props: {
         size: file.size,
         uploadedBy: userId,
       });
+      setUploadDebug(formatContractDebug(contract));
 
       setUploadState({ status: "uploading", message: ui.drawer.attachmentsDropHint });
       await uploadTaskAttachmentBinary(contract, file);
@@ -282,6 +298,8 @@ export function TaskAttachmentsSection(props: {
                 {uploadState.message}
               </div>
             ) : null}
+
+            {uploadDebug ? <div className="attachmentInlineNotice">{uploadDebug}</div> : null}
 
             {attachments.length ? (
               <>
