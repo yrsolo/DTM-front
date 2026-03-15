@@ -1,4 +1,4 @@
-import { getAuthRequestBase } from "../config/runtimeContour";
+import { getBackendAdminRequestBase } from "../config/runtimeContour";
 
 export type AttachmentUploadContract = {
   task_id: string;
@@ -42,19 +42,7 @@ export class TaskAttachmentUploadError extends Error {
 }
 
 function buildBackendAdminUrl(path: string): string {
-  return `${getAuthRequestBase()}${path}`;
-}
-
-function rewriteAttachmentUrl(url: string): string {
-  try {
-    const parsed = new URL(url, typeof window !== "undefined" ? window.location.origin : "https://dtm.solofarm.ru");
-    const match = parsed.pathname.match(/^(\/test)?\/ops\/api\/task-attachments\/([^/]+)\/(view|download)$/);
-    if (!match) return parsed.toString();
-    const contourPrefix = match[1] ?? "";
-    return `${parsed.origin}${contourPrefix}/ops/auth/attachments/${match[2]}/${match[3]}`;
-  } catch {
-    return url;
-  }
+  return `${getBackendAdminRequestBase()}${path}`;
 }
 
 async function parseErrorResponse(res: Response): Promise<string> {
@@ -83,7 +71,8 @@ export async function requestTaskAttachmentUpload(args: {
 }): Promise<AttachmentUploadContract> {
   let res: Response;
   try {
-    res = await fetch(buildBackendAdminUrl("/attachments/request-upload"), {
+    res = await fetch(buildBackendAdminUrl("/task-attachments/request-upload"), {
+      // Backend confirmed canonical browser intake path is /ops/admin/task-attachments/*.
       method: "POST",
       credentials: "include",
       headers: {
@@ -103,7 +92,7 @@ export async function requestTaskAttachmentUpload(args: {
       stage: "request-upload",
       message: error instanceof Error ? error.message : "request-upload network error",
       details: error instanceof Error ? error.message : "network error",
-      host: extractHost(buildBackendAdminUrl("/attachments/request-upload")),
+      host: extractHost(buildBackendAdminUrl("/task-attachments/request-upload")),
     });
   }
 
@@ -114,7 +103,7 @@ export async function requestTaskAttachmentUpload(args: {
       message: `request-upload failed (${res.status})`,
       status: res.status,
       details,
-      host: extractHost(buildBackendAdminUrl("/attachments/request-upload")),
+      host: extractHost(buildBackendAdminUrl("/task-attachments/request-upload")),
     });
   }
 
@@ -124,34 +113,29 @@ export async function requestTaskAttachmentUpload(args: {
 export async function uploadTaskAttachmentBinary(contract: AttachmentUploadContract, file: File): Promise<void> {
   const preferredMethod = contract.method?.trim().toUpperCase() || "PUT";
 
-  async function sendBinaryUpload(method: string): Promise<Response> {
-    return fetch(buildBackendAdminUrl("/attachments/upload-binary"), {
-      method: "POST",
-      credentials: "include",
-      headers: {
-        "content-type": file.type || "application/octet-stream",
-        "x-dtm-upload-url": encodeURIComponent(contract.uploadUrl),
-        "x-dtm-upload-method": encodeURIComponent(method),
-        "x-dtm-upload-headers": encodeURIComponent(JSON.stringify(contract.headers ?? {})),
-      },
-      body: file,
-    });
-  }
-
   let res: Response;
   let effectiveMethod = preferredMethod;
   try {
-    res = await sendBinaryUpload(effectiveMethod);
+    // Canonical backend contract: binary upload goes directly to presigned Object Storage URL.
+    res = await fetch(contract.uploadUrl, {
+      method: effectiveMethod,
+      headers: contract.headers ?? undefined,
+      body: file,
+    });
     if (res.status === 405 && effectiveMethod !== "PUT") {
       effectiveMethod = "PUT";
-      res = await sendBinaryUpload(effectiveMethod);
+      res = await fetch(contract.uploadUrl, {
+        method: effectiveMethod,
+        headers: contract.headers ?? undefined,
+        body: file,
+      });
     }
   } catch (error) {
     throw new TaskAttachmentUploadError({
       stage: "upload-binary",
       message: error instanceof Error ? error.message : "upload-binary network error",
       details: error instanceof Error ? error.message : "network error",
-      host: extractHost(buildBackendAdminUrl("/attachments/upload-binary")),
+      host: extractHost(contract.uploadUrl),
       method: effectiveMethod,
     });
   }
@@ -181,7 +165,7 @@ export async function finalizeTaskAttachmentUpload(args: {
 }): Promise<void> {
   let res: Response;
   try {
-    res = await fetch(buildBackendAdminUrl("/attachments/finalize"), {
+    res = await fetch(buildBackendAdminUrl("/task-attachments/finalize"), {
       method: "POST",
       credentials: "include",
       headers: {
@@ -199,7 +183,7 @@ export async function finalizeTaskAttachmentUpload(args: {
       stage: "finalize",
       message: error instanceof Error ? error.message : "finalize network error",
       details: error instanceof Error ? error.message : "network error",
-      host: extractHost(buildBackendAdminUrl("/attachments/finalize")),
+      host: extractHost(buildBackendAdminUrl("/task-attachments/finalize")),
     });
   }
   if (!res.ok) {
@@ -209,13 +193,13 @@ export async function finalizeTaskAttachmentUpload(args: {
       message: `finalize failed (${res.status})`,
       status: res.status,
       details,
-      host: extractHost(buildBackendAdminUrl("/attachments/finalize")),
+      host: extractHost(buildBackendAdminUrl("/task-attachments/finalize")),
     });
   }
 }
 
 export async function fetchAttachmentArrayBuffer(url: string): Promise<ArrayBuffer> {
-  const res = await fetch(rewriteAttachmentUrl(url), {
+  const res = await fetch(url, {
     credentials: "include",
     headers: { accept: "*/*" },
     cache: "no-store",
@@ -227,5 +211,5 @@ export async function fetchAttachmentArrayBuffer(url: string): Promise<ArrayBuff
 }
 
 export function getBrowserAttachmentUrl(url: string): string {
-  return rewriteAttachmentUrl(url);
+  return url;
 }

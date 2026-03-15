@@ -45,13 +45,10 @@ Auth/session namespace:
 - `/ops/auth/*`
 - `/test/ops/auth/*`
 
-Attachment wrapper routes exposed to the browser:
-- `/ops/auth/attachments/*`
-- `/test/ops/auth/attachments/*`
-
-These auth wrapper routes forward attachment upload/read requests to backend-owned attachment routes with trusted proxy headers.
-
-For binary upload specifically, browser sends file bytes to `/ops/auth/attachments/upload-binary` (or `/test/...`), and auth wrapper performs the presigned Object Storage upload server-side to avoid browser CORS issues.
+Task attachment routes are a documented exception to the usual browser contract:
+- upload intake uses backend-owned `/ops/admin/task-attachments/*` and `/test/ops/admin/task-attachments/*`;
+- `view` / `download` use opaque backend-owned links returned in attachment metadata;
+- binary upload then goes directly from browser to the presigned Object Storage URL returned by `request-upload`.
 
 ## Browser -> Auth proxy
 

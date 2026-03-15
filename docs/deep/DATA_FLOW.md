@@ -55,8 +55,10 @@ Source of truth:
 - attachment metadata не lazy-loadятся отдельно: они приходят в общем snapshot payload;
 - attachment panel в drawer свёрнута по умолчанию, но это UX decision, а не server-load optimization;
 - read path uses payload links only;
-- admin upload flow использует browser-facing auth wrapper `/ops/auth/attachments/*` и `/test/ops/auth/attachments/*`; auth contour forwards upload intake to backend-owned attachment admin routes with trusted headers;
-- direct browser PUT в Object Storage не используется; auth wrapper uploads the binary server-side using the presigned contract to avoid browser CORS failures;
+- admin upload flow follows the backend attachment contract:
+  - `POST /ops/admin/task-attachments/request-upload` or `/test/...`
+  - direct browser `PUT` to the returned presigned `uploadUrl`
+  - `POST /ops/admin/task-attachments/finalize` or `/test/...`
 - finalize does not mutate frontend snapshot directly: UI ждёт следующего snapshot refresh.
 
 ## Cache / persistence
