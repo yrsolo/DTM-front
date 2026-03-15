@@ -6,6 +6,7 @@ import {
   requestTaskAttachmentUpload,
   uploadTaskAttachmentBinary,
   finalizeTaskAttachmentUpload,
+  pollAttachmentJob,
   fetchAttachmentArrayBuffer,
   getBrowserAttachmentUrl,
   TaskAttachmentUploadError,
@@ -26,7 +27,7 @@ import { AttachmentPreviewModal, AttachmentPreviewState } from "./AttachmentPrev
 
 type UploadState =
   | { status: "idle" }
-  | { status: "requesting" | "uploading" | "finalizing" | "waiting"; message: string }
+  | { status: "requesting" | "uploading" | "finalizing" | "waiting" | "ready"; message: string }
   | { status: "error"; message: string };
 
 function formatContractDebug(contract: AttachmentUploadContract): string {
@@ -106,15 +107,15 @@ export function TaskAttachmentsSection(props: {
   const [previewState, setPreviewState] = React.useState<AttachmentPreviewState>({ open: false });
   const inputRef = React.useRef<HTMLInputElement | null>(null);
 
-  async function waitForAttachmentPublication(expectedAttachmentId: string): Promise<boolean> {
+  async function refetchUntilAttachmentVisible(expectedAttachmentId: string): Promise<boolean> {
     if (!ctx?.snapshotState.syncFromApi) return false;
-    for (let attempt = 0; attempt < 8; attempt += 1) {
+    for (let attempt = 0; attempt < 4; attempt += 1) {
       await ctx.snapshotState.syncFromApi();
       const currentTask = ctx.snapshotState.snapshot?.tasks.find((task) => task.id === props.task.id);
       if (currentTask?.attachments?.some((attachment) => attachment.id === expectedAttachmentId)) {
         return true;
       }
-      await new Promise((resolve) => window.setTimeout(resolve, 1500));
+      await new Promise((resolve) => window.setTimeout(resolve, 1000));
     }
     return false;
   }
@@ -151,7 +152,7 @@ export function TaskAttachmentsSection(props: {
       formatBytes(attachment.sizeBytes),
       formatAttachmentUploadedAt(attachment.uploadedAt ?? null, locale),
     ].filter(Boolean);
-    const subtitle = subtitleParts.join(" • ");
+    const subtitle = subtitleParts.join(" | ");
 
     if (isDocxAttachment(attachment)) {
       setPreviewState({
@@ -261,17 +262,18 @@ export function TaskAttachmentsSection(props: {
       await uploadTaskAttachmentBinary(contract, file);
 
       setUploadState({ status: "finalizing", message: ui.drawer.attachmentsFinalize });
-      await finalizeTaskAttachmentUpload({
+      const finalize = await finalizeTaskAttachmentUpload({
         taskId: props.task.id,
         attachmentId: contract.attachment_id,
         uploadedBy: userId,
       });
 
       setUploadState({ status: "waiting", message: ui.drawer.attachmentsWaiting });
-      const published = await waitForAttachmentPublication(contract.attachment_id);
+      await pollAttachmentJob(finalize.jobId);
+      const published = await refetchUntilAttachmentVisible(contract.attachment_id);
       setUploadState(
         published
-          ? { status: "idle" }
+          ? { status: "ready", message: ui.drawer.attachmentsUploaded }
           : { status: "waiting", message: ui.drawer.attachmentsWaiting }
       );
     } catch (error) {
@@ -297,7 +299,7 @@ export function TaskAttachmentsSection(props: {
           <span className="drawerSectionTitle">{ui.drawer.attachments}</span>
           <span className="attachmentPanelToggleMeta">
             <span className="badge attachmentCountBadge">{attachments.length}</span>
-            <span className="attachmentPanelChevron">{expanded ? "−" : "+"}</span>
+            <span className="attachmentPanelChevron">{expanded ? "-" : "+"}</span>
           </span>
         </button>
 
@@ -381,7 +383,7 @@ export function TaskAttachmentsSection(props: {
                       <div className="attachmentInspectorSubline">
                         {[attachmentTypeLabel(selectedAttachment), formatBytes(selectedAttachment.sizeBytes), formatAttachmentUploadedAt(selectedAttachment.uploadedAt ?? null, locale)]
                           .filter(Boolean)
-                          .join(" • ")}
+                          .join(" | ")}
                       </div>
                     </div>
                     <div className="attachmentInspectorActions">

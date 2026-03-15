@@ -55,12 +55,22 @@ Source of truth:
 - attachment metadata не lazy-loadятся отдельно: они приходят в общем snapshot payload;
 - attachment panel в drawer свёрнута по умолчанию, но это UX decision, а не server-load optimization;
 - read path uses payload links only;
+- control-plane browser routes go through the auth facade:
+  - `POST /ops/auth/attachments/request-upload`
+  - `POST /ops/auth/attachments/finalize`
+  - `POST /ops/auth/attachments/delete`
+  - `GET /ops/auth/attachments/jobs/{job_id}`
+  - `GET /ops/auth/attachments/{attachment_id}/view`
+  - `GET /ops/auth/attachments/{attachment_id}/download`
+  - test contour uses the same paths under `/test/ops/auth/...`;
 - admin upload flow follows the backend attachment contract:
-  - `POST /ops/admin/task-attachments/request-upload` or `/test/...`
+  - request upload contract through auth facade
   - direct browser `PUT` to the returned presigned `uploadUrl`
-  - `POST /ops/admin/task-attachments/finalize` or `/test/...`
+  - finalize through auth facade
+  - poll `jobs/{job_id}` until terminal `success`
+  - only then refetch snapshot/task state;
 - attachment harness and browser polling can use existing auth facade route `/ops/auth/attachments/jobs/{job_id}` and `/test/ops/auth/attachments/jobs/{job_id}` instead of a new namespace;
-- finalize does not mutate frontend snapshot directly: UI ждёт следующего snapshot refresh.
+- finalize does not mutate frontend snapshot directly: UI waits for backend job success first and then performs the refetch.
 
 ## Cache / persistence
 

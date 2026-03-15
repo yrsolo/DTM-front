@@ -26,7 +26,31 @@ export type AttachmentUploadContract = {
   } | null;
 };
 
-export type TaskAttachmentUploadStage = "request-upload" | "upload-binary" | "finalize";
+export type AttachmentFinalizeResult = {
+  jobId: string;
+  artifact?: string | null;
+};
+
+export type AttachmentDeleteResult = {
+  jobId: string;
+  artifact?: string | null;
+};
+
+export type AttachmentJobStatus =
+  | "accepted"
+  | "running"
+  | "success"
+  | "failed_retryable"
+  | "failed_terminal";
+
+export type AttachmentJobStatusResult = {
+  jobId: string;
+  status: AttachmentJobStatus;
+  artifact?: string | null;
+  details?: string | null;
+};
+
+export type TaskAttachmentUploadStage = "request-upload" | "upload-binary" | "finalize" | "job-poll" | "delete";
 
 export class TaskAttachmentUploadError extends Error {
   stage: TaskAttachmentUploadStage;
@@ -87,6 +111,38 @@ function extractHost(url: string): string | null {
   } catch {
     return null;
   }
+}
+
+function normalizeJobId(payload: any): string | null {
+  if (typeof payload?.job_id === "string" && payload.job_id.trim()) return payload.job_id.trim();
+  if (typeof payload?.jobId === "string" && payload.jobId.trim()) return payload.jobId.trim();
+  if (typeof payload?.job?.id === "string" && payload.job.id.trim()) return payload.job.id.trim();
+  return null;
+}
+
+function normalizeJobStatus(payload: any): AttachmentJobStatus | null {
+  const raw =
+    typeof payload?.status === "string"
+      ? payload.status
+      : typeof payload?.job?.status === "string"
+        ? payload.job.status
+        : null;
+  if (!raw) return null;
+  const normalized = raw.trim().toLowerCase();
+  if (
+    normalized === "accepted" ||
+    normalized === "running" ||
+    normalized === "success" ||
+    normalized === "failed_retryable" ||
+    normalized === "failed_terminal"
+  ) {
+    return normalized;
+  }
+  return null;
+}
+
+function normalizeArtifact(payload: any): string | null {
+  return typeof payload?.artifact === "string" && payload.artifact.trim() ? payload.artifact.trim() : null;
 }
 
 export async function requestTaskAttachmentUpload(args: {
@@ -188,7 +244,7 @@ export async function finalizeTaskAttachmentUpload(args: {
   taskId: string;
   attachmentId: string;
   uploadedBy: string;
-}): Promise<void> {
+}): Promise<AttachmentFinalizeResult> {
   let res: Response;
   try {
     res = await fetch(buildBackendAdminUrl("/attachments/finalize"), {
@@ -222,6 +278,169 @@ export async function finalizeTaskAttachmentUpload(args: {
       host: extractHost(buildBackendAdminUrl("/attachments/finalize")),
     });
   }
+
+  const payload = await res.json().catch(() => null);
+  const jobId = normalizeJobId(payload);
+  if (!jobId) {
+    throw new TaskAttachmentUploadError({
+      stage: "finalize",
+      message: "finalize failed (missing job id)",
+      status: res.status,
+      details: "missing job_id in finalize response",
+      host: extractHost(buildBackendAdminUrl("/attachments/finalize")),
+    });
+  }
+
+  return {
+    jobId,
+    artifact: normalizeArtifact(payload),
+  };
+}
+
+export async function deleteTaskAttachment(args: {
+  taskId: string;
+  attachmentId: string;
+  deletedBy: string;
+}): Promise<AttachmentDeleteResult> {
+  let res: Response;
+  try {
+    res = await fetch(buildBackendAdminUrl("/attachments/delete"), {
+      method: "POST",
+      credentials: "include",
+      headers: {
+        accept: "application/json",
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({
+        task_id: args.taskId,
+        attachment_id: args.attachmentId,
+        deleted_by: args.deletedBy,
+      }),
+    });
+  } catch (error) {
+    throw new TaskAttachmentUploadError({
+      stage: "delete",
+      message: error instanceof Error ? error.message : "delete network error",
+      details: error instanceof Error ? error.message : "network error",
+      host: extractHost(buildBackendAdminUrl("/attachments/delete")),
+    });
+  }
+
+  if (!res.ok) {
+    const details = await parseErrorResponse(res);
+    throw new TaskAttachmentUploadError({
+      stage: "delete",
+      message: `delete failed (${res.status})`,
+      status: res.status,
+      details,
+      host: extractHost(buildBackendAdminUrl("/attachments/delete")),
+    });
+  }
+
+  const payload = await res.json().catch(() => null);
+  const jobId = normalizeJobId(payload);
+  if (!jobId) {
+    throw new TaskAttachmentUploadError({
+      stage: "delete",
+      message: "delete failed (missing job id)",
+      status: res.status,
+      details: "missing job_id in delete response",
+      host: extractHost(buildBackendAdminUrl("/attachments/delete")),
+    });
+  }
+
+  return {
+    jobId,
+    artifact: normalizeArtifact(payload),
+  };
+}
+
+export async function getAttachmentJobStatus(jobId: string): Promise<AttachmentJobStatusResult> {
+  const jobPath = `/attachments/jobs/${encodeURIComponent(jobId)}`;
+  let res: Response;
+  try {
+    res = await fetch(buildBackendAdminUrl(jobPath), {
+      method: "GET",
+      credentials: "include",
+      headers: {
+        accept: "application/json",
+      },
+      cache: "no-store",
+    });
+  } catch (error) {
+    throw new TaskAttachmentUploadError({
+      stage: "job-poll",
+      message: error instanceof Error ? error.message : "job-poll network error",
+      details: error instanceof Error ? error.message : "network error",
+      host: extractHost(buildBackendAdminUrl(jobPath)),
+    });
+  }
+
+  if (!res.ok) {
+    const details = await parseErrorResponse(res);
+    throw new TaskAttachmentUploadError({
+      stage: "job-poll",
+      message: `job-poll failed (${res.status})`,
+      status: res.status,
+      details,
+      host: extractHost(buildBackendAdminUrl(jobPath)),
+    });
+  }
+
+  const payload = await res.json().catch(() => null);
+  const status = normalizeJobStatus(payload);
+  if (!status) {
+    throw new TaskAttachmentUploadError({
+      stage: "job-poll",
+      message: "job-poll failed (missing status)",
+      details: "missing or unsupported job status",
+      host: extractHost(buildBackendAdminUrl(jobPath)),
+    });
+  }
+
+  return {
+    jobId: normalizeJobId(payload) ?? jobId,
+    status,
+    artifact: normalizeArtifact(payload),
+    details:
+      typeof payload?.message === "string" && payload.message.trim()
+        ? payload.message.trim()
+        : typeof payload?.error?.message === "string" && payload.error.message.trim()
+          ? payload.error.message.trim()
+          : null,
+  };
+}
+
+export async function pollAttachmentJob(
+  jobId: string,
+  options?: {
+    intervalMs?: number;
+    maxAttempts?: number;
+  }
+): Promise<AttachmentJobStatusResult> {
+  const intervalMs = options?.intervalMs ?? 2000;
+  const maxAttempts = options?.maxAttempts ?? 60;
+
+  for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
+    const result = await getAttachmentJobStatus(jobId);
+    if (result.status === "success") {
+      return result;
+    }
+    if (result.status === "failed_retryable" || result.status === "failed_terminal") {
+      throw new TaskAttachmentUploadError({
+        stage: "job-poll",
+        message: `job-poll finished with ${result.status}`,
+        details: result.details ?? `job status=${result.status}`,
+      });
+    }
+    await new Promise((resolve) => window.setTimeout(resolve, intervalMs));
+  }
+
+  throw new TaskAttachmentUploadError({
+    stage: "job-poll",
+    message: "job-poll timed out",
+    details: `job ${jobId} did not reach terminal success in time`,
+  });
 }
 
 export async function fetchAttachmentArrayBuffer(url: string): Promise<ArrayBuffer> {
