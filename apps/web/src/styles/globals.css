@@ -2829,7 +2829,7 @@ button:hover {
 }
 
 .adminUserGridTiles {
-  grid-template-columns: repeat(auto-fit, minmax(220px, 260px));
+  grid-template-columns: repeat(auto-fit, minmax(280px, 320px));
   align-items: stretch;
   justify-content: start;
 }
