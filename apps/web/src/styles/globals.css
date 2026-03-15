@@ -3025,8 +3025,220 @@ button:hover {
   overflow: visible;
 }
 
+.adminPageIntro {
+  margin-top: 4px;
+  max-width: 760px;
+}
+
+.adminTabsRow {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin: 10px 0 16px;
+}
+
+.adminTabsRow.isSubtabs {
+  margin-top: 0;
+}
+
+.adminTabButton {
+  min-height: 42px;
+  padding: 10px 16px;
+  border-radius: 14px;
+  border: 1px solid rgba(145, 169, 236, 0.18);
+  background: linear-gradient(180deg, rgba(21, 28, 52, 0.72), rgba(14, 19, 39, 0.72));
+  color: #c6d6f5;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.adminTabButton.isActive {
+  border-color: rgba(206, 157, 255, 0.4);
+  background:
+    radial-gradient(circle at 0% 0%, rgba(255, 129, 195, 0.16), transparent 45%),
+    linear-gradient(135deg, rgba(78, 42, 115, 0.82), rgba(25, 29, 66, 0.86));
+  color: #f7f2ff;
+}
+
+.adminSectionLead {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.adminSectionLead.compact {
+  margin-bottom: 14px;
+}
+
+.adminSectionTitle {
+  font-size: 24px;
+  margin: 0;
+}
+
 .adminSectionCard {
   overflow: visible;
+}
+
+.adminAllowlistToolbar {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.adminAllowlistRow {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+}
+
+.adminLinkFormNote {
+  margin-bottom: 12px;
+}
+
+.adminLinkDraftGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(180px, 1fr);
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.adminFieldStack {
+  display: grid;
+  gap: 6px;
+}
+
+.adminLinkDraftActions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.adminLinkChecklist {
+  display: grid;
+  gap: 10px;
+}
+
+.adminLinksSummary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.adminCountBadge {
+  min-width: 28px;
+  height: 28px;
+  padding: 0 9px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: rgba(102, 240, 214, 0.16);
+  border: 1px solid rgba(102, 240, 214, 0.22);
+  color: #bffbf0;
+  font-weight: 700;
+}
+
+.adminAccessLinkList {
+  display: grid;
+  gap: 12px;
+}
+
+.adminAccessLinkCard {
+  border: 1px solid rgba(145, 169, 236, 0.16);
+  border-radius: 16px;
+  padding: 14px;
+  background: linear-gradient(180deg, rgba(19, 26, 49, 0.68), rgba(14, 19, 39, 0.78));
+}
+
+.adminAccessLinkHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.adminLinkStatusBadge {
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  border: 1px solid rgba(145, 169, 236, 0.18);
+}
+
+.adminLinkStatusBadge.isActive {
+  background: rgba(102, 240, 214, 0.16);
+  border-color: rgba(102, 240, 214, 0.22);
+  color: #bffbf0;
+}
+
+.adminLinkStatusBadge.isExpired {
+  background: rgba(255, 196, 110, 0.16);
+  border-color: rgba(255, 196, 110, 0.24);
+  color: #ffe2ae;
+}
+
+.adminLinkStatusBadge.isRevoked {
+  background: rgba(255, 126, 168, 0.14);
+  border-color: rgba(255, 126, 168, 0.22);
+  color: #ffd0de;
+}
+
+.adminAccessLinkMeta {
+  display: flex;
+  gap: 8px 16px;
+  flex-wrap: wrap;
+  margin: 12px 0;
+  color: #aebad8;
+  font-size: 13px;
+}
+
+.adminAccessLinkActions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+
+.adminLinkDetails {
+  border-top: 1px solid rgba(145, 169, 236, 0.12);
+  padding-top: 10px;
+}
+
+.adminLinkDetails summary {
+  cursor: pointer;
+  color: #f2f5ff;
+}
+
+.adminAccessLinkEvents {
+  display: grid;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.adminStubEmptyState {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  border: 1px dashed rgba(145, 169, 236, 0.24);
+  border-radius: 18px;
+  padding: 20px;
+  background: rgba(16, 22, 41, 0.45);
+}
+
+.adminStubEmptyIcon {
+  width: 48px;
+  height: 48px;
+  border-radius: 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, rgba(255, 143, 201, 0.2), rgba(104, 151, 255, 0.2));
+  color: #f5f0ff;
+  font-size: 20px;
 }
 
 .adminUserCard.isOverlay {
@@ -3065,6 +3277,16 @@ button:hover {
 
   .adminPresetSplit {
     grid-template-columns: 1fr;
+  }
+
+  .adminLinkDraftGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .adminAccessLinkHeader,
+  .adminAllowlistRow {
+    flex-direction: column;
+    align-items: stretch;
   }
 
   .favoritesPanel,

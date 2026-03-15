@@ -10,6 +10,7 @@
 Source of truth в коде:
 - [TimelinePage.tsx](../../apps/web/src/pages/TimelinePage.tsx)
 - [MiniAppPage.tsx](../../apps/web/src/pages/MiniAppPage.tsx)
+- [AdminPage.tsx](../../apps/web/src/pages/AdminPage.tsx)
 - [UnifiedTimeline.tsx](../../apps/web/src/gantt/UnifiedTimeline.tsx)
 - [DesignersBoard.tsx](../../apps/web/src/components/DesignersBoard.tsx)
 - [TaskDetailsDrawer.tsx](../../apps/web/src/components/TaskDetailsDrawer.tsx)
@@ -120,6 +121,54 @@ Tooltip может быть шире карточки, чтобы milestone labe
 - имя файла в раскрытой панели кликабельно и открывает preview; compact action buttons используют иконки, а preview modal сохраняет full-text buttons;
 - upload control виден только admin и использует существующий backend upload contour без изменения snapshot contract;
 - desktop drawer принимает drag-and-drop upload по всей поверхности карточки задачи: при перетаскивании подсвечивается весь drawer, а drop в любое место карточки загружает файл в текущую задачу.
+
+## Страница `Админка`
+
+### Назначение слоя
+
+Собрать в одном месте governance-поверхности для доступа и visual preset management, не смешивая user-ops и styling-ops в один длинный скролл.
+
+### Композиция
+
+- top-level tabs:
+  - `Доступ`
+  - `Стиль`
+- `Доступ` содержит две подвкладки:
+  - `Люди`
+  - `Ссылки`
+- `Стиль` пока содержит одну подвкладку:
+  - `Пресеты`
+
+### `Доступ -> Люди`
+
+Содержит все текущие access-governance блоки:
+- pending users;
+- approved users;
+- approve / reject / revoke;
+- admin role toggle;
+- allowlist;
+- `Обновить базу дизайнеров`.
+
+### `Доступ -> Ссылки`
+
+Wave-1 operator surface под future temporary access links:
+- список ссылок;
+- будущая форма создания;
+- quick copy slot;
+- countdown / remaining time slot;
+- usage stats / audit log slot.
+
+Текущая wave-1 реализация intentionally stubbed:
+- shape уже соответствует будущему runtime contract;
+- реальный temp-link redemption, session bootstrap и stats ingestion включаются следующей волной.
+
+### `Стиль -> Пресеты`
+
+Сохраняет текущую бизнес-логику preset management:
+- color presets;
+- layout presets;
+- import / export / delete / set default;
+- drag-order persistence.
 
 ### Переходы
 

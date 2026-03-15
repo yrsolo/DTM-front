@@ -121,6 +121,14 @@ User-visible statuses:
 - `Пользователь` -> доступ подтверждён, full access есть, admin role нет
 - `Администратор` -> full access и доступ к admin UI
 
+Reserved session metadata for the next wave of temporary access links:
+- `/ops/auth/me` and `/test/ops/auth/me` now reserve these optional fields:
+  - `sessionKind`
+  - `expiresAt`
+  - `temporaryAccessLabel`
+- current Yandex / Telegram sessions may still return them as `null`
+- future temp-link sessions will use them for auth-panel countdown and session source labeling
+
 Browser data request behavior:
 - default mode для approved/admin -> frontend отправляет browser API requests с auth cookie
 - guest и pending получают masked data из-за отсутствия full access
@@ -157,6 +165,43 @@ Admin personal order:
   - color presets
   - layout presets
 - `GET /admin/overview` возвращает эти списки уже в персональном порядке текущего администратора
+
+Current admin IA:
+- top-level tabs:
+  - `Доступ`
+  - `Стиль`
+- nested tabs under `Доступ`:
+  - `Люди`
+  - `Ссылки`
+- nested tabs under `Стиль`:
+  - `Пресеты`
+
+`Доступ -> Люди` keeps current runtime actions:
+- pending / approved users
+- approve / reject / revoke
+- admin role toggle
+- allowlist
+- `Обновить базу дизайнеров`
+
+`Доступ -> Ссылки` is wave-1 operator surface for temporary access links:
+- list shape is already reserved in `admin/overview` as `accessLinks`
+- current runtime returns an empty list until temp-link backend APIs are enabled
+- UI already reserves:
+  - label
+  - status
+  - expiresAt
+  - remaining time
+  - useCount
+  - lastUsedAt
+  - quick copy
+  - usage log / stats panel
+- target semantics for the next wave:
+  - reusable viewer link
+  - full unmasked access like approved viewer
+  - never admin access
+  - auth-panel countdown until expiry
+
+`Стиль -> Пресеты` hosts the existing color/layout preset management without changing the current preset business logic.
 
 ## OAuth apps
 

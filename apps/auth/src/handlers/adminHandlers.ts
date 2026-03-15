@@ -92,6 +92,7 @@ export async function listAdminData(req: NormalizedRequest) {
     pendingUsers: orderedPendingUsers,
     approvedUsers: orderedApprovedUsers,
     allowlist,
+    accessLinks: [],
     presets: {
       color: orderedColorPresets,
       layout: orderedLayoutPresets,

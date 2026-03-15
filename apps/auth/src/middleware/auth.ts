@@ -53,6 +53,9 @@ export function buildMePayload(user: AuthUser | null) {
   return {
     authenticated: Boolean(user),
     accessMode: getAccessMode(user),
+    sessionKind: null,
+    expiresAt: null,
+    temporaryAccessLabel: null,
     user: user
       ? {
           id: user.id,

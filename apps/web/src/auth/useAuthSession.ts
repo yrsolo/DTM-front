@@ -32,6 +32,9 @@ export type AuthSessionState = {
   accessMode: "masked" | "full";
   user: AuthSessionUser | null;
   available: boolean;
+  sessionKind: "yandex" | "telegram" | "temp_link" | null;
+  expiresAt: string | null;
+  temporaryAccessLabel: string | null;
   telegramBootstrap: TelegramBootstrapState;
   telegramBootstrapReason: TelegramBootstrapReason | null;
 };
@@ -42,6 +45,9 @@ const DEFAULT_STATE: AuthSessionState = {
   accessMode: "masked",
   user: null,
   available: true,
+  sessionKind: null,
+  expiresAt: null,
+  temporaryAccessLabel: null,
   telegramBootstrap: "idle",
   telegramBootstrapReason: null,
 };
@@ -70,6 +76,9 @@ export function useAuthSession() {
           accessMode: "masked",
           user: null,
           available: true,
+          sessionKind: null,
+          expiresAt: null,
+          temporaryAccessLabel: null,
           telegramBootstrap: "idle",
           telegramBootstrapReason: null,
         };
@@ -87,6 +96,12 @@ export function useAuthSession() {
         accessMode: payload?.accessMode === "full" ? "full" : "masked",
         user: payload?.user ?? null,
         available: true,
+        sessionKind:
+          payload?.sessionKind === "yandex" || payload?.sessionKind === "telegram" || payload?.sessionKind === "temp_link"
+            ? payload.sessionKind
+            : null,
+        expiresAt: typeof payload?.expiresAt === "string" ? payload.expiresAt : null,
+        temporaryAccessLabel: typeof payload?.temporaryAccessLabel === "string" ? payload.temporaryAccessLabel : null,
         telegramBootstrap: payload?.authenticated ? "linked" : "idle",
         telegramBootstrapReason: null,
       };
