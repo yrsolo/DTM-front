@@ -2343,11 +2343,47 @@ button:hover {
   min-width: 36px;
   width: 36px;
   height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   padding-left: 0;
   padding-right: 0;
-  justify-content: center;
-  font-size: 16px;
-  line-height: 1;
+  padding-top: 0;
+  padding-bottom: 0;
+  line-height: 0;
+}
+
+.attachmentActionIconSvg {
+  width: 18px;
+  height: 18px;
+  display: block;
+  flex: 0 0 auto;
+}
+
+.attachmentActionIconButton.isPreview {
+  color: #8ef0b8;
+  border-color: rgba(92, 214, 142, 0.34);
+}
+
+.attachmentActionIconButton.isPreview:hover,
+.attachmentActionIconButton.isPreview:focus-visible {
+  background: linear-gradient(180deg, rgba(26, 67, 44, 0.92), rgba(18, 44, 30, 0.86));
+  border-color: rgba(108, 235, 160, 0.46);
+}
+
+.attachmentActionIconButton.isDownload {
+  color: #dce8ff;
+}
+
+.attachmentActionIconButton.isDelete {
+  color: #ff9da8;
+  border-color: rgba(244, 113, 136, 0.34);
+}
+
+.attachmentActionIconButton.isDelete:hover,
+.attachmentActionIconButton.isDelete:focus-visible {
+  background: linear-gradient(180deg, rgba(88, 29, 44, 0.94), rgba(56, 18, 30, 0.88));
+  border-color: rgba(255, 132, 154, 0.5);
 }
 
 .attachmentEmptyState {

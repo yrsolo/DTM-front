@@ -30,6 +30,51 @@ type UploadState =
   | { status: "requesting" | "uploading" | "finalizing" | "waiting"; message: string }
   | { status: "error"; message: string };
 
+function AttachmentActionIcon(props: { kind: "preview" | "download" | "delete" }) {
+  if (props.kind === "preview") {
+    return (
+      <svg viewBox="0 0 24 24" aria-hidden="true" className="attachmentActionIconSvg">
+        <path
+          d="M2.5 12s3.8-6.5 9.5-6.5S21.5 12 21.5 12s-3.8 6.5-9.5 6.5S2.5 12 2.5 12Z"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <circle cx="12" cy="12" r="3.2" fill="none" stroke="currentColor" strokeWidth="1.8" />
+      </svg>
+    );
+  }
+
+  if (props.kind === "download") {
+    return (
+      <svg viewBox="0 0 24 24" aria-hidden="true" className="attachmentActionIconSvg">
+        <path
+          d="M12 4.5v9.5m0 0 3.6-3.6M12 14l-3.6-3.6M5 18.5h14"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+    );
+  }
+
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" className="attachmentActionIconSvg">
+      <path
+        d="M6.5 6.5 17.5 17.5M17.5 6.5l-11 11"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.9"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
 function openInNewWindow(url: string): boolean {
   if (typeof window === "undefined") return false;
   const popup = window.open(url, "_blank", "noopener,noreferrer");
@@ -412,7 +457,7 @@ export function TaskAttachmentsSection(props: {
                     <div className="attachmentInspectorActions">
                       <button
                         type="button"
-                        className="miniAppButton miniAppButtonGhost attachmentActionIconButton"
+                        className="miniAppButton miniAppButtonGhost attachmentActionIconButton isPreview"
                         onClick={() => {
                           void handlePreview(selectedAttachment);
                         }}
@@ -420,29 +465,29 @@ export function TaskAttachmentsSection(props: {
                         title={selectedAttachment.links?.view ? ui.drawer.attachmentsPreview : ui.drawer.attachmentsUnavailable}
                         aria-label={selectedAttachment.links?.view ? ui.drawer.attachmentsPreview : ui.drawer.attachmentsUnavailable}
                       >
-                        {"👁"}
+                        <AttachmentActionIcon kind="preview" />
                       </button>
                       <button
                         type="button"
-                        className="miniAppButton miniAppButtonGhost attachmentActionIconButton"
+                        className="miniAppButton miniAppButtonGhost attachmentActionIconButton isDownload"
                         onClick={() => handleDownload(selectedAttachment)}
                         disabled={!selectedAttachment.links?.download}
                         title={selectedAttachment.links?.download ? ui.drawer.attachmentsDownload : ui.drawer.attachmentsUnavailable}
                         aria-label={selectedAttachment.links?.download ? ui.drawer.attachmentsDownload : ui.drawer.attachmentsUnavailable}
                       >
-                        {"↓"}
+                        <AttachmentActionIcon kind="download" />
                       </button>
                       {canUpload ? (
                         <button
                           type="button"
-                          className="miniAppButton miniAppButtonGhost attachmentActionIconButton"
+                          className="miniAppButton miniAppButtonGhost attachmentActionIconButton isDelete"
                           onClick={() => {
                             void handleDelete(selectedAttachment);
                           }}
                           title={ui.drawer.attachmentsDelete}
                           aria-label={ui.drawer.attachmentsDelete}
                         >
-                          {"×"}
+                          <AttachmentActionIcon kind="delete" />
                         </button>
                       ) : null}
                     </div>
