@@ -14,6 +14,7 @@ import {
 } from "./handlers/adminHandlers";
 import {
   accessLinkUsageHandler,
+  activateAccessLinkHandler,
   createAccessLinkHandler,
   listAccessLinksHandler,
   redeemAccessLinkHandler,
@@ -151,6 +152,11 @@ export async function routeRequest(req: NormalizedRequest): Promise<HttpResult> 
     const accessLinkRevokeMatch = req.routePath.match(/^\/admin\/access-links\/([^/]+)\/revoke$/);
     if (req.method === "POST" && accessLinkRevokeMatch) {
       return revokeAccessLinkHandler(req, accessLinkRevokeMatch[1]);
+    }
+
+    const accessLinkActivateMatch = req.routePath.match(/^\/admin\/access-links\/([^/]+)\/activate$/);
+    if (req.method === "POST" && accessLinkActivateMatch) {
+      return activateAccessLinkHandler(req, accessLinkActivateMatch[1]);
     }
 
     const accessLinkUsageMatch = req.routePath.match(/^\/admin\/access-links\/([^/]+)\/usage$/);

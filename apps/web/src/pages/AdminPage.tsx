@@ -856,6 +856,18 @@ export function AdminPage() {
     [loadOverview]
   );
 
+  const activateAccessLink = React.useCallback(
+    async (linkId: string) => {
+      const res = await fetch(buildAuthUrl(`/admin/access-links/${encodeURIComponent(linkId)}/activate`), {
+        method: "POST",
+        credentials: "include",
+      });
+      await expectOk(res, "Не удалось вернуть ссылку в активные");
+      await loadOverview();
+    },
+    [loadOverview]
+  );
+
   const handlePeopleDragEnd = React.useCallback(
     async (event: DragEndEvent) => {
       const snapshot = dragSnapshotRef.current;
@@ -1153,7 +1165,19 @@ export function AdminPage() {
                             />
                           </label>
                         </div>
-                        <div className="adminAccessLinkActions">
+                        <div className="adminAccessLinkActions isTempLinkActions">
+                          <button
+                            type="button"
+                            className="btn btnGhost"
+                            onClick={() =>
+                              void runAdminAction(
+                                () => (link.status === "revoked" ? activateAccessLink(link.id) : revokeAccessLink(link.id)),
+                                link.status === "revoked" ? "Ссылка снова активна" : "Ссылка отозвана"
+                              )
+                            }
+                          >
+                            {link.status === "revoked" ? "Вернуть" : "Удалить"}
+                          </button>
                           <button type="button" onClick={() => void runAdminAction(() => copyBrowserLink(link.browserUrl), "Ссылка скопирована")} disabled={!link.browserUrl}>Копировать</button>
                           <button type="button" className="btn btnGhost" onClick={() => void runAdminAction(() => saveAccessLink(link.id), "Ссылка обновлена")}>Сохранить</button>
                           <button type="button" className="btn btnGhost" onClick={() => void runAdminAction(() => revokeAccessLink(link.id), "Ссылка отозвана")} disabled={link.status === "revoked"}>Отозвать</button>

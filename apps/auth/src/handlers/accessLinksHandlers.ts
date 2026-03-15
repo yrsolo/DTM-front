@@ -298,6 +298,33 @@ export async function revokeAccessLinkHandler(req: NormalizedRequest, linkId: st
   return json(200, { link: revoked ? await toAccessLinkCard(revoked) : null });
 }
 
+export async function activateAccessLinkHandler(req: NormalizedRequest, linkId: string) {
+  const auth = await requireAdmin(req);
+  if (auth.error) return auth.error;
+  const existing = await getAccessLinkById(linkId);
+  if (!existing) {
+    return notFound("Access link not found");
+  }
+  const expiresAt = new Date(existing.expiresAt);
+  if (!Number.isFinite(expiresAt.getTime()) || expiresAt.getTime() <= Date.now()) {
+    return badRequest("Нельзя активировать ссылку с истекшим сроком. Сначала продлите дату окончания.");
+  }
+  await updateAccessLink({
+    id: linkId,
+    label: existing.label,
+    expiresAt,
+    status: "active",
+  });
+  const activated = await getAccessLinkById(linkId);
+  await writeAuditLog({
+    actorUserId: auth.user.id,
+    targetUserId: null,
+    action: "admin.access_link_activate",
+    payloadJson: JSON.stringify({ accessLinkId: linkId }),
+  });
+  return json(200, { link: activated ? await toAccessLinkCard(activated) : null });
+}
+
 export async function accessLinkUsageHandler(req: NormalizedRequest, linkId: string) {
   const auth = await requireAdmin(req);
   if (auth.error) return auth.error;
