@@ -155,6 +155,7 @@ export function TaskAttachmentsSection(props: {
     const subtitle = subtitleParts.join(" | ");
 
     if (isDocxAttachment(attachment)) {
+      const browserDownloadUrl = attachment.links?.download ? getBrowserAttachmentUrl(attachment.links.download) : null;
       setPreviewState({
         open: true,
         title: attachment.name,
@@ -163,7 +164,7 @@ export function TaskAttachmentsSection(props: {
         closeLabel: ui.drawer.close,
         downloadLabel: ui.drawer.attachmentsDownload,
         unavailableLabel: ui.drawer.attachmentsUnavailable,
-        downloadUrl: attachment.links?.download ?? null,
+        downloadUrl: browserDownloadUrl,
         onClose: () => setPreviewState({ open: false }),
       });
 
@@ -180,7 +181,7 @@ export function TaskAttachmentsSection(props: {
           closeLabel: ui.drawer.close,
           downloadLabel: ui.drawer.attachmentsDownload,
           unavailableLabel: ui.drawer.attachmentsUnavailable,
-          downloadUrl: attachment.links?.download ?? null,
+          downloadUrl: browserDownloadUrl,
           onClose: () => setPreviewState({ open: false }),
         });
       } catch {
@@ -193,7 +194,7 @@ export function TaskAttachmentsSection(props: {
           closeLabel: ui.drawer.close,
           downloadLabel: ui.drawer.attachmentsDownload,
           unavailableLabel: ui.drawer.attachmentsUnavailable,
-          downloadUrl: attachment.links?.download ?? null,
+          downloadUrl: browserDownloadUrl,
           onClose: () => setPreviewState({ open: false }),
         });
       }
@@ -201,6 +202,7 @@ export function TaskAttachmentsSection(props: {
     }
 
     if (isImageAttachment(attachment)) {
+      const browserDownloadUrl = attachment.links?.download ? getBrowserAttachmentUrl(attachment.links.download) : null;
       setPreviewState({
         open: true,
         title: attachment.name,
@@ -210,7 +212,7 @@ export function TaskAttachmentsSection(props: {
         closeLabel: ui.drawer.close,
         downloadLabel: ui.drawer.attachmentsDownload,
         unavailableLabel: ui.drawer.attachmentsUnavailable,
-        downloadUrl: attachment.links?.download ?? null,
+        downloadUrl: browserDownloadUrl,
         onClose: () => setPreviewState({ open: false }),
       });
       return;
