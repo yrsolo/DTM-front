@@ -1,4 +1,4 @@
-import { getBackendAdminRequestBase } from "../config/runtimeContour";
+import { getAuthRequestBase } from "../config/runtimeContour";
 
 export type AttachmentUploadContract = {
   task_id: string;
@@ -42,7 +42,7 @@ export class TaskAttachmentUploadError extends Error {
 }
 
 function buildBackendAdminUrl(path: string): string {
-  return `${getBackendAdminRequestBase()}${path}`;
+  return `${getAuthRequestBase()}${path}`;
 }
 
 async function parseErrorResponse(res: Response): Promise<string> {
@@ -71,8 +71,7 @@ export async function requestTaskAttachmentUpload(args: {
 }): Promise<AttachmentUploadContract> {
   let res: Response;
   try {
-    res = await fetch(buildBackendAdminUrl("/task-attachments/request-upload"), {
-      // Backend confirmed canonical browser intake path is /ops/admin/task-attachments/*.
+    res = await fetch(buildBackendAdminUrl("/attachments/request-upload"), {
       method: "POST",
       credentials: "include",
       headers: {
@@ -92,7 +91,7 @@ export async function requestTaskAttachmentUpload(args: {
       stage: "request-upload",
       message: error instanceof Error ? error.message : "request-upload network error",
       details: error instanceof Error ? error.message : "network error",
-      host: extractHost(buildBackendAdminUrl("/task-attachments/request-upload")),
+      host: extractHost(buildBackendAdminUrl("/attachments/request-upload")),
     });
   }
 
@@ -103,7 +102,7 @@ export async function requestTaskAttachmentUpload(args: {
       message: `request-upload failed (${res.status})`,
       status: res.status,
       details,
-      host: extractHost(buildBackendAdminUrl("/task-attachments/request-upload")),
+      host: extractHost(buildBackendAdminUrl("/attachments/request-upload")),
     });
   }
 
@@ -165,7 +164,7 @@ export async function finalizeTaskAttachmentUpload(args: {
 }): Promise<void> {
   let res: Response;
   try {
-    res = await fetch(buildBackendAdminUrl("/task-attachments/finalize"), {
+    res = await fetch(buildBackendAdminUrl("/attachments/finalize"), {
       method: "POST",
       credentials: "include",
       headers: {
@@ -183,7 +182,7 @@ export async function finalizeTaskAttachmentUpload(args: {
       stage: "finalize",
       message: error instanceof Error ? error.message : "finalize network error",
       details: error instanceof Error ? error.message : "network error",
-      host: extractHost(buildBackendAdminUrl("/task-attachments/finalize")),
+      host: extractHost(buildBackendAdminUrl("/attachments/finalize")),
     });
   }
   if (!res.ok) {
@@ -193,7 +192,7 @@ export async function finalizeTaskAttachmentUpload(args: {
       message: `finalize failed (${res.status})`,
       status: res.status,
       details,
-      host: extractHost(buildBackendAdminUrl("/task-attachments/finalize")),
+      host: extractHost(buildBackendAdminUrl("/attachments/finalize")),
     });
   }
 }
