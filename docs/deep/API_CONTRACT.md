@@ -133,8 +133,47 @@ Frontend-safe поля:
   - prod -> `/ops/auth/attachments/:id/view|download`
   - test -> `/test/ops/auth/attachments/:id/view|download`
 - frontend не синтезирует storage URLs и не обходит auth facade;
+- frontend использует payload metadata, но read action открывает contour-safe auth route по `attachment_id`, а не raw storage/backend URL;
 - отсутствие `attachments` считается валидным backward-compatible payload;
 - masked payload может не содержать attachment metadata вообще.
+
+### Control-plane attachment contract
+
+Frontend attachment mutations do not use generic `bff`.
+
+Browser-safe routes:
+- `POST /ops/auth/attachments/request-upload`
+- `POST /ops/auth/attachments/finalize`
+- `POST /ops/auth/attachments/delete`
+- `GET /ops/auth/attachments/jobs/{job_id}`
+- `GET /ops/auth/attachments/{attachment_id}/view`
+- `GET /ops/auth/attachments/{attachment_id}/download`
+- test contour uses the same paths under `/test/ops/auth/...`
+
+Upload request body:
+- `task_id`
+- `filename`
+- `mime`
+- `size`
+- `uploaded_by`
+
+Finalize body:
+- `task_id`
+- `attachment_id`
+- `uploaded_by`
+
+Delete body:
+- `task_id`
+- `attachment_id`
+- `deleted_by`
+
+Behavior:
+- `request-upload` returns the presigned upload contract, including `attachment_id`, `uploadUrl`, `headers`, `method`, lifetime metadata and diagnostics;
+- browser then performs direct binary upload to Object Storage using the exact returned contract;
+- successful binary upload alone does not publish the attachment in frontend payload;
+- `finalize` returns `202` with `job_id`;
+- frontend polls `jobs/{job_id}` until terminal `success`;
+- only after terminal job success does frontend refetch task/frontend data and expect the attachment to appear or disappear in `tasks[].attachments`.
 
 ## Структура milestone
 
