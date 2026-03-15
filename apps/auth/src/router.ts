@@ -13,6 +13,14 @@ import {
   saveAdminLayoutOrderHandler,
 } from "./handlers/adminHandlers";
 import {
+  accessLinkUsageHandler,
+  createAccessLinkHandler,
+  listAccessLinksHandler,
+  redeemAccessLinkHandler,
+  revokeAccessLinkHandler,
+  updateAccessLinkHandler,
+} from "./handlers/accessLinksHandlers";
+import {
   proxyAttachmentAdminRequest,
   proxyAttachmentBinaryUpload,
   proxyAttachmentJobRequest,
@@ -54,6 +62,9 @@ export async function routeRequest(req: NormalizedRequest): Promise<HttpResult> 
     if (req.method === "GET" && req.routePath === "/me") {
       return me(req);
     }
+    if (req.method === "POST" && req.routePath === "/access-links/redeem") {
+      return redeemAccessLinkHandler(req);
+    }
     if (req.method === "POST" && req.routePath === "/logout") {
       return logout();
     }
@@ -68,6 +79,12 @@ export async function routeRequest(req: NormalizedRequest): Promise<HttpResult> 
     }
     if (req.method === "POST" && req.routePath === "/admin/designers/refresh") {
       return refreshDesignersDirectoryHandler(req);
+    }
+    if (req.method === "GET" && req.routePath === "/admin/access-links") {
+      return listAccessLinksHandler(req);
+    }
+    if (req.method === "POST" && req.routePath === "/admin/access-links") {
+      return createAccessLinkHandler(req);
     }
     if (req.method === "POST" && req.routePath === "/attachments/request-upload") {
       return proxyAttachmentAdminRequest(req, "request-upload");
@@ -124,6 +141,21 @@ export async function routeRequest(req: NormalizedRequest): Promise<HttpResult> 
     const removeAdminMatch = req.routePath.match(/^\/admin\/users\/([^/]+)\/remove-admin$/);
     if (req.method === "POST" && removeAdminMatch) {
       return removeAdminHandler(req, removeAdminMatch[1]);
+    }
+
+    const accessLinkMatch = req.routePath.match(/^\/admin\/access-links\/([^/]+)$/);
+    if (req.method === "PATCH" && accessLinkMatch) {
+      return updateAccessLinkHandler(req, accessLinkMatch[1]);
+    }
+
+    const accessLinkRevokeMatch = req.routePath.match(/^\/admin\/access-links\/([^/]+)\/revoke$/);
+    if (req.method === "POST" && accessLinkRevokeMatch) {
+      return revokeAccessLinkHandler(req, accessLinkRevokeMatch[1]);
+    }
+
+    const accessLinkUsageMatch = req.routePath.match(/^\/admin\/access-links\/([^/]+)\/usage$/);
+    if (req.method === "GET" && accessLinkUsageMatch) {
+      return accessLinkUsageHandler(req, accessLinkUsageMatch[1]);
     }
 
     const presetMatch = req.routePath.match(/^\/presets\/([^/]+)$/);

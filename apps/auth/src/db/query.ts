@@ -40,6 +40,19 @@ export function int32(value: number) {
   return TypedValues.fromNative(Types.INT32, value);
 }
 
+export function optionalInt32(value: number | null) {
+  if (value == null) {
+    return {
+      type: { optionalType: { item: Types.INT32 } },
+      value: { nullFlagValue: 0 },
+    };
+  }
+  return {
+    type: { optionalType: { item: Types.INT32 } },
+    value: TypedValues.fromNative(Types.INT32, value).value,
+  };
+}
+
 export function timestamp(value: Date) {
   return TypedValues.fromNative(Types.TIMESTAMP, value);
 }

@@ -1,30 +1,83 @@
 import { getAuthRuntimeConfig } from "../config";
+import { getAccessLinkById } from "../db/accessLinksRepo";
 import { isEmailAllowed } from "../db/allowlistRepo";
 import { incrementSessionVersion, setUserStatus, getUserById, upsertRole } from "../db/usersRepo";
 import { clearSessionCookie, readSessionClaims } from "../session/cookieSession";
-import type { AccessMode, AuthUser, SessionClaims } from "../types";
+import type { AccessMode, AuthUser, SessionClaims, SessionKind, SessionUser, TempLinkSessionClaims, UserSessionClaims } from "../types";
+
+function decorateUserSession(user: AuthUser, provider: Exclude<SessionKind, "temp_link">): SessionUser {
+  return {
+    ...user,
+    sessionKind: provider,
+    expiresAt: null,
+    temporaryAccessLabel: null,
+    sourceAccessLinkId: null,
+  };
+}
+
+function materializeTempLinkSession(claims: TempLinkSessionClaims, link: Awaited<ReturnType<typeof getAccessLinkById>>): SessionUser | null {
+  if (!link) return null;
+  const expiresAtMs = Date.parse(link.expiresAt);
+  if (link.status !== "active" || !Number.isFinite(expiresAtMs) || expiresAtMs <= Date.now()) {
+    return null;
+  }
+  return {
+    id: `access-link:${link.id}`,
+    yandexUid: `access-link:${link.id}`,
+    email: null,
+    displayName: link.label,
+    avatarUrl: null,
+    personId: null,
+    personName: null,
+    telegramId: null,
+    telegramUsername: null,
+    status: "approved",
+    role: "viewer",
+    sessionVersion: 1,
+    createdAt: link.createdAt,
+    lastLoginAt: link.lastUsedAt,
+    sessionKind: claims.kind,
+    expiresAt: link.expiresAt,
+    temporaryAccessLabel: link.label,
+    sourceAccessLinkId: link.id,
+  };
+}
 
 export async function resolveSession(
   cookieHeader: string | undefined
-): Promise<{ claims: SessionClaims | null; user: AuthUser | null; clearCookie: boolean }> {
+): Promise<{ claims: SessionClaims | null; user: SessionUser | null; clearCookie: boolean }> {
   const claims = readSessionClaims(cookieHeader);
   if (!claims) {
     return { claims: null, user: null, clearCookie: false };
   }
 
-  const user = await getUserById(claims.userId);
+  if (claims.kind === "temp_link") {
+    const link = await getAccessLinkById(claims.linkId);
+    const user = materializeTempLinkSession(claims, link);
+    if (!user) {
+      return { claims: null, user: null, clearCookie: true };
+    }
+    return { claims, user, clearCookie: false };
+  }
+
+  const userClaims = claims as UserSessionClaims;
+  const user = await getUserById(userClaims.userId);
   if (!user) {
     return { claims: null, user: null, clearCookie: true };
   }
 
-  if (user.sessionVersion !== claims.sv || user.status === "blocked") {
+  if (user.sessionVersion !== userClaims.sv || user.status === "blocked") {
     return { claims: null, user: null, clearCookie: true };
   }
 
-  return { claims, user, clearCookie: false };
+  return {
+    claims,
+    user: decorateUserSession(user, userClaims.provider === "telegram" ? "telegram" : "yandex"),
+    clearCookie: false,
+  };
 }
 
-export function getAccessMode(user: AuthUser | null): AccessMode {
+export function getAccessMode(user: Pick<SessionUser, "status"> | null): AccessMode {
   return user?.status === "approved" ? "full" : "masked";
 }
 
@@ -49,13 +102,13 @@ export async function ensureAdminRole(userId: string): Promise<void> {
   await upsertRole(userId, "admin");
 }
 
-export function buildMePayload(user: AuthUser | null) {
+export function buildMePayload(user: SessionUser | null) {
   return {
     authenticated: Boolean(user),
     accessMode: getAccessMode(user),
-    sessionKind: null,
-    expiresAt: null,
-    temporaryAccessLabel: null,
+    sessionKind: user?.sessionKind ?? null,
+    expiresAt: user?.expiresAt ?? null,
+    temporaryAccessLabel: user?.temporaryAccessLabel ?? null,
     user: user
       ? {
           id: user.id,

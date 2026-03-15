@@ -151,16 +151,19 @@ Tooltip может быть шире карточки, чтобы milestone labe
 
 ### `Доступ -> Ссылки`
 
-Wave-1 operator surface под future temporary access links:
-- список ссылок;
-- будущая форма создания;
-- quick copy slot;
-- countdown / remaining time slot;
+Рабочая операторская поверхность для временных viewer-ссылок:
+- создание reusable link с expiry;
+- список active / expired / revoked ссылок;
+- quick copy browser URL;
+- inline edit label / expiry;
+- revoke;
 - usage stats / audit log slot.
 
-Текущая wave-1 реализация intentionally stubbed:
-- shape уже соответствует будущему runtime contract;
-- реальный temp-link redemption, session bootstrap и stats ingestion включаются следующей волной.
+Runtime semantics:
+- ссылка ведёт в обычный web timeline;
+- redemption создаёт temp-link session;
+- auth panel показывает countdown до `expiresAt`;
+- temp-link session даёт full viewer access без admin-прав.
 
 ### `Стиль -> Пресеты`
 

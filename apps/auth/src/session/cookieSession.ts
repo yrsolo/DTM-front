@@ -1,7 +1,7 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
 
 import { getAuthRuntimeConfig } from "../config";
-import type { SessionClaims } from "../types";
+import type { SessionClaims, TempLinkSessionClaims, UserSessionClaims } from "../types";
 
 function base64urlEncode(value: string): string {
   return Buffer.from(value, "utf8").toString("base64url");
@@ -44,6 +44,31 @@ export function clearSessionCookie(): string {
   return `${cfg.cookieName}=; HttpOnly; Path=${cfg.cookiePath}; Max-Age=0; ${sameSite}${secure}`;
 }
 
+function isUserClaims(value: unknown): value is UserSessionClaims {
+  if (!value || typeof value !== "object") return false;
+  const claims = value as Record<string, unknown>;
+  return (
+    typeof claims.userId === "string" &&
+    typeof claims.yandexUid === "string" &&
+    typeof claims.role === "string" &&
+    typeof claims.status === "string" &&
+    typeof claims.sv === "number" &&
+    typeof claims.iat === "number" &&
+    typeof claims.exp === "number"
+  );
+}
+
+function isTempLinkClaims(value: unknown): value is TempLinkSessionClaims {
+  if (!value || typeof value !== "object") return false;
+  const claims = value as Record<string, unknown>;
+  return (
+    claims.kind === "temp_link" &&
+    typeof claims.linkId === "string" &&
+    typeof claims.iat === "number" &&
+    typeof claims.exp === "number"
+  );
+}
+
 export function readSessionClaims(cookieHeader: string | undefined): SessionClaims | null {
   const cfg = getAuthRuntimeConfig();
   const cookies = parseCookieHeader(cookieHeader);
@@ -62,7 +87,7 @@ export function readSessionClaims(cookieHeader: string | undefined): SessionClai
 
   try {
     const claims = JSON.parse(base64urlDecode(payload)) as SessionClaims;
-    if (!claims || typeof claims !== "object") return null;
+    if (!isUserClaims(claims) && !isTempLinkClaims(claims)) return null;
     if (Date.now() >= claims.exp * 1000) return null;
     return claims;
   } catch {

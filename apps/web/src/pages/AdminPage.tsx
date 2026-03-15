@@ -77,6 +77,11 @@ type AccessLinkCard = {
   usageEvents: AccessLinkUsageEvent[];
 };
 
+type AccessLinkDraft = {
+  label: string;
+  expiresAt: string;
+};
+
 type DragListKey = "pendingUsers" | "approvedUsers" | "colorPresets" | "layoutPresets";
 type AdminTopTab = "access" | "style";
 type AdminAccessTab = "people" | "links";
@@ -154,6 +159,14 @@ function formatDateTime(value: string | null | undefined): string {
     hour: "2-digit",
     minute: "2-digit",
   }).format(date);
+}
+
+function toDateTimeInputValue(value: string | null | undefined): string {
+  if (!value) return "";
+  const date = new Date(value);
+  if (!Number.isFinite(date.getTime())) return "";
+  const local = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+  return local.toISOString().slice(0, 16);
 }
 
 function formatRemainingTime(value: string | null): string {
@@ -362,6 +375,8 @@ export function AdminPage() {
   const [styleTab, setStyleTab] = React.useState<AdminStyleTab>(() => readStoredTab(ADMIN_STYLE_TAB_KEY, ["presets"], "presets"));
   const [draftLinkLabel, setDraftLinkLabel] = React.useState("");
   const [draftLinkExpiryHours, setDraftLinkExpiryHours] = React.useState("72");
+  const [linkDrafts, setLinkDrafts] = React.useState<Record<string, AccessLinkDraft>>({});
+  const [, setLinksClock] = React.useState(() => Date.now());
   const importRef = React.useRef<HTMLInputElement | null>(null);
   const dragSnapshotRef = React.useRef<{ list: DragListKey; ids: string[] } | null>(null);
 
@@ -411,7 +426,25 @@ export function AdminPage() {
     setOrderedApprovedUsers(overview?.approvedUsers ?? []);
     setOrderedColorPresets(overview?.presets.color ?? []);
     setOrderedLayoutPresets(overview?.presets.layout ?? []);
+    setLinkDrafts(
+      Object.fromEntries(
+        (overview?.accessLinks ?? []).map((link) => [
+          link.id,
+          {
+            label: link.label,
+            expiresAt: toDateTimeInputValue(link.expiresAt),
+          },
+        ])
+      )
+    );
   }, [overview]);
+
+  React.useEffect(() => {
+    const timer = window.setInterval(() => {
+      setLinksClock(Date.now());
+    }, 30000);
+    return () => window.clearInterval(timer);
+  }, []);
 
   const getListItems = React.useCallback(
     (list: DragListKey) => {
@@ -749,6 +782,80 @@ export function AdminPage() {
     await navigator.clipboard.writeText(url);
   }, []);
 
+  const createAccessLink = React.useCallback(async () => {
+    const label = draftLinkLabel.trim();
+    const expiresInHours = Number(draftLinkExpiryHours);
+    if (!label) {
+      throw new Error("Нужно указать название ссылки.");
+    }
+    if (!Number.isFinite(expiresInHours) || expiresInHours <= 0) {
+      throw new Error("Срок действия должен быть положительным числом часов.");
+    }
+    const res = await fetch(buildAuthUrl("/admin/access-links"), {
+      method: "POST",
+      credentials: "include",
+      headers: { "content-type": "application/json", accept: "application/json" },
+      body: JSON.stringify({ label, expiresInHours }),
+    });
+    await expectOk(res, "Не удалось создать временную ссылку");
+    const payload = (await res.json()) as { link?: AccessLinkCard | null };
+    setDraftLinkLabel("");
+    setDraftLinkExpiryHours("72");
+    if (payload.link?.browserUrl) {
+      await copyBrowserLink(payload.link.browserUrl);
+      setActionNotice("Ссылка создана и скопирована");
+    }
+    await loadOverview();
+  }, [copyBrowserLink, draftLinkExpiryHours, draftLinkLabel, loadOverview]);
+
+  const updateAccessLinkDraft = React.useCallback((linkId: string, patch: Partial<AccessLinkDraft>) => {
+    setLinkDrafts((prev) => ({
+      ...prev,
+      [linkId]: {
+        label: prev[linkId]?.label ?? "",
+        expiresAt: prev[linkId]?.expiresAt ?? "",
+        ...patch,
+      },
+    }));
+  }, []);
+
+  const saveAccessLink = React.useCallback(
+    async (linkId: string) => {
+      const draft = linkDrafts[linkId];
+      if (!draft?.label.trim()) {
+        throw new Error("Название ссылки не может быть пустым.");
+      }
+      if (!draft.expiresAt) {
+        throw new Error("Укажите дату окончания ссылки.");
+      }
+      const expiresAt = new Date(draft.expiresAt);
+      if (!Number.isFinite(expiresAt.getTime())) {
+        throw new Error("Некорректная дата окончания ссылки.");
+      }
+      const res = await fetch(buildAuthUrl(`/admin/access-links/${encodeURIComponent(linkId)}`), {
+        method: "PATCH",
+        credentials: "include",
+        headers: { "content-type": "application/json", accept: "application/json" },
+        body: JSON.stringify({ label: draft.label.trim(), expiresAt: expiresAt.toISOString() }),
+      });
+      await expectOk(res, "Не удалось обновить временную ссылку");
+      await loadOverview();
+    },
+    [linkDrafts, loadOverview]
+  );
+
+  const revokeAccessLink = React.useCallback(
+    async (linkId: string) => {
+      const res = await fetch(buildAuthUrl(`/admin/access-links/${encodeURIComponent(linkId)}/revoke`), {
+        method: "POST",
+        credentials: "include",
+      });
+      await expectOk(res, "Не удалось отозвать временную ссылку");
+      await loadOverview();
+    },
+    [loadOverview]
+  );
+
   const handlePeopleDragEnd = React.useCallback(
     async (event: DragEndEvent) => {
       const snapshot = dragSnapshotRef.current;
@@ -965,13 +1072,12 @@ export function AdminPage() {
             ) : (
               <>
               <div className="adminSectionLead">
-                <div className="muted">Wave 1 operator surface для reusable viewer-ссылок, таймеров, быстрого копирования и usage stats.</div>
+                <div className="muted">Временные ссылки дают full viewer access без admin-прав. Каждое успешное открытие увеличивает useCount и попадает в журнал использования.</div>
               </div>
 
               <div className="grid2" style={{ alignItems: "start" }}>
                 <div className="card adminSectionCard">
                   <h4 className="pageTitle" style={{ fontSize: 22 }}>Создание ссылки</h4>
-                  <div className="muted adminLinkFormNote">Runtime для временных ссылок включим следующей волной. Форма уже повторяет финальную операторскую модель.</div>
                   <div className="adminLinkDraftGrid">
                     <label className="adminFieldStack">
                       <span className="muted">Название / оператор</span>
@@ -983,18 +1089,18 @@ export function AdminPage() {
                     </label>
                   </div>
                   <div className="adminLinkDraftActions">
-                    <button type="button" disabled title="Создание временных ссылок включим на следующей волне runtime.">Создать ссылку</button>
-                    <div className="muted">Будущая ссылка даст full unmasked viewer access без admin-прав.</div>
+                    <button type="button" onClick={() => void runAdminAction(createAccessLink, "Ссылка создана")}>Создать ссылку</button>
+                    <div className="muted">После создания ссылка сразу копируется в буфер обмена.</div>
                   </div>
                 </div>
 
                 <div className="card adminSectionCard">
-                  <h4 className="pageTitle" style={{ fontSize: 22 }}>Правила будущей runtime-модели</h4>
+                  <h4 className="pageTitle" style={{ fontSize: 22 }}>Поведение ссылки</h4>
                   <div className="adminLinkChecklist">
                     <div className="tableRowGhost">Reusable viewer link до expiry или revoke.</div>
                     <div className="tableRowGhost">В auth-панели будет countdown до окончания действия ссылки.</div>
-                    <div className="tableRowGhost">Временная сессия даст те же non-admin возможности, что и approved viewer.</div>
-                    <div className="tableRowGhost">Для каждой ссылки будем хранить useCount, IP, city и журнал использований.</div>
+                    <div className="tableRowGhost">Ссылка ведёт в обычный web timeline и не даёт admin-права.</div>
+                    <div className="tableRowGhost">Для каждой ссылки видны useCount, последний вход и журнал IP / city / client summary.</div>
                   </div>
                 </div>
               </div>
@@ -1028,10 +1134,29 @@ export function AdminPage() {
                           <span>Использований: {link.useCount}</span>
                           <span>Последний вход: {formatDateTime(link.lastUsedAt)}</span>
                         </div>
+                        <div className="adminLinkDraftGrid">
+                          <label className="adminFieldStack">
+                            <span className="muted">Название</span>
+                            <input
+                              className="input"
+                              value={linkDrafts[link.id]?.label ?? link.label}
+                              onChange={(event) => updateAccessLinkDraft(link.id, { label: event.target.value })}
+                            />
+                          </label>
+                          <label className="adminFieldStack">
+                            <span className="muted">Действует до</span>
+                            <input
+                              className="input"
+                              type="datetime-local"
+                              value={linkDrafts[link.id]?.expiresAt ?? toDateTimeInputValue(link.expiresAt)}
+                              onChange={(event) => updateAccessLinkDraft(link.id, { expiresAt: event.target.value })}
+                            />
+                          </label>
+                        </div>
                         <div className="adminAccessLinkActions">
                           <button type="button" onClick={() => void runAdminAction(() => copyBrowserLink(link.browserUrl), "Ссылка скопирована")} disabled={!link.browserUrl}>Копировать</button>
-                          <button type="button" className="btn btnGhost" disabled title="Extend включим вместе с runtime API.">Продлить</button>
-                          <button type="button" className="btn btnGhost" disabled title="Revoke включим вместе с runtime API.">Отозвать</button>
+                          <button type="button" className="btn btnGhost" onClick={() => void runAdminAction(() => saveAccessLink(link.id), "Ссылка обновлена")}>Сохранить</button>
+                          <button type="button" className="btn btnGhost" onClick={() => void runAdminAction(() => revokeAccessLink(link.id), "Ссылка отозвана")} disabled={link.status === "revoked"}>Отозвать</button>
                         </div>
                         <details className="adminLinkDetails">
                           <summary>Статистика и журнал</summary>
@@ -1058,7 +1183,7 @@ export function AdminPage() {
                     <div className="adminStubEmptyIcon" aria-hidden="true">⧉</div>
                     <div>
                       <div className="adminUserName">Временные ссылки еще не заведены</div>
-                      <div className="muted">UI уже готов к reusable viewer links, таймерам, quick copy и журналу usage. Следующая волна включит runtime API и session bootstrap.</div>
+                      <div className="muted">Создай первую reusable viewer ссылку выше. После redemption она даст full unmasked viewer access и покажет usage stats здесь же.</div>
                     </div>
                   </div>
                 )}
