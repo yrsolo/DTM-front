@@ -18,51 +18,127 @@ export type AttachmentPreviewState =
       onClose: () => void;
     };
 
+type TouchAnchor =
+  | { mode: "pan"; x: number; y: number; translateX: number; translateY: number }
+  | { mode: "pinch"; distance: number; centerX: number; centerY: number; scale: number; translateX: number; translateY: number };
+
 function getTouchDistance(event: React.TouchEvent<HTMLDivElement>): number | null {
   if (event.touches.length < 2) return null;
   const [first, second] = [event.touches[0], event.touches[1]];
-  const dx = second.clientX - first.clientX;
-  const dy = second.clientY - first.clientY;
-  return Math.hypot(dx, dy);
+  return Math.hypot(second.clientX - first.clientX, second.clientY - first.clientY);
+}
+
+function getTouchCenter(event: React.TouchEvent<HTMLDivElement>): { x: number; y: number } | null {
+  if (event.touches.length < 2) return null;
+  const [first, second] = [event.touches[0], event.touches[1]];
+  return {
+    x: (first.clientX + second.clientX) / 2,
+    y: (first.clientY + second.clientY) / 2,
+  };
 }
 
 export function AttachmentPreviewModal(props: { state: AttachmentPreviewState }) {
   const [zoomScale, setZoomScale] = React.useState(1);
-  const pinchRef = React.useRef<{ distance: number; scale: number } | null>(null);
+  const [translate, setTranslate] = React.useState({ x: 0, y: 0 });
+  const touchAnchorRef = React.useRef<TouchAnchor | null>(null);
 
   React.useEffect(() => {
     if (!props.state.open) return;
     setZoomScale(1);
-    pinchRef.current = null;
+    setTranslate({ x: 0, y: 0 });
+    touchAnchorRef.current = null;
   }, [props.state]);
 
   if (!props.state.open) return null;
 
   function handleTouchStart(event: React.TouchEvent<HTMLDivElement>) {
-    const distance = getTouchDistance(event);
-    if (!distance) return;
-    pinchRef.current = { distance, scale: zoomScale };
+    if (event.touches.length >= 2) {
+      const distance = getTouchDistance(event);
+      const center = getTouchCenter(event);
+      if (!distance || !center) return;
+      touchAnchorRef.current = {
+        mode: "pinch",
+        distance,
+        centerX: center.x,
+        centerY: center.y,
+        scale: zoomScale,
+        translateX: translate.x,
+        translateY: translate.y,
+      };
+      return;
+    }
+
+    if (event.touches.length === 1) {
+      touchAnchorRef.current = {
+        mode: "pan",
+        x: event.touches[0].clientX,
+        y: event.touches[0].clientY,
+        translateX: translate.x,
+        translateY: translate.y,
+      };
+    }
   }
 
   function handleTouchMove(event: React.TouchEvent<HTMLDivElement>) {
-    const pinch = pinchRef.current;
-    const distance = getTouchDistance(event);
-    if (!pinch || !distance) return;
-    event.preventDefault();
-    const nextScale = Math.min(2.5, Math.max(0.55, (distance / pinch.distance) * pinch.scale));
-    setZoomScale(nextScale);
+    const anchor = touchAnchorRef.current;
+    if (!anchor) return;
+
+    if (anchor.mode === "pinch" && event.touches.length >= 2) {
+      const distance = getTouchDistance(event);
+      const center = getTouchCenter(event);
+      if (!distance || !center) return;
+      event.preventDefault();
+      const nextScale = Math.min(2.5, Math.max(0.55, (distance / anchor.distance) * anchor.scale));
+      const nextTranslate = {
+        x: anchor.translateX + (center.x - anchor.centerX),
+        y: anchor.translateY + (center.y - anchor.centerY),
+      };
+      setZoomScale(nextScale);
+      setTranslate(nextTranslate);
+      return;
+    }
+
+    if (anchor.mode === "pan" && event.touches.length === 1) {
+      event.preventDefault();
+      setTranslate({
+        x: anchor.translateX + (event.touches[0].clientX - anchor.x),
+        y: anchor.translateY + (event.touches[0].clientY - anchor.y),
+      });
+    }
   }
 
   function handleTouchEnd(event: React.TouchEvent<HTMLDivElement>) {
     if (event.touches.length >= 2) {
       const distance = getTouchDistance(event);
-      if (distance) {
-        pinchRef.current = { distance, scale: zoomScale };
-      }
+      const center = getTouchCenter(event);
+      if (!distance || !center) return;
+      touchAnchorRef.current = {
+        mode: "pinch",
+        distance,
+        centerX: center.x,
+        centerY: center.y,
+        scale: zoomScale,
+        translateX: translate.x,
+        translateY: translate.y,
+      };
       return;
     }
-    pinchRef.current = null;
+
+    if (event.touches.length === 1) {
+      touchAnchorRef.current = {
+        mode: "pan",
+        x: event.touches[0].clientX,
+        y: event.touches[0].clientY,
+        translateX: translate.x,
+        translateY: translate.y,
+      };
+      return;
+    }
+
+    touchAnchorRef.current = null;
   }
+
+  const previewTransform = `translate(${translate.x}px, ${translate.y}px) scale(${zoomScale})`;
 
   const modal = (
     <div className="attachmentPreviewBackdrop" onClick={props.state.onClose}>
@@ -108,7 +184,7 @@ export function AttachmentPreviewModal(props: { state: AttachmentPreviewState })
                 className="attachmentPreviewImage"
                 src={props.state.src}
                 alt={props.state.title}
-                style={{ transform: `scale(${zoomScale})` }}
+                style={{ transform: previewTransform }}
               />
             </div>
           ) : null}
@@ -122,7 +198,7 @@ export function AttachmentPreviewModal(props: { state: AttachmentPreviewState })
             >
               <div
                 className="attachmentPreviewDocx"
-                style={{ transform: `scale(${zoomScale})` }}
+                style={{ transform: previewTransform }}
                 dangerouslySetInnerHTML={{ __html: props.state.html }}
               />
             </div>

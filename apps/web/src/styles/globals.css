@@ -2217,10 +2217,16 @@ button:hover {
   align-items: center;
   justify-content: flex-start;
   gap: 10px;
+  flex-wrap: nowrap;
 }
 
 .attachmentUploadRow.isCompact {
   flex-wrap: wrap;
+}
+
+.attachmentUploadButton {
+  white-space: nowrap;
+  flex: 0 0 auto;
 }
 
 .attachmentFileInput {
@@ -2449,6 +2455,7 @@ button:hover {
   place-items: start center;
   touch-action: none;
   transform-origin: top center;
+  overflow: hidden;
 }
 
 .attachmentPreviewImage {

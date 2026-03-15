@@ -72,6 +72,7 @@ export type UiText = {
     attachmentsEmpty: string;
     attachmentsUpload: string;
     attachmentsUploading: string;
+    attachmentsUploadingBinary: string;
     attachmentsFinalize: string;
     attachmentsWaiting: string;
     attachmentsUploaded: string;
@@ -203,8 +204,9 @@ const RU_TEXT: UiText = {
     ownerResolveHint: "ownerId присутствует, но не найден в people[]",
     attachments: "Вложения",
     attachmentsEmpty: "Пока нет вложений",
-    attachmentsUpload: "Загрузить файл",
+    attachmentsUpload: "Загрузить",
     attachmentsUploading: "Получаем контракт загрузки...",
+    attachmentsUploadingBinary: "Загружаем файл...",
     attachmentsFinalize: "Проверяем файл и завершаем загрузку...",
     attachmentsWaiting: "Файл отправлен. Ждём публикацию вложения в snapshot.",
     attachmentsUploaded: "Вложение опубликовано.",
@@ -216,7 +218,7 @@ const RU_TEXT: UiText = {
     attachmentsUnavailable: "Недоступно",
     attachmentsActionFailed: "Не удалось выполнить действие с файлом",
     attachmentsPreviewFailed: "Не удалось открыть предпросмотр файла",
-    attachmentsDropHint: "Файл загружается только по явному действию администратора",
+    attachmentsDropHint: "",
     attachmentsUploadedAt: "Загружен",
     attachmentsGeneric: "Файл",
     weekdays: ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"],
@@ -336,8 +338,9 @@ const EN_TEXT: UiText = {
     ownerResolveHint: "ownerId is present but absent in people[] mapping",
     attachments: "Attachments",
     attachmentsEmpty: "No attachments yet",
-    attachmentsUpload: "Upload file",
+    attachmentsUpload: "Upload",
     attachmentsUploading: "Requesting upload contract...",
+    attachmentsUploadingBinary: "Uploading file...",
     attachmentsFinalize: "Verifying file and finalizing upload...",
     attachmentsWaiting: "File uploaded. Waiting for snapshot publication.",
     attachmentsUploaded: "Attachment published.",
@@ -349,7 +352,7 @@ const EN_TEXT: UiText = {
     attachmentsUnavailable: "Unavailable",
     attachmentsActionFailed: "Failed to complete file action",
     attachmentsPreviewFailed: "Failed to open file preview",
-    attachmentsDropHint: "File upload is available only as an explicit admin action",
+    attachmentsDropHint: "",
     attachmentsUploadedAt: "Uploaded",
     attachmentsGeneric: "File",
     weekdays: ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"],

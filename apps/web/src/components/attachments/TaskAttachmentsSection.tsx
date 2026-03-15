@@ -245,7 +245,7 @@ export function TaskAttachmentsSection(props: {
         uploadedBy: userId,
       });
 
-      setUploadState({ status: "uploading", message: ui.drawer.attachmentsDropHint });
+      setUploadState({ status: "uploading", message: ui.drawer.attachmentsUploadingBinary });
       await uploadTaskAttachmentBinary(contract, file);
 
       setUploadState({ status: "finalizing", message: ui.drawer.attachmentsFinalize });
@@ -330,10 +330,9 @@ export function TaskAttachmentsSection(props: {
                   className="attachmentFileInput"
                   onChange={handleFilePicked}
                 />
-                <button type="button" className="miniAppButton" onClick={() => inputRef.current?.click()}>
+                <button type="button" className="miniAppButton attachmentUploadButton" onClick={() => inputRef.current?.click()}>
                   {ui.drawer.attachmentsUpload}
                 </button>
-                <span className="muted">{ui.drawer.attachmentsDropHint}</span>
               </div>
             ) : null}
 
