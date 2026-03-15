@@ -2056,6 +2056,14 @@ button:hover {
   opacity: 0;
 }
 
+.drawer.attachmentDrawerDropActive {
+  border-color: rgba(143, 195, 255, 0.52);
+  box-shadow:
+    0 0 0 1px rgba(143, 195, 255, 0.3),
+    0 0 0 8px rgba(143, 195, 255, 0.08),
+    0 22px 46px rgba(18, 33, 74, 0.3);
+}
+
 .drawerHeaderRow {
   display: flex;
   justify-content: space-between;

@@ -56,6 +56,9 @@ function formatUploadError(error: unknown, fallback: string): string {
 export function TaskAttachmentsSection(props: {
   task: TaskV1;
   compact?: boolean;
+  dragActive?: boolean;
+  droppedFile?: File | null;
+  onDroppedFileHandled?: () => void;
 }) {
   const ctx = React.useContext(LayoutContext);
   const ui = ctx?.ui ?? getUiText("ru");
@@ -69,7 +72,6 @@ export function TaskAttachmentsSection(props: {
   const [selectedId, setSelectedId] = React.useState<string | null>(null);
   const [uploadState, setUploadState] = React.useState<UploadState>({ status: "idle" });
   const [actionError, setActionError] = React.useState<string | null>(null);
-  const [isDragActive, setIsDragActive] = React.useState(false);
   const [tooltipState, setTooltipState] = React.useState<TooltipState>({ visible: false });
   const [previewState, setPreviewState] = React.useState<AttachmentPreviewState>({ open: false });
   const inputRef = React.useRef<HTMLInputElement | null>(null);
@@ -105,10 +107,16 @@ export function TaskAttachmentsSection(props: {
     setSelectedId(null);
     setUploadState({ status: "idle" });
     setActionError(null);
-    setIsDragActive(false);
     setPreviewState({ open: false });
     setTooltipState({ visible: false });
   }, [props.task.id]);
+
+  React.useEffect(() => {
+    if (!props.droppedFile || !canUpload) return;
+    setExpanded(true);
+    void processAttachmentFile(props.droppedFile);
+    props.onDroppedFileHandled?.();
+  }, [props.droppedFile, canUpload]);
 
   const selectedAttachment = React.useMemo(
     () => attachments.find((attachment) => attachment.id === selectedId) ?? attachments[0] ?? null,
@@ -298,34 +306,7 @@ export function TaskAttachmentsSection(props: {
   return (
     <>
       <div
-        className={`card drawerSection ${isDragActive ? "attachmentDropZoneActive" : ""}`}
-        onDragEnter={(event) => {
-          if (!canUpload) return;
-          event.preventDefault();
-          setExpanded(true);
-          setIsDragActive(true);
-        }}
-        onDragOver={(event) => {
-          if (!canUpload) return;
-          event.preventDefault();
-          event.dataTransfer.dropEffect = "copy";
-        }}
-        onDragLeave={(event) => {
-          if (!canUpload) return;
-          const nextTarget = event.relatedTarget as Node | null;
-          if (nextTarget && event.currentTarget.contains(nextTarget)) return;
-          setIsDragActive(false);
-        }}
-        onDrop={(event) => {
-          if (!canUpload) return;
-          event.preventDefault();
-          setExpanded(true);
-          setIsDragActive(false);
-          const file = event.dataTransfer.files?.[0];
-          if (file) {
-            void processAttachmentFile(file);
-          }
-        }}
+        className={`card drawerSection ${props.dragActive ? "attachmentDropZoneActive" : ""}`}
       >
         <button
           type="button"
