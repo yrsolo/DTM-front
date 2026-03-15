@@ -229,6 +229,9 @@ export function TaskAttachmentsSection(props: {
       return;
     }
     const browserDownloadUrl = getBrowserAttachmentUrl(downloadUrl);
+    if (openInNewWindow(browserDownloadUrl)) {
+      return;
+    }
     if (typeof document === "undefined") return;
     const anchor = document.createElement("a");
     anchor.href = browserDownloadUrl;
