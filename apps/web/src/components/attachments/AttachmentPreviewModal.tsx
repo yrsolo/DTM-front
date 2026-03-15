@@ -19,8 +19,24 @@ export type AttachmentPreviewState =
     };
 
 type TouchAnchor =
-  | { mode: "pan"; x: number; y: number; translateX: number; translateY: number }
-  | { mode: "pinch"; distance: number; centerX: number; centerY: number; scale: number; translateX: number; translateY: number };
+  | {
+      mode: "pan";
+      x: number;
+      y: number;
+      translateX: number;
+      translateY: number;
+    }
+  | {
+      mode: "pinch";
+      distance: number;
+      localX: number;
+      localY: number;
+      scale: number;
+      translateX: number;
+      translateY: number;
+      contentOriginX: number;
+      contentOriginY: number;
+    };
 
 function getTouchDistance(event: React.TouchEvent<HTMLDivElement>): number | null {
   if (event.touches.length < 2) return null;
@@ -41,6 +57,11 @@ export function AttachmentPreviewModal(props: { state: AttachmentPreviewState })
   const [zoomScale, setZoomScale] = React.useState(1);
   const [translate, setTranslate] = React.useState({ x: 0, y: 0 });
   const touchAnchorRef = React.useRef<TouchAnchor | null>(null);
+  const zoomAreaRef = React.useRef<HTMLDivElement | null>(null);
+  const zoomContentRef = React.useRef<HTMLDivElement | HTMLImageElement | null>(null);
+  const setZoomContentRef = React.useCallback((node: HTMLDivElement | HTMLImageElement | null) => {
+    zoomContentRef.current = node;
+  }, []);
 
   React.useEffect(() => {
     if (!props.state.open) return;
@@ -52,18 +73,25 @@ export function AttachmentPreviewModal(props: { state: AttachmentPreviewState })
   if (!props.state.open) return null;
 
   function handleTouchStart(event: React.TouchEvent<HTMLDivElement>) {
-    if (event.touches.length >= 2) {
+    const zoomArea = zoomAreaRef.current;
+    const zoomContent = zoomContentRef.current;
+
+    if (event.touches.length >= 2 && zoomArea && zoomContent) {
       const distance = getTouchDistance(event);
       const center = getTouchCenter(event);
       if (!distance || !center) return;
+      const areaRect = zoomArea.getBoundingClientRect();
+      const contentRect = zoomContent.getBoundingClientRect();
       touchAnchorRef.current = {
         mode: "pinch",
         distance,
-        centerX: center.x,
-        centerY: center.y,
+        localX: center.x - areaRect.left,
+        localY: center.y - areaRect.top,
         scale: zoomScale,
         translateX: translate.x,
         translateY: translate.y,
+        contentOriginX: contentRect.left - areaRect.left,
+        contentOriginY: contentRect.top - areaRect.top,
       };
       return;
     }
@@ -81,20 +109,25 @@ export function AttachmentPreviewModal(props: { state: AttachmentPreviewState })
 
   function handleTouchMove(event: React.TouchEvent<HTMLDivElement>) {
     const anchor = touchAnchorRef.current;
-    if (!anchor) return;
+    const zoomArea = zoomAreaRef.current;
+    if (!anchor || !zoomArea) return;
 
     if (anchor.mode === "pinch" && event.touches.length >= 2) {
       const distance = getTouchDistance(event);
       const center = getTouchCenter(event);
       if (!distance || !center) return;
       event.preventDefault();
+      const areaRect = zoomArea.getBoundingClientRect();
       const nextScale = Math.min(2.5, Math.max(0.55, (distance / anchor.distance) * anchor.scale));
-      const nextTranslate = {
-        x: anchor.translateX + (center.x - anchor.centerX),
-        y: anchor.translateY + (center.y - anchor.centerY),
-      };
+      const nextLocalX = center.x - areaRect.left;
+      const nextLocalY = center.y - areaRect.top;
+      const focalContentX = (anchor.localX - anchor.contentOriginX - anchor.translateX) / anchor.scale;
+      const focalContentY = (anchor.localY - anchor.contentOriginY - anchor.translateY) / anchor.scale;
       setZoomScale(nextScale);
-      setTranslate(nextTranslate);
+      setTranslate({
+        x: nextLocalX - anchor.contentOriginX - focalContentX * nextScale,
+        y: nextLocalY - anchor.contentOriginY - focalContentY * nextScale,
+      });
       return;
     }
 
@@ -108,18 +141,25 @@ export function AttachmentPreviewModal(props: { state: AttachmentPreviewState })
   }
 
   function handleTouchEnd(event: React.TouchEvent<HTMLDivElement>) {
-    if (event.touches.length >= 2) {
+    const zoomArea = zoomAreaRef.current;
+    const zoomContent = zoomContentRef.current;
+
+    if (event.touches.length >= 2 && zoomArea && zoomContent) {
       const distance = getTouchDistance(event);
       const center = getTouchCenter(event);
       if (!distance || !center) return;
+      const areaRect = zoomArea.getBoundingClientRect();
+      const contentRect = zoomContent.getBoundingClientRect();
       touchAnchorRef.current = {
         mode: "pinch",
         distance,
-        centerX: center.x,
-        centerY: center.y,
+        localX: center.x - areaRect.left,
+        localY: center.y - areaRect.top,
         scale: zoomScale,
         translateX: translate.x,
         translateY: translate.y,
+        contentOriginX: contentRect.left - areaRect.left,
+        contentOriginY: contentRect.top - areaRect.top,
       };
       return;
     }
@@ -174,6 +214,7 @@ export function AttachmentPreviewModal(props: { state: AttachmentPreviewState })
           {props.state.mode === "error" ? <div className="miniAppNotice">{props.state.error}</div> : null}
           {props.state.mode === "image" && props.state.src ? (
             <div
+              ref={zoomAreaRef}
               className="attachmentPreviewZoomArea"
               onTouchStart={handleTouchStart}
               onTouchMove={handleTouchMove}
@@ -181,6 +222,7 @@ export function AttachmentPreviewModal(props: { state: AttachmentPreviewState })
               onTouchCancel={handleTouchEnd}
             >
               <img
+                ref={setZoomContentRef}
                 className="attachmentPreviewImage"
                 src={props.state.src}
                 alt={props.state.title}
@@ -190,6 +232,7 @@ export function AttachmentPreviewModal(props: { state: AttachmentPreviewState })
           ) : null}
           {props.state.mode === "docx" && props.state.html ? (
             <div
+              ref={zoomAreaRef}
               className="attachmentPreviewZoomArea"
               onTouchStart={handleTouchStart}
               onTouchMove={handleTouchMove}
@@ -197,6 +240,7 @@ export function AttachmentPreviewModal(props: { state: AttachmentPreviewState })
               onTouchCancel={handleTouchEnd}
             >
               <div
+                ref={setZoomContentRef}
                 className="attachmentPreviewDocx"
                 style={{ transform: previewTransform }}
                 dangerouslySetInnerHTML={{ __html: props.state.html }}

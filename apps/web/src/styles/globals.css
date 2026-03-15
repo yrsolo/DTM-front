@@ -2499,7 +2499,7 @@ button:hover {
   height: auto;
   object-fit: contain;
   border-radius: 14px;
-  transform-origin: top center;
+  transform-origin: 0 0;
   transition: transform 90ms linear;
 }
 
@@ -2508,7 +2508,7 @@ button:hover {
   max-width: 860px;
   color: #eef4ff;
   line-height: 1.6;
-  transform-origin: top center;
+  transform-origin: 0 0;
   transition: transform 90ms linear;
 }
 
