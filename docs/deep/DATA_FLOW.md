@@ -59,6 +59,7 @@ Source of truth:
   - `POST /ops/admin/task-attachments/request-upload` or `/test/...`
   - direct browser `PUT` to the returned presigned `uploadUrl`
   - `POST /ops/admin/task-attachments/finalize` or `/test/...`
+- attachment harness and browser polling can use existing auth facade route `/ops/auth/attachments/jobs/{job_id}` and `/test/ops/auth/attachments/jobs/{job_id}` instead of a new namespace;
 - finalize does not mutate frontend snapshot directly: UI ждёт следующего snapshot refresh.
 
 ## Cache / persistence

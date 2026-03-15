@@ -15,6 +15,7 @@ import {
 import {
   proxyAttachmentAdminRequest,
   proxyAttachmentBinaryUpload,
+  proxyAttachmentJobRequest,
   proxyAttachmentReadRequest,
 } from "./handlers/attachmentProxy";
 import { callback, login, logout, me, telegramSession } from "./handlers/authHandlers";
@@ -79,6 +80,10 @@ export async function routeRequest(req: NormalizedRequest): Promise<HttpResult> 
     }
     if (req.method === "POST" && req.routePath === "/attachments/delete") {
       return proxyAttachmentAdminRequest(req, "delete");
+    }
+    const attachmentJobMatch = req.routePath.match(/^\/attachments\/jobs\/([^/]+)$/);
+    if (req.method === "GET" && attachmentJobMatch) {
+      return proxyAttachmentJobRequest(req, attachmentJobMatch[1]);
     }
     if (req.method === "GET" && req.routePath === "/presets") {
       return listPresetsHandler(req);

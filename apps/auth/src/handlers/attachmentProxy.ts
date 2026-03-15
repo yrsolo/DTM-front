@@ -117,6 +117,10 @@ export function proxyAttachmentReadRequest(
   return proxyTrustedRequest(req, `/task-attachments/${attachmentId}/${action}`);
 }
 
+export function proxyAttachmentJobRequest(req: NormalizedRequest, jobId: string): Promise<HttpResult> {
+  return proxyTrustedRequest(req, `/admin/jobs/${jobId}`);
+}
+
 function decodeHeaderValue(value: string | undefined): string | null {
   const raw = value?.trim();
   if (!raw) return null;
