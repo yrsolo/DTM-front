@@ -3,6 +3,7 @@ import { TaskAttachmentV1, TaskV1 } from "@dtm/schema/snapshot";
 
 import {
   AttachmentUploadContract,
+  deleteTaskAttachment,
   requestTaskAttachmentUpload,
   uploadTaskAttachmentBinary,
   finalizeTaskAttachmentUpload,
@@ -113,6 +114,19 @@ export function TaskAttachmentsSection(props: {
       await ctx.snapshotState.syncFromApi();
       const currentTask = ctx.snapshotState.snapshot?.tasks.find((task) => task.id === props.task.id);
       if (currentTask?.attachments?.some((attachment) => attachment.id === expectedAttachmentId)) {
+        return true;
+      }
+      await new Promise((resolve) => window.setTimeout(resolve, 1000));
+    }
+    return false;
+  }
+
+  async function refetchUntilAttachmentMissing(expectedAttachmentId: string): Promise<boolean> {
+    if (!ctx?.snapshotState.syncFromApi) return false;
+    for (let attempt = 0; attempt < 4; attempt += 1) {
+      await ctx.snapshotState.syncFromApi();
+      const currentTask = ctx.snapshotState.snapshot?.tasks.find((task) => task.id === props.task.id);
+      if (!currentTask?.attachments?.some((attachment) => attachment.id === expectedAttachmentId)) {
         return true;
       }
       await new Promise((resolve) => window.setTimeout(resolve, 1000));
@@ -293,6 +307,34 @@ export function TaskAttachmentsSection(props: {
     }
   }
 
+  async function handleDelete(attachment: TaskAttachmentV1) {
+    const userId = authState?.user?.id ?? null;
+    if (!canUpload || !userId) return;
+
+    setActionError(null);
+    try {
+      setUploadState({ status: "waiting", message: ui.drawer.attachmentsDeleting });
+      const deletion = await deleteTaskAttachment({
+        taskId: props.task.id,
+        attachmentId: attachment.id,
+        deletedBy: userId,
+      });
+      await pollAttachmentJob(deletion.jobId);
+      const removed = await refetchUntilAttachmentMissing(attachment.id);
+      if (removed) {
+        setSelectedId(null);
+        setUploadState({ status: "ready", message: ui.drawer.attachmentsDeleted });
+      } else {
+        setUploadState({ status: "waiting", message: ui.drawer.attachmentsDeleting });
+      }
+    } catch (error) {
+      setUploadState({
+        status: "error",
+        message: formatUploadError(error, ui.drawer.attachmentsActionFailed),
+      });
+    }
+  }
+
   return (
     <>
       <div className="card drawerSection">
@@ -394,20 +436,35 @@ export function TaskAttachmentsSection(props: {
                     <div className="attachmentInspectorActions">
                       <button
                         type="button"
-                        className="miniAppButton miniAppButtonGhost"
+                        className="miniAppButton miniAppButtonGhost attachmentActionIconButton"
                         onClick={() => { void handlePreview(selectedAttachment); }}
                         disabled={!selectedAttachment.links?.view}
+                        title={selectedAttachment.links?.view ? ui.drawer.attachmentsPreview : ui.drawer.attachmentsUnavailable}
+                        aria-label={selectedAttachment.links?.view ? ui.drawer.attachmentsPreview : ui.drawer.attachmentsUnavailable}
                       >
-                        {selectedAttachment.links?.view ? ui.drawer.attachmentsPreview : ui.drawer.attachmentsUnavailable}
+                        {selectedAttachment.links?.view ? "↗" : "?"}
                       </button>
                       <button
                         type="button"
-                        className="miniAppButton miniAppButtonGhost"
+                        className="miniAppButton miniAppButtonGhost attachmentActionIconButton"
                         onClick={() => handleDownload(selectedAttachment)}
                         disabled={!selectedAttachment.links?.download}
+                        title={selectedAttachment.links?.download ? ui.drawer.attachmentsDownload : ui.drawer.attachmentsUnavailable}
+                        aria-label={selectedAttachment.links?.download ? ui.drawer.attachmentsDownload : ui.drawer.attachmentsUnavailable}
                       >
-                        {selectedAttachment.links?.download ? ui.drawer.attachmentsDownload : ui.drawer.attachmentsUnavailable}
+                        {selectedAttachment.links?.download ? "↓" : "?"}
                       </button>
+                      {canUpload ? (
+                        <button
+                          type="button"
+                          className="miniAppButton miniAppButtonGhost attachmentActionIconButton"
+                          onClick={() => { void handleDelete(selectedAttachment); }}
+                          title={ui.drawer.attachmentsDelete}
+                          aria-label={ui.drawer.attachmentsDelete}
+                        >
+                          {"×"}
+                        </button>
+                      ) : null}
                     </div>
                   </div>
                 ) : null}

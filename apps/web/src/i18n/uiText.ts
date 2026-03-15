@@ -77,6 +77,9 @@ export type UiText = {
     attachmentsUploaded: string;
     attachmentsPreview: string;
     attachmentsDownload: string;
+    attachmentsDelete: string;
+    attachmentsDeleting: string;
+    attachmentsDeleted: string;
     attachmentsUnavailable: string;
     attachmentsActionFailed: string;
     attachmentsPreviewFailed: string;
@@ -207,6 +210,9 @@ const RU_TEXT: UiText = {
     attachmentsUploaded: "Вложение опубликовано.",
     attachmentsPreview: "Просмотр",
     attachmentsDownload: "Скачать",
+    attachmentsDelete: "Удалить",
+    attachmentsDeleting: "Удаляем вложение и ждём завершения фоновой задачи...",
+    attachmentsDeleted: "Вложение удалено.",
     attachmentsUnavailable: "Недоступно",
     attachmentsActionFailed: "Не удалось выполнить действие с файлом",
     attachmentsPreviewFailed: "Не удалось открыть предпросмотр файла",
@@ -337,6 +343,9 @@ const EN_TEXT: UiText = {
     attachmentsUploaded: "Attachment published.",
     attachmentsPreview: "Preview",
     attachmentsDownload: "Download",
+    attachmentsDelete: "Delete",
+    attachmentsDeleting: "Deleting attachment and waiting for background job...",
+    attachmentsDeleted: "Attachment deleted.",
     attachmentsUnavailable: "Unavailable",
     attachmentsActionFailed: "Failed to complete file action",
     attachmentsPreviewFailed: "Failed to open file preview",
