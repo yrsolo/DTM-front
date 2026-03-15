@@ -2,7 +2,6 @@ import React from "react";
 import { TaskAttachmentV1, TaskV1 } from "@dtm/schema/snapshot";
 
 import {
-  AttachmentUploadContract,
   deleteTaskAttachment,
   requestTaskAttachmentUpload,
   uploadTaskAttachmentBinary,
@@ -28,40 +27,8 @@ import { AttachmentPreviewModal, AttachmentPreviewState } from "./AttachmentPrev
 
 type UploadState =
   | { status: "idle" }
-  | { status: "requesting" | "uploading" | "finalizing" | "waiting" | "ready"; message: string }
+  | { status: "requesting" | "uploading" | "finalizing" | "waiting"; message: string }
   | { status: "error"; message: string };
-
-function formatContractDebug(contract: AttachmentUploadContract): string {
-  const method = contract.method?.trim().toUpperCase() || "PUT";
-  const headerKeys = Object.keys(contract.headers ?? {}).sort();
-  let host = "unknown";
-  try {
-    host = new URL(contract.uploadUrl).host;
-  } catch {
-    host = "invalid-url";
-  }
-  return `uploadHost=${host} | method=${method} | headerKeys=${headerKeys.join(",") || "none"}`;
-}
-
-function formatDiagnosticsDebug(contract: AttachmentUploadContract): string[] {
-  const diagnostics = contract.diagnostics;
-  if (!diagnostics) return [];
-
-  return [
-    diagnostics.uploadContractVersion ? `contractVersion=${diagnostics.uploadContractVersion}` : null,
-    diagnostics.signedMethod ? `signedMethod=${diagnostics.signedMethod}` : null,
-    diagnostics.signedContentType ? `signedContentType=${diagnostics.signedContentType}` : null,
-    diagnostics.requiredHeaders?.length ? `requiredHeaders=${diagnostics.requiredHeaders.join(",")}` : null,
-    diagnostics.uploadUrlScheme ? `uploadUrlScheme=${diagnostics.uploadUrlScheme}` : null,
-    diagnostics.uploadUrlHost ? `uploadUrlHost=${diagnostics.uploadUrlHost}` : null,
-    diagnostics.uploadUrlPath ? `uploadUrlPath=${diagnostics.uploadUrlPath}` : null,
-    diagnostics.expiresAtUtc ? `expiresAtUtc=${diagnostics.expiresAtUtc}` : null,
-    diagnostics.browserMayRequirePreflight !== null && diagnostics.browserMayRequirePreflight !== undefined
-      ? `browserMayRequirePreflight=${diagnostics.browserMayRequirePreflight ? "true" : "false"}`
-      : null,
-    diagnostics.notes?.length ? `notes=${diagnostics.notes.join(" ; ")}` : null,
-  ].filter((value): value is string => Boolean(value));
-}
 
 function openInNewWindow(url: string): boolean {
   if (typeof window === "undefined") return false;
@@ -102,8 +69,7 @@ export function TaskAttachmentsSection(props: {
   const [selectedId, setSelectedId] = React.useState<string | null>(null);
   const [uploadState, setUploadState] = React.useState<UploadState>({ status: "idle" });
   const [actionError, setActionError] = React.useState<string | null>(null);
-  const [uploadDebug, setUploadDebug] = React.useState<string | null>(null);
-  const [uploadDiagnostics, setUploadDiagnostics] = React.useState<string[]>([]);
+  const [isDragActive, setIsDragActive] = React.useState(false);
   const [tooltipState, setTooltipState] = React.useState<TooltipState>({ visible: false });
   const [previewState, setPreviewState] = React.useState<AttachmentPreviewState>({ open: false });
   const inputRef = React.useRef<HTMLInputElement | null>(null);
@@ -139,8 +105,7 @@ export function TaskAttachmentsSection(props: {
     setSelectedId(null);
     setUploadState({ status: "idle" });
     setActionError(null);
-    setUploadDebug(null);
-    setUploadDiagnostics([]);
+    setIsDragActive(false);
     setPreviewState({ open: false });
     setTooltipState({ visible: false });
   }, [props.task.id]);
@@ -159,8 +124,9 @@ export function TaskAttachmentsSection(props: {
       setActionError(ui.drawer.attachmentsUnavailable);
       return;
     }
-    const browserViewUrl = getBrowserAttachmentUrl(viewUrl);
 
+    const browserViewUrl = getBrowserAttachmentUrl(viewUrl);
+    const browserDownloadUrl = attachment.links?.download ? getBrowserAttachmentUrl(attachment.links.download) : null;
     const subtitleParts = [
       attachmentTypeLabel(attachment),
       formatBytes(attachment.sizeBytes),
@@ -169,7 +135,6 @@ export function TaskAttachmentsSection(props: {
     const subtitle = subtitleParts.join(" | ");
 
     if (isDocxAttachment(attachment)) {
-      const browserDownloadUrl = attachment.links?.download ? getBrowserAttachmentUrl(attachment.links.download) : null;
       setPreviewState({
         open: true,
         title: attachment.name,
@@ -216,7 +181,6 @@ export function TaskAttachmentsSection(props: {
     }
 
     if (isImageAttachment(attachment)) {
-      const browserDownloadUrl = attachment.links?.download ? getBrowserAttachmentUrl(attachment.links.download) : null;
       setPreviewState({
         open: true,
         title: attachment.name,
@@ -258,13 +222,11 @@ export function TaskAttachmentsSection(props: {
     anchor.remove();
   }
 
-  async function handleFilePicked(event: React.ChangeEvent<HTMLInputElement>) {
-    const file = event.target.files?.[0];
+  async function processAttachmentFile(file: File) {
     const userId = authState?.user?.id ?? null;
     if (!file || !userId || !canUpload) return;
 
     setActionError(null);
-    setUploadDiagnostics([]);
     try {
       setUploadState({ status: "requesting", message: ui.drawer.attachmentsUploading });
       const contract = await requestTaskAttachmentUpload({
@@ -274,8 +236,6 @@ export function TaskAttachmentsSection(props: {
         size: file.size,
         uploadedBy: userId,
       });
-      setUploadDebug(formatContractDebug(contract));
-      setUploadDiagnostics(formatDiagnosticsDebug(contract));
 
       setUploadState({ status: "uploading", message: ui.drawer.attachmentsDropHint });
       await uploadTaskAttachmentBinary(contract, file);
@@ -290,11 +250,7 @@ export function TaskAttachmentsSection(props: {
       setUploadState({ status: "waiting", message: ui.drawer.attachmentsWaiting });
       await pollAttachmentJob(finalize.jobId);
       const published = await refetchUntilAttachmentVisible(contract.attachment_id);
-      setUploadState(
-        published
-          ? { status: "ready", message: ui.drawer.attachmentsUploaded }
-          : { status: "waiting", message: ui.drawer.attachmentsWaiting }
-      );
+      setUploadState(published ? { status: "idle" } : { status: "waiting", message: ui.drawer.attachmentsWaiting });
     } catch (error) {
       setUploadState({
         status: "error",
@@ -305,6 +261,12 @@ export function TaskAttachmentsSection(props: {
         inputRef.current.value = "";
       }
     }
+  }
+
+  function handleFilePicked(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    void processAttachmentFile(file);
   }
 
   async function handleDelete(attachment: TaskAttachmentV1) {
@@ -321,11 +283,9 @@ export function TaskAttachmentsSection(props: {
       });
       await pollAttachmentJob(deletion.jobId);
       const removed = await refetchUntilAttachmentMissing(attachment.id);
+      setUploadState(removed ? { status: "idle" } : { status: "waiting", message: ui.drawer.attachmentsDeleting });
       if (removed) {
         setSelectedId(null);
-        setUploadState({ status: "ready", message: ui.drawer.attachmentsDeleted });
-      } else {
-        setUploadState({ status: "waiting", message: ui.drawer.attachmentsDeleting });
       }
     } catch (error) {
       setUploadState({
@@ -337,7 +297,36 @@ export function TaskAttachmentsSection(props: {
 
   return (
     <>
-      <div className="card drawerSection">
+      <div
+        className={`card drawerSection ${isDragActive ? "attachmentDropZoneActive" : ""}`}
+        onDragEnter={(event) => {
+          if (!canUpload) return;
+          event.preventDefault();
+          setExpanded(true);
+          setIsDragActive(true);
+        }}
+        onDragOver={(event) => {
+          if (!canUpload) return;
+          event.preventDefault();
+          event.dataTransfer.dropEffect = "copy";
+        }}
+        onDragLeave={(event) => {
+          if (!canUpload) return;
+          const nextTarget = event.relatedTarget as Node | null;
+          if (nextTarget && event.currentTarget.contains(nextTarget)) return;
+          setIsDragActive(false);
+        }}
+        onDrop={(event) => {
+          if (!canUpload) return;
+          event.preventDefault();
+          setExpanded(true);
+          setIsDragActive(false);
+          const file = event.dataTransfer.files?.[0];
+          if (file) {
+            void processAttachmentFile(file);
+          }
+        }}
+      >
         <button
           type="button"
           className={`attachmentPanelToggle ${expanded ? "isOpen" : ""}`}
@@ -363,6 +352,7 @@ export function TaskAttachmentsSection(props: {
                 <button type="button" className="miniAppButton" onClick={() => inputRef.current?.click()}>
                   {ui.drawer.attachmentsUpload}
                 </button>
+                <span className="muted">{ui.drawer.attachmentsDropHint}</span>
               </div>
             ) : null}
 
@@ -371,13 +361,6 @@ export function TaskAttachmentsSection(props: {
                 {uploadState.message}
               </div>
             ) : null}
-
-            {uploadDebug ? <div className="attachmentInlineNotice">{uploadDebug}</div> : null}
-            {uploadDiagnostics.map((line) => (
-              <div key={line} className="attachmentInlineNotice">
-                {line}
-              </div>
-            ))}
 
             {attachments.length ? (
               <>
@@ -390,7 +373,9 @@ export function TaskAttachmentsSection(props: {
                         type="button"
                         className={`attachmentIconTile ${attachmentToneClass(attachment)} ${selectedAttachment?.id === attachment.id ? "isActive" : ""}`}
                         onClick={() => setSelectedId(attachment.id)}
-                        onDoubleClick={() => { void handlePreview(attachment); }}
+                        onDoubleClick={() => {
+                          void handlePreview(attachment);
+                        }}
                         onMouseEnter={(event) =>
                           setTooltipState({
                             visible: true,
@@ -410,9 +395,7 @@ export function TaskAttachmentsSection(props: {
                         }
                         onMouseMove={(event) =>
                           setTooltipState((prev) =>
-                            prev.visible
-                              ? { ...prev, x: event.clientX, y: event.clientY }
-                              : prev
+                            prev.visible ? { ...prev, x: event.clientX, y: event.clientY } : prev
                           )
                         }
                         onMouseLeave={() => setTooltipState({ visible: false })}
@@ -426,9 +409,22 @@ export function TaskAttachmentsSection(props: {
                 {selectedAttachment ? (
                   <div className={`attachmentInspector ${props.compact ? "isCompact" : ""}`}>
                     <div className="attachmentInspectorMeta">
-                      <div className="attachmentInspectorTitle">{selectedAttachment.name}</div>
+                      <button
+                        type="button"
+                        className="attachmentInspectorTitleButton"
+                        title={selectedAttachment.name}
+                        onClick={() => {
+                          void handlePreview(selectedAttachment);
+                        }}
+                      >
+                        {selectedAttachment.name}
+                      </button>
                       <div className="attachmentInspectorSubline">
-                        {[attachmentTypeLabel(selectedAttachment), formatBytes(selectedAttachment.sizeBytes), formatAttachmentUploadedAt(selectedAttachment.uploadedAt ?? null, locale)]
+                        {[
+                          attachmentTypeLabel(selectedAttachment),
+                          formatBytes(selectedAttachment.sizeBytes),
+                          formatAttachmentUploadedAt(selectedAttachment.uploadedAt ?? null, locale),
+                        ]
                           .filter(Boolean)
                           .join(" | ")}
                       </div>
@@ -437,12 +433,14 @@ export function TaskAttachmentsSection(props: {
                       <button
                         type="button"
                         className="miniAppButton miniAppButtonGhost attachmentActionIconButton"
-                        onClick={() => { void handlePreview(selectedAttachment); }}
+                        onClick={() => {
+                          void handlePreview(selectedAttachment);
+                        }}
                         disabled={!selectedAttachment.links?.view}
                         title={selectedAttachment.links?.view ? ui.drawer.attachmentsPreview : ui.drawer.attachmentsUnavailable}
                         aria-label={selectedAttachment.links?.view ? ui.drawer.attachmentsPreview : ui.drawer.attachmentsUnavailable}
                       >
-                        {selectedAttachment.links?.view ? "↗" : "?"}
+                        {"👁"}
                       </button>
                       <button
                         type="button"
@@ -452,13 +450,15 @@ export function TaskAttachmentsSection(props: {
                         title={selectedAttachment.links?.download ? ui.drawer.attachmentsDownload : ui.drawer.attachmentsUnavailable}
                         aria-label={selectedAttachment.links?.download ? ui.drawer.attachmentsDownload : ui.drawer.attachmentsUnavailable}
                       >
-                        {selectedAttachment.links?.download ? "↓" : "?"}
+                        {"↓"}
                       </button>
                       {canUpload ? (
                         <button
                           type="button"
                           className="miniAppButton miniAppButtonGhost attachmentActionIconButton"
-                          onClick={() => { void handleDelete(selectedAttachment); }}
+                          onClick={() => {
+                            void handleDelete(selectedAttachment);
+                          }}
                           title={ui.drawer.attachmentsDelete}
                           aria-label={ui.drawer.attachmentsDelete}
                         >

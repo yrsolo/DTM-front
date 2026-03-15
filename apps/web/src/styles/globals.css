@@ -2156,6 +2156,13 @@ button:hover {
   margin-top: 12px;
 }
 
+.attachmentDropZoneActive {
+  border-color: rgba(143, 195, 255, 0.48);
+  box-shadow:
+    0 0 0 1px rgba(143, 195, 255, 0.24),
+    0 18px 34px rgba(18, 33, 74, 0.24);
+}
+
 .attachmentUploadRow {
   display: flex;
   align-items: center;
@@ -2237,9 +2244,26 @@ button:hover {
   min-width: 0;
   display: grid;
   gap: 4px;
+  flex: 1 1 auto;
 }
 
 .attachmentInspectorTitle {
+  font-size: 13px;
+  font-weight: 700;
+  color: #eef4ff;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.attachmentInspectorTitleButton {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  margin: 0;
+  text-align: left;
+  cursor: pointer;
   font-size: 13px;
   font-weight: 700;
   color: #eef4ff;
@@ -2255,17 +2279,19 @@ button:hover {
 
 .attachmentInspectorActions {
   display: inline-flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: 8px;
+  flex: 0 0 auto;
 }
 
 .attachmentActionIconButton {
-  min-width: 40px;
-  width: 40px;
+  min-width: 36px;
+  width: 36px;
+  height: 36px;
   padding-left: 0;
   padding-right: 0;
   justify-content: center;
-  font-size: 17px;
+  font-size: 16px;
   line-height: 1;
 }
 
