@@ -697,12 +697,7 @@ export function AdminPage() {
 
   const renderHeader = (
     <div className="pageHeader">
-      <div>
-        <h3 className="pageTitle">Админка</h3>
-        <div className="muted adminPageIntro">
-          Управление доступом, будущими временными ссылками и визуальными пресетами в одном месте.
-        </div>
-      </div>
+      <h3 className="pageTitle">Админка</h3>
       <button type="button" className="adminCloseButton" onClick={goToTimeline} aria-label="Вернуться на таймлайн" title="Вернуться на таймлайн">
         ×
       </button>
@@ -746,16 +741,22 @@ export function AdminPage() {
       {actionError ? <p className="muted" style={{ color: "#ffb8c8" }}>{actionError}</p> : null}
       {actionNotice ? <p className="muted" style={{ color: "#9fe8c4" }}>{actionNotice}</p> : null}
 
-      <div className="adminTabsRow">
-        <AdminTabButton active={topTab === "access"} onClick={() => setTopTab("access")}>Доступ</AdminTabButton>
-        <AdminTabButton active={topTab === "style"} onClick={() => setTopTab("style")}>Стиль</AdminTabButton>
+      <div className="adminTabPanel">
+        <div className="adminTabPanelLabel">Раздел</div>
+        <div className="adminTabsRow">
+          <AdminTabButton active={topTab === "access"} onClick={() => setTopTab("access")}>Доступ</AdminTabButton>
+          <AdminTabButton active={topTab === "style"} onClick={() => setTopTab("style")}>Стиль</AdminTabButton>
+        </div>
       </div>
 
       {topTab === "access" ? (
         <>
-          <div className="adminTabsRow isSubtabs">
-            <AdminTabButton active={accessTab === "people"} onClick={() => setAccessTab("people")}>Люди</AdminTabButton>
-            <AdminTabButton active={accessTab === "links"} onClick={() => setAccessTab("links")}>Ссылки</AdminTabButton>
+          <div className="adminSubtabPanel">
+            <div className="adminTabPanelLabel">Подраздел</div>
+            <div className="adminTabsRow isSubtabs">
+              <AdminTabButton active={accessTab === "people"} onClick={() => setAccessTab("people")}>Люди</AdminTabButton>
+              <AdminTabButton active={accessTab === "links"} onClick={() => setAccessTab("links")}>Ссылки</AdminTabButton>
+            </div>
           </div>
 
           {accessTab === "people" ? (
@@ -957,8 +958,11 @@ export function AdminPage() {
         </>
       ) : (
         <>
-          <div className="adminTabsRow isSubtabs">
-            <AdminTabButton active={styleTab === "presets"} onClick={() => setStyleTab("presets")}>Пресеты</AdminTabButton>
+          <div className="adminSubtabPanel">
+            <div className="adminTabPanelLabel">Подраздел</div>
+            <div className="adminTabsRow isSubtabs">
+              <AdminTabButton active={styleTab === "presets"} onClick={() => setStyleTab("presets")}>Пресеты</AdminTabButton>
+            </div>
           </div>
 
           <div className="adminSectionLead">

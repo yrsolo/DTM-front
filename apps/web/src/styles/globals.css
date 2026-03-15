@@ -3025,20 +3025,48 @@ button:hover {
   overflow: visible;
 }
 
-.adminPageIntro {
-  margin-top: 4px;
-  max-width: 760px;
-}
-
 .adminTabsRow {
   display: flex;
   gap: 10px;
   flex-wrap: wrap;
-  margin: 10px 0 16px;
+  margin: 0;
 }
 
 .adminTabsRow.isSubtabs {
   margin-top: 0;
+}
+
+.adminTabPanel,
+.adminSubtabPanel {
+  display: grid;
+  gap: 10px;
+  margin: 10px 0 16px;
+  border-radius: 18px;
+}
+
+.adminTabPanel {
+  padding: 14px;
+  border: 1px solid rgba(165, 184, 240, 0.18);
+  background:
+    radial-gradient(circle at 0% 0%, rgba(255, 143, 201, 0.08), transparent 38%),
+    linear-gradient(180deg, rgba(24, 31, 58, 0.72), rgba(14, 20, 41, 0.84));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.04),
+    0 18px 32px rgba(6, 10, 22, 0.18);
+}
+
+.adminSubtabPanel {
+  padding: 12px;
+  border: 1px solid rgba(140, 159, 221, 0.14);
+  background: linear-gradient(180deg, rgba(15, 21, 39, 0.72), rgba(11, 16, 32, 0.82));
+}
+
+.adminTabPanelLabel {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #9eb0d8;
 }
 
 .adminTabButton {
@@ -3057,6 +3085,24 @@ button:hover {
     radial-gradient(circle at 0% 0%, rgba(255, 129, 195, 0.16), transparent 45%),
     linear-gradient(135deg, rgba(78, 42, 115, 0.82), rgba(25, 29, 66, 0.86));
   color: #f7f2ff;
+}
+
+.adminSubtabPanel .adminTabButton {
+  min-height: 38px;
+  padding: 8px 14px;
+  border-radius: 12px;
+  border-color: rgba(127, 150, 210, 0.16);
+  background: linear-gradient(180deg, rgba(19, 25, 44, 0.9), rgba(13, 18, 35, 0.9));
+  color: #b4c4e5;
+  font-size: 14px;
+}
+
+.adminSubtabPanel .adminTabButton.isActive {
+  border-color: rgba(118, 238, 211, 0.28);
+  background:
+    radial-gradient(circle at 100% 100%, rgba(102, 240, 214, 0.12), transparent 46%),
+    linear-gradient(180deg, rgba(19, 49, 55, 0.88), rgba(15, 28, 39, 0.92));
+  color: #dffdf6;
 }
 
 .adminSectionLead {
