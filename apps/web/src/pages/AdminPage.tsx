@@ -749,16 +749,15 @@ export function AdminPage() {
       </div>
 
       {topTab === "access" ? (
-        <>
-          <div className="adminSubtabPanel">
-            <div className="adminTabsRow isSubtabs">
-              <AdminTabButton active={accessTab === "people"} onClick={() => setAccessTab("people")}>Люди</AdminTabButton>
-              <AdminTabButton active={accessTab === "links"} onClick={() => setAccessTab("links")}>Ссылки</AdminTabButton>
-            </div>
+        <div className="adminSubtabPanel">
+          <div className="adminTabsRow isSubtabs">
+            <AdminTabButton active={accessTab === "people"} onClick={() => setAccessTab("people")}>Люди</AdminTabButton>
+            <AdminTabButton active={accessTab === "links"} onClick={() => setAccessTab("links")}>Ссылки</AdminTabButton>
           </div>
 
-          {accessTab === "people" ? (
-            <>
+          <div className="adminSubtabBody">
+            {accessTab === "people" ? (
+              <>
               <div className="adminSectionLead">
                 <h4 className="pageTitle adminSectionTitle">Люди</h4>
                 <div className="muted">Одобрение пользователей, admin-роли, allowlist и синхронизация дизайнеров.</div>
@@ -848,9 +847,9 @@ export function AdminPage() {
                   {!overview?.allowlist?.length ? <div className="muted">Allowlist пуст.</div> : null}
                 </div>
               </div>
-            </>
-          ) : (
-            <>
+              </>
+            ) : (
+              <>
               <div className="adminSectionLead">
                 <h4 className="pageTitle adminSectionTitle">Ссылки</h4>
                 <div className="muted">Wave 1 operator surface для reusable viewer-ссылок, таймеров, быстрого копирования и usage stats.</div>
@@ -951,90 +950,91 @@ export function AdminPage() {
                   </div>
                 )}
               </div>
-            </>
-          )}
-        </>
+              </>
+            )}
+          </div>
+        </div>
       ) : (
-        <>
-          <div className="adminSubtabPanel">
-            <div className="adminTabsRow isSubtabs">
-              <AdminTabButton active={styleTab === "presets"} onClick={() => setStyleTab("presets")}>Пресеты</AdminTabButton>
-            </div>
+        <div className="adminSubtabPanel">
+          <div className="adminTabsRow isSubtabs">
+            <AdminTabButton active={styleTab === "presets"} onClick={() => setStyleTab("presets")}>Пресеты</AdminTabButton>
           </div>
 
-          <div className="adminSectionLead">
-            <h4 className="pageTitle adminSectionTitle">Стиль</h4>
-            <div className="muted">Первая подвкладка хранит color/layout presets без изменения текущей бизнес-логики.</div>
-          </div>
+          <div className="adminSubtabBody">
+            <div className="adminSectionLead">
+              <h4 className="pageTitle adminSectionTitle">Стиль</h4>
+              <div className="muted">Первая подвкладка хранит color/layout presets без изменения текущей бизнес-логики.</div>
+            </div>
 
-          <div className="card adminSectionCard">
-            <div className="pageHeader" style={{ marginBottom: 12 }}>
-              <h4 className="pageTitle" style={{ fontSize: 22 }}>Пресеты</h4>
-            </div>
-            <div className="adminPresetToolbar">
-              <button type="button" className="btn btnGhost" onClick={() => { setPendingImportKind("color"); importRef.current?.click(); }}>Импортировать color preset</button>
-              <button type="button" className="btn btnGhost" onClick={() => { setPendingImportKind("layout"); importRef.current?.click(); }}>Импортировать layout preset</button>
-            </div>
-            <div className="grid2 adminPresetSplit" style={{ alignItems: "start" }}>
-              <div className="card adminPresetColumn">
-                <h4 className="pageTitle" style={{ fontSize: 20 }}>Цветовые пресеты</h4>
-                <DndContext sensors={sensors} collisionDetection={closestCenter} onDragStart={(event) => handleDragStart("colorPresets", event)} onDragOver={(event) => handleDragOver("colorPresets", event)} onDragEnd={(event) => void handleDragEnd("colorPresets", event)} onDragCancel={handleDragCancel}>
-                  <SortableContext items={orderedColorPresets.map((preset) => preset.id)} strategy={rectSortingStrategy}>
-                    <div className="adminUserGrid adminPresetGrid">
-                      {orderedColorPresets.map((preset) => (
-                        <SortableCard key={preset.id} id={preset.id} className="adminUserCard adminUserBrick adminPresetBrick">
-                          <PresetCardContent
-                            preset={preset}
-                            actions={
-                              <>
-                                <button type="button" onClick={() => void runAdminAction(() => setDefaultPreset(preset), "Preset по умолчанию обновлен")}>Сделать default</button>
-                                <button type="button" className="btn btnGhost" onClick={() => void runAdminAction(() => exportPreset(preset), "Preset экспортирован")}>Экспорт</button>
-                                <button type="button" className="btn btnGhost" onClick={() => void runAdminAction(() => deletePreset(preset.id), "Preset удален")}>Удалить</button>
-                              </>
-                            }
-                          />
-                        </SortableCard>
-                      ))}
-                      {!orderedColorPresets.length ? <div className="muted">Пока нет preset-ов этого типа.</div> : null}
-                    </div>
-                  </SortableContext>
-                </DndContext>
+            <div className="card adminSectionCard">
+              <div className="pageHeader" style={{ marginBottom: 12 }}>
+                <h4 className="pageTitle" style={{ fontSize: 22 }}>Пресеты</h4>
+              </div>
+              <div className="adminPresetToolbar">
+                <button type="button" className="btn btnGhost" onClick={() => { setPendingImportKind("color"); importRef.current?.click(); }}>Импортировать color preset</button>
+                <button type="button" className="btn btnGhost" onClick={() => { setPendingImportKind("layout"); importRef.current?.click(); }}>Импортировать layout preset</button>
+              </div>
+              <div className="grid2 adminPresetSplit" style={{ alignItems: "start" }}>
+                <div className="card adminPresetColumn">
+                  <h4 className="pageTitle" style={{ fontSize: 20 }}>Цветовые пресеты</h4>
+                  <DndContext sensors={sensors} collisionDetection={closestCenter} onDragStart={(event) => handleDragStart("colorPresets", event)} onDragOver={(event) => handleDragOver("colorPresets", event)} onDragEnd={(event) => void handleDragEnd("colorPresets", event)} onDragCancel={handleDragCancel}>
+                    <SortableContext items={orderedColorPresets.map((preset) => preset.id)} strategy={rectSortingStrategy}>
+                      <div className="adminUserGrid adminPresetGrid">
+                        {orderedColorPresets.map((preset) => (
+                          <SortableCard key={preset.id} id={preset.id} className="adminUserCard adminUserBrick adminPresetBrick">
+                            <PresetCardContent
+                              preset={preset}
+                              actions={
+                                <>
+                                  <button type="button" onClick={() => void runAdminAction(() => setDefaultPreset(preset), "Preset по умолчанию обновлен")}>Сделать default</button>
+                                  <button type="button" className="btn btnGhost" onClick={() => void runAdminAction(() => exportPreset(preset), "Preset экспортирован")}>Экспорт</button>
+                                  <button type="button" className="btn btnGhost" onClick={() => void runAdminAction(() => deletePreset(preset.id), "Preset удален")}>Удалить</button>
+                                </>
+                              }
+                            />
+                          </SortableCard>
+                        ))}
+                        {!orderedColorPresets.length ? <div className="muted">Пока нет preset-ов этого типа.</div> : null}
+                      </div>
+                    </SortableContext>
+                  </DndContext>
+                </div>
+
+                <div className="card adminPresetColumn">
+                  <h4 className="pageTitle" style={{ fontSize: 20 }}>UI / Layout пресеты</h4>
+                  <DndContext sensors={sensors} collisionDetection={closestCenter} onDragStart={(event) => handleDragStart("layoutPresets", event)} onDragOver={(event) => handleDragOver("layoutPresets", event)} onDragEnd={(event) => void handleDragEnd("layoutPresets", event)} onDragCancel={handleDragCancel}>
+                    <SortableContext items={orderedLayoutPresets.map((preset) => preset.id)} strategy={rectSortingStrategy}>
+                      <div className="adminUserGrid adminPresetGrid">
+                        {orderedLayoutPresets.map((preset) => (
+                          <SortableCard key={preset.id} id={preset.id} className="adminUserCard adminUserBrick adminPresetBrick">
+                            <PresetCardContent
+                              preset={preset}
+                              actions={
+                                <>
+                                  <button type="button" onClick={() => void runAdminAction(() => setDefaultPreset(preset), "Preset по умолчанию обновлен")}>Сделать default</button>
+                                  <button type="button" className="btn btnGhost" onClick={() => void runAdminAction(() => exportPreset(preset), "Preset экспортирован")}>Экспорт</button>
+                                  <button type="button" className="btn btnGhost" onClick={() => void runAdminAction(() => deletePreset(preset.id), "Preset удален")}>Удалить</button>
+                                </>
+                              }
+                            />
+                          </SortableCard>
+                        ))}
+                        {!orderedLayoutPresets.length ? <div className="muted">Пока нет preset-ов этого типа.</div> : null}
+                      </div>
+                    </SortableContext>
+                  </DndContext>
+                </div>
               </div>
 
-              <div className="card adminPresetColumn">
-                <h4 className="pageTitle" style={{ fontSize: 20 }}>UI / Layout пресеты</h4>
-                <DndContext sensors={sensors} collisionDetection={closestCenter} onDragStart={(event) => handleDragStart("layoutPresets", event)} onDragOver={(event) => handleDragOver("layoutPresets", event)} onDragEnd={(event) => void handleDragEnd("layoutPresets", event)} onDragCancel={handleDragCancel}>
-                  <SortableContext items={orderedLayoutPresets.map((preset) => preset.id)} strategy={rectSortingStrategy}>
-                    <div className="adminUserGrid adminPresetGrid">
-                      {orderedLayoutPresets.map((preset) => (
-                        <SortableCard key={preset.id} id={preset.id} className="adminUserCard adminUserBrick adminPresetBrick">
-                          <PresetCardContent
-                            preset={preset}
-                            actions={
-                              <>
-                                <button type="button" onClick={() => void runAdminAction(() => setDefaultPreset(preset), "Preset по умолчанию обновлен")}>Сделать default</button>
-                                <button type="button" className="btn btnGhost" onClick={() => void runAdminAction(() => exportPreset(preset), "Preset экспортирован")}>Экспорт</button>
-                                <button type="button" className="btn btnGhost" onClick={() => void runAdminAction(() => deletePreset(preset.id), "Preset удален")}>Удалить</button>
-                              </>
-                            }
-                          />
-                        </SortableCard>
-                      ))}
-                      {!orderedLayoutPresets.length ? <div className="muted">Пока нет preset-ов этого типа.</div> : null}
-                    </div>
-                  </SortableContext>
-                </DndContext>
-              </div>
+              <input ref={importRef} type="file" accept=".json,application/json" style={{ display: "none" }} onChange={(event) => {
+                const file = event.target.files?.[0];
+                if (!file) return;
+                void runAdminAction(() => importPreset(file, pendingImportKind), "Preset импортирован");
+                event.target.value = "";
+              }} />
             </div>
-
-            <input ref={importRef} type="file" accept=".json,application/json" style={{ display: "none" }} onChange={(event) => {
-              const file = event.target.files?.[0];
-              if (!file) return;
-              void runAdminAction(() => importPreset(file, pendingImportKind), "Preset импортирован");
-              event.target.value = "";
-            }} />
           </div>
-        </>
+        </div>
       )}
 
       {typeof document !== "undefined"
