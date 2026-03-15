@@ -65,9 +65,18 @@ function buildTrustedHeaders(req: NormalizedRequest, user: Awaited<ReturnType<ty
 
 async function proxyTrustedRequest(req: NormalizedRequest, upstreamPath: string): Promise<HttpResult> {
   const cfg = getAuthRuntimeConfig();
+  const upstreamOrigin = cfg.apiUpstreamOrigin.replace(/\/+$/, "");
+  return proxyTrustedRequestToOrigin(req, upstreamOrigin, upstreamPath);
+}
+
+async function proxyTrustedRequestToOrigin(
+  req: NormalizedRequest,
+  upstreamOrigin: string,
+  upstreamPath: string
+): Promise<HttpResult> {
   const { user, clearCookie } = await resolveSession(req.headers.cookie);
   const upstreamUrl = new URL(
-    `${cfg.apiUpstreamOrigin.replace(/\/+$/, "")}${upstreamPath}${req.query.toString() ? `?${req.query.toString()}` : ""}`
+    `${upstreamOrigin}${upstreamPath}${req.query.toString() ? `?${req.query.toString()}` : ""}`
   );
 
   const upstreamRes = await fetch(upstreamUrl, {
@@ -118,7 +127,9 @@ export function proxyAttachmentReadRequest(
 }
 
 export function proxyAttachmentJobRequest(req: NormalizedRequest, jobId: string): Promise<HttpResult> {
-  return proxyTrustedRequest(req, `/admin/jobs/${jobId}`);
+  const cfg = getAuthRuntimeConfig();
+  const rawBackendOrigin = cfg.apiUpstreamOrigin.replace(/\/api\/?$/, "");
+  return proxyTrustedRequestToOrigin(req, rawBackendOrigin, `/admin/jobs/${jobId}`);
 }
 
 function decodeHeaderValue(value: string | undefined): string | null {
