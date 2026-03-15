@@ -742,7 +742,6 @@ export function AdminPage() {
       {actionNotice ? <p className="muted" style={{ color: "#9fe8c4" }}>{actionNotice}</p> : null}
 
       <div className="adminTabPanel">
-        <div className="adminTabPanelLabel">Раздел</div>
         <div className="adminTabsRow">
           <AdminTabButton active={topTab === "access"} onClick={() => setTopTab("access")}>Доступ</AdminTabButton>
           <AdminTabButton active={topTab === "style"} onClick={() => setTopTab("style")}>Стиль</AdminTabButton>
@@ -752,7 +751,6 @@ export function AdminPage() {
       {topTab === "access" ? (
         <>
           <div className="adminSubtabPanel">
-            <div className="adminTabPanelLabel">Подраздел</div>
             <div className="adminTabsRow isSubtabs">
               <AdminTabButton active={accessTab === "people"} onClick={() => setAccessTab("people")}>Люди</AdminTabButton>
               <AdminTabButton active={accessTab === "links"} onClick={() => setAccessTab("links")}>Ссылки</AdminTabButton>
@@ -959,7 +957,6 @@ export function AdminPage() {
       ) : (
         <>
           <div className="adminSubtabPanel">
-            <div className="adminTabPanelLabel">Подраздел</div>
             <div className="adminTabsRow isSubtabs">
               <AdminTabButton active={styleTab === "presets"} onClick={() => setStyleTab("presets")}>Пресеты</AdminTabButton>
             </div>
