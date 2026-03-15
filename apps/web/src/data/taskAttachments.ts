@@ -12,6 +12,18 @@ export type AttachmentUploadContract = {
   method?: string | null;
   uploadUrl: string;
   headers?: Record<string, string>;
+  diagnostics?: {
+    uploadContractVersion?: string | null;
+    signedMethod?: string | null;
+    signedContentType?: string | null;
+    requiredHeaders?: string[] | null;
+    uploadUrlScheme?: string | null;
+    uploadUrlHost?: string | null;
+    uploadUrlPath?: string | null;
+    expiresAtUtc?: string | null;
+    browserMayRequirePreflight?: boolean | null;
+    notes?: string[] | null;
+  } | null;
 };
 
 export type TaskAttachmentUploadStage = "request-upload" | "upload-binary" | "finalize";

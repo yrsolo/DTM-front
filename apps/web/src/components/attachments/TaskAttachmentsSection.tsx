@@ -41,6 +41,26 @@ function formatContractDebug(contract: AttachmentUploadContract): string {
   return `uploadHost=${host} | method=${method} | headerKeys=${headerKeys.join(",") || "none"}`;
 }
 
+function formatDiagnosticsDebug(contract: AttachmentUploadContract): string[] {
+  const diagnostics = contract.diagnostics;
+  if (!diagnostics) return [];
+
+  return [
+    diagnostics.uploadContractVersion ? `contractVersion=${diagnostics.uploadContractVersion}` : null,
+    diagnostics.signedMethod ? `signedMethod=${diagnostics.signedMethod}` : null,
+    diagnostics.signedContentType ? `signedContentType=${diagnostics.signedContentType}` : null,
+    diagnostics.requiredHeaders?.length ? `requiredHeaders=${diagnostics.requiredHeaders.join(",")}` : null,
+    diagnostics.uploadUrlScheme ? `uploadUrlScheme=${diagnostics.uploadUrlScheme}` : null,
+    diagnostics.uploadUrlHost ? `uploadUrlHost=${diagnostics.uploadUrlHost}` : null,
+    diagnostics.uploadUrlPath ? `uploadUrlPath=${diagnostics.uploadUrlPath}` : null,
+    diagnostics.expiresAtUtc ? `expiresAtUtc=${diagnostics.expiresAtUtc}` : null,
+    diagnostics.browserMayRequirePreflight !== null && diagnostics.browserMayRequirePreflight !== undefined
+      ? `browserMayRequirePreflight=${diagnostics.browserMayRequirePreflight ? "true" : "false"}`
+      : null,
+    diagnostics.notes?.length ? `notes=${diagnostics.notes.join(" ; ")}` : null,
+  ].filter((value): value is string => Boolean(value));
+}
+
 function openInNewWindow(url: string): boolean {
   if (typeof window === "undefined") return false;
   const popup = window.open(url, "_blank", "noopener,noreferrer");
@@ -81,6 +101,7 @@ export function TaskAttachmentsSection(props: {
   const [uploadState, setUploadState] = React.useState<UploadState>({ status: "idle" });
   const [actionError, setActionError] = React.useState<string | null>(null);
   const [uploadDebug, setUploadDebug] = React.useState<string | null>(null);
+  const [uploadDiagnostics, setUploadDiagnostics] = React.useState<string[]>([]);
   const [tooltipState, setTooltipState] = React.useState<TooltipState>({ visible: false });
   const [previewState, setPreviewState] = React.useState<AttachmentPreviewState>({ open: false });
   const inputRef = React.useRef<HTMLInputElement | null>(null);
@@ -104,6 +125,7 @@ export function TaskAttachmentsSection(props: {
     setUploadState({ status: "idle" });
     setActionError(null);
     setUploadDebug(null);
+    setUploadDiagnostics([]);
     setPreviewState({ open: false });
     setTooltipState({ visible: false });
   }, [props.task.id]);
@@ -222,6 +244,7 @@ export function TaskAttachmentsSection(props: {
     if (!file || !userId || !canUpload) return;
 
     setActionError(null);
+    setUploadDiagnostics([]);
     try {
       setUploadState({ status: "requesting", message: ui.drawer.attachmentsUploading });
       const contract = await requestTaskAttachmentUpload({
@@ -232,6 +255,7 @@ export function TaskAttachmentsSection(props: {
         uploadedBy: userId,
       });
       setUploadDebug(formatContractDebug(contract));
+      setUploadDiagnostics(formatDiagnosticsDebug(contract));
 
       setUploadState({ status: "uploading", message: ui.drawer.attachmentsDropHint });
       await uploadTaskAttachmentBinary(contract, file);
@@ -300,6 +324,11 @@ export function TaskAttachmentsSection(props: {
             ) : null}
 
             {uploadDebug ? <div className="attachmentInlineNotice">{uploadDebug}</div> : null}
+            {uploadDiagnostics.map((line) => (
+              <div key={line} className="attachmentInlineNotice">
+                {line}
+              </div>
+            ))}
 
             {attachments.length ? (
               <>
