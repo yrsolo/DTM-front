@@ -60,7 +60,22 @@ function buildBackendAdminUrl(path: string): string {
 async function parseErrorResponse(res: Response): Promise<string> {
   try {
     const payload = await res.json();
-    return typeof payload?.error === "string" ? payload.error : `HTTP ${res.status}`;
+    if (typeof payload?.error === "string") {
+      return payload.error;
+    }
+    if (payload?.error && typeof payload.error === "object") {
+      const parts = [
+        typeof payload.error.code === "string" ? `code=${payload.error.code}` : null,
+        typeof payload.error.message === "string" ? `message=${payload.error.message}` : null,
+        typeof payload.error.details?.step === "string" ? `step=${payload.error.details.step}` : null,
+        typeof payload.error.details?.reason === "string" ? `reason=${payload.error.details.reason}` : null,
+        typeof payload.error.details?.field === "string" ? `field=${payload.error.details.field}` : null,
+      ].filter(Boolean);
+      if (parts.length) {
+        return parts.join(" | ");
+      }
+    }
+    return `HTTP ${res.status}`;
   } catch {
     return `HTTP ${res.status}`;
   }
