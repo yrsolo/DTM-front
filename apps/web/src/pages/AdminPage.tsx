@@ -759,7 +759,6 @@ export function AdminPage() {
             {accessTab === "people" ? (
               <>
               <div className="adminSectionLead">
-                <h4 className="pageTitle adminSectionTitle">Люди</h4>
                 <div className="muted">Одобрение пользователей, admin-роли, allowlist и синхронизация дизайнеров.</div>
               </div>
 
@@ -851,7 +850,6 @@ export function AdminPage() {
             ) : (
               <>
               <div className="adminSectionLead">
-                <h4 className="pageTitle adminSectionTitle">Ссылки</h4>
                 <div className="muted">Wave 1 operator surface для reusable viewer-ссылок, таймеров, быстрого копирования и usage stats.</div>
               </div>
 
@@ -962,7 +960,6 @@ export function AdminPage() {
 
           <div className="adminSubtabBody">
             <div className="adminSectionLead">
-              <h4 className="pageTitle adminSectionTitle">Стиль</h4>
               <div className="muted">Первая подвкладка хранит color/layout presets без изменения текущей бизнес-логики.</div>
             </div>
 
