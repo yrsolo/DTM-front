@@ -10,6 +10,7 @@ import {
   PointerSensor,
   useSensor,
   useSensors,
+  useDroppable,
 } from "@dnd-kit/core";
 import { arrayMove, rectSortingStrategy, SortableContext, useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
@@ -21,6 +22,10 @@ const MINI_APP_ADMIN_RETURN_KEY = "dtm-miniapp-admin-return-to";
 const ADMIN_TOP_TAB_KEY = "dtm-admin-top-tab";
 const ADMIN_ACCESS_TAB_KEY = "dtm-admin-access-tab";
 const ADMIN_STYLE_TAB_KEY = "dtm-admin-style-tab";
+const USER_DROP_ZONE_ID: Record<"pendingUsers" | "approvedUsers", string> = {
+  pendingUsers: "admin-drop-pendingUsers",
+  approvedUsers: "admin-drop-approvedUsers",
+};
 
 type AdminUserCard = {
   id: string;
@@ -272,6 +277,15 @@ function SortableCard(props: SortableCardProps) {
   );
 }
 
+function DroppableUserColumn(props: { list: "pendingUsers" | "approvedUsers"; children: React.ReactNode }) {
+  const { isOver, setNodeRef } = useDroppable({ id: USER_DROP_ZONE_ID[props.list] });
+  return (
+    <div ref={setNodeRef} className={`adminUserDropZone ${isOver ? "isOver" : ""}`}>
+      {props.children}
+    </div>
+  );
+}
+
 function UserCardContent(props: {
   user: AdminUserCard;
   roleText?: string;
@@ -409,6 +423,24 @@ export function AdminPage() {
     [orderedApprovedUsers, orderedColorPresets, orderedLayoutPresets, orderedPendingUsers]
   );
 
+  const getUserListById = React.useCallback(
+    (id: string): "pendingUsers" | "approvedUsers" | null => {
+      if (orderedPendingUsers.some((user) => user.id === id)) return "pendingUsers";
+      if (orderedApprovedUsers.some((user) => user.id === id)) return "approvedUsers";
+      return null;
+    },
+    [orderedApprovedUsers, orderedPendingUsers]
+  );
+
+  const getUserDropListByTargetId = React.useCallback(
+    (targetId: string): "pendingUsers" | "approvedUsers" | null => {
+      if (targetId === USER_DROP_ZONE_ID.pendingUsers) return "pendingUsers";
+      if (targetId === USER_DROP_ZONE_ID.approvedUsers) return "approvedUsers";
+      return getUserListById(targetId);
+    },
+    [getUserListById]
+  );
+
   const setListItems = React.useCallback((list: DragListKey, nextItems: AdminUserCard[] | PresetCard[]) => {
     if (list === "pendingUsers") {
       setOrderedPendingUsers(nextItems as AdminUserCard[]);
@@ -479,6 +511,36 @@ export function AdminPage() {
       }
     },
     [getListItems, loadOverview, persistListOrder]
+  );
+
+  const handlePeopleDragStart = React.useCallback(
+    (event: DragStartEvent) => {
+      const list = getUserListById(String(event.active.id));
+      if (!list) return;
+      setActiveDrag({ list, id: String(event.active.id) });
+      dragSnapshotRef.current = { list, ids: idsOf(getListItems(list) as Array<{ id: string }>) };
+    },
+    [getListItems, getUserListById]
+  );
+
+  const handlePeopleDragOver = React.useCallback(
+    (event: DragOverEvent) => {
+      if (!event.over || !activeDrag) return;
+      const sourceList = activeDrag.list;
+      if (sourceList !== "pendingUsers" && sourceList !== "approvedUsers") return;
+      const overId = String(event.over.id);
+      const targetList = getUserDropListByTargetId(overId);
+      if (!targetList || targetList !== sourceList) return;
+      const activeId = String(event.active.id);
+      if (activeId === overId) return;
+
+      const currentItems = getListItems(sourceList);
+      const oldIndex = currentItems.findIndex((item) => item.id === activeId);
+      const newIndex = currentItems.findIndex((item) => item.id === overId);
+      if (oldIndex < 0 || newIndex < 0 || oldIndex === newIndex) return;
+      setListItems(sourceList, arrayMove(currentItems as Array<{ id: string }>, oldIndex, newIndex) as AdminUserCard[]);
+    },
+    [activeDrag, getListItems, getUserDropListByTargetId, setListItems]
   );
 
   const handleDragCancel = React.useCallback(() => {
@@ -687,6 +749,57 @@ export function AdminPage() {
     await navigator.clipboard.writeText(url);
   }, []);
 
+  const handlePeopleDragEnd = React.useCallback(
+    async (event: DragEndEvent) => {
+      const snapshot = dragSnapshotRef.current;
+      const sourceList = activeDrag?.list;
+      setActiveDrag(null);
+      dragSnapshotRef.current = null;
+      if (!snapshot || !sourceList || (sourceList !== "pendingUsers" && sourceList !== "approvedUsers")) {
+        return;
+      }
+
+      if (!event.over) {
+        const currentItems = getListItems(snapshot.list);
+        setListItems(snapshot.list, orderItems(currentItems as Array<{ id: string }>, snapshot.ids) as AdminUserCard[]);
+        return;
+      }
+
+      const userId = String(event.active.id);
+      const overId = String(event.over.id);
+      const targetList = getUserDropListByTargetId(overId);
+      if (!targetList) return;
+
+      if (targetList === sourceList) {
+        const finalIds = idsOf(getListItems(sourceList) as Array<{ id: string }>);
+        if (arraysEqual(finalIds, snapshot.ids)) return;
+        try {
+          setActionError(null);
+          await persistListOrder(sourceList, finalIds);
+        } catch (err) {
+          setActionError(err instanceof Error ? err.message : "Не удалось сохранить порядок карточек");
+          await loadOverview();
+        }
+        return;
+      }
+
+      if (sourceList === "pendingUsers" && targetList === "approvedUsers") {
+        await runAdminAction(() => approve(userId), "Пользователь одобрен");
+        return;
+      }
+
+      if (sourceList === "approvedUsers" && targetList === "pendingUsers") {
+        if (authSession?.state.user?.id === userId) {
+          setActionError("Нельзя удалить самого себя из одобренных перетаскиванием.");
+          await loadOverview();
+          return;
+        }
+        await runAdminAction(() => revoke(userId), "Пользователь удален из одобренных");
+      }
+    },
+    [activeDrag, approve, authSession?.state.user?.id, getListItems, getUserDropListByTargetId, loadOverview, persistListOrder, revoke, runAdminAction, setListItems]
+  );
+
   const activeOverlay = React.useMemo(() => {
     if (!activeDrag) return null;
     const items = getListItems(activeDrag.list);
@@ -763,61 +876,63 @@ export function AdminPage() {
               </div>
 
               <div className="grid2" style={{ alignItems: "start" }}>
-                <div className="card adminSectionCard">
-                  <h4 className="pageTitle" style={{ fontSize: 22 }}>Ожидают одобрения</h4>
-                  <DndContext sensors={sensors} collisionDetection={closestCenter} onDragStart={(event) => handleDragStart("pendingUsers", event)} onDragOver={(event) => handleDragOver("pendingUsers", event)} onDragEnd={(event) => void handleDragEnd("pendingUsers", event)} onDragCancel={handleDragCancel}>
+                <DndContext sensors={sensors} collisionDetection={closestCenter} onDragStart={handlePeopleDragStart} onDragOver={handlePeopleDragOver} onDragEnd={(event) => void handlePeopleDragEnd(event)} onDragCancel={handleDragCancel}>
+                  <div className="card adminSectionCard">
+                    <h4 className="pageTitle" style={{ fontSize: 22 }}>Ожидают одобрения</h4>
                     <SortableContext items={orderedPendingUsers.map((user) => user.id)} strategy={rectSortingStrategy}>
-                      <div className="adminUserGrid adminUserGridTiles">
-                        {orderedPendingUsers.map((user) => (
-                          <SortableCard key={user.id} id={user.id} className="adminUserCard adminUserBrick">
-                            <UserCardContent
-                              user={user}
-                              actions={
-                                <>
-                                  <button type="button" onClick={() => void runAdminAction(() => approve(user.id), "Пользователь одобрен")}>Одобрить</button>
-                                  <button type="button" className="btn btnGhost" onClick={() => void runAdminAction(() => reject(user.id), "Заявка отклонена")}>Отклонить</button>
-                                </>
-                              }
-                            />
-                          </SortableCard>
-                        ))}
-                        {!orderedPendingUsers.length ? <div className="muted">Нет пользователей, ожидающих одобрения.</div> : null}
-                      </div>
-                    </SortableContext>
-                  </DndContext>
-                </div>
-
-                <div className="card adminSectionCard">
-                  <h4 className="pageTitle" style={{ fontSize: 22 }}>Одобренные пользователи</h4>
-                  <DndContext sensors={sensors} collisionDetection={closestCenter} onDragStart={(event) => handleDragStart("approvedUsers", event)} onDragOver={(event) => handleDragOver("approvedUsers", event)} onDragEnd={(event) => void handleDragEnd("approvedUsers", event)} onDragCancel={handleDragCancel}>
-                    <SortableContext items={orderedApprovedUsers.map((user) => user.id)} strategy={rectSortingStrategy}>
-                      <div className="adminUserGrid adminUserGridTiles">
-                        {orderedApprovedUsers.map((user) => {
-                          const isSelf = authSession.state.user?.id === user.id;
-                          const isAdmin = user.role === "admin";
-                          return (
+                      <DroppableUserColumn list="pendingUsers">
+                        <div className="adminUserGrid adminUserGridTiles">
+                          {orderedPendingUsers.map((user) => (
                             <SortableCard key={user.id} id={user.id} className="adminUserCard adminUserBrick">
                               <UserCardContent
                                 user={user}
-                                roleText={isAdmin ? "Администратор" : "Пользователь"}
-                                roleClassName={isAdmin ? "isAdmin" : ""}
                                 actions={
                                   <>
-                                    <button type="button" className="btn btnGhost" onClick={() => void runAdminAction(() => revoke(user.id), "Пользователь удален из одобренных")} disabled={isSelf}>Удалить</button>
-                                    <button type="button" className={`btn ${isAdmin ? "btnGhost" : ""}`} onClick={() => void runAdminAction(() => toggleAdminRole(user), isAdmin ? "Admin-роль снята" : "Admin-роль назначена")} disabled={isSelf}>
-                                      {isAdmin ? "Убрать из админов" : "Сделать админом"}
-                                    </button>
+                                    <button type="button" onClick={() => void runAdminAction(() => approve(user.id), "Пользователь одобрен")}>Одобрить</button>
+                                    <button type="button" className="btn btnGhost" onClick={() => void runAdminAction(() => reject(user.id), "Заявка отклонена")}>Отклонить</button>
                                   </>
                                 }
                               />
                             </SortableCard>
-                          );
-                        })}
-                        {!orderedApprovedUsers.length ? <div className="muted">Нет одобренных пользователей.</div> : null}
-                      </div>
+                          ))}
+                          {!orderedPendingUsers.length ? <div className="muted">Нет пользователей, ожидающих одобрения.</div> : null}
+                        </div>
+                      </DroppableUserColumn>
                     </SortableContext>
-                  </DndContext>
-                </div>
+                  </div>
+
+                  <div className="card adminSectionCard">
+                    <h4 className="pageTitle" style={{ fontSize: 22 }}>Одобренные пользователи</h4>
+                    <SortableContext items={orderedApprovedUsers.map((user) => user.id)} strategy={rectSortingStrategy}>
+                      <DroppableUserColumn list="approvedUsers">
+                        <div className="adminUserGrid adminUserGridTiles">
+                          {orderedApprovedUsers.map((user) => {
+                            const isSelf = authSession.state.user?.id === user.id;
+                            const isAdmin = user.role === "admin";
+                            return (
+                              <SortableCard key={user.id} id={user.id} className="adminUserCard adminUserBrick">
+                                <UserCardContent
+                                  user={user}
+                                  roleText={isAdmin ? "Администратор" : "Пользователь"}
+                                  roleClassName={isAdmin ? "isAdmin" : ""}
+                                  actions={
+                                    <>
+                                      <button type="button" className="btn btnGhost" onClick={() => void runAdminAction(() => revoke(user.id), "Пользователь удален из одобренных")} disabled={isSelf}>Удалить</button>
+                                      <button type="button" className={`btn ${isAdmin ? "btnGhost" : ""}`} onClick={() => void runAdminAction(() => toggleAdminRole(user), isAdmin ? "Admin-роль снята" : "Admin-роль назначена")} disabled={isSelf}>
+                                        {isAdmin ? "Убрать из админов" : "Сделать админом"}
+                                      </button>
+                                    </>
+                                  }
+                                />
+                              </SortableCard>
+                            );
+                          })}
+                          {!orderedApprovedUsers.length ? <div className="muted">Нет одобренных пользователей.</div> : null}
+                        </div>
+                      </DroppableUserColumn>
+                    </SortableContext>
+                  </div>
+                </DndContext>
               </div>
 
               <div className="card adminSectionCard" style={{ marginTop: 16 }}>

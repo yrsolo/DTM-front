@@ -2829,9 +2829,23 @@ button:hover {
 }
 
 .adminUserGridTiles {
-  grid-template-columns: repeat(auto-fit, minmax(340px, 420px));
+  grid-template-columns: repeat(auto-fit, minmax(220px, 260px));
   align-items: stretch;
   justify-content: start;
+}
+
+.adminUserDropZone {
+  min-height: 120px;
+  border-radius: 16px;
+  transition: background 140ms ease, box-shadow 140ms ease, border-color 140ms ease;
+}
+
+.adminUserDropZone.isOver {
+  background:
+    radial-gradient(circle at 0% 0%, rgba(255, 143, 201, 0.1), transparent 38%),
+    radial-gradient(circle at 100% 100%, rgba(102, 240, 214, 0.08), transparent 42%),
+    rgba(17, 24, 46, 0.5);
+  box-shadow: inset 0 0 0 1px rgba(168, 194, 255, 0.2);
 }
 
 .adminUserCard {
