@@ -128,8 +128,11 @@ Frontend-safe поля:
 - `links.download`
 
 Важные правила:
-- frontend использует `links.view` и `links.download` как opaque backend-owned links;
-- frontend не синтезирует attachment URLs из `attachment_id`;
+- frontend не должен открывать backend service routes из payload напрямую в браузере;
+- если backend payload содержит raw read links вроде `/api/task-attachments/:id/view|download`, frontend обязан перевести их в browser-safe auth facade route текущего контура:
+  - prod -> `/ops/auth/attachments/:id/view|download`
+  - test -> `/test/ops/auth/attachments/:id/view|download`
+- frontend не синтезирует storage URLs и не обходит auth facade;
 - отсутствие `attachments` считается валидным backward-compatible payload;
 - masked payload может не содержать attachment metadata вообще.
 

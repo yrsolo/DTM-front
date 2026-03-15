@@ -45,11 +45,11 @@ Auth/session namespace:
 - `/ops/auth/*`
 - `/test/ops/auth/*`
 
-Task attachment routes are a documented exception to the usual browser contract:
-- upload intake uses backend-owned `/ops/admin/task-attachments/*` and `/test/ops/admin/task-attachments/*`;
-- `view` / `download` use opaque backend-owned links returned in attachment metadata;
-- binary upload then goes directly from browser to the presigned Object Storage URL returned by `request-upload`.
-- browser-safe attachment harness polling is exposed through auth facade route `/ops/auth/attachments/jobs/{job_id}` and `/test/ops/auth/attachments/jobs/{job_id}`, which proxies to backend admin jobs route with trusted headers.
+Task attachment routes use a dedicated auth facade instead of generic `bff`:
+- browser control plane uses `/ops/auth/attachments/*` and `/test/ops/auth/attachments/*`;
+- `request-upload`, `finalize`, `delete`, `jobs/{job_id}`, `view`, and `download` are all browser-safe auth routes;
+- binary upload then goes directly from browser to the presigned Object Storage URL returned by `request-upload`;
+- backend-owned `/ops/admin/*` and `/ops/api/task-attachments/*` stay internal service routes and must not be opened directly by the browser.
 
 ## Browser -> Auth proxy
 

@@ -1,4 +1,4 @@
-import { getAuthRequestBase } from "../config/runtimeContour";
+import { getAuthBasePath, getAuthRequestBase, getRuntimeOrigin } from "../config/runtimeContour";
 
 export type AttachmentUploadContract = {
   task_id: string;
@@ -455,6 +455,45 @@ export async function fetchAttachmentArrayBuffer(url: string): Promise<ArrayBuff
   return await res.arrayBuffer();
 }
 
+function buildAttachmentReadFacadeUrl(
+  attachmentId: string,
+  action: "view" | "download",
+  search = "",
+  hash = "",
+  pathname?: string
+): string {
+  return `${getRuntimeOrigin(pathname)}${getAuthBasePath(pathname)}/attachments/${attachmentId}/${action}${search}${hash}`;
+}
+
+function normalizeAttachmentReadUrl(url: string): string {
+  const runtimeOrigin = getRuntimeOrigin();
+  let parsed: URL;
+  try {
+    parsed = new URL(url, runtimeOrigin);
+  } catch {
+    return url;
+  }
+
+  const authMatch = parsed.pathname.match(/^\/(?:test\/)?ops\/auth\/attachments\/([^/]+)\/(view|download)$/);
+  if (authMatch) {
+    return parsed.toString();
+  }
+
+  const backendMatch = parsed.pathname.match(
+    /^\/(?:(?:test\/)?ops\/)?api\/task-attachments\/([^/]+)\/(view|download)$/
+  );
+  if (backendMatch) {
+    return buildAttachmentReadFacadeUrl(
+      backendMatch[1],
+      backendMatch[2] as "view" | "download",
+      parsed.search,
+      parsed.hash
+    );
+  }
+
+  return parsed.toString();
+}
+
 export function getBrowserAttachmentUrl(url: string): string {
-  return url;
+  return normalizeAttachmentReadUrl(url);
 }
