@@ -7,6 +7,7 @@ import { getUiText } from "../i18n/uiText";
 import { formatTaskIdForUi } from "../utils/id";
 import { resolveDayTone, resolveMilestoneTone } from "../utils/milestoneTone";
 import { toShortPersonName } from "../utils/personName";
+import { TaskAttachmentsSection } from "./attachments/TaskAttachmentsSection";
 import { LayoutContext } from "./Layout";
 
 type DayCell = {
@@ -65,6 +66,10 @@ function addDays(d: Date, days: number): Date {
   const next = new Date(d);
   next.setDate(next.getDate() + days);
   return next;
+}
+
+function hasDraggedFiles(event: React.DragEvent<HTMLElement>): boolean {
+  return Array.from(event.dataTransfer?.types ?? []).includes("Files");
 }
 
 export function TaskDetailsDrawer(props: {
@@ -138,6 +143,9 @@ export function TaskDetailsDrawer(props: {
     left: number;
   } | null>(null);
   const [isCalendarDragging, setIsCalendarDragging] = React.useState(false);
+  const [attachmentDragActive, setAttachmentDragActive] = React.useState(false);
+  const [pendingAttachmentFile, setPendingAttachmentFile] = React.useState<File | null>(null);
+  const attachmentDragDepthRef = React.useRef(0);
 
   const findPerson = React.useCallback(
     (ref?: string | null) =>
@@ -151,6 +159,10 @@ export function TaskDetailsDrawer(props: {
   const customerPerson = t ? findPerson(t.customer) : null;
   const group = t ? props.groups?.find((g) => g.id === t.groupId) : null;
   const statusLabel = t ? props.statusLabels?.[t.status] ?? t.status : "-";
+  const authState = ctx?.authSession.state;
+  const canUploadAttachments = Boolean(
+    authState?.authenticated && authState.accessMode === "full" && authState.user?.role === "admin"
+  );
 
   React.useEffect(() => {
     let active = true;
@@ -303,6 +315,12 @@ export function TaskDetailsDrawer(props: {
   }, [t?.id]);
 
   React.useEffect(() => {
+    setAttachmentDragActive(false);
+    setPendingAttachmentFile(null);
+    attachmentDragDepthRef.current = 0;
+  }, [t?.id]);
+
+  React.useEffect(() => {
     if (!isCalendarDragging) return;
     const onMove = (e: MouseEvent) => {
       const drag = calendarDragRef.current;
@@ -334,10 +352,40 @@ export function TaskDetailsDrawer(props: {
     <div className={`${backdropClassName} drawerAnim-${animState}`} onClick={props.onClose}>
       <div
         ref={drawerRef}
-        className={`${drawerClassName} drawerAnim-${animState}`}
+        className={`${drawerClassName} drawerAnim-${animState} ${attachmentDragActive ? "attachmentDrawerDropActive" : ""}`}
         onClick={(e) => e.stopPropagation()}
         onWheel={(e) => e.stopPropagation()}
         onTouchMove={(e) => e.stopPropagation()}
+        onDragEnter={(e) => {
+          if (!canUploadAttachments || !hasDraggedFiles(e)) return;
+          e.preventDefault();
+          attachmentDragDepthRef.current += 1;
+          setAttachmentDragActive(true);
+        }}
+        onDragOver={(e) => {
+          if (!canUploadAttachments || !hasDraggedFiles(e)) return;
+          e.preventDefault();
+          e.dataTransfer.dropEffect = "copy";
+        }}
+        onDragLeave={(e) => {
+          if (!canUploadAttachments || !hasDraggedFiles(e)) return;
+          e.preventDefault();
+          attachmentDragDepthRef.current = Math.max(0, attachmentDragDepthRef.current - 1);
+          if (attachmentDragDepthRef.current === 0) {
+            setAttachmentDragActive(false);
+          }
+        }}
+        onDrop={(e) => {
+          if (!canUploadAttachments || !hasDraggedFiles(e)) return;
+          e.preventDefault();
+          e.stopPropagation();
+          attachmentDragDepthRef.current = 0;
+          setAttachmentDragActive(false);
+          const file = e.dataTransfer.files?.[0];
+          if (file) {
+            setPendingAttachmentFile(file);
+          }
+        }}
       >
         <div className="drawerHeaderRow">
           <h2 className="drawerTitle">{t.title}</h2>
@@ -493,6 +541,14 @@ export function TaskDetailsDrawer(props: {
             </div>
           </div>
         ) : null}
+
+        <TaskAttachmentsSection
+          task={t}
+          compact={presentation === "sheet"}
+          dragActive={attachmentDragActive}
+          droppedFile={pendingAttachmentFile}
+          onDroppedFileHandled={() => setPendingAttachmentFile(null)}
+        />
 
         {t.notes ? (
           <div className="card drawerSection">

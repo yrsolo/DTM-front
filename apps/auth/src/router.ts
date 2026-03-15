@@ -12,6 +12,20 @@ import {
   revokeApprovedUserHandler,
   saveAdminLayoutOrderHandler,
 } from "./handlers/adminHandlers";
+import {
+  accessLinkUsageHandler,
+  createAccessLinkHandler,
+  listAccessLinksHandler,
+  redeemAccessLinkHandler,
+  revokeAccessLinkHandler,
+  updateAccessLinkHandler,
+} from "./handlers/accessLinksHandlers";
+import {
+  proxyAttachmentAdminRequest,
+  proxyAttachmentBinaryUpload,
+  proxyAttachmentJobRequest,
+  proxyAttachmentReadRequest,
+} from "./handlers/attachmentProxy";
 import { callback, login, logout, me, telegramSession } from "./handlers/authHandlers";
 import { proxyApiRequest } from "./handlers/apiProxy";
 import {
@@ -48,6 +62,9 @@ export async function routeRequest(req: NormalizedRequest): Promise<HttpResult> 
     if (req.method === "GET" && req.routePath === "/me") {
       return me(req);
     }
+    if (req.method === "POST" && req.routePath === "/access-links/redeem") {
+      return redeemAccessLinkHandler(req);
+    }
     if (req.method === "POST" && req.routePath === "/logout") {
       return logout();
     }
@@ -62,6 +79,28 @@ export async function routeRequest(req: NormalizedRequest): Promise<HttpResult> 
     }
     if (req.method === "POST" && req.routePath === "/admin/designers/refresh") {
       return refreshDesignersDirectoryHandler(req);
+    }
+    if (req.method === "GET" && req.routePath === "/admin/access-links") {
+      return listAccessLinksHandler(req);
+    }
+    if (req.method === "POST" && req.routePath === "/admin/access-links") {
+      return createAccessLinkHandler(req);
+    }
+    if (req.method === "POST" && req.routePath === "/attachments/request-upload") {
+      return proxyAttachmentAdminRequest(req, "request-upload");
+    }
+    if (req.method === "POST" && req.routePath === "/attachments/upload-binary") {
+      return proxyAttachmentBinaryUpload(req);
+    }
+    if (req.method === "POST" && req.routePath === "/attachments/finalize") {
+      return proxyAttachmentAdminRequest(req, "finalize");
+    }
+    if (req.method === "POST" && req.routePath === "/attachments/delete") {
+      return proxyAttachmentAdminRequest(req, "delete");
+    }
+    const attachmentJobMatch = req.routePath.match(/^\/attachments\/jobs\/([^/]+)$/);
+    if (req.method === "GET" && attachmentJobMatch) {
+      return proxyAttachmentJobRequest(req, attachmentJobMatch[1]);
     }
     if (req.method === "GET" && req.routePath === "/presets") {
       return listPresetsHandler(req);
@@ -104,6 +143,21 @@ export async function routeRequest(req: NormalizedRequest): Promise<HttpResult> 
       return removeAdminHandler(req, removeAdminMatch[1]);
     }
 
+    const accessLinkMatch = req.routePath.match(/^\/admin\/access-links\/([^/]+)$/);
+    if (req.method === "PATCH" && accessLinkMatch) {
+      return updateAccessLinkHandler(req, accessLinkMatch[1]);
+    }
+
+    const accessLinkRevokeMatch = req.routePath.match(/^\/admin\/access-links\/([^/]+)\/revoke$/);
+    if (req.method === "POST" && accessLinkRevokeMatch) {
+      return revokeAccessLinkHandler(req, accessLinkRevokeMatch[1]);
+    }
+
+    const accessLinkUsageMatch = req.routePath.match(/^\/admin\/access-links\/([^/]+)\/usage$/);
+    if (req.method === "GET" && accessLinkUsageMatch) {
+      return accessLinkUsageHandler(req, accessLinkUsageMatch[1]);
+    }
+
     const presetMatch = req.routePath.match(/^\/presets\/([^/]+)$/);
     if (req.method === "GET" && presetMatch) {
       return getPresetHandler(req, presetMatch[1]);
@@ -128,6 +182,11 @@ export async function routeRequest(req: NormalizedRequest): Promise<HttpResult> 
     const presetExportMatch = req.routePath.match(/^\/presets\/([^/]+)\/export$/);
     if (req.method === "GET" && presetExportMatch) {
       return exportPresetHandler(req, presetExportMatch[1]);
+    }
+
+    const attachmentReadMatch = req.routePath.match(/^\/attachments\/([^/]+)\/(view|download)$/);
+    if (req.method === "GET" && attachmentReadMatch) {
+      return proxyAttachmentReadRequest(req, attachmentReadMatch[1], attachmentReadMatch[2] as "view" | "download");
     }
 
     return notFound(`Unknown auth route: ${req.routePath}`);

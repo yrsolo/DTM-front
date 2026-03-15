@@ -66,6 +66,46 @@ function normalizeToSnapshotV1(payload) {
               status: m.status || "unknown"
             }))
           : [],
+        attachments: Array.isArray(t.attachments)
+          ? t.attachments
+              .map((attachment) => {
+                if (!attachment || typeof attachment !== "object") return null;
+                if (
+                  typeof attachment.id !== "string" ||
+                  typeof attachment.name !== "string" ||
+                  typeof attachment.mime !== "string" ||
+                  typeof attachment.kind !== "string" ||
+                  typeof attachment.sizeBytes !== "number" ||
+                  typeof attachment.status !== "string"
+                ) {
+                  return null;
+                }
+                return {
+                  id: attachment.id,
+                  name: attachment.name,
+                  mime: attachment.mime,
+                  kind: attachment.kind,
+                  sizeBytes: attachment.sizeBytes,
+                  status: attachment.status,
+                  uploadedAt: typeof attachment.uploadedAt === "string" ? attachment.uploadedAt : null,
+                  capabilities: Array.isArray(attachment.capabilities)
+                    ? attachment.capabilities.filter((item) => typeof item === "string")
+                    : undefined,
+                  meta:
+                    attachment.meta && typeof attachment.meta === "object"
+                      ? { preview: typeof attachment.meta.preview === "string" ? attachment.meta.preview : null }
+                      : undefined,
+                  links:
+                    attachment.links && typeof attachment.links === "object"
+                      ? {
+                          view: typeof attachment.links.view === "string" ? attachment.links.view : null,
+                          download: typeof attachment.links.download === "string" ? attachment.links.download : null
+                        }
+                      : undefined
+                };
+              })
+              .filter(Boolean)
+          : undefined,
         hash: t.hash ?? null,
         revision: t.revision ?? null
       })),

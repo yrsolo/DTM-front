@@ -100,7 +100,7 @@ jobs:
               YDB_DATABASE="$(node -e "const cfg=$CONFIG_JSON; process.stdout.write(cfg.ydb_database_test || '')")"
               API_UPSTREAM_ORIGIN="$(node -e "const cfg=$CONFIG_JSON; process.stdout.write(cfg.api_origin_test || '')")"
               AUTH_BASE_PATH="/test/ops/auth"
-              API_PROXY_BASE_PATH="/test/ops/api"
+              API_PROXY_BASE_PATH="/test/ops/bff"
               MASKING_SECRET_KEY="MASKING_SALT_TEST"
               ;;
             prod)
@@ -108,7 +108,7 @@ jobs:
               YDB_DATABASE="$(node -e "const cfg=$CONFIG_JSON; process.stdout.write(cfg.ydb_database_prod || '')")"
               API_UPSTREAM_ORIGIN="$(node -e "const cfg=$CONFIG_JSON; process.stdout.write(cfg.api_origin_prod || '')")"
               AUTH_BASE_PATH="/ops/auth"
-              API_PROXY_BASE_PATH="/ops/api"
+              API_PROXY_BASE_PATH="/ops/bff"
               MASKING_SECRET_KEY="MASKING_SALT_PROD"
               ;;
             *)
@@ -206,7 +206,7 @@ jobs:
           echo "Masking secret key: ${{ steps.vars.outputs.masking_secret_key }}"
           echo "Browser auth proxy secret: lockbox:BROWSER_AUTH_PROXY_SECRET"
           echo "Preset bucket: dtm-presets"
-          echo "Preset public base URL: http://dtm-presets.solofarm.ru"
+          echo "Preset public base URL: https://dtm-presets.website.yandexcloud.net"
 
       - name: Deploy auth function
         if: ${{ steps.vars.outputs.dry_run != 'true' }}
@@ -233,10 +233,12 @@ jobs:
             YDB_ENDPOINT=${{ steps.vars.outputs.ydb_endpoint }}
             YDB_DATABASE=${{ steps.vars.outputs.ydb_database }}
             YDB_METADATA_CREDENTIALS=1
+            PEOPLE_SYNC_PATH=/v2/people
             PRESET_BUCKET=dtm-presets
-            PRESET_PUBLIC_BASE_URL=http://dtm-presets.solofarm.ru
+            PRESET_PUBLIC_BASE_URL=https://dtm-presets.website.yandexcloud.net
             PRESET_STORAGE_ENDPOINT=https://storage.yandexcloud.net
             PRESET_STORAGE_REGION=ru-central1
+            TG_TOKEN=${{ secrets.TG_TOKEN }}
             AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}
             AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}
             YANDEX_CLIENT_ID_TEST=${{ secrets.YANDEX_CLIENT_ID_TEST }}

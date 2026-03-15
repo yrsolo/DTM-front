@@ -10,6 +10,7 @@ import {
   PointerSensor,
   useSensor,
   useSensors,
+  useDroppable,
 } from "@dnd-kit/core";
 import { arrayMove, rectSortingStrategy, SortableContext, useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
@@ -18,6 +19,13 @@ import { LayoutContext } from "../components/Layout";
 import { getAuthRequestBase, getTasksRoute } from "../config/runtimeContour";
 
 const MINI_APP_ADMIN_RETURN_KEY = "dtm-miniapp-admin-return-to";
+const ADMIN_TOP_TAB_KEY = "dtm-admin-top-tab";
+const ADMIN_ACCESS_TAB_KEY = "dtm-admin-access-tab";
+const ADMIN_STYLE_TAB_KEY = "dtm-admin-style-tab";
+const USER_DROP_ZONE_ID: Record<"pendingUsers" | "approvedUsers", string> = {
+  pendingUsers: "admin-drop-pendingUsers",
+  approvedUsers: "admin-drop-approvedUsers",
+};
 
 type AdminUserCard = {
   id: string;
@@ -48,7 +56,36 @@ type PresetCard = {
   availability: "ready" | "broken" | "unavailable";
 };
 
+type AccessLinkUsageEvent = {
+  id: string;
+  usedAt: string;
+  ip: string | null;
+  city: string | null;
+  clientSummary: string | null;
+};
+
+type AccessLinkCard = {
+  id: string;
+  label: string;
+  status: "active" | "expired" | "revoked";
+  browserUrl: string | null;
+  expiresAt: string | null;
+  createdAt: string;
+  createdBy: string | null;
+  lastUsedAt: string | null;
+  useCount: number;
+  usageEvents: AccessLinkUsageEvent[];
+};
+
+type AccessLinkDraft = {
+  label: string;
+  expiresAt: string;
+};
+
 type DragListKey = "pendingUsers" | "approvedUsers" | "colorPresets" | "layoutPresets";
+type AdminTopTab = "access" | "style";
+type AdminAccessTab = "people" | "links";
+type AdminStyleTab = "presets";
 
 type AdminOverview = {
   pendingUsers: AdminUserCard[];
@@ -59,6 +96,7 @@ type AdminOverview = {
     comment: string | null;
     createdAt: string;
   }>;
+  accessLinks: AccessLinkCard[];
   presets: {
     color: PresetCard[];
     layout: PresetCard[];
@@ -105,20 +143,51 @@ function goToTimeline(): void {
       return;
     }
   } catch {
-    // fall through to default timeline route
+    // ignore and use default route
   }
   window.location.assign(getTasksRoute());
 }
 
-function formatRequestedAt(value: string): string {
+function formatDateTime(value: string | null | undefined): string {
+  if (!value) return "-";
   const date = new Date(value);
   if (!Number.isFinite(date.getTime())) return value;
-  const yy = String(date.getFullYear()).slice(-2);
-  const mm = String(date.getMonth() + 1).padStart(2, "0");
-  const dd = String(date.getDate()).padStart(2, "0");
-  const hh = String(date.getHours()).padStart(2, "0");
-  const min = String(date.getMinutes()).padStart(2, "0");
-  return `${yy}-${mm}-${dd} ${hh}:${min}`;
+  return new Intl.DateTimeFormat("ru-RU", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(date);
+}
+
+function toDateTimeInputValue(value: string | null | undefined): string {
+  if (!value) return "";
+  const date = new Date(value);
+  if (!Number.isFinite(date.getTime())) return "";
+  const local = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+  return local.toISOString().slice(0, 16);
+}
+
+function formatRemainingTime(value: string | null): string {
+  if (!value) return "Без срока";
+  const target = new Date(value);
+  if (!Number.isFinite(target.getTime())) return value;
+  const diff = target.getTime() - Date.now();
+  if (diff <= 0) return "Истекла";
+  const totalMinutes = Math.floor(diff / 60000);
+  const days = Math.floor(totalMinutes / (60 * 24));
+  const hours = Math.floor((totalMinutes % (60 * 24)) / 60);
+  const minutes = totalMinutes % 60;
+  if (days > 0) return `${days} д ${hours} ч`;
+  if (hours > 0) return `${hours} ч ${minutes} мин`;
+  return `${minutes} мин`;
+}
+
+function readStoredTab<T extends string>(key: string, allowed: readonly T[], fallback: T): T {
+  if (typeof window === "undefined") return fallback;
+  const raw = window.localStorage.getItem(key);
+  return allowed.includes(raw as T) ? (raw as T) : fallback;
 }
 
 function initials(name: string | null, email: string | null): string {
@@ -130,13 +199,17 @@ function initials(name: string | null, email: string | null): string {
   return source.slice(0, 2).toUpperCase();
 }
 
+function statusLabel(status: AccessLinkCard["status"]): string {
+  if (status === "active") return "Активна";
+  if (status === "expired") return "Истекла";
+  return "Отозвана";
+}
+
 function UserAvatar(props: { name: string | null; email: string | null; avatarUrl: string | null }) {
   const [failed, setFailed] = React.useState(false);
-
   if (failed || !props.avatarUrl) {
     return <div className="adminUserAvatar adminUserAvatarFallback">{initials(props.name, props.email)}</div>;
   }
-
   return (
     <img
       className="adminUserAvatar"
@@ -151,7 +224,6 @@ function PresetKindBadge(props: { kind: "color" | "layout" }) {
   if (props.kind === "color") {
     return <span className="adminPresetKindBadge isColor" aria-hidden="true" />;
   }
-
   return (
     <span className="adminPresetKindBadge isLayout" aria-hidden="true">
       <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.8">
@@ -177,19 +249,16 @@ function orderItems<T extends { id: string }>(items: T[], order: string[]): T[] 
   const itemById = new Map(items.map((item) => [item.id, item] as const));
   const next: T[] = [];
   const used = new Set<string>();
-
   for (const id of order) {
     const item = itemById.get(id);
     if (!item || used.has(id)) continue;
     next.push(item);
     used.add(id);
   }
-
   for (const item of items) {
     if (used.has(item.id)) continue;
     next.push(item);
   }
-
   return next;
 }
 
@@ -208,7 +277,6 @@ function arraysEqual(left: string[], right: string[]): boolean {
 
 function SortableCard(props: SortableCardProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: props.id });
-
   return (
     <div
       ref={setNodeRef}
@@ -217,6 +285,15 @@ function SortableCard(props: SortableCardProps) {
       {...attributes}
       {...listeners}
     >
+      {props.children}
+    </div>
+  );
+}
+
+function DroppableUserColumn(props: { list: "pendingUsers" | "approvedUsers"; children: React.ReactNode }) {
+  const { isOver, setNodeRef } = useDroppable({ id: USER_DROP_ZONE_ID[props.list] });
+  return (
+    <div ref={setNodeRef} className={`adminUserDropZone ${isOver ? "isOver" : ""}`}>
       {props.children}
     </div>
   );
@@ -237,7 +314,7 @@ function UserCardContent(props: {
         {props.user.personName ? <div className="muted">Дизайнер: {props.user.personName}</div> : null}
         {props.user.telegramId ? <div className="muted">Telegram ID: {props.user.telegramId}</div> : null}
         {props.user.telegramUsername ? <div className="muted">Telegram: @{props.user.telegramUsername}</div> : null}
-        <div className="muted">Заявка: {formatRequestedAt(props.user.requestedAt)}</div>
+        <div className="muted">Заявка: {formatDateTime(props.user.requestedAt)}</div>
         {props.roleText ? <div className={`adminUserRole ${props.roleClassName ?? ""}`}>{props.roleText}</div> : null}
       </div>
       <div className="adminUserActions">{props.actions}</div>
@@ -252,7 +329,7 @@ function PresetCardContent(props: { preset: PresetCard; actions: React.ReactNode
       : props.preset.availability === "ready"
         ? "Доступен"
         : props.preset.availability === "broken"
-          ? "Asset повреждён"
+          ? "Asset поврежден"
           : "Asset недоступен";
 
   return (
@@ -263,11 +340,19 @@ function PresetCardContent(props: { preset: PresetCard; actions: React.ReactNode
         <div className="muted adminPresetDescription">{props.preset.description || "Без описания"}</div>
         <div className="muted">Автор: {props.preset.authorDisplayName || "не указан"}</div>
         <div className="muted">Revision: {props.preset.revision ?? "-"}</div>
-        <div className="muted">Обновлён: {props.preset.updatedAt ? formatRequestedAt(props.preset.updatedAt) : "-"}</div>
+        <div className="muted">Обновлен: {props.preset.updatedAt ? formatDateTime(props.preset.updatedAt) : "-"}</div>
         <div className={`adminUserRole ${props.preset.isDefault ? "isAdmin" : ""}`}>{availabilityText}</div>
       </div>
       <div className="adminUserActions">{props.actions}</div>
     </>
+  );
+}
+
+function AdminTabButton(props: { active: boolean; onClick: () => void; children: React.ReactNode }) {
+  return (
+    <button type="button" className={`adminTabButton ${props.active ? "isActive" : ""}`} onClick={props.onClick}>
+      {props.children}
+    </button>
   );
 }
 
@@ -285,11 +370,33 @@ export function AdminPage() {
   const [orderedColorPresets, setOrderedColorPresets] = React.useState<PresetCard[]>([]);
   const [orderedLayoutPresets, setOrderedLayoutPresets] = React.useState<PresetCard[]>([]);
   const [activeDrag, setActiveDrag] = React.useState<ActiveDrag | null>(null);
+  const [topTab, setTopTab] = React.useState<AdminTopTab>(() => readStoredTab(ADMIN_TOP_TAB_KEY, ["access", "style"], "access"));
+  const [accessTab, setAccessTab] = React.useState<AdminAccessTab>(() => readStoredTab(ADMIN_ACCESS_TAB_KEY, ["people", "links"], "people"));
+  const [styleTab, setStyleTab] = React.useState<AdminStyleTab>(() => readStoredTab(ADMIN_STYLE_TAB_KEY, ["presets"], "presets"));
+  const [draftLinkLabel, setDraftLinkLabel] = React.useState("");
+  const [draftLinkExpiryHours, setDraftLinkExpiryHours] = React.useState("72");
+  const [linkDrafts, setLinkDrafts] = React.useState<Record<string, AccessLinkDraft>>({});
+  const [, setLinksClock] = React.useState(() => Date.now());
   const importRef = React.useRef<HTMLInputElement | null>(null);
   const dragSnapshotRef = React.useRef<{ list: DragListKey; ids: string[] } | null>(null);
 
   const authSession = ctx?.authSession;
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }));
+
+  React.useEffect(() => {
+    if (typeof window === "undefined") return;
+    window.localStorage.setItem(ADMIN_TOP_TAB_KEY, topTab);
+  }, [topTab]);
+
+  React.useEffect(() => {
+    if (typeof window === "undefined") return;
+    window.localStorage.setItem(ADMIN_ACCESS_TAB_KEY, accessTab);
+  }, [accessTab]);
+
+  React.useEffect(() => {
+    if (typeof window === "undefined") return;
+    window.localStorage.setItem(ADMIN_STYLE_TAB_KEY, styleTab);
+  }, [styleTab]);
 
   const loadOverview = React.useCallback(async () => {
     setLoading(true);
@@ -319,7 +426,25 @@ export function AdminPage() {
     setOrderedApprovedUsers(overview?.approvedUsers ?? []);
     setOrderedColorPresets(overview?.presets.color ?? []);
     setOrderedLayoutPresets(overview?.presets.layout ?? []);
+    setLinkDrafts(
+      Object.fromEntries(
+        (overview?.accessLinks ?? []).map((link) => [
+          link.id,
+          {
+            label: link.label,
+            expiresAt: toDateTimeInputValue(link.expiresAt),
+          },
+        ])
+      )
+    );
   }, [overview]);
+
+  React.useEffect(() => {
+    const timer = window.setInterval(() => {
+      setLinksClock(Date.now());
+    }, 30000);
+    return () => window.clearInterval(timer);
+  }, []);
 
   const getListItems = React.useCallback(
     (list: DragListKey) => {
@@ -329,6 +454,24 @@ export function AdminPage() {
       return orderedLayoutPresets;
     },
     [orderedApprovedUsers, orderedColorPresets, orderedLayoutPresets, orderedPendingUsers]
+  );
+
+  const getUserListById = React.useCallback(
+    (id: string): "pendingUsers" | "approvedUsers" | null => {
+      if (orderedPendingUsers.some((user) => user.id === id)) return "pendingUsers";
+      if (orderedApprovedUsers.some((user) => user.id === id)) return "approvedUsers";
+      return null;
+    },
+    [orderedApprovedUsers, orderedPendingUsers]
+  );
+
+  const getUserDropListByTargetId = React.useCallback(
+    (targetId: string): "pendingUsers" | "approvedUsers" | null => {
+      if (targetId === USER_DROP_ZONE_ID.pendingUsers) return "pendingUsers";
+      if (targetId === USER_DROP_ZONE_ID.approvedUsers) return "approvedUsers";
+      return getUserListById(targetId);
+    },
+    [getUserListById]
   );
 
   const setListItems = React.useCallback((list: DragListKey, nextItems: AdminUserCard[] | PresetCard[]) => {
@@ -401,6 +544,36 @@ export function AdminPage() {
       }
     },
     [getListItems, loadOverview, persistListOrder]
+  );
+
+  const handlePeopleDragStart = React.useCallback(
+    (event: DragStartEvent) => {
+      const list = getUserListById(String(event.active.id));
+      if (!list) return;
+      setActiveDrag({ list, id: String(event.active.id) });
+      dragSnapshotRef.current = { list, ids: idsOf(getListItems(list) as Array<{ id: string }>) };
+    },
+    [getListItems, getUserListById]
+  );
+
+  const handlePeopleDragOver = React.useCallback(
+    (event: DragOverEvent) => {
+      if (!event.over || !activeDrag) return;
+      const sourceList = activeDrag.list;
+      if (sourceList !== "pendingUsers" && sourceList !== "approvedUsers") return;
+      const overId = String(event.over.id);
+      const targetList = getUserDropListByTargetId(overId);
+      if (!targetList || targetList !== sourceList) return;
+      const activeId = String(event.active.id);
+      if (activeId === overId) return;
+
+      const currentItems = getListItems(sourceList);
+      const oldIndex = currentItems.findIndex((item) => item.id === activeId);
+      const newIndex = currentItems.findIndex((item) => item.id === overId);
+      if (oldIndex < 0 || newIndex < 0 || oldIndex === newIndex) return;
+      setListItems(sourceList, arrayMove(currentItems as Array<{ id: string }>, oldIndex, newIndex) as AdminUserCard[]);
+    },
+    [activeDrag, getListItems, getUserDropListByTargetId, setListItems]
   );
 
   const handleDragCancel = React.useCallback(() => {
@@ -602,6 +775,138 @@ export function AdminPage() {
     [loadOverview]
   );
 
+  const copyBrowserLink = React.useCallback(async (url: string | null) => {
+    if (!url) {
+      throw new Error("Ссылка еще не опубликована для браузера.");
+    }
+    await navigator.clipboard.writeText(url);
+  }, []);
+
+  const createAccessLink = React.useCallback(async () => {
+    const label = draftLinkLabel.trim();
+    const expiresInHours = Number(draftLinkExpiryHours);
+    if (!label) {
+      throw new Error("Нужно указать название ссылки.");
+    }
+    if (!Number.isFinite(expiresInHours) || expiresInHours <= 0) {
+      throw new Error("Срок действия должен быть положительным числом часов.");
+    }
+    const res = await fetch(buildAuthUrl("/admin/access-links"), {
+      method: "POST",
+      credentials: "include",
+      headers: { "content-type": "application/json", accept: "application/json" },
+      body: JSON.stringify({ label, expiresInHours }),
+    });
+    await expectOk(res, "Не удалось создать временную ссылку");
+    const payload = (await res.json()) as { link?: AccessLinkCard | null };
+    setDraftLinkLabel("");
+    setDraftLinkExpiryHours("72");
+    if (payload.link?.browserUrl) {
+      await copyBrowserLink(payload.link.browserUrl);
+      setActionNotice("Ссылка создана и скопирована");
+    }
+    await loadOverview();
+  }, [copyBrowserLink, draftLinkExpiryHours, draftLinkLabel, loadOverview]);
+
+  const updateAccessLinkDraft = React.useCallback((linkId: string, patch: Partial<AccessLinkDraft>) => {
+    setLinkDrafts((prev) => ({
+      ...prev,
+      [linkId]: {
+        label: prev[linkId]?.label ?? "",
+        expiresAt: prev[linkId]?.expiresAt ?? "",
+        ...patch,
+      },
+    }));
+  }, []);
+
+  const saveAccessLink = React.useCallback(
+    async (linkId: string) => {
+      const draft = linkDrafts[linkId];
+      if (!draft?.label.trim()) {
+        throw new Error("Название ссылки не может быть пустым.");
+      }
+      if (!draft.expiresAt) {
+        throw new Error("Укажите дату окончания ссылки.");
+      }
+      const expiresAt = new Date(draft.expiresAt);
+      if (!Number.isFinite(expiresAt.getTime())) {
+        throw new Error("Некорректная дата окончания ссылки.");
+      }
+      const res = await fetch(buildAuthUrl(`/admin/access-links/${encodeURIComponent(linkId)}`), {
+        method: "PATCH",
+        credentials: "include",
+        headers: { "content-type": "application/json", accept: "application/json" },
+        body: JSON.stringify({ label: draft.label.trim(), expiresAt: expiresAt.toISOString() }),
+      });
+      await expectOk(res, "Не удалось обновить временную ссылку");
+      await loadOverview();
+    },
+    [linkDrafts, loadOverview]
+  );
+
+  const revokeAccessLink = React.useCallback(
+    async (linkId: string) => {
+      const res = await fetch(buildAuthUrl(`/admin/access-links/${encodeURIComponent(linkId)}/revoke`), {
+        method: "POST",
+        credentials: "include",
+      });
+      await expectOk(res, "Не удалось отозвать временную ссылку");
+      await loadOverview();
+    },
+    [loadOverview]
+  );
+
+  const handlePeopleDragEnd = React.useCallback(
+    async (event: DragEndEvent) => {
+      const snapshot = dragSnapshotRef.current;
+      const sourceList = activeDrag?.list;
+      setActiveDrag(null);
+      dragSnapshotRef.current = null;
+      if (!snapshot || !sourceList || (sourceList !== "pendingUsers" && sourceList !== "approvedUsers")) {
+        return;
+      }
+
+      if (!event.over) {
+        const currentItems = getListItems(snapshot.list);
+        setListItems(snapshot.list, orderItems(currentItems as Array<{ id: string }>, snapshot.ids) as AdminUserCard[]);
+        return;
+      }
+
+      const userId = String(event.active.id);
+      const overId = String(event.over.id);
+      const targetList = getUserDropListByTargetId(overId);
+      if (!targetList) return;
+
+      if (targetList === sourceList) {
+        const finalIds = idsOf(getListItems(sourceList) as Array<{ id: string }>);
+        if (arraysEqual(finalIds, snapshot.ids)) return;
+        try {
+          setActionError(null);
+          await persistListOrder(sourceList, finalIds);
+        } catch (err) {
+          setActionError(err instanceof Error ? err.message : "Не удалось сохранить порядок карточек");
+          await loadOverview();
+        }
+        return;
+      }
+
+      if (sourceList === "pendingUsers" && targetList === "approvedUsers") {
+        await runAdminAction(() => approve(userId), "Пользователь одобрен");
+        return;
+      }
+
+      if (sourceList === "approvedUsers" && targetList === "pendingUsers") {
+        if (authSession?.state.user?.id === userId) {
+          setActionError("Нельзя удалить самого себя из одобренных перетаскиванием.");
+          await loadOverview();
+          return;
+        }
+        await runAdminAction(() => revoke(userId), "Пользователь удален из одобренных");
+      }
+    },
+    [activeDrag, approve, authSession?.state.user?.id, getListItems, getUserDropListByTargetId, loadOverview, persistListOrder, revoke, runAdminAction, setListItems]
+  );
+
   const activeOverlay = React.useMemo(() => {
     if (!activeDrag) return null;
     const items = getListItems(activeDrag.list);
@@ -610,16 +915,20 @@ export function AdminPage() {
 
   if (!ctx) return null;
 
+  const renderHeader = (
+    <div className="pageHeader">
+      <h3 className="pageTitle">Админка</h3>
+      <button type="button" className="adminCloseButton" onClick={goToTimeline} aria-label="Вернуться на таймлайн" title="Вернуться на таймлайн">
+        ×
+      </button>
+    </div>
+  );
+
   if (loading) {
     return (
       <div className="card adminPageRoot">
-        <div className="pageHeader">
-          <h3 className="pageTitle">Админка</h3>
-          <button type="button" className="adminCloseButton" onClick={goToTimeline} aria-label="Вернуться на таймлайн" title="Вернуться на таймлайн">
-            ×
-          </button>
-        </div>
-        <p className="muted">Загружаем данные доступа, пользователей и preset catalog...</p>
+        {renderHeader}
+        <p className="muted">Загружаем доступ, пользователей и каталог пресетов...</p>
       </div>
     );
   }
@@ -627,12 +936,7 @@ export function AdminPage() {
   if (!authSession?.state.authenticated) {
     return (
       <div className="card adminPageRoot">
-        <div className="pageHeader">
-          <h3 className="pageTitle">Админка</h3>
-          <button type="button" className="adminCloseButton" onClick={goToTimeline} aria-label="Вернуться на таймлайн" title="Вернуться на таймлайн">
-            ×
-          </button>
-        </div>
+        {renderHeader}
         <p className="muted">Войдите через Яндекс, чтобы открыть админку.</p>
       </div>
     );
@@ -641,270 +945,334 @@ export function AdminPage() {
   if (authSession.state.user?.role !== "admin") {
     return (
       <div className="card adminPageRoot">
-        <div className="pageHeader">
-          <h3 className="pageTitle">Админка</h3>
-          <button type="button" className="adminCloseButton" onClick={goToTimeline} aria-label="Вернуться на таймлайн" title="Вернуться на таймлайн">
-            ×
-          </button>
-        </div>
-        <p className="muted">У вашей учётной записи нет прав администратора.</p>
+        {renderHeader}
+        <p className="muted">У вашей учетной записи нет прав администратора.</p>
       </div>
     );
   }
 
+  const links = overview?.accessLinks ?? [];
+
   return (
     <div className="card adminPageRoot">
-      <div className="pageHeader">
-        <h3 className="pageTitle">Админка</h3>
-        <button type="button" className="adminCloseButton" onClick={goToTimeline} aria-label="Вернуться на таймлайн" title="Вернуться на таймлайн">
-          ×
-        </button>
-      </div>
+      {renderHeader}
 
       {error ? <p className="muted">{error}</p> : null}
       {actionError ? <p className="muted" style={{ color: "#ffb8c8" }}>{actionError}</p> : null}
       {actionNotice ? <p className="muted" style={{ color: "#9fe8c4" }}>{actionNotice}</p> : null}
 
-      <div className="grid2" style={{ alignItems: "start" }}>
-        <div className="card adminSectionCard">
-          <h4 className="pageTitle" style={{ fontSize: 22 }}>Ожидают одобрения</h4>
-          <DndContext
-            sensors={sensors}
-            collisionDetection={closestCenter}
-            onDragStart={(event) => handleDragStart("pendingUsers", event)}
-            onDragOver={(event) => handleDragOver("pendingUsers", event)}
-            onDragEnd={(event) => void handleDragEnd("pendingUsers", event)}
-            onDragCancel={handleDragCancel}
-          >
-            <SortableContext items={orderedPendingUsers.map((user) => user.id)} strategy={rectSortingStrategy}>
-              <div className="adminUserGrid adminUserGridTiles">
-                {orderedPendingUsers.map((user) => (
-                  <SortableCard key={user.id} id={user.id} className="adminUserCard adminUserBrick">
-                    <UserCardContent
-                      user={user}
-                      actions={
-                        <>
-                          <button type="button" onClick={() => void runAdminAction(() => approve(user.id), "Пользователь одобрен")}>
-                            Одобрить
-                          </button>
-                          <button type="button" className="btn btnGhost" onClick={() => void runAdminAction(() => reject(user.id), "Заявка отклонена")}>
-                            Отклонить
-                          </button>
-                        </>
-                      }
-                    />
-                  </SortableCard>
-                ))}
-                {!orderedPendingUsers.length ? <div className="muted">Нет пользователей, ожидающих одобрения.</div> : null}
-              </div>
-            </SortableContext>
-          </DndContext>
-        </div>
-
-        <div className="card adminSectionCard">
-          <h4 className="pageTitle" style={{ fontSize: 22 }}>Одобренные пользователи</h4>
-          <DndContext
-            sensors={sensors}
-            collisionDetection={closestCenter}
-            onDragStart={(event) => handleDragStart("approvedUsers", event)}
-            onDragOver={(event) => handleDragOver("approvedUsers", event)}
-            onDragEnd={(event) => void handleDragEnd("approvedUsers", event)}
-            onDragCancel={handleDragCancel}
-          >
-            <SortableContext items={orderedApprovedUsers.map((user) => user.id)} strategy={rectSortingStrategy}>
-              <div className="adminUserGrid adminUserGridTiles">
-                {orderedApprovedUsers.map((user) => {
-                  const isSelf = authSession.state.user?.id === user.id;
-                  const isAdmin = user.role === "admin";
-                  return (
-                    <SortableCard key={user.id} id={user.id} className="adminUserCard adminUserBrick">
-                      <UserCardContent
-                        user={user}
-                        roleText={isAdmin ? "Администратор" : "Пользователь"}
-                        roleClassName={isAdmin ? "isAdmin" : ""}
-                        actions={
-                          <>
-                            <button
-                              type="button"
-                              className="btn btnGhost"
-                              onClick={() => void runAdminAction(() => revoke(user.id), "Пользователь удалён из одобренных")}
-                              disabled={isSelf}
-                            >
-                              Удалить
-                            </button>
-                            <button
-                              type="button"
-                              className={`btn ${isAdmin ? "btnGhost" : ""}`}
-                              onClick={() => void runAdminAction(() => toggleAdminRole(user), isAdmin ? "Админ-роль снята" : "Админ-роль назначена")}
-                              disabled={isSelf}
-                            >
-                              {isAdmin ? "Убрать из админов" : "Сделать админом"}
-                            </button>
-                          </>
-                        }
-                      />
-                    </SortableCard>
-                  );
-                })}
-                {!orderedApprovedUsers.length ? <div className="muted">Нет одобренных пользователей.</div> : null}
-              </div>
-            </SortableContext>
-          </DndContext>
+      <div className="adminTabPanel">
+        <div className="adminTabsRow">
+          <AdminTabButton active={topTab === "access"} onClick={() => setTopTab("access")}>Доступ</AdminTabButton>
+          <AdminTabButton active={topTab === "style"} onClick={() => setTopTab("style")}>Стиль</AdminTabButton>
         </div>
       </div>
 
-      <div className="card adminSectionCard" style={{ marginTop: 16 }}>
-        <h4 className="pageTitle" style={{ fontSize: 22 }}>Allowlist</h4>
-        <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
-          <input
-            className="input"
-            type="email"
-            placeholder="email@example.com"
-            value={newEmail}
-            onChange={(event) => setNewEmail(event.target.value)}
-          />
-          <button type="button" onClick={() => void runAdminAction(addAllowlistEmail, "Email добавлен в allowlist")}>
-            Добавить в allowlist
-          </button>
-          <button type="button" className="btn btnGhost" onClick={() => void runAdminAction(refreshDesignersDirectory, "База дизайнеров обновлена")}>
-            Обновить базу дизайнеров
-          </button>
-        </div>
-        <div style={{ display: "grid", gap: 10 }}>
-          {(overview?.allowlist ?? []).map((entry) => (
-            <div key={entry.email} className="tableRowGhost" style={{ display: "flex", justifyContent: "space-between", gap: 12 }}>
-              <div>
-                <div><strong>{entry.email}</strong></div>
-                <div className="muted">{entry.comment || entry.source}</div>
+      {topTab === "access" ? (
+        <div className="adminSubtabPanel">
+          <div className="adminTabsRow isSubtabs">
+            <AdminTabButton active={accessTab === "people"} onClick={() => setAccessTab("people")}>Люди</AdminTabButton>
+            <AdminTabButton active={accessTab === "links"} onClick={() => setAccessTab("links")}>Ссылки</AdminTabButton>
+          </div>
+
+          <div className="adminSubtabBody">
+            {accessTab === "people" ? (
+              <>
+              <div className="adminSectionLead">
+                <div className="muted">Одобрение пользователей, admin-роли, allowlist и синхронизация дизайнеров.</div>
               </div>
-              <button type="button" className="btn btnGhost" onClick={() => void runAdminAction(() => removeAllowlistEmail(entry.email), "Email удалён из allowlist")}>
-                Удалить
-              </button>
+
+              <div className="grid2" style={{ alignItems: "start" }}>
+                <DndContext sensors={sensors} collisionDetection={closestCenter} onDragStart={handlePeopleDragStart} onDragOver={handlePeopleDragOver} onDragEnd={(event) => void handlePeopleDragEnd(event)} onDragCancel={handleDragCancel}>
+                  <div className="card adminSectionCard">
+                    <h4 className="pageTitle" style={{ fontSize: 22 }}>Ожидают одобрения</h4>
+                    <SortableContext items={orderedPendingUsers.map((user) => user.id)} strategy={rectSortingStrategy}>
+                      <DroppableUserColumn list="pendingUsers">
+                        <div className="adminUserGrid adminUserGridTiles">
+                          {orderedPendingUsers.map((user) => (
+                            <SortableCard key={user.id} id={user.id} className="adminUserCard adminUserBrick">
+                              <UserCardContent
+                                user={user}
+                                actions={
+                                  <>
+                                    <button type="button" onClick={() => void runAdminAction(() => approve(user.id), "Пользователь одобрен")}>Одобрить</button>
+                                    <button type="button" className="btn btnGhost" onClick={() => void runAdminAction(() => reject(user.id), "Заявка отклонена")}>Отклонить</button>
+                                  </>
+                                }
+                              />
+                            </SortableCard>
+                          ))}
+                          {!orderedPendingUsers.length ? <div className="muted">Нет пользователей, ожидающих одобрения.</div> : null}
+                        </div>
+                      </DroppableUserColumn>
+                    </SortableContext>
+                  </div>
+
+                  <div className="card adminSectionCard">
+                    <h4 className="pageTitle" style={{ fontSize: 22 }}>Одобренные пользователи</h4>
+                    <SortableContext items={orderedApprovedUsers.map((user) => user.id)} strategy={rectSortingStrategy}>
+                      <DroppableUserColumn list="approvedUsers">
+                        <div className="adminUserGrid adminUserGridTiles">
+                          {orderedApprovedUsers.map((user) => {
+                            const isSelf = authSession.state.user?.id === user.id;
+                            const isAdmin = user.role === "admin";
+                            return (
+                              <SortableCard key={user.id} id={user.id} className="adminUserCard adminUserBrick">
+                                <UserCardContent
+                                  user={user}
+                                  roleText={isAdmin ? "Администратор" : "Пользователь"}
+                                  roleClassName={isAdmin ? "isAdmin" : ""}
+                                  actions={
+                                    <>
+                                      <button type="button" className="btn btnGhost" onClick={() => void runAdminAction(() => revoke(user.id), "Пользователь удален из одобренных")} disabled={isSelf}>Удалить</button>
+                                      <button type="button" className={`btn ${isAdmin ? "btnGhost" : ""}`} onClick={() => void runAdminAction(() => toggleAdminRole(user), isAdmin ? "Admin-роль снята" : "Admin-роль назначена")} disabled={isSelf}>
+                                        {isAdmin ? "Убрать из админов" : "Сделать админом"}
+                                      </button>
+                                    </>
+                                  }
+                                />
+                              </SortableCard>
+                            );
+                          })}
+                          {!orderedApprovedUsers.length ? <div className="muted">Нет одобренных пользователей.</div> : null}
+                        </div>
+                      </DroppableUserColumn>
+                    </SortableContext>
+                  </div>
+                </DndContext>
+              </div>
+
+              <div className="card adminSectionCard" style={{ marginTop: 16 }}>
+                <div className="adminSectionLead compact">
+                  <div>
+                    <h4 className="pageTitle adminSectionTitle">Allowlist и синхронизация</h4>
+                    <div className="muted">Email-список быстрого допуска и принудительное обновление linkage по designers base.</div>
+                  </div>
+                </div>
+                <div className="adminAllowlistToolbar">
+                  <input className="input" type="email" placeholder="email@example.com" value={newEmail} onChange={(event) => setNewEmail(event.target.value)} />
+                  <button type="button" onClick={() => void runAdminAction(addAllowlistEmail, "Email добавлен в allowlist")}>Добавить в allowlist</button>
+                  <button type="button" className="btn btnGhost" onClick={() => void runAdminAction(refreshDesignersDirectory, "База дизайнеров обновлена")}>Обновить базу дизайнеров</button>
+                </div>
+                <div style={{ display: "grid", gap: 10 }}>
+                  {(overview?.allowlist ?? []).map((entry) => (
+                    <div key={entry.email} className="tableRowGhost adminAllowlistRow">
+                      <div>
+                        <div><strong>{entry.email}</strong></div>
+                        <div className="muted">{entry.comment || entry.source}</div>
+                        <div className="muted">Добавлен: {formatDateTime(entry.createdAt)}</div>
+                      </div>
+                      <button type="button" className="btn btnGhost" onClick={() => void runAdminAction(() => removeAllowlistEmail(entry.email), "Email удален из allowlist")}>Удалить</button>
+                    </div>
+                  ))}
+                  {!overview?.allowlist?.length ? <div className="muted">Allowlist пуст.</div> : null}
+                </div>
+              </div>
+              </>
+            ) : (
+              <>
+              <div className="adminSectionLead">
+                <div className="muted">Временные ссылки дают full viewer access без admin-прав. Каждое успешное открытие увеличивает useCount и попадает в журнал использования.</div>
+              </div>
+
+              <div className="grid2" style={{ alignItems: "start" }}>
+                <div className="card adminSectionCard">
+                  <h4 className="pageTitle" style={{ fontSize: 22 }}>Создание ссылки</h4>
+                  <div className="adminLinkDraftGrid">
+                    <label className="adminFieldStack">
+                      <span className="muted">Название / оператор</span>
+                      <input className="input" value={draftLinkLabel} onChange={(event) => setDraftLinkLabel(event.target.value)} placeholder="Например, Презентация для партнера" />
+                    </label>
+                    <label className="adminFieldStack">
+                      <span className="muted">Срок действия, часы</span>
+                      <input className="input" type="number" min={1} step={1} value={draftLinkExpiryHours} onChange={(event) => setDraftLinkExpiryHours(event.target.value)} />
+                    </label>
+                  </div>
+                  <div className="adminLinkDraftActions">
+                    <button type="button" onClick={() => void runAdminAction(createAccessLink, "Ссылка создана")}>Создать ссылку</button>
+                    <div className="muted">После создания ссылка сразу копируется в буфер обмена.</div>
+                  </div>
+                </div>
+
+                <div className="card adminSectionCard">
+                  <h4 className="pageTitle" style={{ fontSize: 22 }}>Поведение ссылки</h4>
+                  <div className="adminLinkChecklist">
+                    <div className="tableRowGhost">Reusable viewer link до expiry или revoke.</div>
+                    <div className="tableRowGhost">В auth-панели будет countdown до окончания действия ссылки.</div>
+                    <div className="tableRowGhost">Ссылка ведёт в обычный web timeline и не даёт admin-права.</div>
+                    <div className="tableRowGhost">Для каждой ссылки видны useCount, последний вход и журнал IP / city / client summary.</div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="card adminSectionCard" style={{ marginTop: 16 }}>
+                <div className="adminSectionLead compact">
+                  <div>
+                    <h4 className="pageTitle adminSectionTitle">Список временных ссылок</h4>
+                    <div className="muted">Когда runtime включится, здесь будут активные, истекшие и отозванные ссылки с быстрым копированием.</div>
+                  </div>
+                  <div className="adminLinksSummary">
+                    <span className="adminCountBadge">{links.length}</span>
+                    <span className="muted">всего ссылок</span>
+                  </div>
+                </div>
+
+                {links.length ? (
+                  <div className="adminAccessLinkList">
+                    {links.map((link) => (
+                      <div key={link.id} className="adminAccessLinkCard">
+                        <div className="adminAccessLinkHeader">
+                          <div>
+                            <div className="adminUserName">{link.label}</div>
+                            <div className="muted">Создана: {formatDateTime(link.createdAt)}{link.createdBy ? ` • ${link.createdBy}` : ""}</div>
+                          </div>
+                          <div className={`adminLinkStatusBadge is${link.status[0].toUpperCase()}${link.status.slice(1)}`}>{statusLabel(link.status)}</div>
+                        </div>
+                        <div className="adminAccessLinkMeta">
+                          <span>Истекает: {formatDateTime(link.expiresAt)}</span>
+                          <span>Осталось: {formatRemainingTime(link.expiresAt)}</span>
+                          <span>Использований: {link.useCount}</span>
+                          <span>Последний вход: {formatDateTime(link.lastUsedAt)}</span>
+                        </div>
+                        <div className="adminLinkDraftGrid">
+                          <label className="adminFieldStack">
+                            <span className="muted">Название</span>
+                            <input
+                              className="input"
+                              value={linkDrafts[link.id]?.label ?? link.label}
+                              onChange={(event) => updateAccessLinkDraft(link.id, { label: event.target.value })}
+                            />
+                          </label>
+                          <label className="adminFieldStack">
+                            <span className="muted">Действует до</span>
+                            <input
+                              className="input"
+                              type="datetime-local"
+                              value={linkDrafts[link.id]?.expiresAt ?? toDateTimeInputValue(link.expiresAt)}
+                              onChange={(event) => updateAccessLinkDraft(link.id, { expiresAt: event.target.value })}
+                            />
+                          </label>
+                        </div>
+                        <div className="adminAccessLinkActions">
+                          <button type="button" onClick={() => void runAdminAction(() => copyBrowserLink(link.browserUrl), "Ссылка скопирована")} disabled={!link.browserUrl}>Копировать</button>
+                          <button type="button" className="btn btnGhost" onClick={() => void runAdminAction(() => saveAccessLink(link.id), "Ссылка обновлена")}>Сохранить</button>
+                          <button type="button" className="btn btnGhost" onClick={() => void runAdminAction(() => revokeAccessLink(link.id), "Ссылка отозвана")} disabled={link.status === "revoked"}>Отозвать</button>
+                        </div>
+                        <details className="adminLinkDetails">
+                          <summary>Статистика и журнал</summary>
+                          {link.usageEvents.length ? (
+                            <div className="adminAccessLinkEvents">
+                              {link.usageEvents.map((event) => (
+                                <div key={event.id} className="tableRowGhost">
+                                  <div><strong>{formatDateTime(event.usedAt)}</strong></div>
+                                  <div className="muted">IP: {event.ip || "-"}</div>
+                                  <div className="muted">Город: {event.city || "-"}</div>
+                                  <div className="muted">{event.clientSummary || "Client summary появится из backend best-effort metadata."}</div>
+                                </div>
+                              ))}
+                            </div>
+                          ) : (
+                            <div className="muted">Пока нет usage events по этой ссылке.</div>
+                          )}
+                        </details>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="adminStubEmptyState">
+                    <div className="adminStubEmptyIcon" aria-hidden="true">⧉</div>
+                    <div>
+                      <div className="adminUserName">Временные ссылки еще не заведены</div>
+                      <div className="muted">Создай первую reusable viewer ссылку выше. После redemption она даст full unmasked viewer access и покажет usage stats здесь же.</div>
+                    </div>
+                  </div>
+                )}
+              </div>
+              </>
+            )}
+          </div>
+        </div>
+      ) : (
+        <div className="adminSubtabPanel">
+          <div className="adminTabsRow isSubtabs">
+            <AdminTabButton active={styleTab === "presets"} onClick={() => setStyleTab("presets")}>Пресеты</AdminTabButton>
+          </div>
+
+          <div className="adminSubtabBody">
+            <div className="adminSectionLead">
+              <div className="muted">Первая подвкладка хранит color/layout presets без изменения текущей бизнес-логики.</div>
             </div>
-          ))}
-          {!overview?.allowlist?.length ? <div className="muted">Allowlist пуст.</div> : null}
-        </div>
-      </div>
 
-      <div className="card adminSectionCard" style={{ marginTop: 16 }}>
-        <div className="pageHeader" style={{ marginBottom: 12 }}>
-          <h4 className="pageTitle" style={{ fontSize: 22 }}>Пресеты</h4>
-        </div>
-
-        <div className="adminPresetToolbar">
-          <button
-            type="button"
-            className="btn btnGhost"
-            onClick={() => {
-              setPendingImportKind("color");
-              importRef.current?.click();
-            }}
-          >
-            Импортировать color preset
-          </button>
-          <button
-            type="button"
-            className="btn btnGhost"
-            onClick={() => {
-              setPendingImportKind("layout");
-              importRef.current?.click();
-            }}
-          >
-            Импортировать layout preset
-          </button>
-        </div>
-
-        <div className="grid2 adminPresetSplit" style={{ alignItems: "start" }}>
-          <div className="card adminPresetColumn">
-            <h4 className="pageTitle" style={{ fontSize: 20 }}>Цветовые пресеты</h4>
-            <DndContext
-              sensors={sensors}
-              collisionDetection={closestCenter}
-              onDragStart={(event) => handleDragStart("colorPresets", event)}
-              onDragOver={(event) => handleDragOver("colorPresets", event)}
-              onDragEnd={(event) => void handleDragEnd("colorPresets", event)}
-              onDragCancel={handleDragCancel}
-            >
-              <SortableContext items={orderedColorPresets.map((preset) => preset.id)} strategy={rectSortingStrategy}>
-                <div className="adminUserGrid adminPresetGrid">
-                  {orderedColorPresets.map((preset) => (
-                    <SortableCard key={preset.id} id={preset.id} className="adminUserCard adminUserBrick adminPresetBrick">
-                      <PresetCardContent
-                        preset={preset}
-                        actions={
-                          <>
-                            <button type="button" onClick={() => void runAdminAction(() => setDefaultPreset(preset), "Preset по умолчанию обновлён")}>
-                              Сделать default
-                            </button>
-                            <button type="button" className="btn btnGhost" onClick={() => void runAdminAction(() => exportPreset(preset), "Preset экспортирован")}>
-                              Экспорт
-                            </button>
-                            <button type="button" className="btn btnGhost" onClick={() => void runAdminAction(() => deletePreset(preset.id), "Preset удалён")}>
-                              Удалить
-                            </button>
-                          </>
-                        }
-                      />
-                    </SortableCard>
-                  ))}
-                  {!orderedColorPresets.length ? <div className="muted">Пока нет preset-ов этого типа.</div> : null}
+            <div className="card adminSectionCard">
+              <div className="pageHeader" style={{ marginBottom: 12 }}>
+                <h4 className="pageTitle" style={{ fontSize: 22 }}>Пресеты</h4>
+              </div>
+              <div className="adminPresetToolbar">
+                <button type="button" className="btn btnGhost" onClick={() => { setPendingImportKind("color"); importRef.current?.click(); }}>Импортировать color preset</button>
+                <button type="button" className="btn btnGhost" onClick={() => { setPendingImportKind("layout"); importRef.current?.click(); }}>Импортировать layout preset</button>
+              </div>
+              <div className="grid2 adminPresetSplit" style={{ alignItems: "start" }}>
+                <div className="card adminPresetColumn">
+                  <h4 className="pageTitle" style={{ fontSize: 20 }}>Цветовые пресеты</h4>
+                  <DndContext sensors={sensors} collisionDetection={closestCenter} onDragStart={(event) => handleDragStart("colorPresets", event)} onDragOver={(event) => handleDragOver("colorPresets", event)} onDragEnd={(event) => void handleDragEnd("colorPresets", event)} onDragCancel={handleDragCancel}>
+                    <SortableContext items={orderedColorPresets.map((preset) => preset.id)} strategy={rectSortingStrategy}>
+                      <div className="adminUserGrid adminPresetGrid">
+                        {orderedColorPresets.map((preset) => (
+                          <SortableCard key={preset.id} id={preset.id} className="adminUserCard adminUserBrick adminPresetBrick">
+                            <PresetCardContent
+                              preset={preset}
+                              actions={
+                                <>
+                                  <button type="button" onClick={() => void runAdminAction(() => setDefaultPreset(preset), "Preset по умолчанию обновлен")}>Сделать default</button>
+                                  <button type="button" className="btn btnGhost" onClick={() => void runAdminAction(() => exportPreset(preset), "Preset экспортирован")}>Экспорт</button>
+                                  <button type="button" className="btn btnGhost" onClick={() => void runAdminAction(() => deletePreset(preset.id), "Preset удален")}>Удалить</button>
+                                </>
+                              }
+                            />
+                          </SortableCard>
+                        ))}
+                        {!orderedColorPresets.length ? <div className="muted">Пока нет preset-ов этого типа.</div> : null}
+                      </div>
+                    </SortableContext>
+                  </DndContext>
                 </div>
-              </SortableContext>
-            </DndContext>
-          </div>
 
-          <div className="card adminPresetColumn">
-            <h4 className="pageTitle" style={{ fontSize: 20 }}>UI / Layout пресеты</h4>
-            <DndContext
-              sensors={sensors}
-              collisionDetection={closestCenter}
-              onDragStart={(event) => handleDragStart("layoutPresets", event)}
-              onDragOver={(event) => handleDragOver("layoutPresets", event)}
-              onDragEnd={(event) => void handleDragEnd("layoutPresets", event)}
-              onDragCancel={handleDragCancel}
-            >
-              <SortableContext items={orderedLayoutPresets.map((preset) => preset.id)} strategy={rectSortingStrategy}>
-                <div className="adminUserGrid adminPresetGrid">
-                  {orderedLayoutPresets.map((preset) => (
-                    <SortableCard key={preset.id} id={preset.id} className="adminUserCard adminUserBrick adminPresetBrick">
-                      <PresetCardContent
-                        preset={preset}
-                        actions={
-                          <>
-                            <button type="button" onClick={() => void runAdminAction(() => setDefaultPreset(preset), "Preset по умолчанию обновлён")}>
-                              Сделать default
-                            </button>
-                            <button type="button" className="btn btnGhost" onClick={() => void runAdminAction(() => exportPreset(preset), "Preset экспортирован")}>
-                              Экспорт
-                            </button>
-                            <button type="button" className="btn btnGhost" onClick={() => void runAdminAction(() => deletePreset(preset.id), "Preset удалён")}>
-                              Удалить
-                            </button>
-                          </>
-                        }
-                      />
-                    </SortableCard>
-                  ))}
-                  {!orderedLayoutPresets.length ? <div className="muted">Пока нет preset-ов этого типа.</div> : null}
+                <div className="card adminPresetColumn">
+                  <h4 className="pageTitle" style={{ fontSize: 20 }}>UI / Layout пресеты</h4>
+                  <DndContext sensors={sensors} collisionDetection={closestCenter} onDragStart={(event) => handleDragStart("layoutPresets", event)} onDragOver={(event) => handleDragOver("layoutPresets", event)} onDragEnd={(event) => void handleDragEnd("layoutPresets", event)} onDragCancel={handleDragCancel}>
+                    <SortableContext items={orderedLayoutPresets.map((preset) => preset.id)} strategy={rectSortingStrategy}>
+                      <div className="adminUserGrid adminPresetGrid">
+                        {orderedLayoutPresets.map((preset) => (
+                          <SortableCard key={preset.id} id={preset.id} className="adminUserCard adminUserBrick adminPresetBrick">
+                            <PresetCardContent
+                              preset={preset}
+                              actions={
+                                <>
+                                  <button type="button" onClick={() => void runAdminAction(() => setDefaultPreset(preset), "Preset по умолчанию обновлен")}>Сделать default</button>
+                                  <button type="button" className="btn btnGhost" onClick={() => void runAdminAction(() => exportPreset(preset), "Preset экспортирован")}>Экспорт</button>
+                                  <button type="button" className="btn btnGhost" onClick={() => void runAdminAction(() => deletePreset(preset.id), "Preset удален")}>Удалить</button>
+                                </>
+                              }
+                            />
+                          </SortableCard>
+                        ))}
+                        {!orderedLayoutPresets.length ? <div className="muted">Пока нет preset-ов этого типа.</div> : null}
+                      </div>
+                    </SortableContext>
+                  </DndContext>
                 </div>
-              </SortableContext>
-            </DndContext>
+              </div>
+
+              <input ref={importRef} type="file" accept=".json,application/json" style={{ display: "none" }} onChange={(event) => {
+                const file = event.target.files?.[0];
+                if (!file) return;
+                void runAdminAction(() => importPreset(file, pendingImportKind), "Preset импортирован");
+                event.target.value = "";
+              }} />
+            </div>
           </div>
         </div>
-
-        <input
-          ref={importRef}
-          type="file"
-          accept=".json,application/json"
-          style={{ display: "none" }}
-          onChange={(event) => {
-            const file = event.target.files?.[0];
-            if (!file) return;
-            void runAdminAction(() => importPreset(file, pendingImportKind), "Preset импортирован");
-            event.target.value = "";
-          }}
-        />
-      </div>
+      )}
 
       {typeof document !== "undefined"
         ? createPortal(
@@ -915,18 +1283,8 @@ export function AdminPage() {
                     <div className="adminUserCard adminUserBrick isOverlay">
                       <UserCardContent
                         user={activeOverlay as AdminUserCard}
-                        roleText={
-                          activeDrag.list === "approvedUsers"
-                            ? (activeOverlay as AdminUserCard).role === "admin"
-                              ? "Администратор"
-                              : "Пользователь"
-                            : undefined
-                        }
-                        roleClassName={
-                          activeDrag.list === "approvedUsers" && (activeOverlay as AdminUserCard).role === "admin"
-                            ? "isAdmin"
-                            : undefined
-                        }
+                        roleText={activeDrag.list === "approvedUsers" ? ((activeOverlay as AdminUserCard).role === "admin" ? "Администратор" : "Пользователь") : undefined}
+                        roleClassName={activeDrag.list === "approvedUsers" && (activeOverlay as AdminUserCard).role === "admin" ? "isAdmin" : undefined}
                         actions={null}
                       />
                     </div>

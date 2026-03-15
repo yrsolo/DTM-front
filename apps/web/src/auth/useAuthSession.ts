@@ -32,6 +32,9 @@ export type AuthSessionState = {
   accessMode: "masked" | "full";
   user: AuthSessionUser | null;
   available: boolean;
+  sessionKind: "yandex" | "telegram" | "temp_link" | null;
+  expiresAt: string | null;
+  temporaryAccessLabel: string | null;
   telegramBootstrap: TelegramBootstrapState;
   telegramBootstrapReason: TelegramBootstrapReason | null;
 };
@@ -42,6 +45,9 @@ const DEFAULT_STATE: AuthSessionState = {
   accessMode: "masked",
   user: null,
   available: true,
+  sessionKind: null,
+  expiresAt: null,
+  temporaryAccessLabel: null,
   telegramBootstrap: "idle",
   telegramBootstrapReason: null,
 };
@@ -50,10 +56,21 @@ function buildAuthUrl(path: string): string {
   return `${getAuthRequestBase()}${path}`;
 }
 
+function consumeAccessLinkTokenFromUrl(): string | null {
+  if (typeof window === "undefined") return null;
+  const url = new URL(window.location.href);
+  const token = url.searchParams.get("access_link")?.trim() || null;
+  if (!token) return null;
+  url.searchParams.delete("access_link");
+  window.history.replaceState({}, "", `${url.pathname}${url.search}${url.hash}`);
+  return token;
+}
+
 export function useAuthSession() {
   const [state, setState] = React.useState<AuthSessionState>(() =>
     ({ ...DEFAULT_STATE, loading: true, available: true })
   );
+  const redeemedRef = React.useRef(false);
 
   const reload = React.useCallback(async () => {
     setState((prev) => ({ ...prev, loading: true, available: true }));
@@ -70,6 +87,9 @@ export function useAuthSession() {
           accessMode: "masked",
           user: null,
           available: true,
+          sessionKind: null,
+          expiresAt: null,
+          temporaryAccessLabel: null,
           telegramBootstrap: "idle",
           telegramBootstrapReason: null,
         };
@@ -87,6 +107,12 @@ export function useAuthSession() {
         accessMode: payload?.accessMode === "full" ? "full" : "masked",
         user: payload?.user ?? null,
         available: true,
+        sessionKind:
+          payload?.sessionKind === "yandex" || payload?.sessionKind === "telegram" || payload?.sessionKind === "temp_link"
+            ? payload.sessionKind
+            : null,
+        expiresAt: typeof payload?.expiresAt === "string" ? payload.expiresAt : null,
+        temporaryAccessLabel: typeof payload?.temporaryAccessLabel === "string" ? payload.temporaryAccessLabel : null,
         telegramBootstrap: payload?.authenticated ? "linked" : "idle",
         telegramBootstrapReason: null,
       };
@@ -157,6 +183,23 @@ export function useAuthSession() {
 
   React.useEffect(() => {
     void (async () => {
+      const accessLinkToken = redeemedRef.current ? null : consumeAccessLinkTokenFromUrl();
+      redeemedRef.current = true;
+      if (accessLinkToken) {
+        try {
+          await fetch(buildAuthUrl("/access-links/redeem"), {
+            method: "POST",
+            credentials: "include",
+            headers: {
+              "content-type": "application/json",
+              accept: "application/json",
+            },
+            body: JSON.stringify({ token: accessLinkToken }),
+          });
+        } catch {
+          // A failed redemption simply falls back to the regular auth/session check.
+        }
+      }
       const nextState = await reload();
       const runtime = getTelegramRuntimeInfo();
       if (!runtime.isTelegramMiniApp) return;

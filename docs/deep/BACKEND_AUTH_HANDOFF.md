@@ -45,6 +45,26 @@ Auth/session namespace:
 - `/ops/auth/*`
 - `/test/ops/auth/*`
 
+Task attachment routes use a dedicated auth facade instead of generic `bff`:
+- browser control plane uses `/ops/auth/attachments/*` and `/test/ops/auth/attachments/*`;
+- `request-upload`, `finalize`, `delete`, `jobs/{job_id}`, `view`, and `download` are all browser-safe auth routes;
+- binary upload then goes directly from browser to the presigned Object Storage URL returned by `request-upload`;
+- backend-owned `/ops/admin/*` and `/ops/api/task-attachments/*` stay internal service routes and must not be opened directly by the browser.
+
+Attachment facade mapping:
+- `POST /ops/auth/attachments/request-upload` -> backend attachment admin `request-upload`;
+- `POST /ops/auth/attachments/finalize` -> backend attachment admin `finalize`;
+- `POST /ops/auth/attachments/delete` -> backend attachment admin `delete`;
+- `GET /ops/auth/attachments/jobs/{job_id}` -> backend admin jobs handler;
+- `GET /ops/auth/attachments/{attachment_id}/view` -> backend attachment read `view`;
+- `GET /ops/auth/attachments/{attachment_id}/download` -> backend attachment read `download`;
+- test contour uses the same mappings under `/test/ops/auth/...`.
+
+Important for browser integration:
+- binary upload is deliberate direct browser `PUT` and must not be proxied through auth or `bff`;
+- browser must use the exact presigned method, URL and signed headers returned by `request-upload`;
+- `view` / `download` remain browser-facing auth routes, even if payload contains raw backend read links.
+
 ## Browser -> Auth proxy
 
 Frontend always calls the auth proxy for browser data requests:

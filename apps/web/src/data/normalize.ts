@@ -34,6 +34,48 @@ export function normalizeToSnapshotV1(payload: any): SnapshotV1 {
   );
 }
 
+function toOptionalString(value: unknown): string | null {
+  return typeof value === "string" && value.trim() ? value : null;
+}
+
+function normalizeAttachment(input: any) {
+  if (!input || typeof input !== "object") return null;
+  const id = toOptionalString(input.id);
+  const name = toOptionalString(input.name);
+  const mime = toOptionalString(input.mime);
+  const kind = toOptionalString(input.kind);
+  const status = toOptionalString(input.status);
+  const sizeBytes = typeof input.sizeBytes === "number" && Number.isFinite(input.sizeBytes)
+    ? input.sizeBytes
+    : typeof input.size_bytes === "number" && Number.isFinite(input.size_bytes)
+      ? input.size_bytes
+      : null;
+
+  if (!id || !name || !mime || !kind || !status || sizeBytes === null) {
+    return null;
+  }
+
+  const capabilities = Array.isArray(input.capabilities)
+    ? input.capabilities.filter((item: unknown): item is string => typeof item === "string" && item.trim().length > 0)
+    : undefined;
+  const preview = toOptionalString(input.meta?.preview ?? input.preview);
+  const view = toOptionalString(input.links?.view);
+  const download = toOptionalString(input.links?.download);
+
+  return {
+    id,
+    name,
+    mime,
+    kind,
+    sizeBytes,
+    status,
+    uploadedAt: toOptionalString(input.uploadedAt ?? input.uploaded_at),
+    capabilities,
+    meta: preview !== null ? { preview } : undefined,
+    links: view !== null || download !== null ? { view, download } : undefined,
+  };
+}
+
 /** Maps the v2 API response to the internal SnapshotV1 shape. */
 function normalizeV2(payload: any): SnapshotV1 {
   return {
@@ -94,6 +136,11 @@ function normalizeV2(payload: any): SnapshotV1 {
             status: m.status,
           }))
         : [],
+      attachments: Array.isArray(t.attachments)
+        ? t.attachments
+            .map((attachment: any) => normalizeAttachment(attachment))
+            .filter(Boolean)
+        : undefined,
       hash: t.hash ?? null,
       revision: t.revision ?? null,
     })),

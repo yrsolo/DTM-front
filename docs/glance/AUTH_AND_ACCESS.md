@@ -121,9 +121,26 @@ User-visible statuses:
 - `Пользователь` -> доступ подтверждён, full access есть, admin role нет
 - `Администратор` -> full access и доступ к admin UI
 
+Session metadata:
+- `/ops/auth/me` and `/test/ops/auth/me` return:
+  - `sessionKind`
+  - `expiresAt`
+  - `temporaryAccessLabel`
+- current supported session sources:
+  - `yandex`
+  - `telegram`
+  - `temp_link`
+- temp-link session uses:
+  - `sessionKind = temp_link`
+  - `expiresAt` for auth-panel countdown
+  - `temporaryAccessLabel` for operator-facing session naming
+
 Browser data request behavior:
 - default mode для approved/admin -> frontend отправляет browser API requests с auth cookie
 - guest и pending получают masked data из-за отсутствия full access
+- temp-link session behaves like approved viewer:
+  - full access
+  - no admin rights
 - если approved/admin вручную включает маскирование в UI, frontend отправляет browser API requests без auth cookie
 - auth proxy на основе cookie сам выставляет upstream headers:
   - `x-dtm-access-mode`
@@ -138,7 +155,13 @@ JSON endpoints:
 
 V1 endpoints:
 - `GET /admin/overview`
+- `GET /admin/access-links`
+- `POST /admin/access-links`
+- `PATCH /admin/access-links/:id`
+- `POST /admin/access-links/:id/revoke`
+- `GET /admin/access-links/:id/usage`
 - `POST /telegram/session`
+- `POST /access-links/redeem`
 - `POST /admin/users/:id/approve`
 - `POST /admin/users/:id/reject`
 - `POST /admin/users/:id/revoke`
@@ -157,6 +180,47 @@ Admin personal order:
   - color presets
   - layout presets
 - `GET /admin/overview` возвращает эти списки уже в персональном порядке текущего администратора
+
+Current admin IA:
+- top-level tabs:
+  - `Доступ`
+  - `Стиль`
+- nested tabs under `Доступ`:
+  - `Люди`
+  - `Ссылки`
+- nested tabs under `Стиль`:
+  - `Пресеты`
+
+`Доступ -> Люди` keeps current runtime actions:
+- pending / approved users
+- approve / reject / revoke
+- admin role toggle
+- allowlist
+- `Обновить базу дизайнеров`
+
+`Доступ -> Ссылки` is live runtime surface for temporary access links:
+- reusable viewer links are created under auth contour
+- each link card shows:
+  - label
+  - status
+  - expiresAt
+  - remaining time
+  - useCount
+  - lastUsedAt
+  - quick copy browser URL
+  - usage log / stats panel
+- operator actions:
+  - create
+  - edit label / expiry
+  - revoke
+  - copy browser URL
+- runtime semantics:
+  - full unmasked access like approved viewer
+  - never admin access
+  - auth-panel countdown until expiry
+  - every successful redemption increments usage stats and writes a usage event
+
+`Стиль -> Пресеты` hosts the existing color/layout preset management without changing the current preset business logic.
 
 ## OAuth apps
 

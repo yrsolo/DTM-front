@@ -96,10 +96,15 @@ async function syncUserLinkageByEmail(userId: string, email: string | null) {
   }
 }
 
-function buildSessionCookieForUser(user: NonNullable<Awaited<ReturnType<typeof getUserById>>>) {
+function buildSessionCookieForUser(
+  user: NonNullable<Awaited<ReturnType<typeof getUserById>>>,
+  provider: "yandex" | "telegram"
+) {
   const cfg = getAuthRuntimeConfig();
   const now = Math.floor(Date.now() / 1000);
   return issueSessionCookie({
+    kind: "user",
+    provider,
     userId: user.id,
     yandexUid: user.yandexUid,
     role: user.role,
@@ -178,7 +183,7 @@ export async function callback(req: NormalizedRequest) {
     }),
   });
 
-  const sessionCookie = buildSessionCookieForUser(user);
+  const sessionCookie = buildSessionCookieForUser(user, "yandex");
 
   const response = oauthState.popup
     ? html(200, buildPopupClosePage(oauthState.returnTo))
@@ -264,7 +269,7 @@ export async function telegramSession(req: NormalizedRequest) {
     return telegramSessionError(404, "telegram_user_not_linked", telegramUser.id);
   }
 
-  const sessionCookie = buildSessionCookieForUser(user);
+  const sessionCookie = buildSessionCookieForUser(user, "telegram");
   user = await getUserById(user.id);
   const result = json(200, {
     ok: true,

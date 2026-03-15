@@ -35,6 +35,27 @@ type AuthPanelContent = {
   maskingHint: string;
 };
 
+function formatSessionCountdown(value: string | null, locale: "ru" | "en"): string | null {
+  if (!value) return null;
+  const expiresAt = new Date(value);
+  if (!Number.isFinite(expiresAt.getTime())) return null;
+  const diffMs = expiresAt.getTime() - Date.now();
+  if (diffMs <= 0) {
+    return locale === "ru" ? "Истекла" : "Expired";
+  }
+  const totalMinutes = Math.floor(diffMs / 60000);
+  const days = Math.floor(totalMinutes / (60 * 24));
+  const hours = Math.floor((totalMinutes % (60 * 24)) / 60);
+  const minutes = totalMinutes % 60;
+  if (days > 0) {
+    return locale === "ru" ? `${days} д ${hours} ч` : `${days}d ${hours}h`;
+  }
+  if (hours > 0) {
+    return locale === "ru" ? `${hours} ч ${minutes} мин` : `${hours}h ${minutes}m`;
+  }
+  return locale === "ru" ? `${Math.max(1, minutes)} мин` : `${Math.max(1, minutes)}m`;
+}
+
 function LockIcon() {
   return (
     <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">
@@ -68,10 +89,13 @@ function buildAuthPanelContent(params: {
     role: "admin" | "viewer";
     status: "pending" | "approved" | "blocked";
   } | null;
+  sessionKind: "yandex" | "telegram" | "temp_link" | null;
+  expiresAt: string | null;
+  temporaryAccessLabel: string | null;
   maskingForced: boolean;
   maskingLockedByAccess: boolean;
 }): AuthPanelContent {
-  const { locale, loading, authenticated, accessMode, user, maskingForced, maskingLockedByAccess } = params;
+  const { locale, loading, authenticated, accessMode, user, sessionKind, expiresAt, temporaryAccessLabel, maskingForced, maskingLockedByAccess } = params;
 
   if (loading) {
     return {
@@ -115,6 +139,29 @@ function buildAuthPanelContent(params: {
       adminHint: locale === "ru" ? "У вас есть права на открытие админки." : "You have permission to open admin.",
       primaryActionLabel: locale === "ru" ? "Выйти" : "Sign out",
       canOpenAdmin: true,
+      canToggleMasking: !maskingLockedByAccess,
+      maskingTitle: locale === "ru" ? `Принудительная маскировка: ${maskingForced ? "вкл" : "выкл"}` : `Forced masking: ${maskingForced ? "on" : "off"}`,
+      maskingHint: maskingLockedByAccess
+        ? (locale === "ru" ? "Маскирование определяется уровнем доступа." : "Masking is defined by access level.")
+        : (locale === "ru" ? "Во включённом режиме запросы к API отправляются без auth cookie." : "When enabled, API requests are sent without the auth cookie."),
+    };
+  }
+
+  if (sessionKind === "temp_link") {
+    const countdown = formatSessionCountdown(expiresAt, locale);
+    const label = temporaryAccessLabel || user.displayName || (locale === "ru" ? "Временный доступ" : "Temporary access");
+    return {
+      title: label,
+      statusLabel: locale === "ru" ? "Временная ссылка" : "Temporary link",
+      accessBadge: locale === "ru" ? "Полный доступ" : "Full access",
+      helpText: locale === "ru" ? "Сессия выдана временной ссылкой доступа." : "This session was granted by a temporary access link.",
+      detailText:
+        locale === "ru"
+          ? `Ссылка даёт viewer-доступ без admin-прав.${countdown ? ` До окончания: ${countdown}.` : ""}`
+          : `This link grants viewer access without admin rights.${countdown ? ` Time remaining: ${countdown}.` : ""}`,
+      adminHint: locale === "ru" ? "Временная ссылка никогда не даёт доступ к админке." : "Temporary links never grant admin access.",
+      primaryActionLabel: locale === "ru" ? "Выйти" : "Sign out",
+      canOpenAdmin: false,
       canToggleMasking: !maskingLockedByAccess,
       maskingTitle: locale === "ru" ? `Принудительная маскировка: ${maskingForced ? "вкл" : "выкл"}` : `Forced masking: ${maskingForced ? "on" : "off"}`,
       maskingHint: maskingLockedByAccess
@@ -213,6 +260,7 @@ export function TimelinePage() {
     }
     return "tasks";
   });
+  const [, setSessionClock] = React.useState(() => Date.now());
   const dateFromInputRef = React.useRef<HTMLInputElement | null>(null);
   const dateToInputRef = React.useRef<HTMLInputElement | null>(null);
   const dragStartRef = React.useRef<{
@@ -324,6 +372,14 @@ export function TimelinePage() {
     if (!host) return;
     setTimelineViewportHeight(host.clientHeight);
   }, [timelineHost.width, timelineHost.ref]);
+
+  React.useEffect(() => {
+    if (authSession.state.sessionKind !== "temp_link" || !authSession.state.expiresAt) return;
+    const timer = window.setInterval(() => {
+      setSessionClock(Date.now());
+    }, 30000);
+    return () => window.clearInterval(timer);
+  }, [authSession.state.expiresAt, authSession.state.sessionKind]);
 
   React.useEffect(() => {
     const onMove = (e: MouseEvent) => {
@@ -517,6 +573,9 @@ export function TimelinePage() {
     authenticated: authSession.state.authenticated,
     accessMode: authSession.state.accessMode,
     user: authSession.state.user,
+    sessionKind: authSession.state.sessionKind,
+    expiresAt: authSession.state.expiresAt,
+    temporaryAccessLabel: authSession.state.temporaryAccessLabel,
     maskingForced,
     maskingLockedByAccess,
   });

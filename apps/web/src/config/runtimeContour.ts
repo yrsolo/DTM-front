@@ -43,6 +43,10 @@ export function getApiProxyBasePath(pathname = currentPathname()): string {
   return getRuntimeContour(pathname) === "test" ? "/test/ops/bff" : "/ops/bff";
 }
 
+export function getBackendAdminBasePath(pathname = currentPathname()): string {
+  return getRuntimeContour(pathname) === "test" ? "/test/ops/admin" : "/ops/admin";
+}
+
 export function getAdminRoute(pathname = currentPathname()): string {
   if (isLocalFrontendRuntime()) {
     return "/admin";
@@ -68,4 +72,8 @@ export function getAuthRequestBase(pathname = currentPathname()): string {
 
 export function getApiProxyRequestBase(pathname = currentPathname()): string {
   return `${getRuntimeOrigin(pathname)}${getApiProxyBasePath(pathname)}`;
+}
+
+export function getBackendAdminRequestBase(pathname = currentPathname()): string {
+  return `${getRuntimeOrigin(pathname)}${getBackendAdminBasePath(pathname)}`;
 }

@@ -68,6 +68,25 @@ export type UiText = {
     links: string;
     openSheetRow: string;
     ownerResolveHint: string;
+    attachments: string;
+    attachmentsEmpty: string;
+    attachmentsUpload: string;
+    attachmentsUploading: string;
+    attachmentsUploadingBinary: string;
+    attachmentsFinalize: string;
+    attachmentsWaiting: string;
+    attachmentsUploaded: string;
+    attachmentsPreview: string;
+    attachmentsDownload: string;
+    attachmentsDelete: string;
+    attachmentsDeleting: string;
+    attachmentsDeleted: string;
+    attachmentsUnavailable: string;
+    attachmentsActionFailed: string;
+    attachmentsPreviewFailed: string;
+    attachmentsDropHint: string;
+    attachmentsUploadedAt: string;
+    attachmentsGeneric: string;
     weekdays: [string, string, string, string, string, string, string];
   };
   workbench: {
@@ -183,6 +202,25 @@ const RU_TEXT: UiText = {
     links: "Ссылки",
     openSheetRow: "Открыть строку в таблице",
     ownerResolveHint: "ownerId присутствует, но не найден в people[]",
+    attachments: "Вложения",
+    attachmentsEmpty: "Пока нет вложений",
+    attachmentsUpload: "Загрузить",
+    attachmentsUploading: "Получаем контракт загрузки...",
+    attachmentsUploadingBinary: "Загружаем файл...",
+    attachmentsFinalize: "Проверяем файл и завершаем загрузку...",
+    attachmentsWaiting: "Файл отправлен. Ждём публикацию вложения в snapshot.",
+    attachmentsUploaded: "Вложение опубликовано.",
+    attachmentsPreview: "Просмотр",
+    attachmentsDownload: "Скачать",
+    attachmentsDelete: "Удалить",
+    attachmentsDeleting: "Удаляем вложение и ждём завершения фоновой задачи...",
+    attachmentsDeleted: "Вложение удалено.",
+    attachmentsUnavailable: "Недоступно",
+    attachmentsActionFailed: "Не удалось выполнить действие с файлом",
+    attachmentsPreviewFailed: "Не удалось открыть предпросмотр файла",
+    attachmentsDropHint: "",
+    attachmentsUploadedAt: "Загружен",
+    attachmentsGeneric: "Файл",
     weekdays: ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"],
   },
   workbench: {
@@ -298,6 +336,25 @@ const EN_TEXT: UiText = {
     links: "Links",
     openSheetRow: "Open sheet row",
     ownerResolveHint: "ownerId is present but absent in people[] mapping",
+    attachments: "Attachments",
+    attachmentsEmpty: "No attachments yet",
+    attachmentsUpload: "Upload",
+    attachmentsUploading: "Requesting upload contract...",
+    attachmentsUploadingBinary: "Uploading file...",
+    attachmentsFinalize: "Verifying file and finalizing upload...",
+    attachmentsWaiting: "File uploaded. Waiting for snapshot publication.",
+    attachmentsUploaded: "Attachment published.",
+    attachmentsPreview: "Preview",
+    attachmentsDownload: "Download",
+    attachmentsDelete: "Delete",
+    attachmentsDeleting: "Deleting attachment and waiting for background job...",
+    attachmentsDeleted: "Attachment deleted.",
+    attachmentsUnavailable: "Unavailable",
+    attachmentsActionFailed: "Failed to complete file action",
+    attachmentsPreviewFailed: "Failed to open file preview",
+    attachmentsDropHint: "",
+    attachmentsUploadedAt: "Uploaded",
+    attachmentsGeneric: "File",
     weekdays: ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"],
   },
   workbench: {

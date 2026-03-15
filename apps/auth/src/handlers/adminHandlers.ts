@@ -1,4 +1,5 @@
 import { badRequest, forbidden, json } from "../http";
+import { buildAccessLinkCards } from "./accessLinksHandlers";
 import { listAllowlistEntries, addAllowlistEmail, removeAllowlistEmail } from "../db/allowlistRepo";
 import { closeAccessRequestsForUser, listAccessRequests } from "../db/accessRequestsRepo";
 import { writeAuditLog } from "../db/auditRepo";
@@ -51,7 +52,7 @@ export async function listAdminData(req: NormalizedRequest) {
   const auth = await requireAdmin(req);
   if (auth.error) return auth.error;
 
-  const [pendingUsers, approvedUsers, allowlist, accessRequests, colorPresets, layoutPresets, prefs] = await Promise.all([
+  const [pendingUsers, approvedUsers, allowlist, accessRequests, colorPresets, layoutPresets, prefs, accessLinks] = await Promise.all([
     listUsersByStatus("pending"),
     listUsersByStatus("approved"),
     listAllowlistEntries(),
@@ -59,6 +60,7 @@ export async function listAdminData(req: NormalizedRequest) {
     listPresetEntries("color", auth.user),
     listPresetEntries("layout", auth.user),
     getAdminLayoutPrefs(auth.user.id),
+    buildAccessLinkCards(),
   ]);
 
   const latestRequestByUserId = new Map<string, string>();
@@ -92,6 +94,7 @@ export async function listAdminData(req: NormalizedRequest) {
     pendingUsers: orderedPendingUsers,
     approvedUsers: orderedApprovedUsers,
     allowlist,
+    accessLinks,
     presets: {
       color: orderedColorPresets,
       layout: orderedLayoutPresets,

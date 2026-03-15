@@ -10,6 +10,7 @@
 Source of truth в коде:
 - [TimelinePage.tsx](../../apps/web/src/pages/TimelinePage.tsx)
 - [MiniAppPage.tsx](../../apps/web/src/pages/MiniAppPage.tsx)
+- [AdminPage.tsx](../../apps/web/src/pages/AdminPage.tsx)
 - [UnifiedTimeline.tsx](../../apps/web/src/gantt/UnifiedTimeline.tsx)
 - [DesignersBoard.tsx](../../apps/web/src/components/DesignersBoard.tsx)
 - [TaskDetailsDrawer.tsx](../../apps/web/src/components/TaskDetailsDrawer.tsx)
@@ -52,6 +53,7 @@ Source of truth в коде:
 - badges;
 - список milestones;
 - календарь;
+- скрытая по умолчанию панель вложений с count badge;
 - history.
 
 ## Страница `Дизайнеры`
@@ -113,6 +115,63 @@ Tooltip может быть шире карточки, чтобы milestone labe
 - внутри дня milestones показываются строками `Майлстоун | Бренд | Формат | Шоу` со стандартным цветовым кодированием по milestone tone;
 - верхняя action button `Сегодня` остаётся постоянно доступной и прокручивает календарь к текущему дню;
 - `TaskDetailsDrawer` переиспользуется как mobile sheet, а не как вторая отдельная карточка задачи.
+- attachment panel по умолчанию свёрнута, но summary с количеством вложений виден сразу;
+- внутри раскрытой панели attachments показываются как compact file-icons;
+- desktop использует hover-tooltip для имени и даты загрузки attachment, Mini App — tap-friendly selection surface;
+- имя файла в раскрытой панели кликабельно и открывает preview; compact action buttons используют иконки, а preview modal сохраняет full-text buttons;
+- upload control виден только admin и использует существующий backend upload contour без изменения snapshot contract;
+- desktop drawer принимает drag-and-drop upload по всей поверхности карточки задачи: при перетаскивании подсвечивается весь drawer, а drop в любое место карточки загружает файл в текущую задачу.
+
+## Страница `Админка`
+
+### Назначение слоя
+
+Собрать в одном месте governance-поверхности для доступа и visual preset management, не смешивая user-ops и styling-ops в один длинный скролл.
+
+### Композиция
+
+- top-level tabs:
+  - `Доступ`
+  - `Стиль`
+- `Доступ` содержит две подвкладки:
+  - `Люди`
+  - `Ссылки`
+- `Стиль` пока содержит одну подвкладку:
+  - `Пресеты`
+
+### `Доступ -> Люди`
+
+Содержит все текущие access-governance блоки:
+- pending users;
+- approved users;
+- approve / reject / revoke;
+- admin role toggle;
+- allowlist;
+- `Обновить базу дизайнеров`.
+
+### `Доступ -> Ссылки`
+
+Рабочая операторская поверхность для временных viewer-ссылок:
+- создание reusable link с expiry;
+- список active / expired / revoked ссылок;
+- quick copy browser URL;
+- inline edit label / expiry;
+- revoke;
+- usage stats / audit log slot.
+
+Runtime semantics:
+- ссылка ведёт в обычный web timeline;
+- redemption создаёт temp-link session;
+- auth panel показывает countdown до `expiresAt`;
+- temp-link session даёт full viewer access без admin-прав.
+
+### `Стиль -> Пресеты`
+
+Сохраняет текущую бизнес-логику preset management:
+- color presets;
+- layout presets;
+- import / export / delete / set default;
+- drag-order persistence.
 
 ### Переходы
 

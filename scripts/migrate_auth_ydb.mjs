@@ -184,11 +184,38 @@ async function main() {
         new Column("updated_at", Types.TIMESTAMP),
       );
 
+    const accessLinks = new TableDescription()
+      .withPrimaryKey("id")
+      .withColumns(
+        new Column("id", Types.UTF8),
+        new Column("label", Types.UTF8),
+        new Column("token_hash", Types.UTF8),
+        new Column("status", Types.UTF8),
+        new Column("expires_at", Types.TIMESTAMP),
+        new Column("created_at", Types.TIMESTAMP),
+        new Column("created_by", optional(Types.UTF8)),
+        new Column("last_used_at", optional(Types.TIMESTAMP)),
+        new Column("use_count", Types.INT32),
+      );
+
+    const accessLinkUsage = new TableDescription()
+      .withPrimaryKey("id")
+      .withColumns(
+        new Column("id", Types.UTF8),
+        new Column("link_id", Types.UTF8),
+        new Column("used_at", Types.TIMESTAMP),
+        new Column("ip", optional(Types.UTF8)),
+        new Column("city", optional(Types.UTF8)),
+        new Column("client_summary", optional(Types.UTF8)),
+      );
+
     await ensureTable(driver, "users", users);
     await ensureTable(driver, "allowlist_emails", allowlist);
     await ensureTable(driver, "access_requests", accessRequests);
     await ensureTable(driver, "audit_log", auditLog);
     await ensureTable(driver, "admin_layout_prefs", adminLayoutPrefs);
+    await ensureTable(driver, "access_links", accessLinks);
+    await ensureTable(driver, "access_link_usage", accessLinkUsage);
     await ensureOptionalColumns(driver, "users", [
       new Column("avatar_url", optional(Types.UTF8)),
       new Column("person_id", optional(Types.UTF8)),
