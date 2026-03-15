@@ -25,6 +25,15 @@ So the correct statement is:
 - `test`: confirmed working end-to-end
 - `prod`: expected to work with the same contract, but still needs its own live smoke
 
+Practical interpretation for frontend:
+- if the same route set and request shapes are used, backend attachment runtime on `test` should be treated as confirmed working
+- after this verification, new failures are most likely in one of these places:
+  - auth facade forwarding
+  - browser-side request handling
+  - frontend state/polling/refetch logic
+  - violating the signed upload contract
+- do not assume a backend runtime bug first if `/test/ops/info` attachment harness passes for the same contour
+
 ## High-level model
 
 Attachment flow is split into two planes.
@@ -163,6 +172,11 @@ Current backend behavior after successful attach/delete:
 Meaning:
 - frontend should still do a refetch after terminal job success
 - backend should not require a full snapshot refresh
+
+Important:
+- direct `PUT` success does not make the file visible yet
+- `finalize` success with `202` does not make the file visible yet
+- only terminal `jobs/{job_id} = success` plus a refetch is the readiness signal
 
 ## Read flow
 
@@ -312,6 +326,16 @@ For browser upload failures:
 - log browser error text
 - log upload host and method
 
+For post-finalize failures:
+- log full `jobs/{job_id}` payload
+- log whether frontend refetched after terminal `success`
+- log the attachment id expected in `tasks[].attachments`
+
+For read-path failures:
+- log exact `view` / `download` auth route used
+- log final response status / redirect behavior
+- do not replace backend-provided links with frontend-generated URLs
+
 ## What has been live-confirmed on `test`
 
 Confirmed by `/test/ops/info` attachment harness:
@@ -327,11 +351,35 @@ Confirmed by `/test/ops/info` attachment harness:
 - prep rebuild happens on attach and delete
 - frontend attachment visibility follows async terminal job state
 
+Additional operator confirmation:
+- `/test/ops/info` now shows current probe-task attachments as cards
+- each card supports direct `Open file`, `Download file`, and `Delete file`
+- this lets backend operators validate the same read/delete contour independently from product UI
+
 ## Known caveats
 
 - Old `pending_upload` probe attachments may still exist in the reserved probe task from earlier failed runs; they are not frontend-visible and are cleaned separately by cleanup policy.
 - Reserved probe task currently uses real task status `done`; this is acceptable for operator diagnostics and does not block attachment flow.
 - `prod` still needs its own live smoke before claiming the same level of confidence there.
+
+## Backend-first troubleshooting rule
+
+When attachment issues are reported on `test`, use this order:
+
+1. Reproduce in `/test/ops/info`
+2. If `/test/ops/info` fails:
+   - treat it as backend/auth/storage contour issue
+3. If `/test/ops/info` passes but product UI fails:
+   - treat it as frontend/auth integration issue unless proven otherwise
+
+This rule exists because `/test/ops/info` now verifies:
+- upload contract issuance
+- direct browser upload
+- finalize
+- async job completion
+- publication into snapshot/API
+- read routes
+- delete routes
 
 ## Recommended frontend implementation checklist
 
@@ -343,6 +391,7 @@ Confirmed by `/test/ops/info` attachment harness:
 - show `view` / `download` from payload links only
 - delete through auth facade and refetch after terminal success
 - surface backend JSON errors and upload diagnostics verbatim in debug tools
+- when debugging, compare behavior against `/test/ops/info` before filing backend-runtime issues
 
 ## Related docs
 
