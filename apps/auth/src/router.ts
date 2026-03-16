@@ -16,6 +16,7 @@ import {
   accessLinkUsageHandler,
   activateAccessLinkHandler,
   createAccessLinkHandler,
+  deleteAccessLinkHandler,
   listAccessLinksHandler,
   redeemAccessLinkHandler,
   revokeAccessLinkHandler,
@@ -157,6 +158,11 @@ export async function routeRequest(req: NormalizedRequest): Promise<HttpResult> 
     const accessLinkActivateMatch = req.routePath.match(/^\/admin\/access-links\/([^/]+)\/activate$/);
     if (req.method === "POST" && accessLinkActivateMatch) {
       return activateAccessLinkHandler(req, accessLinkActivateMatch[1]);
+    }
+
+    const accessLinkDeleteMatch = req.routePath.match(/^\/admin\/access-links\/([^/]+)\/delete$/);
+    if (req.method === "POST" && accessLinkDeleteMatch) {
+      return deleteAccessLinkHandler(req, accessLinkDeleteMatch[1]);
     }
 
     const accessLinkUsageMatch = req.routePath.match(/^\/admin\/access-links\/([^/]+)\/usage$/);

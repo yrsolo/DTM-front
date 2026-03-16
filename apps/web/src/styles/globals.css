@@ -3263,9 +3263,6 @@ button:hover {
   margin-bottom: 10px;
 }
 
-.adminAccessLinkActions.isTempLinkActions > button:last-child {
-  display: none;
-}
 
 .adminLinkDetails {
   border-top: 1px solid rgba(145, 169, 236, 0.12);

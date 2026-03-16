@@ -181,6 +181,30 @@ export async function revokeAccessLink(id: string): Promise<void> {
   });
 }
 
+export async function deleteAccessLink(id: string): Promise<void> {
+  await executeVoid(
+    `
+      DECLARE $id AS Utf8;
+      DELETE FROM ${AUTH_TABLES.accessLinks}
+      WHERE id = $id;
+    `,
+    {
+      $id: utf8(id),
+    }
+  );
+
+  await executeVoid(
+    `
+      DECLARE $link_id AS Utf8;
+      DELETE FROM ${AUTH_TABLES.accessLinkUsage}
+      WHERE link_id = $link_id;
+    `,
+    {
+      $link_id: utf8(id),
+    }
+  );
+}
+
 export async function touchAccessLinkUsage(args: {
   linkId: string;
   ip: string | null;

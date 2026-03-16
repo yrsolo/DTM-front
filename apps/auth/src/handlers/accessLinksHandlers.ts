@@ -3,6 +3,7 @@ import { createHash, createHmac, randomUUID } from "node:crypto";
 import { getAuthRuntimeConfig } from "../config";
 import {
   createAccessLink,
+  deleteAccessLink,
   getAccessLinkById,
   listAccessLinkUsage,
   listAccessLinks,
@@ -323,6 +324,24 @@ export async function activateAccessLinkHandler(req: NormalizedRequest, linkId: 
     payloadJson: JSON.stringify({ accessLinkId: linkId }),
   });
   return json(200, { link: activated ? await toAccessLinkCard(activated) : null });
+}
+
+export async function deleteAccessLinkHandler(req: NormalizedRequest, linkId: string) {
+  const auth = await requireAdmin(req);
+  if (auth.error) return auth.error;
+  const existing = await getAccessLinkById(linkId);
+  if (!existing) {
+    return notFound("Access link not found");
+  }
+  await revokeAccessLink(linkId);
+  await deleteAccessLink(linkId);
+  await writeAuditLog({
+    actorUserId: auth.user.id,
+    targetUserId: null,
+    action: "admin.access_link_delete",
+    payloadJson: JSON.stringify({ accessLinkId: linkId }),
+  });
+  return json(200, { ok: true, deleted: true, id: linkId });
 }
 
 export async function accessLinkUsageHandler(req: NormalizedRequest, linkId: string) {

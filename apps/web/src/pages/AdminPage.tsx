@@ -1165,7 +1165,7 @@ export function AdminPage() {
                             />
                           </label>
                         </div>
-                        <div className="adminAccessLinkActions isTempLinkActions">
+                        <div className="adminAccessLinkActions">
                           <button
                             type="button"
                             className="btn btnGhost"
@@ -1176,11 +1176,28 @@ export function AdminPage() {
                               )
                             }
                           >
-                            {link.status === "revoked" ? "Вернуть" : "Удалить"}
+                            {link.status === "revoked" ? "Вернуть" : "Отозвать"}
                           </button>
                           <button type="button" onClick={() => void runAdminAction(() => copyBrowserLink(link.browserUrl), "Ссылка скопирована")} disabled={!link.browserUrl}>Копировать</button>
                           <button type="button" className="btn btnGhost" onClick={() => void runAdminAction(() => saveAccessLink(link.id), "Ссылка обновлена")}>Сохранить</button>
-                          <button type="button" className="btn btnGhost" onClick={() => void runAdminAction(() => revokeAccessLink(link.id), "Ссылка отозвана")} disabled={link.status === "revoked"}>Отозвать</button>
+                          <button
+                            type="button"
+                            className="btn btnGhost"
+                            onClick={() =>
+                              void runAdminAction(
+                                async () => {
+                                  await fetch(buildAuthUrl(`/admin/access-links/${encodeURIComponent(link.id)}/delete`), {
+                                    method: "POST",
+                                    credentials: "include",
+                                  }).then((res) => expectOk(res, "Не удалось удалить временную ссылку"));
+                                  await loadOverview();
+                                },
+                                "Ссылка удалена"
+                              )
+                            }
+                          >
+                            Удалить
+                          </button>
                         </div>
                         <details className="adminLinkDetails">
                           <summary>Статистика и журнал</summary>
