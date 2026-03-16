@@ -273,15 +273,52 @@ export function TimelinePage() {
   const pendingZoomAnchorRef = React.useRef<{ dateMs: number; clientX: number } | null>(null);
   const pendingDateAnchorRef = React.useRef<number | null>(null);
   const didInitialTodayCenterRef = React.useRef(false);
+  const scrollAnimationFrameRef = React.useRef<number | null>(null);
   const authMenuRef = React.useRef<HTMLDivElement | null>(null);
   const timelineHost = useElementWidth<HTMLDivElement>();
 
-  const applyDateAnchor = (dateMs: number, behavior: ScrollBehavior = "auto") => {
+  const stopTimelineScrollAnimation = () => {
+    if (scrollAnimationFrameRef.current !== null) {
+      cancelAnimationFrame(scrollAnimationFrameRef.current);
+      scrollAnimationFrameRef.current = null;
+    }
+  };
+
+  const scrollTimelineToLeft = (left: number, durationMs = 0) => {
+    const host = timelineHost.ref.current;
+    if (!host) return;
+    const targetLeft = Math.max(0, left);
+    stopTimelineScrollAnimation();
+
+    if (durationMs <= 0) {
+      host.scrollLeft = targetLeft;
+      return;
+    }
+
+    const startLeft = host.scrollLeft;
+    const distance = targetLeft - startLeft;
+    const startAt = performance.now();
+
+    const step = (now: number) => {
+      const progress = Math.min(1, (now - startAt) / durationMs);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      host.scrollLeft = startLeft + distance * eased;
+      if (progress < 1) {
+        scrollAnimationFrameRef.current = requestAnimationFrame(step);
+      } else {
+        scrollAnimationFrameRef.current = null;
+      }
+    };
+
+    scrollAnimationFrameRef.current = requestAnimationFrame(step);
+  };
+
+  const applyDateAnchor = (dateMs: number, durationMs = 0) => {
     const host = timelineHost.ref.current;
     const scale = scaleInfoRef.current;
     if (!host || !scale) return;
     const x = scale.labelW + ((dateMs - scale.rangeStartMs) / DAY_MS) * scale.pxPerDay - host.clientWidth * 0.5;
-    host.scrollTo({ left: Math.max(0, x), behavior });
+    scrollTimelineToLeft(x, durationMs);
   };
 
   const todayAnchorMs = () => {
@@ -289,8 +326,8 @@ export function TimelinePage() {
     return Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate());
   };
 
-  const centerTimelineOnToday = (behavior: ScrollBehavior = "smooth") => {
-    applyDateAnchor(todayAnchorMs(), behavior);
+  const centerTimelineOnToday = (durationMs = 500) => {
+    applyDateAnchor(todayAnchorMs(), durationMs);
   };
 
   const schedulePendingDateAnchorApply = () => {
@@ -391,16 +428,7 @@ export function TimelinePage() {
     return () => window.clearInterval(timer);
   }, [authSession.state.expiresAt, authSession.state.sessionKind]);
 
-  React.useEffect(() => {
-    if (pageView !== "tasks" || didInitialTodayCenterRef.current) return;
-    const host = timelineHost.ref.current;
-    const scale = scaleInfoRef.current;
-    if (!host || !scale || timelineHost.width <= 0) return;
-    didInitialTodayCenterRef.current = true;
-    requestAnimationFrame(() => {
-      applyDateAnchor(todayAnchorMs(), "auto");
-    });
-  }, [pageView, timelineHost.width, snapshot?.meta?.generatedAt, zoom]);
+  React.useEffect(() => () => stopTimelineScrollAnimation(), []);
 
   React.useEffect(() => {
     const onMove = (e: MouseEvent) => {
@@ -782,7 +810,7 @@ export function TimelinePage() {
               <button
                 type="button"
                 className="timelineTodayBtn"
-                onClick={() => centerTimelineOnToday("smooth")}
+                onClick={() => centerTimelineOnToday(500)}
               >
                 Сегодня
               </button>
@@ -1324,8 +1352,9 @@ export function TimelinePage() {
                     labelW +
                     ((zoomAnchor.dateMs - rangeStartMs) / DAY_MS) * pxPerDay -
                     zoomAnchor.clientX;
-                  host.scrollLeft = Math.max(0, x);
+                  scrollTimelineToLeft(x, 0);
                   pendingZoomAnchorRef.current = null;
+                  return;
                 }
 
                 const dateAnchor = pendingDateAnchorRef.current;
@@ -1334,8 +1363,14 @@ export function TimelinePage() {
                     labelW +
                     ((dateAnchor - rangeStartMs) / DAY_MS) * pxPerDay -
                     host.clientWidth * 0.5;
-                  host.scrollLeft = Math.max(0, x);
+                  scrollTimelineToLeft(x, 0);
                   pendingDateAnchorRef.current = null;
+                  return;
+                }
+
+                if (pageView === "tasks" && !didInitialTodayCenterRef.current) {
+                  didInitialTodayCenterRef.current = true;
+                  applyDateAnchor(todayAnchorMs(), 0);
                 }
               }}
               zoom={zoom}
