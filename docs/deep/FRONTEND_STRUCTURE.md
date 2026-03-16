@@ -20,7 +20,7 @@ Source of truth в коде:
 | `apps/web/src/design` | Типы и дефолты design controls, key colors, схема workbench и code-owned UI inventory registry реальных элементов | `controls.ts`, `colors.ts`, `workbenchLayout.ts`, `uiRegistry.ts` |
 | `apps/web/src/gantt` | SVG timeline и связанные rendering-компоненты | `UnifiedTimeline.tsx`, `TaskBar.tsx`, `TasksTimeline.tsx` |
 | `apps/web/src/i18n` | UI-тексты и локализация | `uiText.ts` |
-| `apps/web/src/pages` | Оркестрация desktop и Mini App страниц | `TimelinePage.tsx`, `MiniAppPage.tsx` |
+| `apps/web/src/pages` | Оркестрация desktop и mobile страниц | `TimelinePage.tsx`, `MiniAppPage.tsx` |
 | `apps/web/src/styles` | Глобальные CSS-переменные и стили слоёв | `globals.css` |
 | `apps/web/src/utils` | Вспомогательная доменная логика | `milestoneTone.ts` |
 
@@ -29,7 +29,8 @@ Source of truth в коде:
 - Приложение стартует из [App.tsx](../../apps/web/src/app/App.tsx).
 - `App.tsx` рендерит [Layout.tsx](../../apps/web/src/components/Layout.tsx) и выбирает route-level surface.
 - `/` остаётся desktop entry с [TimelinePage.tsx](../../apps/web/src/pages/TimelinePage.tsx).
-- `/app` открывает mobile-first [MiniAppPage.tsx](../../apps/web/src/pages/MiniAppPage.tsx).
+- `/app` открывает Telegram mobile-first [MiniAppPage.tsx](../../apps/web/src/pages/MiniAppPage.tsx).
+- `/m` и `/mobile` открывают тот же mobile-first shell в web/Yandex режиме через [MiniAppPage.tsx](../../apps/web/src/pages/MiniAppPage.tsx).
 
 ## Где искать источник истины
 
@@ -47,7 +48,7 @@ Source of truth в коде:
 - `selectors/taskSelectors.ts`
 - `selectors/timelineSelectors.ts`
 
-### Telegram runtime и Mini App shell
+### Mobile shell и Telegram runtime
 
 - `telegramRuntime.ts`
 - `MiniAppPage.tsx`
@@ -79,6 +80,6 @@ Source of truth в коде:
 - Вход приложения остаётся тонким.
 - Чтение окружения и runtime-конфига не уходит глубоко в rendering-компоненты.
 - Нормализация данных централизована.
-- Один и тот же snapshot flow обслуживает desktop и Mini App.
+- Один и тот же snapshot flow обслуживает desktop, Telegram Mini App и mobile web.
 - Основной orchestration layer находится в `Layout.tsx`, `TimelinePage.tsx` и `MiniAppPage.tsx`.
 

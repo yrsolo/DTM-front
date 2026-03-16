@@ -24,13 +24,16 @@ Source of truth:
 ### Prod
 - frontend: `https://dtm.solofarm.ru/`
 - mini app SPA: `https://dtm.solofarm.ru/app`
+- mobile web SPA: `https://dtm.solofarm.ru/m`
 - admin SPA: `https://dtm.solofarm.ru/admin`
 - auth endpoints: `https://dtm.solofarm.ru/ops/auth/*`
 - browser-facing API path: `https://dtm.solofarm.ru/ops/bff/*`
 
-Mini App routes:
+Mobile routes:
 - test: `https://dtm.solofarm.ru/test/app`
 - prod: `https://dtm.solofarm.ru/app`
+- test mobile web: `https://dtm.solofarm.ru/test/m`
+- prod mobile web: `https://dtm.solofarm.ru/m`
 
 ## Модель доступа
 
@@ -95,6 +98,12 @@ Telegram Mini App behavior:
 - при успехе Mini App получает обычную contour-specific session cookie
 - если linkage не удалось восстановить, frontend показывает явный Telegram unlinked state вместо тихого `guest`
 - это не создаёт отдельный data path: после выдачи cookie браузер/webview продолжает работать через те же `/ops/auth/*` и `/ops/bff/*`
+
+Mobile web behavior:
+- `/m` и `/test/m` используют тот же mobile shell, что и Telegram Mini App;
+- auth bootstrap там обычный web/Yandex, без `Telegram WebApp initData`;
+- task scoping uses the regular `authSession.user.personId`, not Telegram runtime linkage;
+- visual/design changes for mobile shell are shared between `/app` and `/m`.
 
 ## Admin surface
 

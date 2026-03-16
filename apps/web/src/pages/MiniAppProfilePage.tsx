@@ -1,7 +1,9 @@
-import { AuthStatusPanelCompact } from "../components/miniapp/AuthStatusPanelCompact";
 import { AuthSessionState } from "../auth/useAuthSession";
+import { AuthStatusPanelCompact } from "../components/miniapp/AuthStatusPanelCompact";
+import type { MobileSurfaceMode } from "./MiniAppPage";
 
 export function MiniAppProfilePage(props: {
+  surfaceMode: MobileSurfaceMode;
   authState: AuthSessionState;
   onLogin: () => void;
   onLogout: () => void;
@@ -11,6 +13,7 @@ export function MiniAppProfilePage(props: {
   return (
     <div className="miniAppSection">
       <AuthStatusPanelCompact
+        surfaceMode={props.surfaceMode}
         authState={props.authState}
         onLogin={props.onLogin}
         onLogout={props.onLogout}

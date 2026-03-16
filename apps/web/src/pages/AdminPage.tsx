@@ -134,14 +134,27 @@ function goToTimeline(): void {
       window.sessionStorage.getItem(MINI_APP_ADMIN_RETURN_KEY)?.trim() ||
       window.localStorage.getItem(MINI_APP_ADMIN_RETURN_KEY)?.trim() ||
       "";
-    if (returnTo === "/app" || returnTo.startsWith("/app?") || returnTo === "/test/app" || returnTo.startsWith("/test/app?")) {
+    const isMobileReturn =
+      returnTo === "/app" ||
+      returnTo.startsWith("/app?") ||
+      returnTo === "/test/app" ||
+      returnTo.startsWith("/test/app?") ||
+      returnTo === "/m" ||
+      returnTo.startsWith("/m?") ||
+      returnTo === "/test/m" ||
+      returnTo.startsWith("/test/m?") ||
+      returnTo === "/mobile" ||
+      returnTo.startsWith("/mobile?") ||
+      returnTo === "/test/mobile" ||
+      returnTo.startsWith("/test/mobile?");
+    if (isMobileReturn) {
       window.sessionStorage.removeItem(MINI_APP_ADMIN_RETURN_KEY);
       window.localStorage.removeItem(MINI_APP_ADMIN_RETURN_KEY);
       window.location.assign(returnTo);
       return;
     }
     if (miniAppRequested) {
-      const fallbackMiniAppRoute = window.location.pathname.startsWith("/test/") ? "/test/app" : "/app";
+      const fallbackMiniAppRoute = window.location.pathname.startsWith("/test/") ? "/test/m" : "/m";
       window.location.assign(fallbackMiniAppRoute);
       return;
     }

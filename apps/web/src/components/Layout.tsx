@@ -595,7 +595,8 @@ export function Layout(props: { children: React.ReactNode }) {
   }, [layoutVarsStyle]);
 
   const isAdminRoute = location.pathname === "/admin";
-  const isMiniAppRoute = location.pathname === "/app";
+  const isMiniAppRoute =
+    location.pathname === "/app" || location.pathname === "/m" || location.pathname === "/mobile";
   const appShellClassName = isAdminRoute ? "appShell adminShell" : "appShell";
   const containerClassName = `${isAdminRoute ? "container adminContainer" : "container"}${isMiniAppRoute ? " miniAppContainer" : ""}`;
 
