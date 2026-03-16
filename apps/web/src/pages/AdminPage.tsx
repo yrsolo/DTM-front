@@ -359,56 +359,279 @@ function AdminTabButton(props: { active: boolean; onClick: () => void; children:
   );
 }
 
-function UIStylePreview(props: { entry: UIStyleEntry }) {
-  if (props.entry.group === "button") {
-    const ghost = String(props.entry.props.variant).includes("ghost");
+function uiStatusLabel(entry: UIStyleEntry): string {
+  return entry.deprecated ? "Legacy" : "Active";
+}
+
+function UIPreviewActionIcon(props: { kind: "preview" | "download" | "delete" }) {
+  if (props.kind === "preview") {
     return (
-      <span className={`adminUiPreviewButton ${ghost ? "isGhost" : "isPrimary"}`}>
-        {ghost ? "????????? ????????" : "???????? ????????"}
-      </span>
+      <svg viewBox="0 0 24 24" aria-hidden="true" className="attachmentActionIconSvg">
+        <path
+          d="M2.5 12s3.8-6.5 9.5-6.5S21.5 12 21.5 12s-3.8 6.5-9.5 6.5S2.5 12 2.5 12Z"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <circle cx="12" cy="12" r="3.2" fill="none" stroke="currentColor" strokeWidth="1.8" />
+      </svg>
     );
   }
-  if (props.entry.group === "bubble") {
-    return <span className="adminUiPreviewBubble">{String(props.entry.props.tone)}</span>;
-  }
-  if (props.entry.group === "label") {
+
+  if (props.kind === "download") {
     return (
-      <div className="adminUiPreviewLabelWrap">
-        <div className="adminUiPreviewLabel">{props.entry.title}</div>
-        <div className="adminUiPreviewLabelMeta">????????? ?????? ??? ??????????</div>
-      </div>
+      <svg viewBox="0 0 24 24" aria-hidden="true" className="attachmentActionIconSvg">
+        <path
+          d="M12 4.5v9.5m0 0 3.6-3.6M12 14l-3.6-3.6M5 18.5h14"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
     );
   }
+
   return (
-    <div className="adminUiPreviewPanel">
-      <div className="adminUiPreviewPanelTitle">Panel surface</div>
-      <div className="adminUiPreviewPanelBody">Nested content preview</div>
-    </div>
+    <svg viewBox="0 0 24 24" aria-hidden="true" className="attachmentActionIconSvg">
+      <path
+        d="M6.5 6.5 17.5 17.5M17.5 6.5l-11 11"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.9"
+        strokeLinecap="round"
+      />
+    </svg>
   );
 }
 
-function UIStyleCard(props: { entry: UIStyleEntry; active: boolean; onSelect: () => void }) {
+function UIStylePreview(props: { entry: UIStyleEntry }) {
+  switch (props.entry.previewKind) {
+    case "button-primary":
+      return (
+        <div className="adminUiPreviewInline">
+          <button type="button" className="btn">Открыть</button>
+          <button type="button" className="btn btnGhost">Черновик</button>
+        </div>
+      );
+    case "button-ghost":
+      return (
+        <div className="adminUiPreviewInline">
+          <button type="button" className="btn btnGhost">Подробнее</button>
+          <button type="button" className="btn btnGhost" disabled>Недоступно</button>
+        </div>
+      );
+    case "miniapp-primary":
+      return (
+        <div className="adminUiPreviewInline isMobile">
+          <button type="button" className="miniAppButton">Войти</button>
+          <button type="button" className="miniAppButton miniAppButtonGhost">Обновить</button>
+        </div>
+      );
+    case "miniapp-group-toggle":
+      return (
+        <div className="adminUiPreviewMiniGroup">
+          <button type="button" className="miniAppTaskGroupToggle isOpen">
+            <span className="miniAppTaskGroupLabel">Бренд</span>
+            <span className="miniAppTaskGroupCount">8</span>
+          </button>
+        </div>
+      );
+    case "attachment-actions":
+      return (
+        <div className="adminUiPreviewInline">
+          <button type="button" className="miniAppButton miniAppButtonGhost attachmentActionIconButton isPreview" aria-label="Просмотр">
+            <UIPreviewActionIcon kind="preview" />
+          </button>
+          <button type="button" className="miniAppButton miniAppButtonGhost attachmentActionIconButton isDownload" aria-label="Скачать">
+            <UIPreviewActionIcon kind="download" />
+          </button>
+          <button type="button" className="miniAppButton miniAppButtonGhost attachmentActionIconButton isDelete" aria-label="Удалить">
+            <UIPreviewActionIcon kind="delete" />
+          </button>
+        </div>
+      );
+    case "admin-tab":
+      return (
+        <div className="adminUiPreviewInline isTabs">
+          <span className="adminTabButton isActive">Доступ</span>
+          <span className="adminTabButton">Стиль</span>
+        </div>
+      );
+    case "badge-default":
+      return (
+        <div className="adminUiPreviewInline">
+          <span className="badge">В работе</span>
+          <span className="badge">13.04</span>
+        </div>
+      );
+    case "badge-date":
+      return (
+        <div className="adminUiPreviewInline">
+          <span className="badge drawerDateBadge">21.04</span>
+          <span className="badge drawerDateBadge">25.04</span>
+        </div>
+      );
+    case "admin-count":
+      return (
+        <div className="adminUiPreviewInline">
+          <span className="adminCountBadge">24</span>
+          <span className="adminCountBadge">128</span>
+        </div>
+      );
+    case "admin-link-status":
+      return (
+        <div className="adminUiPreviewInline">
+          <span className="adminLinkStatusBadge isActive">Активна</span>
+          <span className="adminLinkStatusBadge isRevoked">Отозвана</span>
+        </div>
+      );
+    case "miniapp-due":
+      return (
+        <div className="adminUiPreviewInline isMobile">
+          <span className="miniAppTaskDueBubble">сегодня</span>
+          <span className="miniAppTaskDueBubble">27.03</span>
+        </div>
+      );
+    case "attachment-count":
+      return (
+        <div className="adminUiPreviewInline">
+          <span className="badge attachmentCountBadge">3</span>
+          <span className="badge attachmentCountBadge">12</span>
+        </div>
+      );
+    case "label-title":
+      return (
+        <div className="adminUiPreviewText">
+          <div className="pageTitle" style={{ fontSize: 20 }}>Панель доступа</div>
+          <div className="muted">Крупный заголовок раздела</div>
+        </div>
+      );
+    case "label-muted":
+      return (
+        <div className="adminUiPreviewText">
+          <div className="muted">Служебная подпись для описаний, статуса и help-copy.</div>
+        </div>
+      );
+    case "label-miniapp-title":
+      return (
+        <div className="adminUiPreviewText">
+          <div className="miniAppTaskTitle">Собрать титры для эфира</div>
+          <div className="miniAppProfileMeta">Мобильный strong label</div>
+        </div>
+      );
+    case "label-drawer-section":
+      return (
+        <div className="adminUiPreviewText">
+          <div className="drawerSectionTitle">Вложения</div>
+          <div className="muted">Заголовок вложенного блока</div>
+        </div>
+      );
+    case "label-designer-name":
+      return (
+        <div className="adminUiPreviewText">
+          <div className="designerColumnName">
+            <span className="designerColumnNameLine">Иванов</span>
+            <span className="designerColumnNameLine">Марк</span>
+          </div>
+        </div>
+      );
+    case "panel-card":
+      return (
+        <div className="card adminUiPreviewSurface">
+          <div className="pageTitle" style={{ fontSize: 16 }}>Glass card</div>
+          <div className="muted">Базовая surface проекта</div>
+        </div>
+      );
+    case "panel-drawer":
+      return (
+        <div className="card drawerSection adminUiPreviewSurface">
+          <div className="drawerSectionTitle">Календарь</div>
+          <div className="muted">Вложенная секция drawer</div>
+        </div>
+      );
+    case "panel-designer-task":
+      return (
+        <button type="button" className="designerTaskCard adminUiPreviewSurfaceButton" title="Карточка дизайнера">
+          <div className="designerTaskBrand">Luxe</div>
+          <div className="designerTaskMeta">
+            <span className="badge">KV</span>
+            <span className="designerTaskShow">Весна</span>
+          </div>
+        </button>
+      );
+    case "panel-miniapp-task":
+      return (
+        <button type="button" className="miniAppTaskCard miniAppTaskCardCompact adminUiPreviewSurfaceButton" title="Mini App card">
+          <div className="miniAppTaskRowMain">
+            <div className="miniAppTaskRowFields">Лента | Анна | KV</div>
+            <span className="miniAppTaskDueBubble">25.03</span>
+          </div>
+        </button>
+      );
+    case "panel-admin-link":
+      return (
+        <div className="adminAccessLinkCard adminUiPreviewSurface">
+          <div className="adminAccessLinkHeader">
+            <div className="adminUserName">Весенний viewer</div>
+            <div className="adminLinkStatusBadge isActive">Активна</div>
+          </div>
+          <div className="adminAccessLinkMeta">
+            <span>Осталось: 3 д 5 ч</span>
+          </div>
+        </div>
+      );
+    case "panel-workbench":
+      return (
+        <div className="workbenchBody adminUiPreviewWorkbench">
+          <div className="wbToolbar">
+            <span className="muted">Workbench surface</span>
+          </div>
+          <div className="wbGroup">
+            <h4>Buttons</h4>
+          </div>
+        </div>
+      );
+    default:
+      return <div className="adminUiPreviewText"><div className="muted">Preview not configured</div></div>;
+  }
+}
+
+function UIStyleRow(props: { entry: UIStyleEntry; active: boolean; onSelect: () => void }) {
   return (
-    <button type="button" className={`adminUiCard ${props.active ? "isActive" : ""}`} onClick={props.onSelect}>
-      <div className="adminUiCardHeader">
-        <div>
-          <div className="adminUiCardTitle">{props.entry.title}</div>
-          <div className="adminUiCardId">{props.entry.id}</div>
+    <div
+      className={`adminUiRow ${props.active ? "isActive" : ""}`}
+      role="button"
+      tabIndex={0}
+      onClick={props.onSelect}
+      onKeyDown={(event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          props.onSelect();
+        }
+      }}
+    >
+      <div className="adminUiRowMain">
+        <div className="adminUiRowIdentity">
+          <div className="adminUiRowTitle">{props.entry.title}</div>
+          <div className="adminUiRowId">{props.entry.id}</div>
         </div>
-        <div className={`adminUiCardStatus is${(props.entry.status ?? "active")[0].toUpperCase()}${(props.entry.status ?? "active").slice(1)}`}>
-          {props.entry.status === "candidate" ? "Candidate" : props.entry.status === "legacy" ? "Legacy" : "Active"}
+        <div className="adminUiRowDescription">{props.entry.description}</div>
+        <div className="adminUiRowUsage">
+          {props.entry.usedIn.map((usage) => (
+            <span key={usage} className="adminUiUsagePill">{usage}</span>
+          ))}
         </div>
+        <div className="adminUiRowSource">{props.entry.sourcePath.replace("apps/web/src/", "")}</div>
       </div>
-      <div className="adminUiCardPreview">
+      <div className="adminUiRowPreview">
         <UIStylePreview entry={props.entry} />
       </div>
-      <div className="adminUiCardDescription">{props.entry.description}</div>
-      <div className="adminUiUsageList">
-        {props.entry.usedIn.slice(0, 3).map((usage) => (
-          <span key={usage} className="adminUiUsagePill">{usage}</span>
-        ))}
-      </div>
-    </button>
+      <div className={`adminUiCardStatus ${props.entry.deprecated ? "isLegacy" : ""}`}>{uiStatusLabel(props.entry)}</div>
+    </div>
   );
 }
 
@@ -430,6 +653,7 @@ export function AdminPage() {
   const [accessTab, setAccessTab] = React.useState<AdminAccessTab>(() => readStoredTab(ADMIN_ACCESS_TAB_KEY, ["people", "links"], "people"));
   const [styleTab, setStyleTab] = React.useState<AdminStyleTab>(() => readStoredTab(ADMIN_STYLE_TAB_KEY, ["presets", "ui"], "presets"));
   const [uiGroup, setUiGroup] = React.useState<UIStyleGroup>("button");
+  const [uiSurfaceFilter, setUiSurfaceFilter] = React.useState<string>("all");
   const [uiSearch, setUiSearch] = React.useState("");
   const [selectedUiId, setSelectedUiId] = React.useState<string>(() => UI_STYLE_REGISTRY[0]?.id ?? "");
   const [draftLinkLabel, setDraftLinkLabel] = React.useState("");
@@ -505,15 +729,22 @@ export function AdminPage() {
     return () => window.clearInterval(timer);
   }, []);
 
+  const availableUiSurfaces = React.useMemo(() => {
+    return Array.from(new Set(UI_STYLE_REGISTRY.flatMap((entry) => entry.usedIn))).sort((left, right) =>
+      left.localeCompare(right, "ru")
+    );
+  }, []);
+
   const filteredUiEntries = React.useMemo(() => {
     const query = uiSearch.trim().toLowerCase();
     return UI_STYLE_REGISTRY.filter((entry) => {
-      if (entry.group != uiGroup) return false;
+      if (entry.group !== uiGroup) return false;
+      if (uiSurfaceFilter !== "all" && !entry.usedIn.includes(uiSurfaceFilter)) return false;
       if (!query) return true;
-      const haystack = [entry.id, entry.title, entry.description, ...entry.usedIn].join(" ").toLowerCase();
+      const haystack = [entry.id, entry.title, entry.description, entry.sourcePath, entry.similarityKey, ...entry.usedIn].join(" ").toLowerCase();
       return haystack.includes(query);
     });
-  }, [uiGroup, uiSearch]);
+  }, [uiGroup, uiSearch, uiSurfaceFilter]);
 
   const selectedUiEntry = React.useMemo(() => {
     const direct = filteredUiEntries.find((entry) => entry.id === selectedUiId);
@@ -1316,7 +1547,7 @@ export function AdminPage() {
       ) : (
         <div className="adminSubtabPanel">
           <div className="adminTabsRow isSubtabs">
-            <AdminTabButton active={styleTab === "presets"} onClick={() => setStyleTab("presets")}>???????</AdminTabButton>
+            <AdminTabButton active={styleTab === "presets"} onClick={() => setStyleTab("presets")}>Пресеты</AdminTabButton>
             <AdminTabButton active={styleTab === "ui"} onClick={() => setStyleTab("ui")}>UI</AdminTabButton>
           </div>
 
@@ -1324,15 +1555,15 @@ export function AdminPage() {
             {styleTab === "presets" ? (
               <div className="card adminSectionCard">
                 <div className="pageHeader" style={{ marginBottom: 12 }}>
-                  <h4 className="pageTitle" style={{ fontSize: 22 }}>???????</h4>
+                  <h4 className="pageTitle" style={{ fontSize: 22 }}>Пресеты</h4>
                 </div>
                 <div className="adminPresetToolbar">
-                  <button type="button" className="btn btnGhost" onClick={() => { setPendingImportKind("color"); importRef.current?.click(); }}>????????????? color preset</button>
-                  <button type="button" className="btn btnGhost" onClick={() => { setPendingImportKind("layout"); importRef.current?.click(); }}>????????????? layout preset</button>
+                  <button type="button" className="btn btnGhost" onClick={() => { setPendingImportKind("color"); importRef.current?.click(); }}>Импортировать color preset</button>
+                  <button type="button" className="btn btnGhost" onClick={() => { setPendingImportKind("layout"); importRef.current?.click(); }}>Импортировать layout preset</button>
                 </div>
                 <div className="grid2 adminPresetSplit" style={{ alignItems: "start" }}>
                   <div className="card adminPresetColumn">
-                    <h4 className="pageTitle" style={{ fontSize: 20 }}>???????? ???????</h4>
+                    <h4 className="pageTitle" style={{ fontSize: 20 }}>Цветовые пресеты</h4>
                     <DndContext sensors={sensors} collisionDetection={closestCenter} onDragStart={(event) => handleDragStart("colorPresets", event)} onDragOver={(event) => handleDragOver("colorPresets", event)} onDragEnd={(event) => void handleDragEnd("colorPresets", event)} onDragCancel={handleDragCancel}>
                       <SortableContext items={orderedColorPresets.map((preset) => preset.id)} strategy={rectSortingStrategy}>
                         <div className="adminUserGrid adminPresetGrid">
@@ -1342,22 +1573,22 @@ export function AdminPage() {
                                 preset={preset}
                                 actions={
                                   <>
-                                    <button type="button" onClick={() => void runAdminAction(() => setDefaultPreset(preset), "Preset ?? ????????? ????????")}>??????? default</button>
-                                    <button type="button" className="btn btnGhost" onClick={() => void runAdminAction(() => exportPreset(preset), "Preset ?????????????")}>???????</button>
-                                    <button type="button" className="btn btnGhost" onClick={() => void runAdminAction(() => deletePreset(preset.id), "Preset ??????")}>???????</button>
+                                    <button type="button" onClick={() => void runAdminAction(() => setDefaultPreset(preset), "Preset по умолчанию обновлён")}>Сделать default</button>
+                                    <button type="button" className="btn btnGhost" onClick={() => void runAdminAction(() => exportPreset(preset), "Preset экспортирован")}>Экспорт</button>
+                                    <button type="button" className="btn btnGhost" onClick={() => void runAdminAction(() => deletePreset(preset.id), "Preset удалён")}>Удалить</button>
                                   </>
                                 }
                               />
                             </SortableCard>
                           ))}
-                          {!orderedColorPresets.length ? <div className="muted">???? ??? preset-?? ????? ????.</div> : null}
+                          {!orderedColorPresets.length ? <div className="muted">Пока нет color preset-ов.</div> : null}
                         </div>
                       </SortableContext>
                     </DndContext>
                   </div>
 
                   <div className="card adminPresetColumn">
-                    <h4 className="pageTitle" style={{ fontSize: 20 }}>UI / Layout ???????</h4>
+                    <h4 className="pageTitle" style={{ fontSize: 20 }}>UI / Layout пресеты</h4>
                     <DndContext sensors={sensors} collisionDetection={closestCenter} onDragStart={(event) => handleDragStart("layoutPresets", event)} onDragOver={(event) => handleDragOver("layoutPresets", event)} onDragEnd={(event) => void handleDragEnd("layoutPresets", event)} onDragCancel={handleDragCancel}>
                       <SortableContext items={orderedLayoutPresets.map((preset) => preset.id)} strategy={rectSortingStrategy}>
                         <div className="adminUserGrid adminPresetGrid">
@@ -1367,15 +1598,15 @@ export function AdminPage() {
                                 preset={preset}
                                 actions={
                                   <>
-                                    <button type="button" onClick={() => void runAdminAction(() => setDefaultPreset(preset), "Preset ?? ????????? ????????")}>??????? default</button>
-                                    <button type="button" className="btn btnGhost" onClick={() => void runAdminAction(() => exportPreset(preset), "Preset ?????????????")}>???????</button>
-                                    <button type="button" className="btn btnGhost" onClick={() => void runAdminAction(() => deletePreset(preset.id), "Preset ??????")}>???????</button>
+                                    <button type="button" onClick={() => void runAdminAction(() => setDefaultPreset(preset), "Preset по умолчанию обновлён")}>Сделать default</button>
+                                    <button type="button" className="btn btnGhost" onClick={() => void runAdminAction(() => exportPreset(preset), "Preset экспортирован")}>Экспорт</button>
+                                    <button type="button" className="btn btnGhost" onClick={() => void runAdminAction(() => deletePreset(preset.id), "Preset удалён")}>Удалить</button>
                                   </>
                                 }
                               />
                             </SortableCard>
                           ))}
-                          {!orderedLayoutPresets.length ? <div className="muted">???? ??? preset-?? ????? ????.</div> : null}
+                          {!orderedLayoutPresets.length ? <div className="muted">Пока нет layout preset-ов.</div> : null}
                         </div>
                       </SortableContext>
                     </DndContext>
@@ -1385,47 +1616,67 @@ export function AdminPage() {
                 <input ref={importRef} type="file" accept=".json,application/json" style={{ display: "none" }} onChange={(event) => {
                   const file = event.target.files?.[0];
                   if (!file) return;
-                  void runAdminAction(() => importPreset(file, pendingImportKind), "Preset ????????????");
+                  void runAdminAction(() => importPreset(file, pendingImportKind), "Preset импортирован");
                   event.target.value = "";
                 }} />
               </div>
             ) : (
               <div className="card adminSectionCard">
                 <div className="adminSectionLead">
-                  <div className="muted">UI-?????? ????? ???????? ?? color/layout presets ? ????????? ????????????? ???????? ?????????? ??? code-owned inventory layer.</div>
+                  <div className="muted">
+                    Реестр собирает реальные элементы проекта из desktop, Mini App, drawer, attachments, admin и workbench.
+                    Список нужен для visual-аудита и последующей унификации похожих паттернов.
+                  </div>
                 </div>
                 <div className="adminUiToolbar">
-                  <div className="adminUiGroupTabs">
-                    {UI_GROUP_ORDER.map((group) => (
-                      <button key={group} type="button" className={`adminUiGroupTab ${uiGroup === group ? "isActive" : ""}`} onClick={() => setUiGroup(group)}>
-                        {UI_STYLE_GROUP_LABELS[group]}
-                      </button>
-                    ))}
+                  <div className="adminUiToolbarPrimary">
+                    <div className="adminUiGroupTabs">
+                      {UI_GROUP_ORDER.map((group) => (
+                        <button key={group} type="button" className={`adminUiGroupTab ${uiGroup === group ? "isActive" : ""}`} onClick={() => setUiGroup(group)}>
+                          {UI_STYLE_GROUP_LABELS[group]}
+                        </button>
+                      ))}
+                    </div>
+                    <label className="adminUiSearch">
+                      <span className="muted">Поиск по id, названию, описанию, usage и source path</span>
+                      <input className="input" value={uiSearch} onChange={(event) => setUiSearch(event.target.value)} placeholder="drawer, miniapp, badge, AdminPage.tsx" />
+                    </label>
                   </div>
-                  <label className="adminUiSearch">
-                    <span className="muted">????? ?? id, title ? usage</span>
-                    <input className="input" value={uiSearch} onChange={(event) => setUiSearch(event.target.value)} placeholder="primary, drawer, admin" />
-                  </label>
+                  <div className="adminUiToolbarSecondary">
+                    <label className="adminFieldStack adminUiSurfaceFilter">
+                      <span className="muted">Поверхность</span>
+                      <select value={uiSurfaceFilter} onChange={(event) => setUiSurfaceFilter(event.target.value)}>
+                        <option value="all">Все поверхности</option>
+                        {availableUiSurfaces.map((surface) => (
+                          <option key={surface} value={surface}>
+                            {surface}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                  </div>
                 </div>
                 <div className="adminUiSummaryRow">
-                  <div className="muted">? ?????? ????? ???????? ?????? read-only inventory. Runtime overrides, inheritance ? normalization workflow ???????? ????????? ??????.</div>
+                  <div className="muted">
+                    Это read-only inventory: здесь показываются реальные элементы проекта в порядке похожести, без runtime overrides и без генератора.
+                  </div>
                   <div className="adminLinksSummary">
                     <span className="adminCountBadge">{filteredUiEntries.length}</span>
-                    <span className="muted">???????</span>
+                    <span className="muted">элементов</span>
                   </div>
                 </div>
                 <div className="adminUiSplit">
                   <div className="adminUiRegistryPane">
-                    <div className="adminUiRegistryGrid">
+                    <div className="adminUiRegistryList">
                       {filteredUiEntries.map((entry) => (
-                        <UIStyleCard key={entry.id} entry={entry} active={selectedUiEntry?.id === entry.id} onSelect={() => setSelectedUiId(entry.id)} />
+                        <UIStyleRow key={entry.id} entry={entry} active={selectedUiEntry?.id === entry.id} onSelect={() => setSelectedUiId(entry.id)} />
                       ))}
                       {!filteredUiEntries.length ? (
                         <div className="adminUiEmptyState">
-                          <div className="adminStubEmptyIcon" aria-hidden="true">?</div>
+                          <div className="adminStubEmptyIcon" aria-hidden="true">⌕</div>
                           <div>
-                            <div className="adminUserName">?????? ?? ???????</div>
-                            <div className="muted">???????? ?????? ?????? ??? ????????? ????????? UI-?????????.</div>
+                            <div className="adminUserName">Ничего не найдено</div>
+                            <div className="muted">Смени группу, поверхность или поисковый запрос, чтобы увидеть другие UI-элементы.</div>
                           </div>
                         </div>
                       ) : null}
@@ -1440,19 +1691,19 @@ export function AdminPage() {
                             <h4 className="pageTitle" style={{ fontSize: 22 }}>{selectedUiEntry.title}</h4>
                             <div className="muted adminUiInspectorId">{selectedUiEntry.id}</div>
                           </div>
-                          <div className={`adminUiCardStatus is${(selectedUiEntry.status ?? "active")[0].toUpperCase()}${(selectedUiEntry.status ?? "active").slice(1)}`}>
-                            {selectedUiEntry.status === "candidate" ? "Candidate" : selectedUiEntry.status === "legacy" ? "Legacy" : "Active"}
+                          <div className={`adminUiCardStatus ${selectedUiEntry.deprecated ? "isLegacy" : ""}`}>
+                            {uiStatusLabel(selectedUiEntry)}
                           </div>
                         </div>
                         <div className="adminUiInspectorPreview">
                           <UIStylePreview entry={selectedUiEntry} />
                         </div>
                         <div className="adminUiInspectorBlock">
-                          <div className="adminUiInspectorBlockTitle">??????????</div>
+                          <div className="adminUiInspectorBlockTitle">Описание</div>
                           <div className="muted">{selectedUiEntry.description}</div>
                         </div>
                         <div className="adminUiInspectorBlock">
-                          <div className="adminUiInspectorBlockTitle">??? ????????????</div>
+                          <div className="adminUiInspectorBlockTitle">Где используется</div>
                           <div className="adminUiUsageList isDetailed">
                             {selectedUiEntry.usedIn.map((usage) => (
                               <span key={usage} className="adminUiUsagePill">{usage}</span>
@@ -1460,9 +1711,17 @@ export function AdminPage() {
                           </div>
                         </div>
                         <div className="adminUiInspectorBlock">
-                          <div className="adminUiInspectorBlockTitle">????????? props</div>
+                          <div className="adminUiInspectorBlockTitle">Source path</div>
+                          <div className="muted adminUiInspectorPath">{selectedUiEntry.sourcePath}</div>
+                        </div>
+                        <div className="adminUiInspectorBlock">
+                          <div className="adminUiInspectorBlockTitle">Similarity key</div>
+                          <div className="muted">{selectedUiEntry.similarityKey}</div>
+                        </div>
+                        <div className="adminUiInspectorBlock">
+                          <div className="adminUiInspectorBlockTitle">Ключевые props</div>
                           <div className="adminUiPropsTable">
-                            {Object.entries(selectedUiEntry.props).map(([key, value]) => (
+                            {Object.entries(selectedUiEntry.propsSummary).map(([key, value]) => (
                               <div key={key} className="adminUiPropRow">
                                 <span className="adminUiPropKey">{key}</span>
                                 <span className="adminUiPropValue">{String(value)}</span>
@@ -1471,16 +1730,18 @@ export function AdminPage() {
                           </div>
                         </div>
                         <div className="adminUiInspectorBlock">
-                          <div className="adminUiInspectorBlockTitle">????????? ? ?????????? ? ????????????</div>
-                          <div className="muted">?????? ??? ??????? code-owned ?????? ??? parent/child ? runtime overrides. ????? ???? ?????????? ??? ?????????????? ? ??????? ??????????.</div>
+                          <div className="adminUiInspectorBlockTitle">Контекст унификации</div>
+                          <div className="muted">
+                            Порядок внутри группы курируется вручную по похожести, чтобы рядом лежали почти одинаковые паттерны и их было легче сливать в следующей волне.
+                          </div>
                         </div>
                       </>
                     ) : (
                       <div className="adminUiEmptyState">
-                        <div className="adminStubEmptyIcon" aria-hidden="true">?</div>
+                        <div className="adminStubEmptyIcon" aria-hidden="true">⌕</div>
                         <div>
-                          <div className="adminUserName">?????? UI-???????</div>
-                          <div className="muted">Inspector ?????? ??????? preview, usage ? ????????? props ????????? ??????.</div>
+                          <div className="adminUserName">Выбери UI-элемент</div>
+                          <div className="muted">Inspector покажет source path, usage, similarity key и ключевые props выбранного элемента.</div>
                         </div>
                       </div>
                     )}

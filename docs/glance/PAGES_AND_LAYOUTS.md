@@ -178,11 +178,23 @@ Runtime semantics:
 
 Read-only inventory layer для унификации дизайн-системы:
 - code-owned registry, не связанный с preset catalog;
+- в реестр входят реальные элементы со всех surface layers:
+  - desktop pages;
+  - Mini App;
+  - task drawer;
+  - attachments;
+  - admin;
+  - workbench;
 - группы `Buttons`, `Bubbles`, `Labels`, `Panels`;
-- group filter и поиск по `id / title / usage`;
-- compact preview карточек;
-- inspector с usage и final props;
-- подготовка к следующим волнам runtime editing и normalization без включения этих механизмов в V1.
+- поиск по `id / title / description / usage / source path`;
+- compact surface filter по месту использования;
+- основной режим показа — узкие горизонтальные row-cards в одну строку:
+  - слева identity и описание;
+  - затем usage tags и source path;
+  - справа живой inline preview элемента;
+- порядок внутри группы курируется вручную по похожести, чтобы почти одинаковые элементы лежали рядом;
+- inspector остаётся secondary aid и показывает `sourcePath`, `similarityKey` и `propsSummary`;
+- runtime editing и normalization workflow пока не включены: слой нужен для visual audit и последующей ручной унификации.
 
 ### Переходы
 

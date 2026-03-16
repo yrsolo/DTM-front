@@ -5,6 +5,7 @@
 - [x] CAM-TELEGRAM-MINIAPP-V1 follow-up - Telegram linkage recovery fixed: auth auto-heal via `telegramId -> yandexEmail`, explicit Mini App unlinked state, docs refreshed.
 - [x] CAM-ATTACHMENTS-UPLOAD-PREVIEW-V1 follow-up - frontend aligned with backend handoff: auth facade control-plane, direct presigned `PUT`, `jobs/{job_id}` polling, contour-safe `view/download`, drawer-wide drag-and-drop upload, docs refreshed.
 - [x] CAM-ADMIN-TABS-TEMP-ACCESS-LINKS-V1 - admin IA rewritten into `Доступ / Стиль`, `Люди / Ссылки / Пресеты` tabs; temp-link runtime shipped end-to-end with YDB storage, redemption, `/me` session metadata, admin CRUD/revoke/stats UI, and auth-panel countdown.
+- [x] CAM-ADMIN-STYLE-UI-INVENTORY-REAL-ELEMENTS-V2 - `Стиль -> UI` rebuilt from synthetic demo registry into a real project-wide UI inventory with fixed Cyrillic, surface-aware search/filter, similarity-ordered row cards, live previews, and canonical docs refresh.
 - [ ] CAM-API-V2-LOADING-SWR-CACHE - finalize manual evidence pack.
 - [x] CAM-SCHEMA-CONTRACT-GOVERNANCE - schema/types sync + validate:schema + guarantees.
 - [ ] CAM-DOCS-CANONICAL-REWRITE - rebuild root README and docs tree around current frontend state.
