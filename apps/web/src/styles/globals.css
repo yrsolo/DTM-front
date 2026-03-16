@@ -79,6 +79,13 @@ body,
   overflow-y: auto;
 }
 
+.appShell.promoShell {
+  height: auto;
+  min-height: 100dvh;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
 a {
   color: inherit;
 }
@@ -105,6 +112,13 @@ a {
 .container.miniAppContainer {
   padding-top: 12px;
   height: 100dvh;
+}
+
+.container.promoContainer {
+  min-height: 100dvh;
+  height: auto;
+  padding: 32px 24px 56px;
+  overflow: visible;
 }
 
 .container > .card {
@@ -2458,6 +2472,383 @@ button:hover {
   background: linear-gradient(170deg, #12192d 0%, #100f23 100%);
   padding: 18px;
   overflow: hidden;
+}
+
+.promoPage {
+  width: min(1220px, 100%);
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.promoHero {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(320px, 0.95fr);
+  gap: 28px;
+  padding: 36px;
+  overflow: hidden;
+}
+
+.promoHero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 22% 18%, rgba(255, 133, 193, 0.2), transparent 34%),
+    radial-gradient(circle at 78% 12%, rgba(108, 147, 255, 0.22), transparent 36%),
+    radial-gradient(circle at 50% 100%, rgba(102, 240, 214, 0.12), transparent 42%);
+  pointer-events: none;
+}
+
+.promoHeroCopy,
+.promoVideoCard,
+.promoStorySection,
+.promoFinalCta {
+  position: relative;
+  z-index: 1;
+}
+
+.promoHeroCopy {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding-right: 12px;
+}
+
+.promoEyebrow {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  padding: 7px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(173, 191, 255, 0.16);
+  background: linear-gradient(135deg, rgba(255, 143, 201, 0.14), rgba(123, 153, 255, 0.16));
+  color: #d9e4ff;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.promoHero h1,
+.promoSectionHeading h2,
+.promoFinalCopy h2 {
+  margin: 0;
+  color: #f5f7ff;
+  line-height: 1.02;
+}
+
+.promoHero h1 {
+  font-size: clamp(40px, 6vw, 76px);
+  max-width: 9.5ch;
+}
+
+.promoLead,
+.promoSectionHeading p,
+.promoFinalCopy p,
+.promoStoryCopy p {
+  margin: 0;
+  color: #b6c2df;
+  line-height: 1.72;
+  font-size: 16px;
+}
+
+.promoCtaRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+}
+
+.promoPrimaryCta,
+.promoSecondaryCta,
+.promoToggleButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 46px;
+  padding: 0 18px;
+  border-radius: 14px;
+  border: 1px solid rgba(175, 191, 255, 0.16);
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    transform 180ms ease,
+    border-color 180ms ease,
+    filter 180ms ease,
+    background 180ms ease;
+  font: inherit;
+}
+
+.promoPrimaryCta {
+  background: linear-gradient(140deg, rgba(255, 142, 201, 0.9), rgba(122, 147, 255, 0.92));
+  color: #09111f;
+  font-weight: 800;
+  box-shadow: 0 18px 32px rgba(60, 32, 80, 0.28);
+}
+
+.promoSecondaryCta,
+.promoToggleButton {
+  background: rgba(11, 18, 32, 0.62);
+  color: #e4ecff;
+  font-weight: 700;
+}
+
+.promoPrimaryCta:hover,
+.promoSecondaryCta:hover,
+.promoToggleButton:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.05);
+}
+
+.promoStatList {
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 10px;
+}
+
+.promoStatList li {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  color: #d7dff3;
+  line-height: 1.55;
+}
+
+.promoStatList li::before {
+  content: "";
+  width: 10px;
+  height: 10px;
+  margin-top: 8px;
+  border-radius: 999px;
+  flex: 0 0 10px;
+  background: linear-gradient(135deg, #ff93cf, #69f0d6);
+  box-shadow: 0 0 18px rgba(255, 147, 207, 0.45);
+}
+
+.promoVideoCard {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 24px;
+  border-radius: 24px;
+  border: 1px solid rgba(168, 188, 255, 0.14);
+  background:
+    radial-gradient(circle at 90% 0%, rgba(99, 141, 255, 0.2), transparent 34%),
+    linear-gradient(165deg, rgba(16, 22, 42, 0.92), rgba(10, 15, 28, 0.94));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 26px 44px rgba(0, 0, 0, 0.28);
+}
+
+.promoVideoHeader {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.promoVideoMeta {
+  color: #a8b7d9;
+  font-size: 14px;
+}
+
+.promoVideoFrame {
+  position: relative;
+  overflow: hidden;
+  border-radius: 22px;
+  border: 1px solid rgba(174, 191, 255, 0.16);
+  background:
+    radial-gradient(circle at 50% 15%, rgba(255, 145, 202, 0.16), transparent 36%),
+    linear-gradient(180deg, rgba(13, 18, 35, 0.96), rgba(8, 12, 22, 0.98));
+  aspect-ratio: 16 / 9;
+}
+
+.promoVideo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  background: #05070d;
+}
+
+.promoVideoOverlay {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  background:
+    linear-gradient(180deg, rgba(8, 12, 22, 0.16), rgba(8, 12, 22, 0.64)),
+    radial-gradient(circle at 50% 44%, rgba(255, 144, 206, 0.16), transparent 28%);
+  color: #f4f7ff;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 14px;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 700;
+}
+
+.promoVideoPlay {
+  width: 74px;
+  height: 74px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(140deg, rgba(255, 142, 201, 0.92), rgba(122, 147, 255, 0.92));
+  color: #08111d;
+  font-size: 30px;
+  box-shadow: 0 18px 36px rgba(43, 20, 63, 0.34);
+}
+
+.promoVideoFrame.isPlaying .promoVideoOverlay {
+  display: none;
+}
+
+.promoStorySection {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.promoSectionHeading {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.promoSectionHeading h2 {
+  font-size: clamp(30px, 4.2vw, 48px);
+  max-width: 13ch;
+}
+
+.promoStoryGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.promoStoryCard {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 18px 20px;
+  border-radius: 20px;
+  border: 1px solid rgba(169, 186, 255, 0.14);
+  background:
+    linear-gradient(140deg, rgba(20, 27, 48, 0.94), rgba(12, 18, 34, 0.98)),
+    radial-gradient(circle at 100% 0%, rgba(255, 143, 201, 0.08), transparent 36%);
+  box-shadow: 0 18px 30px rgba(0, 0, 0, 0.2);
+}
+
+.promoStoryCopy {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex: 1 1 auto;
+}
+
+.promoStoryCopy h2 {
+  margin: 0;
+  color: #eef3ff;
+  font-size: 24px;
+  line-height: 1.15;
+}
+
+.promoToggleButton {
+  flex: 0 0 auto;
+  min-width: 132px;
+}
+
+.promoFinalCta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
+  padding: 26px 28px;
+}
+
+.promoFinalCopy {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 720px;
+}
+
+.promoSilhouette {
+  position: absolute;
+  top: 28px;
+  bottom: 28px;
+  width: 164px;
+  border-radius: 999px;
+  opacity: 0.55;
+  filter: blur(1px);
+  pointer-events: none;
+}
+
+.promoSilhouetteLeft {
+  left: -56px;
+  background:
+    radial-gradient(circle at 65% 22%, rgba(255, 171, 216, 0.38), transparent 28%),
+    linear-gradient(180deg, rgba(255, 160, 216, 0.14), rgba(64, 31, 88, 0.02));
+  box-shadow: inset 0 0 0 1px rgba(255, 208, 235, 0.08);
+}
+
+.promoSilhouetteRight {
+  right: -56px;
+  background:
+    radial-gradient(circle at 35% 28%, rgba(150, 193, 255, 0.38), transparent 28%),
+    linear-gradient(180deg, rgba(136, 177, 255, 0.14), rgba(28, 39, 96, 0.02));
+  box-shadow: inset 0 0 0 1px rgba(213, 230, 255, 0.08);
+}
+
+@media (max-width: 1100px) {
+  .promoHero {
+    grid-template-columns: 1fr;
+  }
+
+  .promoHero h1 {
+    max-width: none;
+  }
+
+  .promoSectionHeading h2 {
+    max-width: none;
+  }
+}
+
+@media (max-width: 760px) {
+  .container.promoContainer {
+    padding: 18px 14px 40px;
+  }
+
+  .promoHero,
+  .promoFinalCta {
+    padding: 22px;
+  }
+
+  .promoStoryCard,
+  .promoFinalCta {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .promoToggleButton,
+  .promoPrimaryCta,
+  .promoSecondaryCta {
+    width: 100%;
+  }
+
+  .promoSilhouette {
+    display: none;
+  }
 }
 
 .attachmentPreviewHeader {

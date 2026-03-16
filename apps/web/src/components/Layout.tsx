@@ -167,8 +167,9 @@ export function Layout(props: { children: React.ReactNode }) {
     loadLimit: runtimeDefaults.loadLimit,
   }));
   const authSession = useAuthSession();
+  const isPromoRoute = location.pathname === "/promo";
   const snapshotState = useSnapshot(runtimeDefaults, {
-    enabled: !authSession.blockInitialDataLoad,
+    enabled: !authSession.blockInitialDataLoad && !isPromoRoute,
   });
   const [design, setDesign] = React.useState<DesignControls>(() => readStoredLayoutDraft());
   const [keyColors, setKeyColors] = React.useState<KeyColors>(() => readStoredColorDraft());
@@ -597,8 +598,8 @@ export function Layout(props: { children: React.ReactNode }) {
   const isAdminRoute = location.pathname === "/admin";
   const isMiniAppRoute =
     location.pathname === "/app" || location.pathname === "/m" || location.pathname === "/mobile";
-  const appShellClassName = isAdminRoute ? "appShell adminShell" : "appShell";
-  const containerClassName = `${isAdminRoute ? "container adminContainer" : "container"}${isMiniAppRoute ? " miniAppContainer" : ""}`;
+  const appShellClassName = `appShell${isAdminRoute ? " adminShell" : ""}${isPromoRoute ? " promoShell" : ""}`;
+  const containerClassName = `${isAdminRoute ? "container adminContainer" : "container"}${isMiniAppRoute ? " miniAppContainer" : ""}${isPromoRoute ? " promoContainer" : ""}`;
 
   return (
     <LayoutContext.Provider
@@ -637,7 +638,7 @@ export function Layout(props: { children: React.ReactNode }) {
       }}
     >
       <div className={appShellClassName} style={layoutVarsStyle}>
-        {!isMiniAppRoute ? (
+        {!isMiniAppRoute && !isPromoRoute ? (
           <div className="topbar">
             <div className="nav">
               <div className="brand">
@@ -675,9 +676,11 @@ export function Layout(props: { children: React.ReactNode }) {
             />
           </div>
         ) : null}
-        <div className="controlDock">
-          <ControlsWorkbench />
-        </div>
+        {!isPromoRoute ? (
+          <div className="controlDock">
+            <ControlsWorkbench />
+          </div>
+        ) : null}
       </div>
     </LayoutContext.Provider>
   );

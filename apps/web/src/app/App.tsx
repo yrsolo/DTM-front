@@ -4,6 +4,7 @@ import { Layout } from "../components/Layout";
 import { getFrontendBasePath } from "../config/runtimeContour";
 import { AdminPage } from "../pages/AdminPage";
 import { MiniAppPage, MobileWebPage } from "../pages/MiniAppPage";
+import { PromoPage } from "../pages/PromoPage";
 import { TimelinePage } from "../pages/TimelinePage";
 
 function isTabletUserAgent(userAgent: string): boolean {
@@ -43,6 +44,7 @@ export function App() {
       <Layout>
         <Routes>
           <Route path="/" element={<TimelineEntryPage />} />
+          <Route path="/promo" element={<PromoPage />} />
           <Route path="/app" element={<MiniAppPage />} />
           <Route path="/m" element={<MobileWebPage />} />
           <Route path="/mobile" element={<MobileWebPage />} />
