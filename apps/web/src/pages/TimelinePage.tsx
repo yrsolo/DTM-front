@@ -272,15 +272,25 @@ export function TimelinePage() {
   const scaleInfoRef = React.useRef<{ rangeStartMs: number; pxPerDay: number; labelW: number } | null>(null);
   const pendingZoomAnchorRef = React.useRef<{ dateMs: number; clientX: number } | null>(null);
   const pendingDateAnchorRef = React.useRef<number | null>(null);
+  const didInitialTodayCenterRef = React.useRef(false);
   const authMenuRef = React.useRef<HTMLDivElement | null>(null);
   const timelineHost = useElementWidth<HTMLDivElement>();
 
-  const applyDateAnchor = (dateMs: number) => {
+  const applyDateAnchor = (dateMs: number, behavior: ScrollBehavior = "auto") => {
     const host = timelineHost.ref.current;
     const scale = scaleInfoRef.current;
     if (!host || !scale) return;
     const x = scale.labelW + ((dateMs - scale.rangeStartMs) / DAY_MS) * scale.pxPerDay - host.clientWidth * 0.5;
-    host.scrollLeft = Math.max(0, x);
+    host.scrollTo({ left: Math.max(0, x), behavior });
+  };
+
+  const todayAnchorMs = () => {
+    const now = new Date();
+    return Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate());
+  };
+
+  const centerTimelineOnToday = (behavior: ScrollBehavior = "smooth") => {
+    applyDateAnchor(todayAnchorMs(), behavior);
   };
 
   const schedulePendingDateAnchorApply = () => {
@@ -380,6 +390,17 @@ export function TimelinePage() {
     }, 30000);
     return () => window.clearInterval(timer);
   }, [authSession.state.expiresAt, authSession.state.sessionKind]);
+
+  React.useEffect(() => {
+    if (pageView !== "tasks" || didInitialTodayCenterRef.current) return;
+    const host = timelineHost.ref.current;
+    const scale = scaleInfoRef.current;
+    if (!host || !scale || timelineHost.width <= 0) return;
+    didInitialTodayCenterRef.current = true;
+    requestAnimationFrame(() => {
+      applyDateAnchor(todayAnchorMs(), "auto");
+    });
+  }, [pageView, timelineHost.width, snapshot?.meta?.generatedAt, zoom]);
 
   React.useEffect(() => {
     const onMove = (e: MouseEvent) => {
@@ -718,45 +739,54 @@ export function TimelinePage() {
             </button>
           </div>
           {pageView === "tasks" ? (
-          <div className="timelineZoomCtl">
-            <button
-              type="button"
-              onClick={() => {
-                const idx = ZOOM_PRESETS.findIndex((v) => Math.abs(v - zoom) < 0.001);
-                const nextIdx = idx <= 0 ? 0 : idx - 1;
-                setZoom(ZOOM_PRESETS[nextIdx]);
-              }}
-            >
-              -
-            </button>
-            <select
-              value={zoomPresetValue}
-              onChange={(e) => {
-                if (e.target.value === "__custom__") return;
-                setZoom(clamp(Number(e.target.value), MIN_ZOOM, MAX_ZOOM));
-              }}
-              aria-label={ui.timeline.zoomAria}
-            >
-              {zoomPresetValue === "__custom__" ? (
-                <option value="__custom__">{Math.round(zoom * 100)}%</option>
-              ) : null}
-              {ZOOM_PRESETS.map((z) => (
-                <option key={z} value={String(z)}>
-                  {Math.round(z * 100)}%
-                </option>
-              ))}
-            </select>
-            <button
-              type="button"
-              onClick={() => {
-                const idx = ZOOM_PRESETS.findIndex((v) => Math.abs(v - zoom) < 0.001);
-                const nextIdx = idx < 0 ? 2 : Math.min(ZOOM_PRESETS.length - 1, idx + 1);
-                setZoom(ZOOM_PRESETS[nextIdx]);
-              }}
-            >
-              +
-            </button>
-          </div>
+            <>
+              <div className="timelineZoomCtl">
+                <button
+                  type="button"
+                  onClick={() => {
+                    const idx = ZOOM_PRESETS.findIndex((v) => Math.abs(v - zoom) < 0.001);
+                    const nextIdx = idx <= 0 ? 0 : idx - 1;
+                    setZoom(ZOOM_PRESETS[nextIdx]);
+                  }}
+                >
+                  -
+                </button>
+                <select
+                  value={zoomPresetValue}
+                  onChange={(e) => {
+                    if (e.target.value === "__custom__") return;
+                    setZoom(clamp(Number(e.target.value), MIN_ZOOM, MAX_ZOOM));
+                  }}
+                  aria-label={ui.timeline.zoomAria}
+                >
+                  {zoomPresetValue === "__custom__" ? (
+                    <option value="__custom__">{Math.round(zoom * 100)}%</option>
+                  ) : null}
+                  {ZOOM_PRESETS.map((z) => (
+                    <option key={z} value={String(z)}>
+                      {Math.round(z * 100)}%
+                    </option>
+                  ))}
+                </select>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const idx = ZOOM_PRESETS.findIndex((v) => Math.abs(v - zoom) < 0.001);
+                    const nextIdx = idx < 0 ? 2 : Math.min(ZOOM_PRESETS.length - 1, idx + 1);
+                    setZoom(ZOOM_PRESETS[nextIdx]);
+                  }}
+                >
+                  +
+                </button>
+              </div>
+              <button
+                type="button"
+                className="timelineTodayBtn"
+                onClick={() => centerTimelineOnToday("smooth")}
+              >
+                Сегодня
+              </button>
+            </>
           ) : null}
           <button
             type="button"

@@ -1513,6 +1513,24 @@ button:hover {
   font-size: 11px;
 }
 
+.timelineTodayBtn {
+  min-height: 32px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(120, 222, 194, 0.34);
+  background: linear-gradient(145deg, rgba(25, 50, 48, 0.92), rgba(18, 34, 42, 0.9));
+  color: #dffcf4;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.timelineTodayBtn:hover,
+.timelineTodayBtn:focus-visible {
+  border-color: rgba(138, 239, 211, 0.5);
+  background: linear-gradient(145deg, rgba(30, 67, 61, 0.96), rgba(20, 44, 50, 0.94));
+}
+
 .limitCtl {
   display: inline-flex;
   align-items: center;
