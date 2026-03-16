@@ -125,6 +125,8 @@ Tooltip может быть шире карточки, чтобы milestone labe
   - авторизация идёт через Яндекс;
   - Telegram runtime не требуется и не используется;
   - список задач фильтруется по обычному `authSession.user.personId`, без Telegram-only bootstrap.
+- при заходе на обычный `/` с телефона frontend автоматически переводит пользователя в `/m`;
+  - планшеты и desktop остаются на стандартном timeline.
 - attachment panel по умолчанию свёрнута, но summary с количеством вложений виден сразу;
 - внутри раскрытой панели attachments показываются как compact file-icons;
 - desktop использует hover-tooltip для имени и даты загрузки attachment, Mini App — tap-friendly selection surface;
