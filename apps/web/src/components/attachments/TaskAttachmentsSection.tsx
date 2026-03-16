@@ -18,6 +18,7 @@ import {
   attachmentToneClass,
   attachmentTypeLabel,
   formatAttachmentUploadedAt,
+  inferUploadMimeType,
   isDocxAttachment,
   isImageAttachment,
 } from "../../utils/attachments";
@@ -285,7 +286,7 @@ export function TaskAttachmentsSection(props: {
       const contract = await requestTaskAttachmentUpload({
         taskId: props.task.id,
         filename: file.name,
-        mime: file.type || "application/octet-stream",
+        mime: inferUploadMimeType(file),
         size: file.size,
         uploadedBy: userId,
       });
@@ -373,6 +374,7 @@ export function TaskAttachmentsSection(props: {
                   ref={inputRef}
                   type="file"
                   className="attachmentFileInput"
+                  accept=".doc,.docx,.pdf,image/jpeg,image/png,image/webp"
                   onChange={handleFilePicked}
                 />
                 <button type="button" className="miniAppButton attachmentUploadButton" onClick={() => inputRef.current?.click()}>

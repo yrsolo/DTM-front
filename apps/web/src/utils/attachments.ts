@@ -6,6 +6,16 @@ function fileExtension(name: string): string {
   return dotIndex >= 0 ? clean.slice(dotIndex + 1) : "";
 }
 
+const UPLOAD_MIME_BY_EXTENSION: Record<string, string> = {
+  doc: "application/msword",
+  docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  pdf: "application/pdf",
+  jpg: "image/jpeg",
+  jpeg: "image/jpeg",
+  png: "image/png",
+  webp: "image/webp",
+};
+
 export function isDocxAttachment(attachment: TaskAttachmentV1): boolean {
   const mime = attachment.mime.toLowerCase();
   const ext = fileExtension(attachment.name);
@@ -58,4 +68,14 @@ export function formatAttachmentUploadedAt(value: string | null | undefined, loc
 
 export function supportsInlinePreview(attachment: TaskAttachmentV1): boolean {
   return isDocxAttachment(attachment) || isImageAttachment(attachment);
+}
+
+export function inferUploadMimeType(file: Pick<File, "name" | "type">): string {
+  const browserMime = typeof file.type === "string" ? file.type.trim() : "";
+  if (browserMime && browserMime !== "application/octet-stream") {
+    return browserMime;
+  }
+
+  const ext = fileExtension(file.name);
+  return UPLOAD_MIME_BY_EXTENSION[ext] ?? "application/octet-stream";
 }
