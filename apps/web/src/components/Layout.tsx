@@ -598,6 +598,24 @@ export function Layout(props: { children: React.ReactNode }) {
   const isAdminRoute = location.pathname === "/admin";
   const isMiniAppRoute =
     location.pathname === "/app" || location.pathname === "/m" || location.pathname === "/mobile";
+
+  React.useEffect(() => {
+    if (typeof document === "undefined") return;
+    const { body, documentElement } = document;
+    const prevBodyOverflow = body.style.overflow;
+    const prevHtmlOverflow = documentElement.style.overflow;
+
+    if (isPromoRoute) {
+      body.style.overflow = "auto";
+      documentElement.style.overflow = "auto";
+    }
+
+    return () => {
+      body.style.overflow = prevBodyOverflow;
+      documentElement.style.overflow = prevHtmlOverflow;
+    };
+  }, [isPromoRoute]);
+
   const appShellClassName = `appShell${isAdminRoute ? " adminShell" : ""}${isPromoRoute ? " promoShell" : ""}`;
   const containerClassName = `${isAdminRoute ? "container adminContainer" : "container"}${isMiniAppRoute ? " miniAppContainer" : ""}${isPromoRoute ? " promoContainer" : ""}`;
 

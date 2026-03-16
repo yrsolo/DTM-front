@@ -91,15 +91,6 @@ export function PromoPage() {
       </section>
 
       <section className="promoStorySection" id="promo-sections">
-        <div className="promoSectionHeading">
-          <span className="promoEyebrow">Как это устроено</span>
-          <h2>Короткая версия по умолчанию. Детали — по клику внутри блока.</h2>
-          <p>
-            Мы оставили смысловые блоки компактными, чтобы страницу можно было быстро
-            просканировать. Если хочется подробностей, каждый блок раскрывается прямо на месте.
-          </p>
-        </div>
-
         <div className="promoStoryGrid">
           {promoContent.sections.map((section) => (
             <PromoSectionCard key={section.id} section={section} />

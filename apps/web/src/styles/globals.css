@@ -2480,6 +2480,7 @@ button:hover {
   display: flex;
   flex-direction: column;
   gap: 28px;
+  padding-bottom: 32px;
 }
 
 .promoHero {
@@ -2715,18 +2716,7 @@ button:hover {
 .promoStorySection {
   display: flex;
   flex-direction: column;
-  gap: 18px;
-}
-
-.promoSectionHeading {
-  display: flex;
-  flex-direction: column;
   gap: 14px;
-}
-
-.promoSectionHeading h2 {
-  font-size: clamp(30px, 4.2vw, 48px);
-  max-width: 13ch;
 }
 
 .promoStoryGrid {
