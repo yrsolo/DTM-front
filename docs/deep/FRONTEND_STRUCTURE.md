@@ -17,7 +17,7 @@ Source of truth в коде:
 | `apps/web/src/components` | Layout, drawer, workbench, board view и Mini App presentation components | `Layout.tsx`, `TaskDetailsDrawer.tsx`, `ControlsWorkbench.tsx`, `components/miniapp/*` |
 | `apps/web/src/config` | Runtime-конфиг, contour/base path и Telegram runtime detection | `publicConfig.ts`, `runtimeContour.ts`, `telegramRuntime.ts` |
 | `apps/web/src/data` | API-запросы, загрузка snapshot, нормализация, runtime defaults и selectors/view-models | `api.ts`, `useSnapshot.ts`, `normalize.ts`, `runtimeDefaults.ts`, `selectors/*` |
-| `apps/web/src/design` | Типы и дефолты design controls, key colors, схема workbench | `controls.ts`, `colors.ts`, `workbenchLayout.ts` |
+| `apps/web/src/design` | Типы и дефолты design controls, key colors, схема workbench и code-owned UI registry | `controls.ts`, `colors.ts`, `workbenchLayout.ts`, `uiRegistry.ts` |
 | `apps/web/src/gantt` | SVG timeline и связанные rendering-компоненты | `UnifiedTimeline.tsx`, `TaskBar.tsx`, `TasksTimeline.tsx` |
 | `apps/web/src/i18n` | UI-тексты и локализация | `uiText.ts` |
 | `apps/web/src/pages` | Оркестрация desktop и Mini App страниц | `TimelinePage.tsx`, `MiniAppPage.tsx` |
@@ -67,6 +67,7 @@ Source of truth в коде:
 - [controls.ts](../../apps/web/src/design/controls.ts)
 - [colors.ts](../../apps/web/src/design/colors.ts)
 - [workbenchLayout.ts](../../apps/web/src/design/workbenchLayout.ts)
+- `uiRegistry.ts`
 - [ControlsWorkbench.tsx](../../apps/web/src/components/ControlsWorkbench.tsx)
 
 ### Milestones и их тона

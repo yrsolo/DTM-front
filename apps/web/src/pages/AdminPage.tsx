@@ -17,6 +17,7 @@ import { CSS } from "@dnd-kit/utilities";
 
 import { LayoutContext } from "../components/Layout";
 import { getAuthRequestBase, getTasksRoute } from "../config/runtimeContour";
+import { UI_STYLE_GROUP_LABELS, UI_STYLE_REGISTRY, type UIStyleEntry, type UIStyleGroup } from "../design/uiRegistry";
 
 const MINI_APP_ADMIN_RETURN_KEY = "dtm-miniapp-admin-return-to";
 const ADMIN_TOP_TAB_KEY = "dtm-admin-top-tab";
@@ -85,7 +86,7 @@ type AccessLinkDraft = {
 type DragListKey = "pendingUsers" | "approvedUsers" | "colorPresets" | "layoutPresets";
 type AdminTopTab = "access" | "style";
 type AdminAccessTab = "people" | "links";
-type AdminStyleTab = "presets";
+type AdminStyleTab = "presets" | "ui";
 
 type AdminOverview = {
   pendingUsers: AdminUserCard[];
@@ -117,6 +118,8 @@ type SortableCardProps = {
   children: React.ReactNode;
   className: string;
 };
+
+const UI_GROUP_ORDER: UIStyleGroup[] = ["button", "bubble", "label", "panel"];
 
 function buildAuthUrl(path: string): string {
   return `${getAuthRequestBase()}${path}`;
@@ -356,6 +359,59 @@ function AdminTabButton(props: { active: boolean; onClick: () => void; children:
   );
 }
 
+function UIStylePreview(props: { entry: UIStyleEntry }) {
+  if (props.entry.group === "button") {
+    const ghost = String(props.entry.props.variant).includes("ghost");
+    return (
+      <span className={`adminUiPreviewButton ${ghost ? "isGhost" : "isPrimary"}`}>
+        {ghost ? "????????? ????????" : "???????? ????????"}
+      </span>
+    );
+  }
+  if (props.entry.group === "bubble") {
+    return <span className="adminUiPreviewBubble">{String(props.entry.props.tone)}</span>;
+  }
+  if (props.entry.group === "label") {
+    return (
+      <div className="adminUiPreviewLabelWrap">
+        <div className="adminUiPreviewLabel">{props.entry.title}</div>
+        <div className="adminUiPreviewLabelMeta">????????? ?????? ??? ??????????</div>
+      </div>
+    );
+  }
+  return (
+    <div className="adminUiPreviewPanel">
+      <div className="adminUiPreviewPanelTitle">Panel surface</div>
+      <div className="adminUiPreviewPanelBody">Nested content preview</div>
+    </div>
+  );
+}
+
+function UIStyleCard(props: { entry: UIStyleEntry; active: boolean; onSelect: () => void }) {
+  return (
+    <button type="button" className={`adminUiCard ${props.active ? "isActive" : ""}`} onClick={props.onSelect}>
+      <div className="adminUiCardHeader">
+        <div>
+          <div className="adminUiCardTitle">{props.entry.title}</div>
+          <div className="adminUiCardId">{props.entry.id}</div>
+        </div>
+        <div className={`adminUiCardStatus is${(props.entry.status ?? "active")[0].toUpperCase()}${(props.entry.status ?? "active").slice(1)}`}>
+          {props.entry.status === "candidate" ? "Candidate" : props.entry.status === "legacy" ? "Legacy" : "Active"}
+        </div>
+      </div>
+      <div className="adminUiCardPreview">
+        <UIStylePreview entry={props.entry} />
+      </div>
+      <div className="adminUiCardDescription">{props.entry.description}</div>
+      <div className="adminUiUsageList">
+        {props.entry.usedIn.slice(0, 3).map((usage) => (
+          <span key={usage} className="adminUiUsagePill">{usage}</span>
+        ))}
+      </div>
+    </button>
+  );
+}
+
 export function AdminPage() {
   const ctx = React.useContext(LayoutContext);
   const [overview, setOverview] = React.useState<AdminOverview | null>(null);
@@ -372,7 +428,10 @@ export function AdminPage() {
   const [activeDrag, setActiveDrag] = React.useState<ActiveDrag | null>(null);
   const [topTab, setTopTab] = React.useState<AdminTopTab>(() => readStoredTab(ADMIN_TOP_TAB_KEY, ["access", "style"], "access"));
   const [accessTab, setAccessTab] = React.useState<AdminAccessTab>(() => readStoredTab(ADMIN_ACCESS_TAB_KEY, ["people", "links"], "people"));
-  const [styleTab, setStyleTab] = React.useState<AdminStyleTab>(() => readStoredTab(ADMIN_STYLE_TAB_KEY, ["presets"], "presets"));
+  const [styleTab, setStyleTab] = React.useState<AdminStyleTab>(() => readStoredTab(ADMIN_STYLE_TAB_KEY, ["presets", "ui"], "presets"));
+  const [uiGroup, setUiGroup] = React.useState<UIStyleGroup>("button");
+  const [uiSearch, setUiSearch] = React.useState("");
+  const [selectedUiId, setSelectedUiId] = React.useState<string>(() => UI_STYLE_REGISTRY[0]?.id ?? "");
   const [draftLinkLabel, setDraftLinkLabel] = React.useState("");
   const [draftLinkExpiryHours, setDraftLinkExpiryHours] = React.useState("72");
   const [linkDrafts, setLinkDrafts] = React.useState<Record<string, AccessLinkDraft>>({});
@@ -445,6 +504,27 @@ export function AdminPage() {
     }, 30000);
     return () => window.clearInterval(timer);
   }, []);
+
+  const filteredUiEntries = React.useMemo(() => {
+    const query = uiSearch.trim().toLowerCase();
+    return UI_STYLE_REGISTRY.filter((entry) => {
+      if (entry.group != uiGroup) return false;
+      if (!query) return true;
+      const haystack = [entry.id, entry.title, entry.description, ...entry.usedIn].join(" ").toLowerCase();
+      return haystack.includes(query);
+    });
+  }, [uiGroup, uiSearch]);
+
+  const selectedUiEntry = React.useMemo(() => {
+    const direct = filteredUiEntries.find((entry) => entry.id === selectedUiId);
+    if (direct) return direct;
+    return filteredUiEntries[0] ?? null;
+  }, [filteredUiEntries, selectedUiId]);
+
+  React.useEffect(() => {
+    if (filteredUiEntries.some((entry) => entry.id === selectedUiId)) return;
+    setSelectedUiId(filteredUiEntries[0]?.id ?? "");
+  }, [filteredUiEntries, selectedUiId]);
 
   const getListItems = React.useCallback(
     (list: DragListKey) => {
@@ -1236,85 +1316,181 @@ export function AdminPage() {
       ) : (
         <div className="adminSubtabPanel">
           <div className="adminTabsRow isSubtabs">
-            <AdminTabButton active={styleTab === "presets"} onClick={() => setStyleTab("presets")}>Пресеты</AdminTabButton>
+            <AdminTabButton active={styleTab === "presets"} onClick={() => setStyleTab("presets")}>???????</AdminTabButton>
+            <AdminTabButton active={styleTab === "ui"} onClick={() => setStyleTab("ui")}>UI</AdminTabButton>
           </div>
 
           <div className="adminSubtabBody">
-            <div className="adminSectionLead">
-              <div className="muted">Первая подвкладка хранит color/layout presets без изменения текущей бизнес-логики.</div>
-            </div>
+            {styleTab === "presets" ? (
+              <div className="card adminSectionCard">
+                <div className="pageHeader" style={{ marginBottom: 12 }}>
+                  <h4 className="pageTitle" style={{ fontSize: 22 }}>???????</h4>
+                </div>
+                <div className="adminPresetToolbar">
+                  <button type="button" className="btn btnGhost" onClick={() => { setPendingImportKind("color"); importRef.current?.click(); }}>????????????? color preset</button>
+                  <button type="button" className="btn btnGhost" onClick={() => { setPendingImportKind("layout"); importRef.current?.click(); }}>????????????? layout preset</button>
+                </div>
+                <div className="grid2 adminPresetSplit" style={{ alignItems: "start" }}>
+                  <div className="card adminPresetColumn">
+                    <h4 className="pageTitle" style={{ fontSize: 20 }}>???????? ???????</h4>
+                    <DndContext sensors={sensors} collisionDetection={closestCenter} onDragStart={(event) => handleDragStart("colorPresets", event)} onDragOver={(event) => handleDragOver("colorPresets", event)} onDragEnd={(event) => void handleDragEnd("colorPresets", event)} onDragCancel={handleDragCancel}>
+                      <SortableContext items={orderedColorPresets.map((preset) => preset.id)} strategy={rectSortingStrategy}>
+                        <div className="adminUserGrid adminPresetGrid">
+                          {orderedColorPresets.map((preset) => (
+                            <SortableCard key={preset.id} id={preset.id} className="adminUserCard adminUserBrick adminPresetBrick">
+                              <PresetCardContent
+                                preset={preset}
+                                actions={
+                                  <>
+                                    <button type="button" onClick={() => void runAdminAction(() => setDefaultPreset(preset), "Preset ?? ????????? ????????")}>??????? default</button>
+                                    <button type="button" className="btn btnGhost" onClick={() => void runAdminAction(() => exportPreset(preset), "Preset ?????????????")}>???????</button>
+                                    <button type="button" className="btn btnGhost" onClick={() => void runAdminAction(() => deletePreset(preset.id), "Preset ??????")}>???????</button>
+                                  </>
+                                }
+                              />
+                            </SortableCard>
+                          ))}
+                          {!orderedColorPresets.length ? <div className="muted">???? ??? preset-?? ????? ????.</div> : null}
+                        </div>
+                      </SortableContext>
+                    </DndContext>
+                  </div>
 
-            <div className="card adminSectionCard">
-              <div className="pageHeader" style={{ marginBottom: 12 }}>
-                <h4 className="pageTitle" style={{ fontSize: 22 }}>Пресеты</h4>
-              </div>
-              <div className="adminPresetToolbar">
-                <button type="button" className="btn btnGhost" onClick={() => { setPendingImportKind("color"); importRef.current?.click(); }}>Импортировать color preset</button>
-                <button type="button" className="btn btnGhost" onClick={() => { setPendingImportKind("layout"); importRef.current?.click(); }}>Импортировать layout preset</button>
-              </div>
-              <div className="grid2 adminPresetSplit" style={{ alignItems: "start" }}>
-                <div className="card adminPresetColumn">
-                  <h4 className="pageTitle" style={{ fontSize: 20 }}>Цветовые пресеты</h4>
-                  <DndContext sensors={sensors} collisionDetection={closestCenter} onDragStart={(event) => handleDragStart("colorPresets", event)} onDragOver={(event) => handleDragOver("colorPresets", event)} onDragEnd={(event) => void handleDragEnd("colorPresets", event)} onDragCancel={handleDragCancel}>
-                    <SortableContext items={orderedColorPresets.map((preset) => preset.id)} strategy={rectSortingStrategy}>
-                      <div className="adminUserGrid adminPresetGrid">
-                        {orderedColorPresets.map((preset) => (
-                          <SortableCard key={preset.id} id={preset.id} className="adminUserCard adminUserBrick adminPresetBrick">
-                            <PresetCardContent
-                              preset={preset}
-                              actions={
-                                <>
-                                  <button type="button" onClick={() => void runAdminAction(() => setDefaultPreset(preset), "Preset по умолчанию обновлен")}>Сделать default</button>
-                                  <button type="button" className="btn btnGhost" onClick={() => void runAdminAction(() => exportPreset(preset), "Preset экспортирован")}>Экспорт</button>
-                                  <button type="button" className="btn btnGhost" onClick={() => void runAdminAction(() => deletePreset(preset.id), "Preset удален")}>Удалить</button>
-                                </>
-                              }
-                            />
-                          </SortableCard>
-                        ))}
-                        {!orderedColorPresets.length ? <div className="muted">Пока нет preset-ов этого типа.</div> : null}
-                      </div>
-                    </SortableContext>
-                  </DndContext>
+                  <div className="card adminPresetColumn">
+                    <h4 className="pageTitle" style={{ fontSize: 20 }}>UI / Layout ???????</h4>
+                    <DndContext sensors={sensors} collisionDetection={closestCenter} onDragStart={(event) => handleDragStart("layoutPresets", event)} onDragOver={(event) => handleDragOver("layoutPresets", event)} onDragEnd={(event) => void handleDragEnd("layoutPresets", event)} onDragCancel={handleDragCancel}>
+                      <SortableContext items={orderedLayoutPresets.map((preset) => preset.id)} strategy={rectSortingStrategy}>
+                        <div className="adminUserGrid adminPresetGrid">
+                          {orderedLayoutPresets.map((preset) => (
+                            <SortableCard key={preset.id} id={preset.id} className="adminUserCard adminUserBrick adminPresetBrick">
+                              <PresetCardContent
+                                preset={preset}
+                                actions={
+                                  <>
+                                    <button type="button" onClick={() => void runAdminAction(() => setDefaultPreset(preset), "Preset ?? ????????? ????????")}>??????? default</button>
+                                    <button type="button" className="btn btnGhost" onClick={() => void runAdminAction(() => exportPreset(preset), "Preset ?????????????")}>???????</button>
+                                    <button type="button" className="btn btnGhost" onClick={() => void runAdminAction(() => deletePreset(preset.id), "Preset ??????")}>???????</button>
+                                  </>
+                                }
+                              />
+                            </SortableCard>
+                          ))}
+                          {!orderedLayoutPresets.length ? <div className="muted">???? ??? preset-?? ????? ????.</div> : null}
+                        </div>
+                      </SortableContext>
+                    </DndContext>
+                  </div>
                 </div>
 
-                <div className="card adminPresetColumn">
-                  <h4 className="pageTitle" style={{ fontSize: 20 }}>UI / Layout пресеты</h4>
-                  <DndContext sensors={sensors} collisionDetection={closestCenter} onDragStart={(event) => handleDragStart("layoutPresets", event)} onDragOver={(event) => handleDragOver("layoutPresets", event)} onDragEnd={(event) => void handleDragEnd("layoutPresets", event)} onDragCancel={handleDragCancel}>
-                    <SortableContext items={orderedLayoutPresets.map((preset) => preset.id)} strategy={rectSortingStrategy}>
-                      <div className="adminUserGrid adminPresetGrid">
-                        {orderedLayoutPresets.map((preset) => (
-                          <SortableCard key={preset.id} id={preset.id} className="adminUserCard adminUserBrick adminPresetBrick">
-                            <PresetCardContent
-                              preset={preset}
-                              actions={
-                                <>
-                                  <button type="button" onClick={() => void runAdminAction(() => setDefaultPreset(preset), "Preset по умолчанию обновлен")}>Сделать default</button>
-                                  <button type="button" className="btn btnGhost" onClick={() => void runAdminAction(() => exportPreset(preset), "Preset экспортирован")}>Экспорт</button>
-                                  <button type="button" className="btn btnGhost" onClick={() => void runAdminAction(() => deletePreset(preset.id), "Preset удален")}>Удалить</button>
-                                </>
-                              }
-                            />
-                          </SortableCard>
-                        ))}
-                        {!orderedLayoutPresets.length ? <div className="muted">Пока нет preset-ов этого типа.</div> : null}
+                <input ref={importRef} type="file" accept=".json,application/json" style={{ display: "none" }} onChange={(event) => {
+                  const file = event.target.files?.[0];
+                  if (!file) return;
+                  void runAdminAction(() => importPreset(file, pendingImportKind), "Preset ????????????");
+                  event.target.value = "";
+                }} />
+              </div>
+            ) : (
+              <div className="card adminSectionCard">
+                <div className="adminSectionLead">
+                  <div className="muted">UI-?????? ????? ???????? ?? color/layout presets ? ????????? ????????????? ???????? ?????????? ??? code-owned inventory layer.</div>
+                </div>
+                <div className="adminUiToolbar">
+                  <div className="adminUiGroupTabs">
+                    {UI_GROUP_ORDER.map((group) => (
+                      <button key={group} type="button" className={`adminUiGroupTab ${uiGroup === group ? "isActive" : ""}`} onClick={() => setUiGroup(group)}>
+                        {UI_STYLE_GROUP_LABELS[group]}
+                      </button>
+                    ))}
+                  </div>
+                  <label className="adminUiSearch">
+                    <span className="muted">????? ?? id, title ? usage</span>
+                    <input className="input" value={uiSearch} onChange={(event) => setUiSearch(event.target.value)} placeholder="primary, drawer, admin" />
+                  </label>
+                </div>
+                <div className="adminUiSummaryRow">
+                  <div className="muted">? ?????? ????? ???????? ?????? read-only inventory. Runtime overrides, inheritance ? normalization workflow ???????? ????????? ??????.</div>
+                  <div className="adminLinksSummary">
+                    <span className="adminCountBadge">{filteredUiEntries.length}</span>
+                    <span className="muted">???????</span>
+                  </div>
+                </div>
+                <div className="adminUiSplit">
+                  <div className="adminUiRegistryPane">
+                    <div className="adminUiRegistryGrid">
+                      {filteredUiEntries.map((entry) => (
+                        <UIStyleCard key={entry.id} entry={entry} active={selectedUiEntry?.id === entry.id} onSelect={() => setSelectedUiId(entry.id)} />
+                      ))}
+                      {!filteredUiEntries.length ? (
+                        <div className="adminUiEmptyState">
+                          <div className="adminStubEmptyIcon" aria-hidden="true">?</div>
+                          <div>
+                            <div className="adminUserName">?????? ?? ???????</div>
+                            <div className="muted">???????? ?????? ?????? ??? ????????? ????????? UI-?????????.</div>
+                          </div>
+                        </div>
+                      ) : null}
+                    </div>
+                  </div>
+                  <div className="card adminUiInspector">
+                    {selectedUiEntry ? (
+                      <>
+                        <div className="adminUiInspectorHeader">
+                          <div>
+                            <div className="adminUiInspectorEyebrow">{UI_STYLE_GROUP_LABELS[selectedUiEntry.group]}</div>
+                            <h4 className="pageTitle" style={{ fontSize: 22 }}>{selectedUiEntry.title}</h4>
+                            <div className="muted adminUiInspectorId">{selectedUiEntry.id}</div>
+                          </div>
+                          <div className={`adminUiCardStatus is${(selectedUiEntry.status ?? "active")[0].toUpperCase()}${(selectedUiEntry.status ?? "active").slice(1)}`}>
+                            {selectedUiEntry.status === "candidate" ? "Candidate" : selectedUiEntry.status === "legacy" ? "Legacy" : "Active"}
+                          </div>
+                        </div>
+                        <div className="adminUiInspectorPreview">
+                          <UIStylePreview entry={selectedUiEntry} />
+                        </div>
+                        <div className="adminUiInspectorBlock">
+                          <div className="adminUiInspectorBlockTitle">??????????</div>
+                          <div className="muted">{selectedUiEntry.description}</div>
+                        </div>
+                        <div className="adminUiInspectorBlock">
+                          <div className="adminUiInspectorBlockTitle">??? ????????????</div>
+                          <div className="adminUiUsageList isDetailed">
+                            {selectedUiEntry.usedIn.map((usage) => (
+                              <span key={usage} className="adminUiUsagePill">{usage}</span>
+                            ))}
+                          </div>
+                        </div>
+                        <div className="adminUiInspectorBlock">
+                          <div className="adminUiInspectorBlockTitle">????????? props</div>
+                          <div className="adminUiPropsTable">
+                            {Object.entries(selectedUiEntry.props).map(([key, value]) => (
+                              <div key={key} className="adminUiPropRow">
+                                <span className="adminUiPropKey">{key}</span>
+                                <span className="adminUiPropValue">{String(value)}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                        <div className="adminUiInspectorBlock">
+                          <div className="adminUiInspectorBlockTitle">????????? ? ?????????? ? ????????????</div>
+                          <div className="muted">?????? ??? ??????? code-owned ?????? ??? parent/child ? runtime overrides. ????? ???? ?????????? ??? ?????????????? ? ??????? ??????????.</div>
+                        </div>
+                      </>
+                    ) : (
+                      <div className="adminUiEmptyState">
+                        <div className="adminStubEmptyIcon" aria-hidden="true">?</div>
+                        <div>
+                          <div className="adminUserName">?????? UI-???????</div>
+                          <div className="muted">Inspector ?????? ??????? preview, usage ? ????????? props ????????? ??????.</div>
+                        </div>
                       </div>
-                    </SortableContext>
-                  </DndContext>
+                    )}
+                  </div>
                 </div>
               </div>
-
-              <input ref={importRef} type="file" accept=".json,application/json" style={{ display: "none" }} onChange={(event) => {
-                const file = event.target.files?.[0];
-                if (!file) return;
-                void runAdminAction(() => importPreset(file, pendingImportKind), "Preset импортирован");
-                event.target.value = "";
-              }} />
-            </div>
+            )}
           </div>
         </div>
       )}
-
       {typeof document !== "undefined"
         ? createPortal(
             <DragOverlay>

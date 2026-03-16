@@ -138,6 +138,7 @@ Tooltip может быть шире карточки, чтобы milestone labe
   - `Ссылки`
 - `Стиль` пока содержит одну подвкладку:
   - `Пресеты`
+  - `UI`
 
 ### `Доступ -> Люди`
 
@@ -172,6 +173,16 @@ Runtime semantics:
 - layout presets;
 - import / export / delete / set default;
 - drag-order persistence.
+
+### `Стиль -> UI`
+
+Read-only inventory layer для унификации дизайн-системы:
+- code-owned registry, не связанный с preset catalog;
+- группы `Buttons`, `Bubbles`, `Labels`, `Panels`;
+- group filter и поиск по `id / title / usage`;
+- compact preview карточек;
+- inspector с usage и final props;
+- подготовка к следующим волнам runtime editing и normalization без включения этих механизмов в V1.
 
 ### Переходы
 
