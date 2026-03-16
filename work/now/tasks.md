@@ -7,7 +7,7 @@
 - [x] CAM-ADMIN-TABS-TEMP-ACCESS-LINKS-V1 - admin IA rewritten into `Доступ / Стиль`, `Люди / Ссылки / Пресеты` tabs; temp-link runtime shipped end-to-end with YDB storage, redemption, `/me` session metadata, admin CRUD/revoke/stats UI, and auth-panel countdown.
 - [x] CAM-ADMIN-STYLE-UI-INVENTORY-REAL-ELEMENTS-V2 - `Стиль -> UI` rebuilt from synthetic demo registry into a real project-wide UI inventory with fixed Cyrillic, surface-aware search/filter, similarity-ordered row cards, live previews, and canonical docs refresh.
 - [x] CAM-MOBILE-WEB-FROM-MINIAPP-V1 - mobile web route `/m` now reuses the Telegram Mini App shell with Yandex auth, no Telegram-only bootstrap requirement, shared task/profile/timeline UX, and gateway/docs updates.
-- [x] CAM-PROMO-LANDING-V1 - public `/promo` landing shipped with separate runtime content file, manual-play hero video, short/full marketing blocks, dedicated promo shell, and gateway/docs updates.
+- [x] CAM-PROMO-LANDING-V1 - public `/promo` landing shipped with separate runtime content file, manual-play hero video, short/full marketing blocks, dedicated promo shell, screenshot-led product scenes from viewer-safe captures, and docs updates.
 - [ ] CAM-API-V2-LOADING-SWR-CACHE - finalize manual evidence pack.
 - [x] CAM-SCHEMA-CONTRACT-GOVERNANCE - schema/types sync + validate:schema + guarantees.
 - [ ] CAM-DOCS-CANONICAL-REWRITE - rebuild root README and docs tree around current frontend state.

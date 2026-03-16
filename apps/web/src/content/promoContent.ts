@@ -5,11 +5,18 @@ export type PromoAction = {
   href: string;
 };
 
+export type PromoScreenshotRef = {
+  asset: string;
+  alt: string;
+  caption?: string;
+};
+
 export type PromoHero = {
   eyebrow: string;
   headline: string;
   subheadline: string;
   videoUrl: string;
+  screenshot: PromoScreenshotRef;
   primaryCta: PromoAction;
   secondaryCta?: PromoAction;
   stats: string[];
@@ -21,6 +28,9 @@ export type PromoSection = {
   title: string;
   short: string;
   full: string;
+  asset?: string;
+  alt?: string;
+  caption?: string;
 };
 
 export type PromoContent = {
