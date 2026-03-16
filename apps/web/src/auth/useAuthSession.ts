@@ -59,8 +59,9 @@ function buildAuthUrl(path: string): string {
 function consumeAccessLinkTokenFromUrl(): string | null {
   if (typeof window === "undefined") return null;
   const url = new URL(window.location.href);
-  const token = url.searchParams.get("access_link")?.trim() || null;
+  const token = url.searchParams.get("k")?.trim() || url.searchParams.get("access_link")?.trim() || null;
   if (!token) return null;
+  url.searchParams.delete("k");
   url.searchParams.delete("access_link");
   window.history.replaceState({}, "", `${url.pathname}${url.search}${url.hash}`);
   return token;

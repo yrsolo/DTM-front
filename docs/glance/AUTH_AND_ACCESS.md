@@ -200,6 +200,10 @@ Current admin IA:
 
 `Доступ -> Ссылки` is live runtime surface for temporary access links:
 - reusable viewer links are created under auth contour
+- browser URL is intentionally minimal:
+  - current copied format is ordinary SPA route (`/` or `/test/`) + query `?k=<12-char-code>`
+  - the recipient does not see verbose token naming in the URL
+- frontend still accepts legacy `access_link` query tokens for backward compatibility, but newly copied links use `k`
 - each link card shows:
   - label
   - status

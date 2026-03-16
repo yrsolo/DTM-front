@@ -67,6 +67,14 @@ function makeAccessLinkToken(linkId: string): string {
   return `${linkId}.${signLinkId(linkId)}`;
 }
 
+function makeShortAccessLinkCode(linkId: string): string {
+  const cfg = getAuthRuntimeConfig();
+  return createHmac("sha256", cfg.sessionSigningSecret)
+    .update(`access-link-short:${linkId}`)
+    .digest("base64url")
+    .slice(0, 12);
+}
+
 function readAccessLinkToken(token: string): { linkId: string; signature: string } | null {
   const [linkId, signature] = token.split(".");
   if (!linkId || !signature) return null;
@@ -82,7 +90,7 @@ function buildBrowserUrl(token: string): string {
   const cfg = getAuthRuntimeConfig();
   const base = cfg.baseUrl.replace(/\/+$/, "");
   const url = new URL(`${base}${getTimelinePath()}`);
-  url.searchParams.set("access_link", token);
+  url.searchParams.set("k", token);
   return url.toString();
 }
 
@@ -215,7 +223,7 @@ export async function createAccessLinkHandler(req: NormalizedRequest) {
   }
 
   const linkId = randomUUID();
-  const rawToken = makeAccessLinkToken(linkId);
+  const rawToken = makeShortAccessLinkCode(linkId);
   const created = await createAccessLink({
     id: linkId,
     label,
@@ -365,15 +373,29 @@ export async function redeemAccessLinkHandler(req: NormalizedRequest) {
   if (!rawToken) {
     return badRequest("token is required");
   }
+  let existing = null as AccessLinkRecord | null;
   const parsed = readAccessLinkToken(rawToken);
-  if (!parsed || parsed.signature !== signLinkId(parsed.linkId)) {
-    return notFound("Access link not found");
+  if (parsed && parsed.signature === signLinkId(parsed.linkId)) {
+    existing = await getAccessLinkById(parsed.linkId);
+    if (!existing || existing.tokenHash !== hashToken(rawToken)) {
+      existing = null;
+    }
   }
-  const existing = await getAccessLinkById(parsed.linkId);
+  if (!existing && rawToken.length === 12) {
+    const candidates = await listAccessLinks();
+    existing =
+      candidates.find((link) => makeShortAccessLinkCode(link.id) === rawToken) ??
+      null;
+    if (existing) {
+      const legacyToken = makeAccessLinkToken(existing.id);
+      const matchesShort = existing.tokenHash === hashToken(rawToken);
+      const matchesLegacy = existing.tokenHash === hashToken(legacyToken);
+      if (!matchesShort && !matchesLegacy) {
+        existing = null;
+      }
+    }
+  }
   if (!existing) {
-    return notFound("Access link not found");
-  }
-  if (existing.tokenHash !== hashToken(rawToken)) {
     return notFound("Access link not found");
   }
   const link = await ensureStoredStatus(existing);
@@ -415,6 +437,6 @@ export async function buildAccessLinkCards(): Promise<AccessLinkCardPayload[]> {
   const cards = await Promise.all(links.map(toAccessLinkCard));
   return cards.map((card) => ({
     ...card,
-    browserUrl: buildBrowserUrl(makeAccessLinkToken(card.id)),
+    browserUrl: buildBrowserUrl(makeShortAccessLinkCode(card.id)),
   }));
 }
