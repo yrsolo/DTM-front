@@ -2479,101 +2479,79 @@ button:hover {
   margin: 0 auto;
   display: flex;
   flex-direction: column;
-  gap: 28px;
-  padding-bottom: 32px;
+  gap: 72px;
+  padding-bottom: 72px;
 }
 
 .promoHero {
-  position: relative;
   display: grid;
-  grid-template-columns: minmax(0, 0.95fr) minmax(420px, 1.05fr);
-  gap: 32px;
-  padding: 36px;
-  overflow: hidden;
-}
-
-.promoHero::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background:
-    radial-gradient(circle at 22% 18%, rgba(255, 133, 193, 0.2), transparent 34%),
-    radial-gradient(circle at 78% 12%, rgba(108, 147, 255, 0.22), transparent 36%),
-    radial-gradient(circle at 50% 100%, rgba(102, 240, 214, 0.12), transparent 42%);
-  pointer-events: none;
-}
-
-.promoHeroCopy,
-.promoHeroVisual,
-.promoVideoCard,
-.promoStorySection,
-.promoFinalCta {
-  position: relative;
-  z-index: 1;
+  grid-template-columns: minmax(0, 0.8fr) minmax(520px, 1.2fr);
+  gap: 42px;
+  padding: 24px 0 0;
 }
 
 .promoHeroCopy {
   display: flex;
   flex-direction: column;
-  gap: 18px;
-  padding-right: 0;
+  gap: 20px;
+  padding-top: 24px;
 }
 
-.promoEyebrow {
+.promoSectionKicker {
   display: inline-flex;
   align-items: center;
   width: fit-content;
-  padding: 7px 12px;
-  border-radius: 999px;
-  border: 1px solid rgba(173, 191, 255, 0.16);
-  background: linear-gradient(135deg, rgba(255, 143, 201, 0.14), rgba(123, 153, 255, 0.16));
-  color: #d9e4ff;
+  padding: 0;
+  color: #95a9de;
   font-size: 12px;
   font-weight: 700;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
 }
 
 .promoHero h1,
-.promoSectionHeading h2,
 .promoFinalCopy h2 {
   margin: 0;
-  color: #f5f7ff;
-  line-height: 1.02;
+  color: #f7f8fe;
+  line-height: 0.98;
 }
 
 .promoHero h1 {
-  font-size: clamp(40px, 6vw, 76px);
-  max-width: 8.8ch;
+  font-size: clamp(54px, 7.2vw, 104px);
+  max-width: 7.2ch;
+  letter-spacing: -0.05em;
 }
 
 .promoLead,
-.promoSectionHeading p,
 .promoFinalCopy p,
-.promoStoryCopy p {
+.promoEditorialBody p,
+.promoShowcaseCopy p,
+.promoSummaryLead p,
+.promoVideoCopy p {
   margin: 0;
-  color: #b6c2df;
-  line-height: 1.72;
-  font-size: 16px;
+  color: #b6c1dd;
+  line-height: 1.8;
+  font-size: 17px;
+  max-width: 34rem;
 }
 
 .promoCtaRow {
   display: flex;
   flex-wrap: wrap;
-  gap: 12px;
+  gap: 14px;
   align-items: center;
 }
 
 .promoPrimaryCta,
 .promoSecondaryCta,
-.promoToggleButton {
+.promoTextToggle {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  min-height: 46px;
-  padding: 0 18px;
-  border-radius: 14px;
+  min-height: 48px;
+  padding: 0 20px;
+  border-radius: 999px;
   border: 1px solid rgba(175, 191, 255, 0.16);
   text-decoration: none;
   cursor: pointer;
@@ -2589,35 +2567,48 @@ button:hover {
   background: linear-gradient(140deg, rgba(255, 142, 201, 0.9), rgba(122, 147, 255, 0.92));
   color: #09111f;
   font-weight: 800;
-  box-shadow: 0 18px 32px rgba(60, 32, 80, 0.28);
+  box-shadow: 0 18px 32px rgba(60, 32, 80, 0.24);
 }
 
-.promoSecondaryCta,
-.promoToggleButton {
-  background: rgba(11, 18, 32, 0.62);
-  color: #e4ecff;
+.promoSecondaryCta {
+  background: transparent;
+  color: #dfe8ff;
   font-weight: 700;
 }
 
 .promoPrimaryCta:hover,
 .promoSecondaryCta:hover,
-.promoToggleButton:hover {
+.promoTextToggle:hover {
   transform: translateY(-1px);
   filter: brightness(1.05);
 }
 
+.promoTextToggle {
+  min-height: auto;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: #f08dca;
+  font-weight: 700;
+  justify-content: flex-start;
+}
+
+.promoTextToggleLight {
+  color: rgba(255, 255, 255, 0.84);
+}
+
 .promoStatList {
-  margin: 8px 0 0;
+  margin: 10px 0 0;
   padding: 0;
   list-style: none;
   display: grid;
-  gap: 10px;
+  gap: 12px;
 }
 
 .promoStatList li {
   display: flex;
   align-items: flex-start;
-  gap: 10px;
+  gap: 12px;
   color: #d7dff3;
   line-height: 1.55;
 }
@@ -2633,74 +2624,71 @@ button:hover {
   box-shadow: 0 0 18px rgba(255, 147, 207, 0.45);
 }
 
-.promoVideoCard {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  padding: 20px;
-  border-radius: 22px;
-  border: 1px solid rgba(168, 188, 255, 0.14);
-  background:
-    radial-gradient(circle at 90% 0%, rgba(99, 141, 255, 0.16), transparent 34%),
-    linear-gradient(165deg, rgba(13, 19, 36, 0.84), rgba(9, 14, 26, 0.88));
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.08),
-    0 18px 32px rgba(0, 0, 0, 0.2);
-  backdrop-filter: blur(18px);
-}
-
 .promoHeroVisual {
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
-}
-
-.promoHeroShot {
   margin: 0;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 14px;
 }
 
-.promoHeroShot img {
+.promoHeroVisual img {
   width: 100%;
   display: block;
   border-radius: 28px;
-  border: 1px solid rgba(176, 192, 255, 0.18);
+  border: 1px solid rgba(176, 192, 255, 0.1);
   box-shadow:
-    0 30px 60px rgba(0, 0, 0, 0.28),
+    0 34px 66px rgba(0, 0, 0, 0.32),
     inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
 
-.promoHeroShot figcaption,
+.promoHeroVisual figcaption,
 .promoSectionCaption {
-  color: #96a8d0;
+  color: #889cc9;
   font-size: 13px;
   line-height: 1.55;
 }
 
-.promoVideoHeader {
-  display: flex;
-  justify-content: space-between;
-  gap: 16px;
+.promoVideoStrip {
+  display: grid;
+  grid-template-columns: minmax(0, 0.75fr) minmax(360px, 0.95fr);
+  gap: 34px;
   align-items: center;
-  flex-wrap: wrap;
+  padding: 8px 0 0;
 }
 
-.promoVideoMeta {
-  color: #a8b7d9;
-  font-size: 14px;
+.promoVideoCopy {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.promoVideoCopy h2,
+.promoEditorialBody h2,
+.promoShowcaseCopy h2,
+.promoSummaryLead h2 {
+  margin: 0;
+  color: #f4f7ff;
+  font-size: clamp(34px, 4.3vw, 56px);
+  line-height: 1.05;
+  letter-spacing: -0.04em;
+}
+
+.promoVideoCard {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
 .promoVideoFrame {
   position: relative;
   overflow: hidden;
-  border-radius: 22px;
-  border: 1px solid rgba(174, 191, 255, 0.16);
+  border-radius: 24px;
+  border: 1px solid rgba(174, 191, 255, 0.14);
   background:
-    radial-gradient(circle at 50% 15%, rgba(255, 145, 202, 0.16), transparent 36%),
-    linear-gradient(180deg, rgba(13, 18, 35, 0.96), rgba(8, 12, 22, 0.98));
+    radial-gradient(circle at 50% 15%, rgba(255, 145, 202, 0.1), transparent 36%),
+    linear-gradient(180deg, rgba(13, 18, 35, 0.92), rgba(8, 12, 22, 0.94));
   aspect-ratio: 16 / 9;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.22);
 }
 
 .promoVideo {
@@ -2730,8 +2718,8 @@ button:hover {
 }
 
 .promoVideoPlay {
-  width: 74px;
-  height: 74px;
+  width: 78px;
+  height: 78px;
   border-radius: 999px;
   display: grid;
   place-items: center;
@@ -2748,48 +2736,24 @@ button:hover {
 .promoStorySection {
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  gap: 76px;
 }
 
-.promoStoryGrid {
+.promoEditorialSection {
   display: flex;
   flex-direction: column;
   gap: 18px;
 }
 
-.promoStoryCard {
-  display: flex;
-  align-items: center;
-  gap: 18px;
-  padding: 22px 24px;
-  border-radius: 26px;
-  border: 1px solid rgba(169, 186, 255, 0.12);
-  background: linear-gradient(160deg, rgba(11, 17, 31, 0.74), rgba(7, 13, 24, 0.8));
-  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.16);
-  backdrop-filter: blur(14px);
-}
-
-.promoStoryCopy {
+.promoEditorialBody {
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  flex: 1 1 auto;
+  gap: 18px;
+  max-width: 760px;
 }
 
-.promoStoryCopy h2 {
-  margin: 0;
-  color: #eef3ff;
-  font-size: clamp(24px, 3vw, 32px);
-  line-height: 1.08;
-}
-
-.promoToggleButton {
-  flex: 0 0 auto;
-  min-width: 132px;
-}
-
-.promoSectionActions {
+.promoInlineActions {
   display: flex;
   align-items: center;
   gap: 14px;
@@ -2797,97 +2761,148 @@ button:hover {
   margin-top: 4px;
 }
 
-.promoShowcaseCard {
+.promoShowcaseScene {
   display: grid;
-  grid-template-columns: minmax(0, 0.8fr) minmax(320px, 0.95fr);
-  gap: 28px;
+  grid-template-columns: minmax(0, 0.78fr) minmax(380px, 1fr);
+  gap: 42px;
   align-items: center;
-  padding: 28px;
-  border-radius: 30px;
-  border: 1px solid rgba(169, 186, 255, 0.14);
-  background:
-    radial-gradient(circle at 0% 20%, rgba(255, 147, 207, 0.08), transparent 32%),
-    radial-gradient(circle at 100% 0%, rgba(107, 146, 255, 0.12), transparent 36%),
-    linear-gradient(165deg, rgba(13, 19, 35, 0.88), rgba(8, 13, 25, 0.94));
-  box-shadow: 0 24px 44px rgba(0, 0, 0, 0.22);
+}
+
+.promoShowcaseScene.isReversed {
+  grid-template-columns: minmax(380px, 1fr) minmax(0, 0.78fr);
+}
+
+.promoShowcaseScene.isReversed .promoShowcaseCopy {
+  order: 2;
+}
+
+.promoShowcaseScene.isReversed .promoShowcaseVisual {
+  order: 1;
 }
 
 .promoShowcaseCopy {
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 18px;
 }
 
-.promoShowcaseCopy h2 {
-  margin: 0;
-  color: #f2f6ff;
-  font-size: clamp(30px, 3.8vw, 44px);
-  line-height: 1.04;
-}
-
-.promoShowcaseFigure {
+.promoShowcaseVisual {
   margin: 0;
   display: flex;
   flex-direction: column;
   gap: 12px;
 }
 
-.promoShowcaseFigure img {
+.promoShowcaseVisual img {
   width: 100%;
   display: block;
-  border-radius: 24px;
-  border: 1px solid rgba(178, 192, 255, 0.16);
+  border-radius: 26px;
+  border: 1px solid rgba(178, 192, 255, 0.1);
   box-shadow:
-    0 24px 50px rgba(0, 0, 0, 0.28),
+    0 28px 58px rgba(0, 0, 0, 0.28),
     inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 
-.promoShowcaseFigure.isMobile {
-  max-width: 380px;
-  justify-self: end;
+.promoShowcaseVisual.isMobile {
+  max-width: 360px;
+  justify-self: center;
+}
+
+.promoSummaryBand {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 26px 0 0;
+  border-top: 1px solid rgba(110, 127, 175, 0.18);
+}
+
+.promoSummaryBody {
+  display: flex;
+  gap: 32px;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.promoSummaryLead {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  max-width: 880px;
 }
 
 .promoFinalCta {
+  position: relative;
+  overflow: hidden;
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  flex-direction: column;
   gap: 24px;
-  padding: 26px 28px;
+  padding: 42px 40px;
+  border-radius: 28px;
+  background: linear-gradient(135deg, rgba(255, 141, 201, 0.92), rgba(124, 143, 255, 0.92));
+  box-shadow: 0 28px 56px rgba(35, 20, 60, 0.24);
 }
 
 .promoFinalCopy {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  max-width: 720px;
+  gap: 14px;
+  max-width: 780px;
 }
 
-.promoSilhouette {
+.promoFinalCopy .promoSectionKicker,
+.promoFinalCopy h2,
+.promoFinalCopy p {
+  color: #091120;
+}
+
+.promoFinalGlow {
   position: absolute;
-  top: 28px;
-  bottom: 28px;
-  width: 164px;
+  inset: auto -80px -160px auto;
+  width: 360px;
+  height: 360px;
   border-radius: 999px;
-  opacity: 0.55;
-  filter: blur(1px);
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.18), transparent 64%);
   pointer-events: none;
 }
 
-.promoSilhouetteLeft {
-  left: -56px;
-  background:
-    radial-gradient(circle at 65% 22%, rgba(255, 171, 216, 0.38), transparent 28%),
-    linear-gradient(180deg, rgba(255, 160, 216, 0.14), rgba(64, 31, 88, 0.02));
-  box-shadow: inset 0 0 0 1px rgba(255, 208, 235, 0.08);
+.promoFooter {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 24px;
+  padding: 12px 0 0;
+  border-top: 1px solid rgba(107, 122, 166, 0.16);
 }
 
-.promoSilhouetteRight {
-  right: -56px;
-  background:
-    radial-gradient(circle at 35% 28%, rgba(150, 193, 255, 0.38), transparent 28%),
-    linear-gradient(180deg, rgba(136, 177, 255, 0.14), rgba(28, 39, 96, 0.02));
-  box-shadow: inset 0 0 0 1px rgba(213, 230, 255, 0.08);
+.promoFooterBrand {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  color: #93a4cd;
+  font-size: 14px;
+}
+
+.promoFooterBrand strong {
+  color: #eef4ff;
+  font-size: 18px;
+  letter-spacing: 0.04em;
+}
+
+.promoFooterLinks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px;
+}
+
+.promoFooterLinks a {
+  color: #b7c6e7;
+  text-decoration: none;
+  font-size: 14px;
+}
+
+.promoSilhouette {
+  display: none;
 }
 
 @media (max-width: 1100px) {
@@ -2895,19 +2910,18 @@ button:hover {
     grid-template-columns: 1fr;
   }
 
-  .promoShowcaseCard {
+  .promoVideoStrip,
+  .promoShowcaseScene,
+  .promoShowcaseScene.isReversed {
     grid-template-columns: 1fr;
   }
 
-  .promoShowcaseFigure.isMobile {
-    justify-self: start;
+  .promoShowcaseScene.isReversed .promoShowcaseCopy,
+  .promoShowcaseScene.isReversed .promoShowcaseVisual {
+    order: initial;
   }
 
   .promoHero h1 {
-    max-width: none;
-  }
-
-  .promoSectionHeading h2 {
     max-width: none;
   }
 }
@@ -2917,30 +2931,47 @@ button:hover {
     padding: 18px 14px 40px;
   }
 
-  .promoHero,
-  .promoFinalCta {
-    padding: 22px;
+  .promoPage {
+    gap: 56px;
+    padding-bottom: 56px;
   }
 
-  .promoStoryCard,
-  .promoShowcaseCard,
-  .promoFinalCta {
-    flex-direction: column;
-    align-items: stretch;
+  .promoHero {
+    gap: 28px;
+    padding-top: 8px;
   }
 
-  .promoShowcaseCard {
+  .promoVideoStrip,
+  .promoSummaryBody {
     display: flex;
+    flex-direction: column;
   }
 
-  .promoToggleButton,
   .promoPrimaryCta,
   .promoSecondaryCta {
     width: 100%;
   }
 
-  .promoSilhouette {
-    display: none;
+  .promoHero h1 {
+    font-size: clamp(42px, 16vw, 72px);
+  }
+
+  .promoShowcaseVisual.isMobile {
+    max-width: 100%;
+  }
+
+  .promoFinalCta {
+    padding: 32px 24px;
+  }
+
+  .promoFooter {
+    flex-direction: column;
+  }
+
+  .promoTextToggle,
+  .promoTextToggleLight {
+    width: 100%;
+    justify-content: flex-start;
   }
 }
 

@@ -24,11 +24,13 @@ export type PromoHero = {
 
 export type PromoSection = {
   id: string;
+  type: "editorial" | "showcase" | "summary" | "cta";
   eyebrow: string;
   title: string;
   short: string;
   full: string;
   asset?: string;
+  align?: "left" | "right";
   alt?: string;
   caption?: string;
 };
