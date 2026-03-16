@@ -166,8 +166,10 @@ export function Layout(props: { children: React.ReactNode }) {
     displayLimit: runtimeDefaults.displayLimit,
     loadLimit: runtimeDefaults.loadLimit,
   }));
-  const snapshotState = useSnapshot(runtimeDefaults);
   const authSession = useAuthSession();
+  const snapshotState = useSnapshot(runtimeDefaults, {
+    enabled: !authSession.blockInitialDataLoad,
+  });
   const [design, setDesign] = React.useState<DesignControls>(() => readStoredLayoutDraft());
   const [keyColors, setKeyColors] = React.useState<KeyColors>(() => readStoredColorDraft());
   const [workbenchPanelEnabled, setWorkbenchPanelEnabled] = React.useState(false);

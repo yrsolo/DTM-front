@@ -141,6 +141,7 @@ Browser data request behavior:
 - temp-link session behaves like approved viewer:
   - full access
   - no admin rights
+  - first-entry bootstrap redeems the link before the initial snapshot fetch, so the user does not see a temporary masked payload flash
 - если approved/admin вручную включает маскирование в UI, frontend отправляет browser API requests без auth cookie
 - auth proxy на основе cookie сам выставляет upstream headers:
   - `x-dtm-access-mode`

@@ -37,6 +37,7 @@ export type AuthSessionState = {
   temporaryAccessLabel: string | null;
   telegramBootstrap: TelegramBootstrapState;
   telegramBootstrapReason: TelegramBootstrapReason | null;
+  pendingAccessLinkBootstrap: boolean;
 };
 
 const DEFAULT_STATE: AuthSessionState = {
@@ -50,17 +51,23 @@ const DEFAULT_STATE: AuthSessionState = {
   temporaryAccessLabel: null,
   telegramBootstrap: "idle",
   telegramBootstrapReason: null,
+  pendingAccessLinkBootstrap: false,
 };
 
 function buildAuthUrl(path: string): string {
   return `${getAuthRequestBase()}${path}`;
 }
 
-function consumeAccessLinkTokenFromUrl(): string | null {
+function readAccessLinkTokenFromUrl(): string | null {
   if (typeof window === "undefined") return null;
   const url = new URL(window.location.href);
-  const token = url.searchParams.get("k")?.trim() || url.searchParams.get("access_link")?.trim() || null;
+  return url.searchParams.get("k")?.trim() || url.searchParams.get("access_link")?.trim() || null;
+}
+
+function consumeAccessLinkTokenFromUrl(): string | null {
+  const token = readAccessLinkTokenFromUrl();
   if (!token) return null;
+  const url = new URL(window.location.href);
   url.searchParams.delete("k");
   url.searchParams.delete("access_link");
   window.history.replaceState({}, "", `${url.pathname}${url.search}${url.hash}`);
@@ -68,8 +75,9 @@ function consumeAccessLinkTokenFromUrl(): string | null {
 }
 
 export function useAuthSession() {
+  const hasAccessLinkBootstrap = Boolean(readAccessLinkTokenFromUrl());
   const [state, setState] = React.useState<AuthSessionState>(() =>
-    ({ ...DEFAULT_STATE, loading: true, available: true })
+    ({ ...DEFAULT_STATE, loading: true, available: true, pendingAccessLinkBootstrap: hasAccessLinkBootstrap })
   );
   const redeemedRef = React.useRef(false);
 
@@ -89,11 +97,12 @@ export function useAuthSession() {
           user: null,
           available: true,
           sessionKind: null,
-          expiresAt: null,
-          temporaryAccessLabel: null,
-          telegramBootstrap: "idle",
-          telegramBootstrapReason: null,
-        };
+        expiresAt: null,
+        temporaryAccessLabel: null,
+        telegramBootstrap: "idle",
+        telegramBootstrapReason: null,
+        pendingAccessLinkBootstrap: false,
+      };
         setState((prev) => ({
           ...prev,
           ...nextState,
@@ -116,6 +125,7 @@ export function useAuthSession() {
         temporaryAccessLabel: typeof payload?.temporaryAccessLabel === "string" ? payload.temporaryAccessLabel : null,
         telegramBootstrap: payload?.authenticated ? "linked" : "idle",
         telegramBootstrapReason: null,
+        pendingAccessLinkBootstrap: false,
       };
       setState((prev) => ({
         ...prev,
@@ -123,7 +133,7 @@ export function useAuthSession() {
       }));
       return nextState;
     } catch {
-      setState((prev) => ({ ...prev, ...DEFAULT_STATE }));
+      setState((prev) => ({ ...prev, ...DEFAULT_STATE, pendingAccessLinkBootstrap: false }));
       return DEFAULT_STATE;
     }
   }, []);
@@ -290,6 +300,7 @@ export function useAuthSession() {
 
   return {
     state,
+    blockInitialDataLoad: state.pendingAccessLinkBootstrap,
     reload,
     loginHref,
     startLogin,

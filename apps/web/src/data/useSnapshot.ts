@@ -89,16 +89,22 @@ function readStatusFilterOverride(): ApiStatusFilter {
   return defaultStatusFilter();
 }
 
-export function useSnapshot(initialRuntimeDefaults?: Partial<RuntimeDefaults>) {
+export function useSnapshot(
+  initialRuntimeDefaults?: Partial<RuntimeDefaults>,
+  options?: {
+    enabled?: boolean;
+  }
+) {
   const runtimeDefaultsRef = React.useRef<RuntimeDefaults>(
     normalizeRuntimeDefaults(initialRuntimeDefaults ?? DEFAULT_RUNTIME_DEFAULTS)
   );
   const runtimeDefaults = runtimeDefaultsRef.current;
-  const initialSnapshot = memorySnapshot;
-  const initialMeta = memoryMeta;
+  const enabled = options?.enabled ?? true;
+  const initialSnapshot = enabled ? memorySnapshot : null;
+  const initialMeta = enabled ? memoryMeta : null;
 
   const [snapshot, setSnapshot] = React.useState<SnapshotV1 | null>(initialSnapshot);
-  const [status, setStatus] = React.useState<SnapshotStatus>(initialSnapshot ? "ready" : "cold_loading");
+  const [status, setStatus] = React.useState<SnapshotStatus>(enabled && initialSnapshot ? "ready" : "cold_loading");
   const [lastUpdatedAt, setLastUpdatedAt] = React.useState<string | null>(
     initialMeta?.savedAt ?? initialSnapshot?.meta.generatedAt ?? null
   );
@@ -341,6 +347,13 @@ export function useSnapshot(initialRuntimeDefaults?: Partial<RuntimeDefaults>) {
   }, [demoMode, loadDemo, setDemoMode]);
 
   React.useEffect(() => {
+    if (!enabled) {
+      setSnapshot(null);
+      setStatus("cold_loading");
+      setLastError(null);
+      return;
+    }
+
     let active = true;
 
     void (async () => {
@@ -402,7 +415,7 @@ export function useSnapshot(initialRuntimeDefaults?: Partial<RuntimeDefaults>) {
     return () => {
       active = false;
     };
-  }, []);
+  }, [enabled]);
 
   React.useEffect(() => {
     if (demoMode || refreshIntervalMs <= 0) return;
