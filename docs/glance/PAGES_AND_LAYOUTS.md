@@ -119,6 +119,8 @@ Tooltip может быть шире карточки, чтобы milestone labe
 - внутри раскрытой панели attachments показываются как compact file-icons;
 - desktop использует hover-tooltip для имени и даты загрузки attachment, Mini App — tap-friendly selection surface;
 - имя файла в раскрытой панели кликабельно и открывает preview; compact action buttons используют иконки, а preview modal сохраняет full-text buttons;
+- повторный клик по уже выбранной file-icon тоже открывает preview;
+- встроенный preview внутри сайта сейчас покрывает `docx`, изображения и `pdf`; legacy `doc` открывается через embedded frame без ухода пользователя со страницы;
 - upload control виден только admin и использует существующий backend upload contour без изменения snapshot contract;
 - при upload frontend нормализует MIME по расширению файла, если браузер или webview не прислал надёжный `File.type`; это покрывает `doc`, `docx`, `pdf` и текущие image-форматы;
 - desktop drawer принимает drag-and-drop upload по всей поверхности карточки задачи: при перетаскивании подсвечивается весь drawer, а drop в любое место карточки загружает файл в текущую задачу.

@@ -21,6 +21,8 @@ import {
   inferUploadMimeType,
   isDocxAttachment,
   isImageAttachment,
+  isLegacyWordAttachment,
+  isPdfAttachment,
 } from "../../utils/attachments";
 import { LayoutContext } from "../Layout";
 import { Tooltip, TooltipState } from "../Tooltip";
@@ -250,6 +252,38 @@ export function TaskAttachmentsSection(props: {
       return;
     }
 
+    if (isPdfAttachment(attachment)) {
+      setPreviewState({
+        open: true,
+        title: attachment.name,
+        subtitle,
+        mode: "pdf",
+        src: browserViewUrl,
+        closeLabel: ui.drawer.close,
+        downloadLabel: ui.drawer.attachmentsDownload,
+        unavailableLabel: ui.drawer.attachmentsUnavailable,
+        downloadUrl: browserDownloadUrl,
+        onClose: () => setPreviewState({ open: false }),
+      });
+      return;
+    }
+
+    if (isLegacyWordAttachment(attachment)) {
+      setPreviewState({
+        open: true,
+        title: attachment.name,
+        subtitle,
+        mode: "frame",
+        src: browserViewUrl,
+        closeLabel: ui.drawer.close,
+        downloadLabel: ui.drawer.attachmentsDownload,
+        unavailableLabel: ui.drawer.attachmentsUnavailable,
+        downloadUrl: browserDownloadUrl,
+        onClose: () => setPreviewState({ open: false }),
+      });
+      return;
+    }
+
     if (!openInNewWindow(browserViewUrl)) {
       setActionError(ui.drawer.attachmentsActionFailed);
     }
@@ -399,7 +433,13 @@ export function TaskAttachmentsSection(props: {
                         key={attachment.id}
                         type="button"
                         className={`attachmentIconTile ${attachmentToneClass(attachment)} ${selectedAttachment?.id === attachment.id ? "isActive" : ""}`}
-                        onClick={() => setSelectedId(attachment.id)}
+                        onClick={() => {
+                          if (selectedAttachment?.id === attachment.id) {
+                            void handlePreview(attachment);
+                            return;
+                          }
+                          setSelectedId(attachment.id);
+                        }}
                         onDoubleClick={() => {
                           void handlePreview(attachment);
                         }}

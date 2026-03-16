@@ -7,7 +7,7 @@ export type AttachmentPreviewState =
       open: true;
       title: string;
       subtitle?: string | null;
-      mode: "loading" | "error" | "docx" | "image";
+      mode: "loading" | "error" | "docx" | "image" | "pdf" | "frame";
       error?: string | null;
       html?: string;
       src?: string;
@@ -246,6 +246,20 @@ export function AttachmentPreviewModal(props: { state: AttachmentPreviewState })
                 dangerouslySetInnerHTML={{ __html: props.state.html }}
               />
             </div>
+          ) : null}
+          {props.state.mode === "pdf" && props.state.src ? (
+            <iframe
+              className="attachmentPreviewFrame attachmentPreviewPdfFrame"
+              src={props.state.src}
+              title={props.state.title}
+            />
+          ) : null}
+          {props.state.mode === "frame" && props.state.src ? (
+            <iframe
+              className="attachmentPreviewFrame"
+              src={props.state.src}
+              title={props.state.title}
+            />
           ) : null}
         </div>
       </div>

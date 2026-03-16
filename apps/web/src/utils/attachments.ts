@@ -26,6 +26,18 @@ export function isDocxAttachment(attachment: TaskAttachmentV1): boolean {
   );
 }
 
+export function isLegacyWordAttachment(attachment: TaskAttachmentV1): boolean {
+  const mime = attachment.mime.toLowerCase();
+  const ext = fileExtension(attachment.name);
+  return mime === "application/msword" || ext === "doc";
+}
+
+export function isPdfAttachment(attachment: TaskAttachmentV1): boolean {
+  const mime = attachment.mime.toLowerCase();
+  const ext = fileExtension(attachment.name);
+  return mime === "application/pdf" || ext === "pdf";
+}
+
 export function isImageAttachment(attachment: TaskAttachmentV1): boolean {
   return attachment.mime.toLowerCase().startsWith("image/");
 }
@@ -47,8 +59,8 @@ export function attachmentIconLabel(attachment: TaskAttachmentV1): string {
 export function attachmentToneClass(attachment: TaskAttachmentV1): string {
   if (isDocxAttachment(attachment)) return "isDocx";
   if (isImageAttachment(attachment)) return "isImage";
+  if (isPdfAttachment(attachment)) return "isPdf";
   const ext = fileExtension(attachment.name);
-  if (ext === "pdf") return "isPdf";
   if (ext === "xls" || ext === "xlsx") return "isSheet";
   if (ext === "ppt" || ext === "pptx") return "isDeck";
   return "isGeneric";
@@ -67,7 +79,7 @@ export function formatAttachmentUploadedAt(value: string | null | undefined, loc
 }
 
 export function supportsInlinePreview(attachment: TaskAttachmentV1): boolean {
-  return isDocxAttachment(attachment) || isImageAttachment(attachment);
+  return isDocxAttachment(attachment) || isImageAttachment(attachment) || isPdfAttachment(attachment);
 }
 
 export function inferUploadMimeType(file: Pick<File, "name" | "type">): string {

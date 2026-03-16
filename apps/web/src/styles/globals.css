@@ -2529,6 +2529,18 @@ button:hover {
   margin-top: 0;
 }
 
+.attachmentPreviewFrame {
+  width: 100%;
+  min-height: min(72vh, 820px);
+  border: 0;
+  border-radius: 14px;
+  background: #ffffff;
+}
+
+.attachmentPreviewPdfFrame {
+  background: #121826;
+}
+
 .drawerMilestoneList {
   margin-top: 10px;
   display: grid;
