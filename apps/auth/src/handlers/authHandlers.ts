@@ -12,6 +12,7 @@ import {
   getUserByTelegramId,
   getUserByYandexUid,
   linkUserToPerson,
+  setUserAvatarUrl,
   setUserStatus,
   syncUserProfile,
   upsertRole,
@@ -273,6 +274,11 @@ export async function telegramSession(req: NormalizedRequest) {
 
   if (!user) {
     return telegramSessionError(404, "telegram_user_not_linked", telegramUser.id);
+  }
+
+  if (!user.avatarUrl && telegramUser.photoUrl) {
+    await setUserAvatarUrl(user.id, telegramUser.photoUrl);
+    user = await getUserById(user.id);
   }
 
   if (user.status !== "approved") {

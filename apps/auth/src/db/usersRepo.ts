@@ -197,7 +197,7 @@ export async function createUserFromTelegram(
       $yandex_uid: utf8(`tg:${telegramUser.id}`),
       $email: optionalUtf8(email),
       $display_name: optionalUtf8(displayName),
-      $avatar_url: optionalUtf8(null),
+      $avatar_url: optionalUtf8(telegramUser.photoUrl ?? null),
       $person_id: optionalUtf8(linkedPerson?.personId ?? null),
       $person_name: optionalUtf8(linkedPerson?.personName ?? null),
       $telegram_id: optionalUtf8(telegramUser.id),
@@ -212,6 +212,38 @@ export async function createUserFromTelegram(
   const created = await getUserById(id);
   if (!created) throw new Error("Telegram user create verification failed");
   return created;
+}
+
+export async function setUserAvatarUrl(userId: string, avatarUrl: string | null): Promise<void> {
+  await executeVoid(
+    `
+      DECLARE $id AS Utf8;
+      DECLARE $avatar_url AS Optional<Utf8>;
+
+      UPSERT INTO ${AUTH_TABLES.users}
+      SELECT
+        id,
+        yandex_uid,
+        email,
+        display_name,
+        $avatar_url AS avatar_url,
+        person_id,
+        person_name,
+        telegram_id,
+        telegram_username,
+        status,
+        role,
+        session_version,
+        created_at,
+        last_login_at
+      FROM ${AUTH_TABLES.users}
+      WHERE id = $id;
+    `,
+    {
+      $id: utf8(userId),
+      $avatar_url: optionalUtf8(avatarUrl),
+    }
+  );
 }
 
 export async function touchUserLogin(userId: string): Promise<void> {

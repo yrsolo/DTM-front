@@ -99,6 +99,7 @@ Telegram Mini App behavior:
 - если linkage не удалось восстановить, frontend показывает явный Telegram unlinked state вместо тихого `guest`
 - это не создаёт отдельный data path: после выдачи cookie браузер/webview продолжает работать через те же `/ops/auth/*` и `/ops/bff/*`
 - пользователям, у которых `telegramId` есть в people directory, больше не требуется Yandex login для доступа к Mini App
+- если Telegram initData содержит `photo_url`, auth сохраняет его как `avatarUrl` для пользователя (для telegram-first логина)
 
 Mobile web behavior:
 - `/m` и `/test/m` используют тот же mobile shell, что и Telegram Mini App;

@@ -7,6 +7,7 @@ export type TelegramInitDataUser = {
   username: string | null;
   firstName: string | null;
   lastName: string | null;
+  photoUrl: string | null;
 };
 
 function decodeValue(value: string): string {
@@ -60,6 +61,7 @@ function parseTelegramUser(rawUserJson: string | undefined): TelegramInitDataUse
       username: typeof parsed.username === "string" && parsed.username.trim() ? parsed.username.trim() : null,
       firstName: typeof parsed.first_name === "string" && parsed.first_name.trim() ? parsed.first_name.trim() : null,
       lastName: typeof parsed.last_name === "string" && parsed.last_name.trim() ? parsed.last_name.trim() : null,
+      photoUrl: typeof parsed.photo_url === "string" && parsed.photo_url.trim() ? parsed.photo_url.trim() : null,
     };
   } catch {
     return null;
