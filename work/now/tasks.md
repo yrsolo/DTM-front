@@ -11,6 +11,7 @@
 - [x] CAM-PROMO-REFERENCE-PACK-V1 - stable promo reference pack committed in-repo with master ref, 5 scene slices, reading guide, comparison checklist, and mandatory review loop for future `/promo` iterations.
 - [x] CAM-PROMO-REFERENCE-ALIGNMENT-V2 - `/promo` rebuilt into a screenshot-led editorial narrative: single-focus hero, secondary video strip, editorial/showcase/summary/cta section types, baseline-vs-after screenshots, and review note against the promo reference pack.
 - [ ] CAM-ATTACHMENTS-PDF-PREVIEW-STANDARDIZATION - force PDF.js preview even with missing metadata, align modal copy, and avoid browser viewer fallbacks.
+- [ ] CAM-TELEGRAM-MINIAPP-NO-YANDEX-AUTH - allow Telegram Mini App access for people directory telegram IDs without Yandex login.
 - [ ] CAM-API-V2-LOADING-SWR-CACHE - finalize manual evidence pack.
 - [x] CAM-SCHEMA-CONTRACT-GOVERNANCE - schema/types sync + validate:schema + guarantees.
 - [ ] CAM-DOCS-CANONICAL-REWRITE - rebuild root README and docs tree around current frontend state.

@@ -6,6 +6,7 @@ import { ensureOpenAccessRequest } from "../db/accessRequestsRepo";
 import { writeAuditLog } from "../db/auditRepo";
 import {
   createUserFromProfile,
+  createUserFromTelegram,
   getUserByEmail,
   getUserById,
   getUserByTelegramId,
@@ -252,21 +253,31 @@ export async function telegramSession(req: NormalizedRequest) {
     if (!linkedPerson) {
       return telegramSessionError(404, "telegram_person_not_found", telegramUser.id);
     }
-    if (!linkedPerson.email) {
-      return telegramSessionError(409, "telegram_person_missing_email", telegramUser.id);
+    if (linkedPerson.email) {
+      user = await getUserByEmail(linkedPerson.email);
     }
-
-    user = await getUserByEmail(linkedPerson.email);
-    if (!user) {
-      return telegramSessionError(404, "telegram_user_not_found_by_email", telegramUser.id);
+    if (user) {
+      await linkUserToPerson(user.id, linkedPerson);
+      user = await getUserById(user.id);
+    } else {
+      user = await createUserFromTelegram(telegramUser, linkedPerson);
     }
-
-    await linkUserToPerson(user.id, linkedPerson);
-    user = await getUserById(user.id);
+  } else if (!user.personId) {
+    const directory = await fetchPeopleDirectory();
+    const linkedPerson = findLinkedPersonByTelegramId(directory, telegramUser.id);
+    if (linkedPerson) {
+      await linkUserToPerson(user.id, linkedPerson);
+      user = await getUserById(user.id);
+    }
   }
 
   if (!user) {
     return telegramSessionError(404, "telegram_user_not_linked", telegramUser.id);
+  }
+
+  if (user.status !== "approved") {
+    await setUserStatus(user.id, "approved");
+    user = await getUserById(user.id);
   }
 
   const sessionCookie = buildSessionCookieForUser(user, "telegram");

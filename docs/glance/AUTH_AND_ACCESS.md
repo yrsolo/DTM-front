@@ -93,11 +93,12 @@ Telegram Mini App behavior:
 - auth contour валидирует `initData` через bot token и сначала ищет пользователя по сохранённому `telegram id`
 - если `telegram id` ещё не записан в auth runtime storage, auth делает auto-heal linkage:
   - ищет человека в backend people directory по `telegramId`
-  - берёт `yandexEmail` как основной email key (`contactEmail` остаётся fallback)
-  - ищет существующего auth user по email и записывает linkage в auth runtime storage
+  - если есть `yandexEmail`, пытается найти существующего auth user и записывает linkage
+  - если user по email не найден (или email отсутствует), создаёт auth user на базе Telegram + person linkage
 - при успехе Mini App получает обычную contour-specific session cookie
 - если linkage не удалось восстановить, frontend показывает явный Telegram unlinked state вместо тихого `guest`
 - это не создаёт отдельный data path: после выдачи cookie браузер/webview продолжает работать через те же `/ops/auth/*` и `/ops/bff/*`
+- пользователям, у которых `telegramId` есть в people directory, больше не требуется Yandex login для доступа к Mini App
 
 Mobile web behavior:
 - `/m` и `/test/m` используют тот же mobile shell, что и Telegram Mini App;
@@ -254,7 +255,8 @@ Current admin IA:
 - source of truth для `currentPersonId` живёт в auth runtime storage, а не во frontend selectors
 - web login best-effort синхронизирует linkage по email с backend people source
 - admin action `Обновить базу дизайнеров` повторно синхронизирует linkage и `telegram id`
-- `POST /telegram/session` умеет on-demand восстанавливать linkage по цепочке `telegramId -> people directory -> yandexEmail -> auth user`
+- `POST /telegram/session` умеет on-demand восстанавливать linkage по цепочке `telegramId -> people directory -> (auth user by email) -> auth user`
+- если user по email не найден, auth создаёт telegram-based user и сразу выдаёт approved session
 - Mini App не запрашивает отдельный `my tasks` payload: frontend получает общий snapshot и затем делает client-side filtering `mine / all`
 
 ## Подробнее

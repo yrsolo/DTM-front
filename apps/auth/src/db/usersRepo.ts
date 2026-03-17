@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 
 import type { AuthUser, LinkedPersonRecord, UserRole, UserStatus, YandexProfile } from "../types";
+import type { TelegramInitDataUser } from "../telegram/initData";
 import { AUTH_TABLES } from "./schema";
 import { executeQuery, executeVoid, int32, optionalTimestamp, optionalUtf8, timestamp, utf8 } from "./query";
 import { normalizeEmail } from "./normalization";
@@ -154,6 +155,62 @@ export async function createUserFromProfile(
   );
   const created = await getUserById(id);
   if (!created) throw new Error("User create verification failed");
+  return created;
+}
+
+export async function createUserFromTelegram(
+  telegramUser: TelegramInitDataUser,
+  linkedPerson: LinkedPersonRecord | null
+): Promise<AuthUser> {
+  const id = randomUUID();
+  const now = new Date();
+  const email = normalizeEmail(linkedPerson?.email ?? null);
+  const nameFromTelegram = [telegramUser.firstName, telegramUser.lastName].filter(Boolean).join(" ").trim();
+  const displayName =
+    linkedPerson?.personName ?? (nameFromTelegram ? nameFromTelegram : telegramUser.username ? `@${telegramUser.username}` : null);
+  const telegramUsername = telegramUser.username ?? linkedPerson?.telegramUsername ?? null;
+
+  await executeVoid(
+    `
+      DECLARE $id AS Utf8;
+      DECLARE $yandex_uid AS Utf8;
+      DECLARE $email AS Optional<Utf8>;
+      DECLARE $display_name AS Optional<Utf8>;
+      DECLARE $avatar_url AS Optional<Utf8>;
+      DECLARE $person_id AS Optional<Utf8>;
+      DECLARE $person_name AS Optional<Utf8>;
+      DECLARE $telegram_id AS Optional<Utf8>;
+      DECLARE $telegram_username AS Optional<Utf8>;
+      DECLARE $status AS Utf8;
+      DECLARE $role AS Utf8;
+      DECLARE $session_version AS Int32;
+      DECLARE $created_at AS Timestamp;
+      DECLARE $last_login_at AS Optional<Timestamp>;
+
+      UPSERT INTO ${AUTH_TABLES.users}
+      (id, yandex_uid, email, display_name, avatar_url, person_id, person_name, telegram_id, telegram_username, status, role, session_version, created_at, last_login_at)
+      VALUES
+      ($id, $yandex_uid, $email, $display_name, $avatar_url, $person_id, $person_name, $telegram_id, $telegram_username, $status, $role, $session_version, $created_at, $last_login_at);
+    `,
+    {
+      $id: utf8(id),
+      $yandex_uid: utf8(`tg:${telegramUser.id}`),
+      $email: optionalUtf8(email),
+      $display_name: optionalUtf8(displayName),
+      $avatar_url: optionalUtf8(null),
+      $person_id: optionalUtf8(linkedPerson?.personId ?? null),
+      $person_name: optionalUtf8(linkedPerson?.personName ?? null),
+      $telegram_id: optionalUtf8(telegramUser.id),
+      $telegram_username: optionalUtf8(telegramUsername),
+      $status: utf8("approved"),
+      $role: utf8("viewer"),
+      $session_version: int32(1),
+      $created_at: timestamp(now),
+      $last_login_at: optionalTimestamp(now),
+    }
+  );
+  const created = await getUserById(id);
+  if (!created) throw new Error("Telegram user create verification failed");
   return created;
 }
 

@@ -121,6 +121,7 @@ Tooltip может быть шире карточки, чтобы milestone labe
 - `/app` остаётся Telegram Mini App режимом:
   - Telegram runtime и `initData` bootstrap включены;
   - профиль показывает Telegram diagnostics;
+  - пользователям с `telegramId` в people directory больше не нужен Yandex login для доступа;
   - fallback-сообщения для отсутствующей связи остаются telegram-specific.
 - `/m` и `/mobile` открывают тот же mobile shell как обычный web mobile:
   - авторизация идёт через Яндекс;
@@ -133,7 +134,7 @@ Tooltip может быть шире карточки, чтобы milestone labe
 - desktop использует hover-tooltip для имени и даты загрузки attachment, Mini App — tap-friendly selection surface;
 - имя файла в раскрытой панели кликабельно и открывает preview; compact action buttons используют иконки, а preview modal сохраняет full-text buttons;
 - повторный клик по уже выбранной file-icon тоже открывает preview;
-- встроенный preview внутри сайта покрывает `docx`, изображения и `pdf`; PDF рендерится через PDF.js без зависимости от браузерного viewer; legacy `doc` открывается через embedded frame без ухода пользователя со страницы;
+- встроенный preview внутри сайта покрывает `docx`, изображения и `pdf`; PDF рендерится через PDF.js без зависимости от браузерного viewer; legacy `doc` пытается открыть PDF через `Accept: application/pdf`, иначе показывает download fallback;
 - upload control виден только admin и использует существующий backend upload contour без изменения snapshot contract;
 - при upload frontend нормализует MIME по расширению файла, если браузер или webview не прислал надёжный `File.type`; это покрывает `doc`, `docx`, `pdf` и текущие image-форматы;
 - desktop drawer принимает drag-and-drop upload по всей поверхности карточки задачи: при перетаскивании подсвечивается весь drawer, а drop в любое место карточки загружает файл в текущую задачу.
