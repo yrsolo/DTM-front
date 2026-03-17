@@ -1,6 +1,8 @@
 import React from "react";
 import { createPortal } from "react-dom";
 
+import { fetchAttachmentArrayBuffer } from "../../data/taskAttachments";
+
 export type AttachmentPreviewState =
   | { open: false }
   | {
@@ -56,6 +58,11 @@ function getTouchCenter(event: React.TouchEvent<HTMLDivElement>): { x: number; y
 export function AttachmentPreviewModal(props: { state: AttachmentPreviewState }) {
   const [zoomScale, setZoomScale] = React.useState(1);
   const [translate, setTranslate] = React.useState({ x: 0, y: 0 });
+  const [pdfState, setPdfState] = React.useState<{
+    status: "idle" | "loading" | "ready" | "error" | "tooLarge";
+    message?: string;
+    canvases: HTMLCanvasElement[];
+  }>({ status: "idle", canvases: [] });
   const touchAnchorRef = React.useRef<TouchAnchor | null>(null);
   const zoomAreaRef = React.useRef<HTMLDivElement | null>(null);
   const zoomContentRef = React.useRef<HTMLDivElement | HTMLImageElement | null>(null);
@@ -68,6 +75,87 @@ export function AttachmentPreviewModal(props: { state: AttachmentPreviewState })
     setZoomScale(1);
     setTranslate({ x: 0, y: 0 });
     touchAnchorRef.current = null;
+  }, [props.state]);
+
+  React.useEffect(() => {
+    if (!props.state.open) {
+      setPdfState({ status: "idle", canvases: [] });
+      return;
+    }
+
+    const state = props.state;
+    if (state.mode !== "pdf" || !state.src) {
+      setPdfState({ status: "idle", canvases: [] });
+      return;
+    }
+
+    const src = state.src;
+    let isActive = true;
+    const abortController = new AbortController();
+    setPdfState({ status: "loading", canvases: [] });
+
+    const MAX_PAGES = 40;
+
+    async function renderPdf() {
+      try {
+        const pdfjsLib = await import("pdfjs-dist/legacy/build/pdf");
+        const workerUrl = new URL("pdfjs-dist/legacy/build/pdf.worker.min.mjs", import.meta.url).toString();
+        pdfjsLib.GlobalWorkerOptions.workerSrc = workerUrl;
+
+        if (!src) return;
+        const buffer = await fetchAttachmentArrayBuffer(src, abortController.signal);
+        if (!isActive) return;
+
+        const loadingTask = pdfjsLib.getDocument({ data: buffer });
+        const pdf = await loadingTask.promise;
+        if (!isActive) return;
+
+        if (pdf.numPages > MAX_PAGES) {
+          setPdfState({
+            status: "tooLarge",
+            message: `Файл содержит ${pdf.numPages} страниц. Для стабильной работы используйте скачивание.`,
+            canvases: [],
+          });
+          return;
+        }
+
+        const canvases: HTMLCanvasElement[] = [];
+        for (let pageIndex = 1; pageIndex <= pdf.numPages; pageIndex += 1) {
+          if (!isActive) return;
+          const page = await pdf.getPage(pageIndex);
+          const viewport = page.getViewport({ scale: 1.2 });
+          const canvas = document.createElement("canvas");
+          const context = canvas.getContext("2d");
+          if (!context) continue;
+          canvas.width = Math.floor(viewport.width);
+          canvas.height = Math.floor(viewport.height);
+          await page.render({ canvasContext: context, viewport }).promise;
+          canvases.push(canvas);
+          if (isActive) {
+            setPdfState({ status: "loading", canvases: [...canvases] });
+          }
+        }
+
+        if (isActive) {
+          setPdfState({ status: "ready", canvases });
+        }
+      } catch {
+        if (isActive) {
+          setPdfState({
+            status: "error",
+            message: "Не удалось открыть PDF. Попробуйте скачать файл.",
+            canvases: [],
+          });
+        }
+      }
+    }
+
+    void renderPdf();
+
+    return () => {
+      isActive = false;
+      abortController.abort();
+    };
   }, [props.state]);
 
   if (!props.state.open) return null;
@@ -247,19 +335,43 @@ export function AttachmentPreviewModal(props: { state: AttachmentPreviewState })
               />
             </div>
           ) : null}
-          {props.state.mode === "pdf" && props.state.src ? (
-            <iframe
-              className="attachmentPreviewFrame attachmentPreviewPdfFrame"
-              src={props.state.src}
-              title={props.state.title}
-            />
+          {props.state.mode === "pdf" ? (
+            <div
+              ref={zoomAreaRef}
+              className="attachmentPreviewZoomArea"
+              onTouchStart={handleTouchStart}
+              onTouchMove={handleTouchMove}
+              onTouchEnd={handleTouchEnd}
+              onTouchCancel={handleTouchEnd}
+            >
+              <div ref={setZoomContentRef} className="attachmentPreviewPdf" style={{ transform: previewTransform }}>
+                {pdfState.status === "loading" ? (
+                  <div className="attachmentPreviewPdfNotice">Готовим PDF для просмотра…</div>
+                ) : null}
+                {pdfState.status === "error" ? (
+                  <div className="attachmentPreviewPdfNotice">{pdfState.message}</div>
+                ) : null}
+                {pdfState.status === "tooLarge" ? (
+                  <div className="attachmentPreviewPdfNotice">{pdfState.message}</div>
+                ) : null}
+                {pdfState.canvases.map((canvas, index) => (
+                  <div key={index} className="attachmentPreviewPdfPage">
+                    <div
+                      className="attachmentPreviewPdfCanvas"
+                      ref={(node) => {
+                        if (node && node.firstChild !== canvas) {
+                          node.replaceChildren(canvas);
+                        }
+                      }}
+                    />
+                    <div className="attachmentPreviewPdfPageLabel">Страница {index + 1}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
           ) : null}
           {props.state.mode === "frame" && props.state.src ? (
-            <iframe
-              className="attachmentPreviewFrame"
-              src={props.state.src}
-              title={props.state.title}
-            />
+            <iframe className="attachmentPreviewFrame" src={props.state.src} title={props.state.title} />
           ) : null}
         </div>
       </div>

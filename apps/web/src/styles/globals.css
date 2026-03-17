@@ -3062,6 +3062,51 @@ button:hover {
   margin-top: 0;
 }
 
+.attachmentPreviewPdf {
+  width: 100%;
+  display: grid;
+  gap: 18px;
+  justify-items: center;
+  transform-origin: 0 0;
+  transition: transform 90ms linear;
+}
+
+.attachmentPreviewPdfNotice {
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 1px dashed rgba(180, 196, 255, 0.22);
+  color: rgba(225, 234, 255, 0.76);
+  text-align: center;
+  max-width: 420px;
+}
+
+.attachmentPreviewPdfPage {
+  display: grid;
+  gap: 6px;
+  justify-items: center;
+}
+
+.attachmentPreviewPdfCanvas {
+  display: grid;
+  place-items: center;
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 8px;
+  box-shadow: 0 12px 28px rgba(5, 8, 20, 0.35);
+}
+
+.attachmentPreviewPdfCanvas canvas {
+  display: block;
+  width: min(100%, 860px);
+  height: auto;
+  border-radius: 8px;
+}
+
+.attachmentPreviewPdfPageLabel {
+  font-size: 12px;
+  color: rgba(210, 220, 245, 0.7);
+}
+
 .attachmentPreviewFrame {
   width: 100%;
   min-height: min(72vh, 820px);

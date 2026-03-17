@@ -443,11 +443,12 @@ export async function pollAttachmentJob(
   });
 }
 
-export async function fetchAttachmentArrayBuffer(url: string): Promise<ArrayBuffer> {
+export async function fetchAttachmentArrayBuffer(url: string, signal?: AbortSignal): Promise<ArrayBuffer> {
   const res = await fetch(url, {
     credentials: "include",
     headers: { accept: "*/*" },
     cache: "no-store",
+    signal,
   });
   if (!res.ok) {
     throw new Error(`HTTP ${res.status}`);
