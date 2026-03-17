@@ -101,6 +101,27 @@ function formatUploadError(error: unknown, fallback: string): string {
   return fallback;
 }
 
+function isAttachmentsDebugEnabled(): boolean {
+  if (typeof window === "undefined") return false;
+  try {
+    const params = new URLSearchParams(window.location.search);
+    return params.has("attachmentsDebug") || params.get("attachmentsDebug") === "1";
+  } catch {
+    return false;
+  }
+}
+
+function formatDebugUrl(raw: string | null | undefined): string {
+  if (!raw) return "n/a";
+  try {
+    const parsed = new URL(raw, window.location.origin);
+    return `${parsed.origin}${parsed.pathname}`;
+  } catch {
+    const withoutQuery = raw.split("?")[0];
+    return withoutQuery || "n/a";
+  }
+}
+
 export function TaskAttachmentsSection(props: {
   task: TaskV1;
   compact?: boolean;
@@ -123,6 +144,7 @@ export function TaskAttachmentsSection(props: {
   const [tooltipState, setTooltipState] = React.useState<TooltipState>({ visible: false });
   const [previewState, setPreviewState] = React.useState<AttachmentPreviewState>({ open: false });
   const inputRef = React.useRef<HTMLInputElement | null>(null);
+  const debugEnabled = isAttachmentsDebugEnabled();
 
   async function refetchUntilAttachmentVisible(expectedAttachmentId: string): Promise<boolean> {
     if (!ctx?.snapshotState.syncFromApi) return false;
@@ -196,6 +218,16 @@ export function TaskAttachmentsSection(props: {
       formatAttachmentUploadedAt(attachment.uploadedAt ?? null, locale),
     ].filter(Boolean);
     const subtitle = subtitleParts.join(" | ");
+    const baseDebugInfo = debugEnabled
+      ? [
+          `debug=attachments`,
+          `name=${attachment.name}`,
+          `mime=${attachment.mime}`,
+          `kind=${attachment.kind}`,
+          `view=${formatDebugUrl(browserViewUrl)}`,
+          `download=${formatDebugUrl(browserDownloadUrl)}`,
+        ].join("\n")
+      : null;
 
     if (isDocxAttachment(attachment)) {
       setPreviewState({
@@ -203,6 +235,7 @@ export function TaskAttachmentsSection(props: {
         title: attachment.name,
         subtitle,
         mode: "loading",
+        debugInfo: baseDebugInfo ? `${baseDebugInfo}\nmode=docx` : null,
         closeLabel: ui.drawer.close,
         downloadLabel: ui.drawer.attachmentsDownload,
         unavailableLabel: ui.drawer.attachmentsUnavailable,
@@ -216,13 +249,14 @@ export function TaskAttachmentsSection(props: {
         const result = await mammoth.convertToHtml({ arrayBuffer });
         setPreviewState({
           open: true,
-          title: attachment.name,
-          subtitle,
-          mode: "docx",
-          html: result.value,
-          closeLabel: ui.drawer.close,
-          downloadLabel: ui.drawer.attachmentsDownload,
-          unavailableLabel: ui.drawer.attachmentsUnavailable,
+        title: attachment.name,
+        subtitle,
+        mode: "docx",
+        html: result.value,
+        debugInfo: baseDebugInfo ? `${baseDebugInfo}\nmode=docx` : null,
+        closeLabel: ui.drawer.close,
+        downloadLabel: ui.drawer.attachmentsDownload,
+        unavailableLabel: ui.drawer.attachmentsUnavailable,
           downloadUrl: browserDownloadUrl,
           onClose: () => setPreviewState({ open: false }),
         });
@@ -230,12 +264,13 @@ export function TaskAttachmentsSection(props: {
         setPreviewState({
           open: true,
           title: attachment.name,
-          subtitle,
-          mode: "error",
-          error: ui.drawer.attachmentsPreviewFailed,
-          closeLabel: ui.drawer.close,
-          downloadLabel: ui.drawer.attachmentsDownload,
-          unavailableLabel: ui.drawer.attachmentsUnavailable,
+        subtitle,
+        mode: "error",
+        error: ui.drawer.attachmentsPreviewFailed,
+        debugInfo: baseDebugInfo ? `${baseDebugInfo}\nmode=docx\nerror=convert_failed` : null,
+        closeLabel: ui.drawer.close,
+        downloadLabel: ui.drawer.attachmentsDownload,
+        unavailableLabel: ui.drawer.attachmentsUnavailable,
           downloadUrl: browserDownloadUrl,
           onClose: () => setPreviewState({ open: false }),
         });
@@ -250,6 +285,7 @@ export function TaskAttachmentsSection(props: {
         subtitle,
         mode: "image",
         src: browserViewUrl,
+        debugInfo: baseDebugInfo ? `${baseDebugInfo}\nmode=image` : null,
         closeLabel: ui.drawer.close,
         downloadLabel: ui.drawer.attachmentsDownload,
         unavailableLabel: ui.drawer.attachmentsUnavailable,
@@ -266,6 +302,7 @@ export function TaskAttachmentsSection(props: {
         subtitle,
         mode: "pdf",
         src: browserViewUrl,
+        debugInfo: baseDebugInfo ? `${baseDebugInfo}\nmode=pdf` : null,
         closeLabel: ui.drawer.close,
         downloadLabel: ui.drawer.attachmentsDownload,
         unavailableLabel: ui.drawer.attachmentsUnavailable,
@@ -282,6 +319,7 @@ export function TaskAttachmentsSection(props: {
         subtitle,
         mode: "frame",
         src: browserViewUrl,
+        debugInfo: baseDebugInfo ? `${baseDebugInfo}\nmode=frame` : null,
         closeLabel: ui.drawer.close,
         downloadLabel: ui.drawer.attachmentsDownload,
         unavailableLabel: ui.drawer.attachmentsUnavailable,
@@ -298,6 +336,7 @@ export function TaskAttachmentsSection(props: {
         title: attachment.name,
         subtitle,
         mode: "loading",
+        debugInfo: baseDebugInfo ? `${baseDebugInfo}\nmode=probe` : null,
         closeLabel: ui.drawer.close,
         downloadLabel: ui.drawer.attachmentsDownload,
         unavailableLabel: ui.drawer.attachmentsUnavailable,
@@ -311,6 +350,9 @@ export function TaskAttachmentsSection(props: {
         cache: "no-store",
       });
       const contentType = res.headers.get("content-type")?.toLowerCase() ?? "";
+      const debugInfo = baseDebugInfo
+        ? `${baseDebugInfo}\nmode=probe\nhead_status=${res.status}\nhead_type=${contentType || "n/a"}`
+        : null;
       if (contentType.includes("application/pdf")) {
         setPreviewState({
           open: true,
@@ -318,6 +360,7 @@ export function TaskAttachmentsSection(props: {
           subtitle,
           mode: "pdf",
           src: browserViewUrl,
+          debugInfo,
           closeLabel: ui.drawer.close,
           downloadLabel: ui.drawer.attachmentsDownload,
           unavailableLabel: ui.drawer.attachmentsUnavailable,
@@ -336,6 +379,7 @@ export function TaskAttachmentsSection(props: {
       subtitle,
       mode: "pdf",
       src: browserViewUrl,
+      debugInfo: baseDebugInfo ? `${baseDebugInfo}\nmode=pdf\nfallback=force` : null,
       closeLabel: ui.drawer.close,
       downloadLabel: ui.drawer.attachmentsDownload,
       unavailableLabel: ui.drawer.attachmentsUnavailable,

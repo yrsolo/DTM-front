@@ -14,6 +14,7 @@ export type AttachmentPreviewState =
       html?: string;
       src?: string;
       downloadUrl?: string | null;
+      debugInfo?: string | null;
       closeLabel: string;
       downloadLabel: string;
       unavailableLabel: string;
@@ -275,6 +276,13 @@ export function AttachmentPreviewModal(props: { state: AttachmentPreviewState })
           <div className="attachmentPreviewHeaderText">
             <div className="attachmentPreviewTitle">{props.state.title}</div>
             {props.state.subtitle ? <div className="attachmentPreviewSubtitle">{props.state.subtitle}</div> : null}
+            {props.state.debugInfo ? (
+              <div className="attachmentPreviewSubtitle" style={{ opacity: 0.8, fontSize: 12, lineHeight: 1.35 }}>
+                {props.state.debugInfo.split("\n").map((line, index) => (
+                  <div key={index}>{line}</div>
+                ))}
+              </div>
+            ) : null}
           </div>
           <div className="attachmentPreviewHeaderActions">
             {props.state.downloadUrl ? (
