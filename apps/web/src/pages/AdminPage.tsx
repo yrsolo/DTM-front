@@ -37,6 +37,7 @@ type AdminUserCard = {
   personName: string | null;
   telegramId: string | null;
   telegramUsername: string | null;
+  canViewAllTasks: boolean;
   status: string;
   role: string;
   requestedAt: string;
@@ -985,6 +986,21 @@ export function AdminPage() {
     [authSession, loadOverview]
   );
 
+  const setAllTasks = React.useCallback(
+    async (userId: string, enabled: boolean) => {
+      const res = await fetch(buildAuthUrl(`/admin/users/${encodeURIComponent(userId)}/all-tasks`), {
+        method: "POST",
+        credentials: "include",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ enabled }),
+      });
+      await expectOk(res, "Не удалось обновить доступ к задачам");
+      await loadOverview();
+      await authSession?.reload();
+    },
+    [authSession, loadOverview]
+  );
+
   const addAllowlistEmail = React.useCallback(async () => {
     if (!newEmail.trim()) return;
     const res = await fetch(buildAuthUrl("/admin/allowlist"), {
@@ -1360,6 +1376,20 @@ export function AdminPage() {
                                   roleClassName={isAdmin ? "isAdmin" : ""}
                                   actions={
                                     <>
+                                      <label className="adminUserToggle">
+                                        <input
+                                          type="checkbox"
+                                          checked={Boolean(user.canViewAllTasks)}
+                                          onChange={(event) =>
+                                            void runAdminAction(
+                                              () => setAllTasks(user.id, event.target.checked),
+                                              event.target.checked ? "Включён доступ ко всем задачам" : "Доступ к задачам ограничен"
+                                            )
+                                          }
+                                          disabled={isSelf}
+                                        />
+                                        <span>Все задачи</span>
+                                      </label>
                                       <button type="button" className="btn btnGhost" onClick={() => void runAdminAction(() => revoke(user.id), "Пользователь удален из одобренных")} disabled={isSelf}>Удалить</button>
                                       <button type="button" className={`btn ${isAdmin ? "btnGhost" : ""}`} onClick={() => void runAdminAction(() => toggleAdminRole(user), isAdmin ? "Admin-роль снята" : "Admin-роль назначена")} disabled={isSelf}>
                                         {isAdmin ? "Убрать из админов" : "Сделать админом"}

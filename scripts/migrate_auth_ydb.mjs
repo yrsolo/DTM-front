@@ -134,6 +134,7 @@ async function main() {
         new Column("person_name", optional(Types.UTF8)),
         new Column("telegram_id", optional(Types.UTF8)),
         new Column("telegram_username", optional(Types.UTF8)),
+        new Column("can_view_all_tasks", optional(Types.BOOL)),
         new Column("status", Types.UTF8),
         new Column("role", Types.UTF8),
         new Column("session_version", Types.INT32),
@@ -222,6 +223,7 @@ async function main() {
       new Column("person_name", optional(Types.UTF8)),
       new Column("telegram_id", optional(Types.UTF8)),
       new Column("telegram_username", optional(Types.UTF8)),
+      new Column("can_view_all_tasks", optional(Types.BOOL)),
     ]);
 
     console.log(`Auth YDB migration completed for ${target}`);

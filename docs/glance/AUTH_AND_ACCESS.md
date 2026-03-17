@@ -137,6 +137,7 @@ Session metadata:
   - `sessionKind`
   - `expiresAt`
   - `temporaryAccessLabel`
+- `user.canViewAllTasks` показывает, разрешён ли доступ ко всем задачам без owner-фильтра
 - current supported session sources:
   - `yandex`
   - `telegram`

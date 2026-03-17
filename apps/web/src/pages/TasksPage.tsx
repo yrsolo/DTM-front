@@ -21,9 +21,13 @@ export function TasksPage() {
   const timelineHost = useElementWidth<HTMLDivElement>();
 
   if (!ctx) return null;
-  const { filters, snapshotState, design } = ctx;
+  const { filters, snapshotState, design, authSession } = ctx;
   const { snapshot, isLoading, status, error, reloadLocal } = snapshotState;
   const rowH = design.tableRowHeight;
+  const canViewAllTasks =
+    authSession.state.user?.role === "admin" || Boolean(authSession.state.user?.canViewAllTasks);
+  const forcedOwnerId =
+    !canViewAllTasks && authSession.state.authenticated ? authSession.state.user?.personId ?? "" : "";
 
   if (isLoading && !snapshot) return <LoadingState />;
   if (!snapshot && error) return <ErrorBanner error={error} onRetry={reloadLocal} />;
@@ -33,7 +37,8 @@ export function TasksPage() {
   const statusLabels = snapshot.enums?.status ?? {};
 
   const tasks = snapshot.tasks.filter((t) => {
-    if (filters.ownerId && t.ownerId !== filters.ownerId) return false;
+    const effectiveOwnerId = forcedOwnerId || filters.ownerId;
+    if (effectiveOwnerId && t.ownerId !== effectiveOwnerId) return false;
     if (filters.status && t.status !== filters.status) return false;
     if (filters.search && !t.title.toLowerCase().includes(filters.search.toLowerCase())) return false;
     return true;

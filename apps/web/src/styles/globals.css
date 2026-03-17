@@ -3553,6 +3553,23 @@ button:hover {
   justify-content: flex-start;
 }
 
+.adminUserToggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: #d7e5ff;
+  padding: 4px 6px;
+  border-radius: 10px;
+  border: 1px solid rgba(137, 164, 255, 0.22);
+  background: rgba(20, 26, 52, 0.6);
+  white-space: nowrap;
+}
+
+.adminUserToggle input {
+  accent-color: #8fd6ff;
+}
+
 .adminUserActions > button {
   white-space: nowrap;
 }

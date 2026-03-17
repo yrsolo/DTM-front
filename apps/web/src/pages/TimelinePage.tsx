@@ -342,14 +342,6 @@ export function TimelinePage() {
   };
 
   React.useEffect(() => {
-    try {
-      localStorage.setItem(TIMELINE_PAGE_VIEW_KEY, pageView);
-    } catch {
-      // ignore
-    }
-  }, [pageView]);
-
-  React.useEffect(() => {
     if (!isAuthPanelOpen) return;
     const onPointerDown = (event: MouseEvent) => {
       const target = event.target as Node | null;
@@ -407,6 +399,35 @@ export function TimelinePage() {
     statusFilter,
     setStatusFilter,
   } = snapshotState;
+  const canViewAllTasks =
+    authSession.state.user?.role === "admin" || Boolean(authSession.state.user?.canViewAllTasks);
+  const forcedOwnerId =
+    !canViewAllTasks && authSession.state.authenticated ? authSession.state.user?.personId ?? "" : "";
+
+  React.useEffect(() => {
+    try {
+      localStorage.setItem(TIMELINE_PAGE_VIEW_KEY, pageView);
+    } catch {
+      // ignore
+    }
+  }, [pageView]);
+
+  React.useEffect(() => {
+    if (pageView === "designers" && !canViewAllTasks) {
+      setPageView("tasks");
+    }
+  }, [pageView, canViewAllTasks]);
+
+  React.useEffect(() => {
+    if (canViewAllTasks) return;
+    if (
+      viewMode === "designer_brand_show" ||
+      viewMode === "brand_designer_show" ||
+      viewMode === "show_brand_designer"
+    ) {
+      setViewMode("flat_brand_show");
+    }
+  }, [canViewAllTasks, viewMode, setViewMode]);
   const rowH = design.tableRowHeight;
   const peopleById = React.useMemo(() => {
     const map = new Map<string, string>();
@@ -507,7 +528,8 @@ export function TimelinePage() {
   const statusLabels = snapshot.enums?.status ?? {};
 
   const tasks = snapshot.tasks.filter((t) => {
-    if (filters.ownerId && t.ownerId !== filters.ownerId) return false;
+    const effectiveOwnerId = forcedOwnerId || filters.ownerId;
+    if (effectiveOwnerId && t.ownerId !== effectiveOwnerId) return false;
     if (filters.status && t.status !== filters.status) return false;
     if (filters.search && !t.title.toLowerCase().includes(filters.search.toLowerCase())) return false;
     return true;
@@ -758,13 +780,15 @@ export function TimelinePage() {
             >
               {PAGE_LABEL_TASKS}
             </button>
-            <button
-              type="button"
-              className={`modeMiniBtn ${pageView === "designers" ? "active" : ""}`}
-              onClick={() => setPageView("designers")}
-            >
-              {PAGE_LABEL_DESIGNERS}
-            </button>
+            {canViewAllTasks ? (
+              <button
+                type="button"
+                className={`modeMiniBtn ${pageView === "designers" ? "active" : ""}`}
+                onClick={() => setPageView("designers")}
+              >
+                {PAGE_LABEL_DESIGNERS}
+              </button>
+            ) : null}
           </div>
           {pageView === "tasks" ? (
             <>
@@ -1192,20 +1216,24 @@ export function TimelinePage() {
               ["--mode-scale" as string]: String(design.timelineModeDockScale),
             }}
           >
-            <button
-              type="button"
-              className={`modeMiniBtn ${viewMode === "designer_brand_show" ? "active" : ""}`}
-              onClick={() => setViewMode("designer_brand_show")}
-            >
-              {ui.modeByDesignerBrandShow}
-            </button>
-            <button
-              type="button"
-              className={`modeMiniBtn ${viewMode === "brand_designer_show" ? "active" : ""}`}
-              onClick={() => setViewMode("brand_designer_show")}
-            >
-              {ui.modeByBrandDesignerShow}
-            </button>
+            {canViewAllTasks ? (
+              <button
+                type="button"
+                className={`modeMiniBtn ${viewMode === "designer_brand_show" ? "active" : ""}`}
+                onClick={() => setViewMode("designer_brand_show")}
+              >
+                {ui.modeByDesignerBrandShow}
+              </button>
+            ) : null}
+            {canViewAllTasks ? (
+              <button
+                type="button"
+                className={`modeMiniBtn ${viewMode === "brand_designer_show" ? "active" : ""}`}
+                onClick={() => setViewMode("brand_designer_show")}
+              >
+                {ui.modeByBrandDesignerShow}
+              </button>
+            ) : null}
             <button
               type="button"
               className={`modeMiniBtn ${viewMode === "format_brand_show" ? "active" : ""}`}
@@ -1213,13 +1241,15 @@ export function TimelinePage() {
             >
               {ui.modeByFormatBrandShow}
             </button>
-            <button
-              type="button"
-              className={`modeMiniBtn ${viewMode === "show_brand_designer" ? "active" : ""}`}
-              onClick={() => setViewMode("show_brand_designer")}
-            >
-              {ui.modeByShowBrandDesigner}
-            </button>
+            {canViewAllTasks ? (
+              <button
+                type="button"
+                className={`modeMiniBtn ${viewMode === "show_brand_designer" ? "active" : ""}`}
+                onClick={() => setViewMode("show_brand_designer")}
+              >
+                {ui.modeByShowBrandDesigner}
+              </button>
+            ) : null}
             <button
               type="button"
               className={`modeMiniBtn ${viewMode === "flat_brand_show" ? "active" : ""}`}

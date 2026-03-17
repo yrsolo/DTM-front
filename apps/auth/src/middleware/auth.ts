@@ -31,6 +31,7 @@ function materializeTempLinkSession(claims: TempLinkSessionClaims, link: Awaited
     personName: null,
     telegramId: null,
     telegramUsername: null,
+    canViewAllTasks: false,
     status: "approved",
     role: "viewer",
     sessionVersion: 1,
@@ -119,6 +120,7 @@ export function buildMePayload(user: SessionUser | null) {
           personName: user.personName,
           telegramId: user.telegramId,
           telegramUsername: user.telegramUsername,
+          canViewAllTasks: user.canViewAllTasks,
           role: user.role,
           status: user.status,
         }

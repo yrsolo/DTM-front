@@ -37,6 +37,7 @@ export type AuthUser = {
   personName: string | null;
   telegramId: string | null;
   telegramUsername: string | null;
+  canViewAllTasks: boolean;
   status: UserStatus;
   role: UserRole;
   sessionVersion: number;

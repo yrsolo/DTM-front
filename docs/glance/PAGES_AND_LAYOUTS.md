@@ -118,6 +118,7 @@ Tooltip может быть шире карточки, чтобы milestone labe
 - внутри дня milestones показываются строками `Майлстоун | Бренд | Формат | Шоу` со стандартным цветовым кодированием по milestone tone;
 - верхняя action button `Сегодня` остаётся постоянно доступной и прокручивает календарь к текущему дню;
 - `TaskDetailsDrawer` переиспользуется как mobile sheet, а не как вторая отдельная карточка задачи.
+- designer-grouping кнопки доступны только admin или пользователям с `canViewAllTasks`; у остальных скрыты.
 - `/app` остаётся Telegram Mini App режимом:
   - Telegram runtime и `initData` bootstrap включены;
   - профиль показывает Telegram diagnostics;

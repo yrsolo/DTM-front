@@ -6,7 +6,7 @@ import { writeAuditLog } from "../db/auditRepo";
 import { getAdminLayoutPrefs, saveAdminLayoutOrder, type AdminLayoutListKey } from "../db/adminLayoutPrefsRepo";
 import { ensureAdminRole, resolveSession } from "../middleware/auth";
 import { listPresetEntries } from "../presets/catalog";
-import { incrementSessionVersion, linkUserToPerson, listUsersByStatus, setUserStatus, upsertRole } from "../db/usersRepo";
+import { incrementSessionVersion, linkUserToPerson, listUsersByStatus, setUserCanViewAllTasks, setUserStatus, upsertRole } from "../db/usersRepo";
 import { computePeopleDirectoryHash, fetchPeopleDirectory, findLinkedPersonByEmail } from "../people/sync";
 import type { NormalizedRequest } from "../types";
 
@@ -70,20 +70,21 @@ export async function listAdminData(req: NormalizedRequest) {
     }
   }
 
-  const mapUserCard = (user: Awaited<ReturnType<typeof listUsersByStatus>>[number]) => ({
-    id: user.id,
-    yandexUid: user.yandexUid,
-    email: user.email,
-    displayName: user.displayName,
-    personId: user.personId,
-    personName: user.personName,
-    telegramId: user.telegramId,
-    telegramUsername: user.telegramUsername,
-    status: user.status,
-    role: user.role,
-    requestedAt: latestRequestByUserId.get(user.id) ?? user.createdAt,
-    avatarUrl: user.avatarUrl,
-  });
+    const mapUserCard = (user: Awaited<ReturnType<typeof listUsersByStatus>>[number]) => ({
+      id: user.id,
+      yandexUid: user.yandexUid,
+      email: user.email,
+      displayName: user.displayName,
+      personId: user.personId,
+      personName: user.personName,
+      telegramId: user.telegramId,
+      telegramUsername: user.telegramUsername,
+      canViewAllTasks: user.canViewAllTasks,
+      status: user.status,
+      role: user.role,
+      requestedAt: latestRequestByUserId.get(user.id) ?? user.createdAt,
+      avatarUrl: user.avatarUrl,
+    });
 
   const orderedPendingUsers = applyPersonalOrder(pendingUsers.map(mapUserCard), prefs?.pendingUsers ?? []);
   const orderedApprovedUsers = applyPersonalOrder(approvedUsers.map(mapUserCard), prefs?.approvedUsers ?? []);
@@ -213,6 +214,27 @@ export async function removeAdminHandler(req: NormalizedRequest, userId: string)
     actorUserId: auth.user.id,
     targetUserId: userId,
     action: "admin.remove_admin",
+  });
+
+  return json(200, { ok: true });
+}
+
+export async function setUserAllTasksHandler(req: NormalizedRequest, userId: string) {
+  const auth = await requireAdmin(req);
+  if (auth.error) return auth.error;
+
+  const body = parseJsonBody(req);
+  if (!body || typeof body.enabled !== "boolean") {
+    return badRequest("enabled boolean is required");
+  }
+
+  await setUserCanViewAllTasks(userId, body.enabled);
+  await incrementSessionVersion(userId);
+  await writeAuditLog({
+    actorUserId: auth.user.id,
+    targetUserId: userId,
+    action: "admin.user_all_tasks_update",
+    payloadJson: JSON.stringify({ enabled: body.enabled }),
   });
 
   return json(200, { ok: true });

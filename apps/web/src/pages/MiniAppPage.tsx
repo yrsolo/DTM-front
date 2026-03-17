@@ -70,7 +70,8 @@ export function MobileAppPage(props: { mode: MobileSurfaceMode }) {
     () => new Map((snapshot?.people ?? []).map((person) => [person.id, person.name] as const)),
     [snapshot?.people]
   );
-  const canViewAllTasks = authSession.state.user?.role === "admin";
+  const canViewAllTasks =
+    authSession.state.user?.role === "admin" || Boolean(authSession.state.user?.canViewAllTasks);
   const scopedTasks = canViewAllTasks
     ? sortTasksForMobile(selectAllTasks(snapshot))
     : sortTasksForMobile(selectMyTasks(snapshot, currentPerson.personId));

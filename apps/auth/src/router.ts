@@ -5,6 +5,7 @@ import {
   approveUserHandler,
   listAdminData,
   makeAdminHandler,
+  setUserAllTasksHandler,
   refreshDesignersDirectoryHandler,
   rejectUserHandler,
   removeAdminHandler,
@@ -143,6 +144,11 @@ export async function routeRequest(req: NormalizedRequest): Promise<HttpResult> 
     const removeAdminMatch = req.routePath.match(/^\/admin\/users\/([^/]+)\/remove-admin$/);
     if (req.method === "POST" && removeAdminMatch) {
       return removeAdminHandler(req, removeAdminMatch[1]);
+    }
+
+    const allTasksMatch = req.routePath.match(/^\/admin\/users\/([^/]+)\/all-tasks$/);
+    if (req.method === "POST" && allTasksMatch) {
+      return setUserAllTasksHandler(req, allTasksMatch[1]);
     }
 
     const accessLinkMatch = req.routePath.match(/^\/admin\/access-links\/([^/]+)$/);

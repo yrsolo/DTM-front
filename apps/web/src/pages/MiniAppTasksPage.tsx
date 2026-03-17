@@ -48,8 +48,18 @@ export function MiniAppTasksPage(props: {
   authState: AuthSessionState;
   onOpenTask: (taskId: string) => void;
 }) {
-  const [groupingMode, setGroupingMode] = React.useState<MiniTaskGroupingMode>("designer");
+  const groupingOptions: MiniTaskGroupingMode[] = props.canViewAllTasks ? ["designer", "brand", "show"] : ["brand", "show"];
+  const [groupingMode, setGroupingMode] = React.useState<MiniTaskGroupingMode>(
+    props.canViewAllTasks ? "designer" : "brand"
+  );
   const [toggleAllToken, setToggleAllToken] = React.useState(0);
+
+  React.useEffect(() => {
+    if (props.canViewAllTasks) return;
+    if (groupingMode === "designer") {
+      setGroupingMode("brand");
+    }
+  }, [props.canViewAllTasks, groupingMode]);
 
   function handleGroupingClick(mode: MiniTaskGroupingMode) {
     if (groupingMode === mode) {
@@ -62,7 +72,7 @@ export function MiniAppTasksPage(props: {
   return (
     <div className="miniAppSection">
       <div className="miniAppSegmented">
-        {(["designer", "brand", "show"] as MiniTaskGroupingMode[]).map((mode) => (
+        {groupingOptions.map((mode) => (
           <button
             key={mode}
             type="button"
