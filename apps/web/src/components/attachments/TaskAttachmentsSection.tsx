@@ -183,6 +183,13 @@ export function TaskAttachmentsSection(props: {
 
     const browserViewUrl = getBrowserAttachmentUrl(viewUrl);
     const browserDownloadUrl = attachment.links?.download ? getBrowserAttachmentUrl(attachment.links.download) : null;
+    const lowerViewUrl = browserViewUrl.toLowerCase();
+    const lowerDownloadUrl = browserDownloadUrl?.toLowerCase() ?? "";
+    const isPdfByUrl =
+      lowerViewUrl.includes(".pdf") ||
+      lowerDownloadUrl.includes(".pdf") ||
+      lowerViewUrl.includes("application/pdf") ||
+      lowerDownloadUrl.includes("application/pdf");
     const subtitleParts = [
       attachmentTypeLabel(attachment),
       formatBytes(attachment.sizeBytes),
@@ -252,7 +259,7 @@ export function TaskAttachmentsSection(props: {
       return;
     }
 
-    if (isPdfAttachment(attachment)) {
+    if (isPdfAttachment(attachment) || isPdfByUrl) {
       setPreviewState({
         open: true,
         title: attachment.name,

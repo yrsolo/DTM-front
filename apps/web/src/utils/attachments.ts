@@ -35,7 +35,9 @@ export function isLegacyWordAttachment(attachment: TaskAttachmentV1): boolean {
 export function isPdfAttachment(attachment: TaskAttachmentV1): boolean {
   const mime = attachment.mime.toLowerCase();
   const ext = fileExtension(attachment.name);
-  return mime === "application/pdf" || ext === "pdf";
+  if (mime === "application/pdf" || ext === "pdf") return true;
+  const kind = attachment.kind.trim().toLowerCase();
+  return kind.includes("pdf");
 }
 
 export function isImageAttachment(attachment: TaskAttachmentV1): boolean {
