@@ -443,10 +443,24 @@ export async function pollAttachmentJob(
   });
 }
 
-export async function fetchAttachmentArrayBuffer(url: string, signal?: AbortSignal): Promise<ArrayBuffer> {
+export async function fetchAttachmentArrayBuffer(url: string, signal?: AbortSignal): Promise<ArrayBuffer>;
+export async function fetchAttachmentArrayBuffer(
+  url: string,
+  options?: { signal?: AbortSignal; headers?: Record<string, string> }
+): Promise<ArrayBuffer>;
+export async function fetchAttachmentArrayBuffer(
+  url: string,
+  signalOrOptions?: AbortSignal | { signal?: AbortSignal; headers?: Record<string, string> }
+): Promise<ArrayBuffer> {
+  const isOptionsObject =
+    !!signalOrOptions && typeof signalOrOptions === "object" && "signal" in signalOrOptions;
+  const signal: AbortSignal | undefined = isOptionsObject
+    ? signalOrOptions.signal
+    : (signalOrOptions as AbortSignal | undefined);
+  const headers = isOptionsObject ? signalOrOptions.headers : undefined;
   const res = await fetch(url, {
     credentials: "include",
-    headers: { accept: "*/*" },
+    headers: { accept: "*/*", ...(headers ?? {}) },
     cache: "no-store",
     signal,
   });

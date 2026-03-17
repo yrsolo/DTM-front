@@ -15,6 +15,7 @@ export type AttachmentPreviewState =
       src?: string;
       downloadUrl?: string | null;
       debugInfo?: string | null;
+      pdfRequestHeaders?: Record<string, string> | null;
       closeLabel: string;
       downloadLabel: string;
       unavailableLabel: string;
@@ -104,7 +105,10 @@ export function AttachmentPreviewModal(props: { state: AttachmentPreviewState })
         pdfjsLib.GlobalWorkerOptions.workerSrc = workerUrl;
 
         if (!src) return;
-        const buffer = await fetchAttachmentArrayBuffer(src, abortController.signal);
+        const buffer = await fetchAttachmentArrayBuffer(src, {
+          signal: abortController.signal,
+          headers: state.pdfRequestHeaders ?? undefined,
+        });
         if (!isActive) return;
 
         const loadingTask = pdfjsLib.getDocument({ data: buffer });
