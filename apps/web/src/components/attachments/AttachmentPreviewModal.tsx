@@ -298,7 +298,7 @@ export function AttachmentPreviewModal(props: { state: AttachmentPreviewState })
         </div>
 
         <div className="attachmentPreviewBody">
-          {props.state.mode === "loading" ? <div className="miniAppNotice">Загрузка preview...</div> : null}
+          {props.state.mode === "loading" ? <div className="miniAppNotice">Загрузка превью...</div> : null}
           {props.state.mode === "error" ? <div className="miniAppNotice">{props.state.error}</div> : null}
           {props.state.mode === "image" && props.state.src ? (
             <div
@@ -346,7 +346,7 @@ export function AttachmentPreviewModal(props: { state: AttachmentPreviewState })
             >
               <div ref={setZoomContentRef} className="attachmentPreviewPdf" style={{ transform: previewTransform }}>
                 {pdfState.status === "loading" ? (
-                  <div className="attachmentPreviewPdfNotice">Готовим PDF для просмотра…</div>
+                  <div className="attachmentPreviewPdfNotice">Готовим PDF для просмотра...</div>
                 ) : null}
                 {pdfState.status === "error" ? (
                   <div className="attachmentPreviewPdfNotice">{pdfState.message}</div>

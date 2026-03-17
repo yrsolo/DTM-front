@@ -291,9 +291,57 @@ export function TaskAttachmentsSection(props: {
       return;
     }
 
-    if (!openInNewWindow(browserViewUrl)) {
-      setActionError(ui.drawer.attachmentsActionFailed);
+    // Try to resolve unknown attachments as PDF by inspecting headers.
+    try {
+      setPreviewState({
+        open: true,
+        title: attachment.name,
+        subtitle,
+        mode: "loading",
+        closeLabel: ui.drawer.close,
+        downloadLabel: ui.drawer.attachmentsDownload,
+        unavailableLabel: ui.drawer.attachmentsUnavailable,
+        downloadUrl: browserDownloadUrl,
+        onClose: () => setPreviewState({ open: false }),
+      });
+      const res = await fetch(browserViewUrl, {
+        method: "HEAD",
+        credentials: "include",
+        redirect: "follow",
+        cache: "no-store",
+      });
+      const contentType = res.headers.get("content-type")?.toLowerCase() ?? "";
+      if (contentType.includes("application/pdf")) {
+        setPreviewState({
+          open: true,
+          title: attachment.name,
+          subtitle,
+          mode: "pdf",
+          src: browserViewUrl,
+          closeLabel: ui.drawer.close,
+          downloadLabel: ui.drawer.attachmentsDownload,
+          unavailableLabel: ui.drawer.attachmentsUnavailable,
+          downloadUrl: browserDownloadUrl,
+          onClose: () => setPreviewState({ open: false }),
+        });
+        return;
+      }
+    } catch {
+      // fall through to browser handling
     }
+
+    setPreviewState({
+      open: true,
+      title: attachment.name,
+      subtitle,
+      mode: "pdf",
+      src: browserViewUrl,
+      closeLabel: ui.drawer.close,
+      downloadLabel: ui.drawer.attachmentsDownload,
+      unavailableLabel: ui.drawer.attachmentsUnavailable,
+      downloadUrl: browserDownloadUrl,
+      onClose: () => setPreviewState({ open: false }),
+    });
   }
 
   function handleDownload(attachment: TaskAttachmentV1) {
