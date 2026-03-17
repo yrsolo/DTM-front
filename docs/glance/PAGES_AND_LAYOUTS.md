@@ -138,6 +138,7 @@ Tooltip может быть шире карточки, чтобы milestone labe
 - upload control виден только admin и использует существующий backend upload contour без изменения snapshot contract;
 - при upload frontend нормализует MIME по расширению файла, если браузер или webview не прислал надёжный `File.type`; это покрывает `doc`, `docx`, `pdf` и текущие image-форматы;
 - desktop drawer принимает drag-and-drop upload по всей поверхности карточки задачи: при перетаскивании подсвечивается весь drawer, а drop в любое место карточки загружает файл в текущую задачу.
+- auto-refresh snapshot больше не идёт в “забытых” вкладках: polling работает только при активности пользователя, idle > 2 минут блокирует фоновые refresh.
 
 ## Страница `Админка`
 
