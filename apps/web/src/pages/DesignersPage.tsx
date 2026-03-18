@@ -5,6 +5,9 @@ import { LayoutContext } from "../components/Layout";
 import { LoadingState } from "../components/LoadingState";
 import { TaskDetailsDrawer } from "../components/TaskDetailsDrawer";
 import { Tooltip, TooltipState } from "../components/Tooltip";
+import { selectCurrentPersonLink } from "../data/selectors/sessionSelectors";
+import { taskMatchesCurrentPersonWithResolvedOwners } from "../data/selectors/taskSelectors";
+import { useResolvedOwnerNames } from "../data/useResolvedOwnerNames";
 import { DesignersTimeline } from "../gantt/DesignersTimeline";
 import { RenderTask } from "../gantt/types";
 import { useElementWidth } from "../utils/useElementWidth";
@@ -25,18 +28,27 @@ export function DesignersPage() {
   const { filters, snapshotState, design, authSession } = ctx;
   const { snapshot, isLoading, status, error, reloadLocal } = snapshotState;
   const rowH = design.tableRowHeight;
+  const currentPersonLink = selectCurrentPersonLink({
+    authSession: authSession.state,
+    snapshot,
+  });
   const canViewAllTasks =
     authSession.state.user?.role === "admin" || Boolean(authSession.state.user?.canViewAllTasks);
+  const resolvedOwnerNames = useResolvedOwnerNames(snapshot?.tasks ?? [], !canViewAllTasks && authSession.state.authenticated);
   const forcedOwnerId =
-    !canViewAllTasks && authSession.state.authenticated ? authSession.state.user?.personId ?? "" : "";
+    !canViewAllTasks && authSession.state.authenticated ? currentPersonLink.personId ?? "" : "";
 
   if (isLoading && !snapshot) return <LoadingState />;
   if (!snapshot && error) return <ErrorBanner error={error} onRetry={reloadLocal} />;
   if (!snapshot) return <EmptyState title="No data" description="Snapshot is empty." />;
+  const peopleById = new Map(snapshot.people.map((p) => [p.id, p.name]));
 
   const tasks = snapshot.tasks.filter((t) => {
-    const effectiveOwnerId = forcedOwnerId || filters.ownerId;
-    if (effectiveOwnerId && t.ownerId !== effectiveOwnerId) return false;
+    if (!canViewAllTasks && authSession.state.authenticated) {
+      if (!taskMatchesCurrentPersonWithResolvedOwners(t, currentPersonLink, resolvedOwnerNames, peopleById)) return false;
+    } else if (filters.ownerId && t.ownerId !== filters.ownerId) {
+      return false;
+    }
     if (filters.status && t.status !== filters.status) return false;
     if (filters.search && !t.title.toLowerCase().includes(filters.search.toLowerCase())) return false;
     return true;

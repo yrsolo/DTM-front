@@ -7,6 +7,9 @@ import { FiltersBar } from "../components/FiltersBar";
 import { LayoutContext } from "../components/Layout";
 import { TaskDetailsDrawer } from "../components/TaskDetailsDrawer";
 import { Tooltip, TooltipState } from "../components/Tooltip";
+import { selectCurrentPersonLink } from "../data/selectors/sessionSelectors";
+import { taskMatchesCurrentPersonWithResolvedOwners } from "../data/selectors/taskSelectors";
+import { useResolvedOwnerNames } from "../data/useResolvedOwnerNames";
 import { UnifiedTimeline } from "../gantt/UnifiedTimeline";
 import { RenderTask } from "../gantt/types";
 import { readMaskingMode, writeMaskingMode } from "../auth/maskingMode";
@@ -399,10 +402,15 @@ export function TimelinePage() {
     statusFilter,
     setStatusFilter,
   } = snapshotState;
+  const currentPersonLink = selectCurrentPersonLink({
+    authSession: authSession.state,
+    snapshot,
+  });
   const canViewAllTasks =
     authSession.state.user?.role === "admin" || Boolean(authSession.state.user?.canViewAllTasks);
+  const resolvedOwnerNames = useResolvedOwnerNames(snapshot?.tasks ?? [], !canViewAllTasks && authSession.state.authenticated);
   const forcedOwnerId =
-    !canViewAllTasks && authSession.state.authenticated ? authSession.state.user?.personId ?? "" : "";
+    !canViewAllTasks && authSession.state.authenticated ? currentPersonLink.personId ?? "" : "";
 
   React.useEffect(() => {
     try {
@@ -420,12 +428,8 @@ export function TimelinePage() {
 
   React.useEffect(() => {
     if (canViewAllTasks) return;
-    if (
-      viewMode === "designer_brand_show" ||
-      viewMode === "brand_designer_show" ||
-      viewMode === "show_brand_designer"
-    ) {
-      setViewMode("flat_brand_show");
+    if (viewMode === "designer_brand_show") {
+      setViewMode("brand_designer_show");
     }
   }, [canViewAllTasks, viewMode, setViewMode]);
   const rowH = design.tableRowHeight;
@@ -528,8 +532,11 @@ export function TimelinePage() {
   const statusLabels = snapshot.enums?.status ?? {};
 
   const tasks = snapshot.tasks.filter((t) => {
-    const effectiveOwnerId = forcedOwnerId || filters.ownerId;
-    if (effectiveOwnerId && t.ownerId !== effectiveOwnerId) return false;
+    if (!canViewAllTasks && authSession.state.authenticated) {
+      if (!taskMatchesCurrentPersonWithResolvedOwners(t, currentPersonLink, resolvedOwnerNames, peopleById)) return false;
+    } else if (filters.ownerId && t.ownerId !== filters.ownerId) {
+      return false;
+    }
     if (filters.status && t.status !== filters.status) return false;
     if (filters.search && !t.title.toLowerCase().includes(filters.search.toLowerCase())) return false;
     return true;
@@ -1225,15 +1232,13 @@ export function TimelinePage() {
                 {ui.modeByDesignerBrandShow}
               </button>
             ) : null}
-            {canViewAllTasks ? (
-              <button
-                type="button"
-                className={`modeMiniBtn ${viewMode === "brand_designer_show" ? "active" : ""}`}
-                onClick={() => setViewMode("brand_designer_show")}
-              >
-                {ui.modeByBrandDesignerShow}
-              </button>
-            ) : null}
+            <button
+              type="button"
+              className={`modeMiniBtn ${viewMode === "brand_designer_show" ? "active" : ""}`}
+              onClick={() => setViewMode("brand_designer_show")}
+            >
+              {ui.modeByBrandDesignerShow}
+            </button>
             <button
               type="button"
               className={`modeMiniBtn ${viewMode === "format_brand_show" ? "active" : ""}`}
@@ -1241,15 +1246,13 @@ export function TimelinePage() {
             >
               {ui.modeByFormatBrandShow}
             </button>
-            {canViewAllTasks ? (
-              <button
-                type="button"
-                className={`modeMiniBtn ${viewMode === "show_brand_designer" ? "active" : ""}`}
-                onClick={() => setViewMode("show_brand_designer")}
-              >
-                {ui.modeByShowBrandDesigner}
-              </button>
-            ) : null}
+            <button
+              type="button"
+              className={`modeMiniBtn ${viewMode === "show_brand_designer" ? "active" : ""}`}
+              onClick={() => setViewMode("show_brand_designer")}
+            >
+              {ui.modeByShowBrandDesigner}
+            </button>
             <button
               type="button"
               className={`modeMiniBtn ${viewMode === "flat_brand_show" ? "active" : ""}`}

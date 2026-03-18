@@ -7,108 +7,225 @@
       "x": 0,
       "y": 0,
       "name": "promo-v1",
-      "width": 1600,
-      "fill": "#090B18",
+      "width": 1440,
+      "fill": {
+        "type": "gradient",
+        "gradientType": "linear",
+        "enabled": true,
+        "opacity": 0.5,
+        "rotation": 180,
+        "size": {
+          "height": 1
+        },
+        "colors": [
+          {
+            "color": "#121215",
+            "position": 0
+          },
+          {
+            "color": "#141518",
+            "position": 0.35
+          },
+          {
+            "color": "#0d1013",
+            "position": 0.7
+          },
+          {
+            "color": "#151618",
+            "position": 1
+          }
+        ]
+      },
       "layout": "vertical",
-      "gap": 56,
+      "gap": 72,
       "padding": [
-        64,
-        72
+        35,
+        96
       ],
       "children": [
         {
           "type": "frame",
-          "id": "GWXlg",
-          "name": "hero",
+          "id": "ZJLye",
+          "name": "Hero",
           "width": "fill_container",
-          "gap": 28,
+          "height": 653,
+          "gap": 48,
           "children": [
             {
               "type": "frame",
-              "id": "IcGin",
-              "name": "left-character-slot",
-              "width": 220,
-              "height": 620,
-              "fill": "#10162D",
-              "cornerRadius": 32,
-              "stroke": {
-                "align": "inside",
-                "thickness": 1,
-                "fill": "#2B355E"
-              }
-            },
-            {
-              "type": "frame",
-              "id": "WFhkr",
-              "name": "hero-center",
-              "width": "fill_container",
+              "id": "VJxwD",
+              "name": "Hero Copy",
+              "width": 456,
               "layout": "vertical",
-              "gap": 24,
+              "gap": 18,
+              "padding": [
+                27,
+                0,
+                0,
+                0
+              ],
               "children": [
                 {
                   "type": "text",
-                  "id": "t1o1x",
-                  "name": "hero-eyebrow",
-                  "fill": "#8EEAD7",
-                  "content": "DTM promo landing",
-                  "fontFamily": "Inter",
-                  "fontSize": 18,
-                  "fontWeight": "600"
+                  "id": "353Wk",
+                  "name": "heroKicker",
+                  "fill": "#939192ff",
+                  "textGrowth": "fixed-width",
+                  "width": "fit_content(467)",
+                  "content": "МЕНЕДЖЕР ЗАДАЧ ДЛЯ ДИЗАЙН-КОМАНД",
+                  "fontFamily": "Roboto",
+                  "fontSize": 13,
+                  "fontWeight": "300",
+                  "letterSpacing": 1.4
                 },
                 {
                   "type": "text",
-                  "id": "OTpjq",
-                  "name": "hero-title",
-                  "fill": "#F4F7FF",
-                  "content": "Hero / central text flow / promo story",
-                  "fontFamily": "Inter",
-                  "fontSize": 56,
-                  "fontWeight": "700"
+                  "id": "m4pHU",
+                  "name": "heroTitle",
+                  "fill": "#cecac4ff",
+                  "textGrowth": "fixed-width",
+                  "width": 598,
+                  "content": "Таблица на входе.\nПорядок на выходе.",
+                  "lineHeight": 1,
+                  "fontFamily": "Roboto",
+                  "fontSize": 60,
+                  "fontWeight": "normal"
                 },
                 {
                   "type": "text",
-                  "id": "6onxI",
-                  "name": "hero-intro",
-                  "fill": "#AAB7DC",
-                  "content": "Short-first landing canvas. Pencil sketch source of truth for /promo.",
-                  "fontFamily": "Inter",
-                  "fontSize": 22
+                  "id": "q8EWR",
+                  "name": "heroLead",
+                  "fill": "#b1afafff",
+                  "textGrowth": "fixed-width-height",
+                  "width": "fit_content(472)",
+                  "height": "fit_content(151)",
+                  "content": "DTM превращает привычную рабочую таблицу в быстрый, живой и удобный инструмент для дизайн-команды. Без боли, лишних ритуалов и ощущения, что трекер задач снова победил человека.",
+                  "lineHeight": 1.43,
+                  "fontFamily": "Roboto",
+                  "fontSize": 17,
+                  "fontWeight": "normal"
                 },
                 {
                   "type": "frame",
-                  "id": "wVk7F",
-                  "name": "video-zone",
-                  "width": "fill_container",
-                  "height": 420,
-                  "fill": "#121933",
-                  "cornerRadius": 36,
-                  "stroke": {
-                    "align": "inside",
-                    "thickness": 1,
-                    "fill": "#34406C"
-                  },
-                  "layout": "vertical",
+                  "id": "elc99",
+                  "name": "ctaRow",
                   "gap": 12,
-                  "padding": 48,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "G2p4I",
+                      "name": "ctaPrimary",
+                      "fill": {
+                        "type": "gradient",
+                        "gradientType": "linear",
+                        "enabled": true,
+                        "rotation": 140,
+                        "size": {
+                          "height": 1
+                        },
+                        "colors": [
+                          {
+                            "color": "#FF8EC9E6",
+                            "position": 0
+                          },
+                          {
+                            "color": "#7A93FFEB",
+                            "position": 1
+                          }
+                        ]
+                      },
+                      "cornerRadius": 999,
+                      "stroke": {
+                        "align": "inside",
+                        "thickness": 1,
+                        "fill": "#FFFFFF22"
+                      },
+                      "padding": [
+                        12,
+                        22
+                      ],
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "RIHNQ",
+                          "name": "ctaPrimaryText",
+                          "fill": "#09111F",
+                          "content": "Открыть DTM",
+                          "fontFamily": "Manrope",
+                          "fontSize": 14,
+                          "fontWeight": "800"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "oclzB",
+                      "name": "ctaSecondary",
+                      "fill": "#0E1529",
+                      "cornerRadius": 999,
+                      "stroke": {
+                        "align": "inside",
+                        "thickness": 1,
+                        "fill": "#AFBFFF29"
+                      },
+                      "padding": [
+                        12,
+                        20
+                      ],
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "dMuEE",
+                          "name": "ctaSecondaryText",
+                          "fill": "#DCE4FF",
+                          "content": "Смотреть ниже",
+                          "fontFamily": "Manrope",
+                          "fontSize": 14,
+                          "fontWeight": "600"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "ELQze",
+                  "name": "statList",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": 10,
                   "children": [
                     {
                       "type": "text",
-                      "id": "te3N7",
-                      "name": "video-label",
-                      "fill": "#EAF0FF",
-                      "content": "Hero video player",
-                      "fontFamily": "Inter",
-                      "fontSize": 28,
-                      "fontWeight": "600"
+                      "id": "dMUwJ",
+                      "name": "stat1",
+                      "fill": "#D5DDF6",
+                      "content": "• Таблица остается рабочим источником правды",
+                      "fontFamily": "Manrope",
+                      "fontSize": 14,
+                      "fontWeight": "500"
                     },
                     {
                       "type": "text",
-                      "id": "2gOr0",
-                      "name": "video-meta",
-                      "fill": "#8EA0D6",
-                      "content": "Manual start player / dtm-presets video asset",
-                      "fontFamily": "Inter",
-                      "fontSize": 18
+                      "id": "M6Z9v",
+                      "name": "stat2",
+                      "fill": "#D5DDF6",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "• Команда видит сроки, этапы, файлы и дедлайны в одном интерфейсе",
+                      "fontFamily": "Manrope",
+                      "fontSize": 14,
+                      "fontWeight": "500"
+                    },
+                    {
+                      "type": "text",
+                      "id": "clkhy",
+                      "name": "stat3",
+                      "fill": "#D5DDF6",
+                      "content": "• Доступно с компьютера и телефона",
+                      "fontFamily": "Manrope",
+                      "fontSize": 14,
+                      "fontWeight": "500"
                     }
                   ]
                 }
@@ -116,78 +233,39 @@
             },
             {
               "type": "frame",
-              "id": "Qu1NC",
-              "name": "right-character-slot",
-              "width": 220,
-              "height": 620,
-              "fill": "#10162D",
-              "cornerRadius": 32,
-              "stroke": {
-                "align": "inside",
-                "thickness": 1,
-                "fill": "#2B355E"
-              }
-            }
-          ]
-        },
-        {
-          "type": "frame",
-          "id": "4ghC7",
-          "name": "content-sections",
-          "width": "fill_container",
-          "layout": "vertical",
-          "gap": 20,
-          "children": [
-            {
-              "type": "frame",
-              "id": "tKN8h",
-              "name": "story-block-01",
-              "width": "fill_container",
-              "fill": "#0F1428",
-              "cornerRadius": 28,
-              "stroke": {
-                "align": "inside",
-                "thickness": 1,
-                "fill": "#2A3357"
+              "id": "eNT55",
+              "name": "Hero Visual",
+              "clip": true,
+              "width": 826,
+              "height": 692,
+              "fill": {
+                "type": "image",
+                "opacity": 0,
+                "enabled": true,
+                "url": "../apps/web/public/promo/timeline-desktop.png",
+                "mode": "fill"
               },
-              "gap": 24,
-              "padding": [
-                24,
-                28
-              ],
+              "cornerRadius": 24,
+              "layout": "vertical",
               "children": [
                 {
-                  "type": "text",
-                  "id": "m3VXW",
-                  "name": "section-title",
-                  "fill": "#F4F7FF",
-                  "content": "Content block",
-                  "fontFamily": "Inter",
-                  "fontSize": 24,
-                  "fontWeight": "600"
+                  "type": "rectangle",
+                  "id": "ZkIxP",
+                  "fill": "#cccccc00",
+                  "width": 798,
+                  "height": 59
                 },
                 {
-                  "type": "text",
-                  "id": "Vfrtb",
-                  "name": "section-copy",
-                  "fill": "#AAB7DC",
-                  "content": "Each block will switch between short and full text without leaving the layout.",
-                  "fontFamily": "Inter",
-                  "fontSize": 18
-                },
-                {
-                  "type": "frame",
-                  "id": "Artwo",
-                  "name": "toggle-slot",
-                  "width": 160,
-                  "height": 48,
-                  "fill": "#1C2344",
-                  "cornerRadius": 999,
-                  "stroke": {
-                    "align": "inside",
-                    "thickness": 1,
-                    "fill": "#5968A8"
-                  }
+                  "type": "rectangle",
+                  "id": "yWqd2",
+                  "fill": {
+                    "type": "image",
+                    "enabled": true,
+                    "url": "../ref/02/pl 01.webp",
+                    "mode": "fill"
+                  },
+                  "width": 809,
+                  "height": 605
                 }
               ]
             }
@@ -195,18 +273,542 @@
         },
         {
           "type": "frame",
-          "id": "KdV5W",
-          "name": "cta-zone",
+          "id": "CNpjV",
+          "name": "Video Strip",
           "width": "fill_container",
-          "fill": "#10162D",
-          "cornerRadius": 32,
+          "gap": 40,
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "CpBnF",
+              "name": "videoCopy",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 14,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "OI981",
+                  "name": "videoKicker",
+                  "fill": "#95A9DE",
+                  "content": "Видео",
+                  "fontFamily": "Manrope",
+                  "fontSize": 12,
+                  "fontWeight": "700",
+                  "letterSpacing": 2.4
+                },
+                {
+                  "type": "text",
+                  "id": "rworP",
+                  "name": "videoTitle",
+                  "fill": "#F7F8FE",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "Короткий обзор работы DTM",
+                  "fontFamily": "Manrope",
+                  "fontSize": 28,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "text",
+                  "id": "T8RAk",
+                  "name": "videoText",
+                  "fill": "#B6C1DD",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "Видео остается на странице, но больше не спорит с первым экраном. Здесь можно быстро увидеть живой ритм продукта, не ломая главный hero-фокус.",
+                  "lineHeight": 1.8,
+                  "fontFamily": "Manrope",
+                  "fontSize": 17,
+                  "fontWeight": "500"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "O7gVp",
+              "name": "Video Card",
+              "clip": true,
+              "width": 520,
+              "height": 320,
+              "fill": "#0F1529",
+              "cornerRadius": 24,
+              "stroke": {
+                "align": "inside",
+                "thickness": 1,
+                "fill": "#2B3457"
+              },
+              "layout": "none",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "FkY7y",
+                  "x": 0,
+                  "y": 0,
+                  "name": "videoImage",
+                  "width": 520,
+                  "height": 320,
+                  "fill": {
+                    "type": "image",
+                    "enabled": true,
+                    "url": "../apps/web/public/promo/timeline-desktop.png",
+                    "mode": "fill"
+                  }
+                },
+                {
+                  "type": "ellipse",
+                  "id": "OF9lb",
+                  "x": 216,
+                  "y": 110,
+                  "name": "playCircle",
+                  "fill": {
+                    "type": "gradient",
+                    "gradientType": "linear",
+                    "enabled": true,
+                    "rotation": 140,
+                    "size": {
+                      "height": 1
+                    },
+                    "colors": [
+                      {
+                        "color": "#FF8EC9E6",
+                        "position": 0
+                      },
+                      {
+                        "color": "#7A93FFEB",
+                        "position": 1
+                      }
+                    ]
+                  },
+                  "width": 88,
+                  "height": 88
+                },
+                {
+                  "type": "text",
+                  "id": "Ylk1j",
+                  "x": 248,
+                  "y": 140,
+                  "name": "playIcon",
+                  "fill": "#1A0E2A",
+                  "content": "▶",
+                  "fontFamily": "Manrope",
+                  "fontSize": 28,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "text",
+                  "id": "wK9E0",
+                  "x": 200,
+                  "y": 214,
+                  "name": "playLabel",
+                  "fill": "#F7F8FE",
+                  "content": "Запустить ролик",
+                  "fontFamily": "Manrope",
+                  "fontSize": 14,
+                  "fontWeight": "600"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "e6YWF",
+          "name": "Editorial",
+          "width": 554,
+          "layout": "vertical",
+          "gap": 16,
+          "children": [
+            {
+              "type": "text",
+              "id": "2ZS0U",
+              "name": "editorialKicker",
+              "fill": "#95A9DE",
+              "content": "Почему это вообще нужно",
+              "fontFamily": "Manrope",
+              "fontSize": 12,
+              "fontWeight": "700",
+              "letterSpacing": 2.4
+            },
+            {
+              "type": "text",
+              "id": "bVPZT",
+              "name": "editorialTitle",
+              "fill": "#F7F8FE",
+              "textGrowth": "fixed-width",
+              "width": "fill_container",
+              "content": "Команды уходят в таблицы не потому, что любят хаос. А потому, что там все еще быстрее.",
+              "fontFamily": "Manrope",
+              "fontSize": 30,
+              "fontWeight": "700"
+            },
+            {
+              "type": "text",
+              "id": "cNoXK",
+              "name": "editorialBody",
+              "fill": "#B6C1DD",
+              "textGrowth": "fixed-width",
+              "width": "fill_container",
+              "content": "Таблица побеждает там, где проект живет в постоянных правках. Открыли, переставили, сохранили, пошли дальше.",
+              "lineHeight": 1.8,
+              "fontFamily": "Manrope",
+              "fontSize": 17,
+              "fontWeight": "500"
+            },
+            {
+              "type": "text",
+              "id": "eXXbY",
+              "name": "editorialToggle",
+              "fill": "#F2D1FF",
+              "content": "Подробнее",
+              "fontFamily": "Manrope",
+              "fontSize": 14,
+              "fontWeight": "600"
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "I2pf8",
+          "name": "Showcase Timeline",
+          "width": "fill_container",
+          "gap": 48,
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "fieA3",
+              "name": "sc1Copy",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 14,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "304OJ",
+                  "name": "sc1Kicker",
+                  "fill": "#95A9DE",
+                  "content": "Таймлайн",
+                  "fontFamily": "Manrope",
+                  "fontSize": 12,
+                  "fontWeight": "700",
+                  "letterSpacing": 2.4
+                },
+                {
+                  "type": "text",
+                  "id": "ZgShW",
+                  "name": "sc1Title",
+                  "fill": "#F7F8FE",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "DTM сохраняет скорость таблицы, но отдает команде уже собранную картину дня.",
+                  "fontFamily": "Manrope",
+                  "fontSize": 26,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "text",
+                  "id": "CvZUx",
+                  "name": "sc1Body",
+                  "fill": "#B6C1DD",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "Менеджер продолжает быстро менять план там, где ему удобно. Команда видит уже не сырой лист, а живой таймлайн по задачам, срокам и этапам.",
+                  "lineHeight": 1.8,
+                  "fontFamily": "Manrope",
+                  "fontSize": 17,
+                  "fontWeight": "500"
+                },
+                {
+                  "type": "text",
+                  "id": "A6R8a",
+                  "name": "sc1Toggle",
+                  "fill": "#F2D1FF",
+                  "content": "Подробнее",
+                  "fontFamily": "Manrope",
+                  "fontSize": 14,
+                  "fontWeight": "600"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "xLhpm",
+              "name": "sc1Visual",
+              "clip": true,
+              "width": 720,
+              "height": 420,
+              "fill": {
+                "type": "image",
+                "enabled": true,
+                "url": "../apps/web/public/promo/timeline-desktop.png",
+                "mode": "fill"
+              },
+              "cornerRadius": 24
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "4vp0i",
+          "name": "Showcase Drawer",
+          "width": "fill_container",
+          "gap": 48,
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "jMAcK",
+              "name": "sc2Visual",
+              "clip": true,
+              "width": 640,
+              "height": 420,
+              "fill": {
+                "type": "image",
+                "enabled": true,
+                "url": "../apps/web/public/promo/task-drawer.png",
+                "mode": "fill"
+              },
+              "cornerRadius": 24
+            },
+            {
+              "type": "frame",
+              "id": "CKegE",
+              "name": "sc2Copy",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 14,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "sCH59",
+                  "name": "sc2Kicker",
+                  "fill": "#95A9DE",
+                  "content": "Карточка задачи",
+                  "fontFamily": "Manrope",
+                  "fontSize": 12,
+                  "fontWeight": "700",
+                  "letterSpacing": 2.4
+                },
+                {
+                  "type": "text",
+                  "id": "jRAxs",
+                  "name": "sc2Title",
+                  "fill": "#F7F8FE",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "Детали проекта больше не расползаются по чатам, файлам и случайным заметкам.",
+                  "fontFamily": "Manrope",
+                  "fontSize": 26,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "text",
+                  "id": "NPcRV",
+                  "name": "sc2Body",
+                  "fill": "#B6C1DD",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "Открываешь одну задачу и сразу видишь этапы, сроки, вложения, историю и все то, ради чего раньше приходилось прыгать между экранами.",
+                  "lineHeight": 1.8,
+                  "fontFamily": "Manrope",
+                  "fontSize": 17,
+                  "fontWeight": "500"
+                },
+                {
+                  "type": "text",
+                  "id": "QL90w",
+                  "name": "sc2Toggle",
+                  "fill": "#F2D1FF",
+                  "content": "Подробнее",
+                  "fontFamily": "Manrope",
+                  "fontSize": 14,
+                  "fontWeight": "600"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "kU0uR",
+          "name": "Showcase Mobile",
+          "width": "fill_container",
+          "gap": 48,
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "GHKGl",
+              "name": "sc3Copy",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 14,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "3aQQ5",
+                  "name": "sc3Kicker",
+                  "fill": "#95A9DE",
+                  "content": "Телефон",
+                  "fontFamily": "Manrope",
+                  "fontSize": 12,
+                  "fontWeight": "700",
+                  "letterSpacing": 2.4
+                },
+                {
+                  "type": "text",
+                  "id": "kUHBC",
+                  "name": "sc3Title",
+                  "fill": "#F7F8FE",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "Система не заканчивается на десктопе. Рабочая картина доступна и с телефона.",
+                  "fontFamily": "Manrope",
+                  "fontSize": 26,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "text",
+                  "id": "DxmYb",
+                  "name": "sc3Body",
+                  "fill": "#B6C1DD",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "Когда нужно быстро посмотреть задачу, дедлайн или вложение, не приходится ждать, пока откроется тяжелый офисный ритуал.",
+                  "lineHeight": 1.8,
+                  "fontFamily": "Manrope",
+                  "fontSize": 17,
+                  "fontWeight": "500"
+                },
+                {
+                  "type": "text",
+                  "id": "4XmMk",
+                  "name": "sc3Toggle",
+                  "fill": "#F2D1FF",
+                  "content": "Подробнее",
+                  "fontFamily": "Manrope",
+                  "fontSize": 14,
+                  "fontWeight": "600"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "95241",
+              "name": "sc3Visual",
+              "clip": true,
+              "width": 300,
+              "height": 520,
+              "fill": {
+                "type": "image",
+                "enabled": true,
+                "url": "../apps/web/public/promo/mobile-view.png",
+                "mode": "fill"
+              },
+              "cornerRadius": 28
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "E8pbM",
+          "name": "Summary",
+          "width": "fill_container",
+          "fill": "#0F1529",
+          "cornerRadius": 24,
           "stroke": {
             "align": "inside",
             "thickness": 1,
-            "fill": "#2E3962"
+            "fill": "#2B355E"
           },
           "layout": "vertical",
           "gap": 16,
+          "padding": [
+            24,
+            28
+          ],
+          "children": [
+            {
+              "type": "text",
+              "id": "sNI0Q",
+              "name": "summaryKicker",
+              "fill": "#95A9DE",
+              "content": "Под капотом",
+              "fontFamily": "Manrope",
+              "fontSize": 12,
+              "fontWeight": "700",
+              "letterSpacing": 2.4
+            },
+            {
+              "type": "text",
+              "id": "EYgZP",
+              "name": "summaryTitle",
+              "fill": "#F7F8FE",
+              "textGrowth": "fixed-width",
+              "width": "fill_container",
+              "content": "Безопасность, аналитика и рабочая дисциплина встроены в продукт, а не прикручены сверху.",
+              "fontFamily": "Manrope",
+              "fontSize": 24,
+              "fontWeight": "700"
+            },
+            {
+              "type": "text",
+              "id": "LpMHP",
+              "name": "summaryBody",
+              "fill": "#B6C1DD",
+              "textGrowth": "fixed-width",
+              "width": "fill_container",
+              "content": "Yandex auth, viewer-safe режимы, временные ссылки, уведомления, файлы, PDF-превью и аналитика по отделу работают как единая связка.",
+              "lineHeight": 1.8,
+              "fontFamily": "Manrope",
+              "fontSize": 16,
+              "fontWeight": "500"
+            },
+            {
+              "type": "text",
+              "id": "t5aUL",
+              "name": "summaryToggle",
+              "fill": "#F2D1FF",
+              "content": "Подробнее",
+              "fontFamily": "Manrope",
+              "fontSize": 14,
+              "fontWeight": "600"
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "JjpaE",
+          "name": "Final CTA",
+          "width": "fill_container",
+          "fill": {
+            "type": "gradient",
+            "gradientType": "linear",
+            "enabled": true,
+            "rotation": 150,
+            "size": {
+              "height": 1
+            },
+            "colors": [
+              {
+                "color": "#1A102E",
+                "position": 0
+              },
+              {
+                "color": "#3E3B8E",
+                "position": 0.55
+              },
+              {
+                "color": "#7C6DF1",
+                "position": 1
+              }
+            ]
+          },
+          "cornerRadius": 28,
+          "layout": "vertical",
+          "gap": 18,
           "padding": [
             28,
             32
@@ -214,26 +816,256 @@
           "children": [
             {
               "type": "text",
-              "id": "kRu5v",
-              "name": "cta-title",
-              "fill": "#F4F7FF",
-              "content": "Final CTA zone",
-              "fontFamily": "Inter",
-              "fontSize": 32,
+              "id": "kv6pG",
+              "name": "ctaKicker",
+              "fill": "#D6CCFF",
+              "content": "Финальный CTA",
+              "fontFamily": "Manrope",
+              "fontSize": 12,
+              "fontWeight": "700",
+              "letterSpacing": 2.4
+            },
+            {
+              "type": "text",
+              "id": "JEi3J",
+              "name": "ctaTitle",
+              "fill": "#F7F8FE",
+              "textGrowth": "fixed-width",
+              "width": "fill_container",
+              "content": "Если ваши задачи все равно живут в таблице, пусть хотя бы выход из нее будет красивым.",
+              "fontFamily": "Manrope",
+              "fontSize": 30,
               "fontWeight": "700"
             },
             {
               "type": "text",
-              "id": "3n4R5",
-              "name": "cta-copy",
-              "fill": "#AAB7DC",
-              "content": "Primary action will lead to the regular DTM entry point.",
-              "fontFamily": "Inter",
-              "fontSize": 18
+              "id": "y1odp",
+              "name": "ctaBody",
+              "fill": "#D3D7FF",
+              "textGrowth": "fixed-width",
+              "width": "fill_container",
+              "content": "DTM создан для команд, которые хотят меньше бороться с инструментом и быстрее видеть реальную картину работы.",
+              "lineHeight": 1.8,
+              "fontFamily": "Manrope",
+              "fontSize": 16,
+              "fontWeight": "500"
+            },
+            {
+              "type": "frame",
+              "id": "ZquKw",
+              "name": "ctaRow",
+              "gap": 12,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "e0QH6",
+                  "name": "ctaButton",
+                  "fill": {
+                    "type": "gradient",
+                    "gradientType": "linear",
+                    "enabled": true,
+                    "rotation": 140,
+                    "size": {
+                      "height": 1
+                    },
+                    "colors": [
+                      {
+                        "color": "#FF8EC9E6",
+                        "position": 0
+                      },
+                      {
+                        "color": "#7A93FFEB",
+                        "position": 1
+                      }
+                    ]
+                  },
+                  "cornerRadius": 999,
+                  "stroke": {
+                    "align": "inside",
+                    "thickness": 1,
+                    "fill": "#FFFFFF22"
+                  },
+                  "padding": [
+                    12,
+                    22
+                  ],
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "5TYz4",
+                      "name": "ctaButtonText",
+                      "fill": "#09111F",
+                      "content": "Открыть DTM",
+                      "fontFamily": "Manrope",
+                      "fontSize": 14,
+                      "fontWeight": "800"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "VVFGf",
+                  "name": "ctaToggle",
+                  "fill": "#141833",
+                  "cornerRadius": 999,
+                  "stroke": {
+                    "align": "inside",
+                    "thickness": 1,
+                    "fill": "#AFBFFF29"
+                  },
+                  "padding": [
+                    12,
+                    20
+                  ],
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "njwgP",
+                      "name": "ctaToggleText",
+                      "fill": "#E5E9FF",
+                      "content": "Свернуть",
+                      "fontFamily": "Manrope",
+                      "fontSize": 14,
+                      "fontWeight": "600"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "okVCT",
+          "name": "Footer",
+          "width": "fill_container",
+          "gap": 24,
+          "padding": [
+            8,
+            0,
+            0,
+            0
+          ],
+          "justifyContent": "space_between",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "AoWYR",
+              "name": "footerLeft",
+              "layout": "vertical",
+              "gap": 6,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "uH31e",
+                  "name": "footerBrand",
+                  "fill": "#F7F8FE",
+                  "content": "DTM",
+                  "fontFamily": "Manrope",
+                  "fontSize": 16,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "text",
+                  "id": "uP715",
+                  "name": "footerTagline",
+                  "fill": "#A8B4D8",
+                  "content": "Рабочий слой над таблицей для дизайн-команд.",
+                  "fontFamily": "Manrope",
+                  "fontSize": 13,
+                  "fontWeight": "500"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "g64xn",
+              "name": "footerLinks",
+              "gap": 16,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "dWCYm",
+                  "name": "footerLink1",
+                  "fill": "#DCE4FF",
+                  "content": "Открыть DTM",
+                  "fontFamily": "Manrope",
+                  "fontSize": 13,
+                  "fontWeight": "600"
+                },
+                {
+                  "type": "text",
+                  "id": "CFUkt",
+                  "name": "footerLink2",
+                  "fill": "#DCE4FF",
+                  "content": "Секции",
+                  "fontFamily": "Manrope",
+                  "fontSize": 13,
+                  "fontWeight": "600"
+                }
+              ]
             }
           ]
         }
       ]
+    },
+    {
+      "type": "rectangle",
+      "id": "nw3to",
+      "x": -46.48507462686598,
+      "y": -39.954128440366844,
+      "enabled": false,
+      "fill": {
+        "type": "image",
+        "opacity": 0.5,
+        "enabled": true,
+        "url": "../ref/02/hf_20260316_210039_9166e0bd-06cb-4985-a597-7053558176f8.png",
+        "mode": "fill"
+      },
+      "width": 1533,
+      "height": 856
+    },
+    {
+      "type": "text",
+      "id": "3owJH",
+      "x": 397,
+      "y": -80,
+      "fill": "#ffffff",
+      "fontFamily": "Inter",
+      "fontSize": 16,
+      "fontWeight": "normal"
+    },
+    {
+      "type": "rectangle",
+      "id": "K5Vod",
+      "x": -42.98507462686575,
+      "y": -38,
+      "enabled": false,
+      "fill": {
+        "type": "image",
+        "opacity": 0.5,
+        "enabled": true,
+        "url": "../ref/02/hf_20260316_210039_9166e0bd-06cb-4985-a597-7053558176f8.png",
+        "mode": "fill"
+      },
+      "width": 1526,
+      "height": 852
+    },
+    {
+      "type": "rectangle",
+      "id": "umc2A",
+      "x": -42.98507462686575,
+      "y": -38,
+      "enabled": false,
+      "fill": {
+        "type": "image",
+        "enabled": true,
+        "url": "../ref/02/hf_20260316_210039_9166e0bd-06cb-4985-a597-7053558176f8.png",
+        "mode": "fill"
+      },
+      "width": 1526,
+      "height": 852
     }
   ],
   "themes": {

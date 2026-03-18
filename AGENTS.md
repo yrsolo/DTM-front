@@ -29,6 +29,23 @@ If missing, execution/planning must not continue.
   - `work/roadmap/README.md`
   - `work/roadmap/campaigns/<CAM>/{charter,plan,evidence}.md`
 
+## Penpot MCP workflow
+- For local Penpot work, prefer repo tooling over Codex built-in MCP integration.
+- Use:
+  - `npm run penpot:tools`
+  - `npm run penpot:selection`
+  - `node scripts/penpot_cli.mjs execute-code --code "..."`
+  - `node scripts/penpot_cli.mjs page-structure --max-depth 3`
+  - `node scripts/penpot_cli.mjs find-shapes --name "<NAME>"`
+- Primary entrypoint: `scripts/penpot_cli.mjs`
+- Supporting client/config:
+  - `scripts/penpot_mcp_client.mjs`
+  - `scripts/penpot_config.mjs`
+- Reference docs: `docs/deep/PENPOT_MCP.md`
+- Assumption: local Penpot MCP server is tools-only; do not depend on MCP resources discovery.
+- The Penpot MCP plugin UI must stay open in Penpot while commands are running.
+- If Codex built-in MCP calls time out, do not spend time re-debugging that first; use the repo CLI path unless the owner explicitly asks for MCP client diagnostics.
+
 ## Quality gate before commit
 - No secret leaks.
 - `npm test` / `npm run build` (or relevant) passes for changed areas.

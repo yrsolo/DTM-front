@@ -3463,9 +3463,17 @@ button:hover {
   grid-template-columns: 1fr;
   gap: 10px;
   min-height: 0;
+  min-width: 408px;
   align-content: start;
-  justify-items: start;
+  justify-items: stretch;
   text-align: left;
+}
+
+.adminUserHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
 }
 
 .adminUserAvatar {
@@ -3501,7 +3509,6 @@ button:hover {
 }
 
 .adminUserRole {
-  margin-top: 4px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -3513,6 +3520,8 @@ button:hover {
   background: rgba(27, 36, 76, 0.7);
   font-size: 12px;
   color: #d7e5ff;
+  margin-left: auto;
+  flex: 0 0 auto;
 }
 
 .adminUserRole.isAdmin {
@@ -3546,11 +3555,11 @@ button:hover {
 }
 
 .adminUserActions {
-  display: flex;
-  flex-wrap: nowrap;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: 8px;
-  margin-top: 2px;
-  justify-content: flex-start;
+  margin-top: 4px;
+  align-items: stretch;
 }
 
 .adminUserToggle {
@@ -3564,14 +3573,22 @@ button:hover {
   border: 1px solid rgba(137, 164, 255, 0.22);
   background: rgba(20, 26, 52, 0.6);
   white-space: nowrap;
+  width: fit-content;
 }
 
 .adminUserToggle input {
   accent-color: #8fd6ff;
 }
 
+.adminUserActions > :first-child {
+  grid-column: 1 / -1;
+  justify-self: start;
+}
+
 .adminUserActions > button {
   white-space: nowrap;
+  min-width: 0;
+  justify-content: center;
 }
 
 .adminPresetToolbar {

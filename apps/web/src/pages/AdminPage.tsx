@@ -324,7 +324,10 @@ function UserCardContent(props: {
 }) {
   return (
     <>
-      <UserAvatar name={props.user.displayName} email={props.user.email} avatarUrl={props.user.avatarUrl} />
+      <div className="adminUserHeader">
+        <UserAvatar name={props.user.displayName} email={props.user.email} avatarUrl={props.user.avatarUrl} />
+        {props.roleText ? <div className={`adminUserRole ${props.roleClassName ?? ""}`}>{props.roleText}</div> : null}
+      </div>
       <div className="adminUserBody">
         <div className="adminUserName">{props.user.displayName || props.user.email || props.user.id}</div>
         <div className="muted">{props.user.email || "Email не указан"}</div>
@@ -332,7 +335,6 @@ function UserCardContent(props: {
         {props.user.telegramId ? <div className="muted">Telegram ID: {props.user.telegramId}</div> : null}
         {props.user.telegramUsername ? <div className="muted">Telegram: @{props.user.telegramUsername}</div> : null}
         <div className="muted">Заявка: {formatDateTime(props.user.requestedAt)}</div>
-        {props.roleText ? <div className={`adminUserRole ${props.roleClassName ?? ""}`}>{props.roleText}</div> : null}
       </div>
       <div className="adminUserActions">{props.actions}</div>
     </>

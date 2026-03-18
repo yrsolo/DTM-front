@@ -20,3 +20,5 @@ Thumbs.db
 # Local infra snapshots
 config/API_Gateway.yaml
 .tmp.release.json
+
+ref

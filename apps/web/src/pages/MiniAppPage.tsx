@@ -12,6 +12,7 @@ import {
   selectTaskById,
   sortTasksForMobile,
 } from "../data/selectors/taskSelectors";
+import { useResolvedOwnerNames } from "../data/useResolvedOwnerNames";
 import { resolveMilestoneTone } from "../utils/milestoneTone";
 import { MiniAppProfilePage } from "./MiniAppProfilePage";
 import { MiniAppTasksPage } from "./MiniAppTasksPage";
@@ -72,9 +73,10 @@ export function MobileAppPage(props: { mode: MobileSurfaceMode }) {
   );
   const canViewAllTasks =
     authSession.state.user?.role === "admin" || Boolean(authSession.state.user?.canViewAllTasks);
+  const resolvedOwnerNames = useResolvedOwnerNames(snapshot?.tasks ?? [], !canViewAllTasks && Boolean(currentPerson.personName));
   const scopedTasks = canViewAllTasks
     ? sortTasksForMobile(selectAllTasks(snapshot))
-    : sortTasksForMobile(selectMyTasks(snapshot, currentPerson.personId));
+    : sortTasksForMobile(selectMyTasks(snapshot, currentPerson, resolvedOwnerNames, peopleById));
   const taskItems = React.useMemo<MiniTaskListItem[]>(
     () =>
       scopedTasks.map((task) => ({
@@ -101,7 +103,7 @@ export function MobileAppPage(props: { mode: MobileSurfaceMode }) {
         items={taskItems}
         surfaceMode={props.mode}
         canViewAllTasks={canViewAllTasks}
-        unresolvedPersonLink={!currentPerson.personId}
+        unresolvedPersonLink={!currentPerson.personId && !currentPerson.personName}
         authState={authSession.state}
         onOpenTask={setSelectedTaskId}
       />
