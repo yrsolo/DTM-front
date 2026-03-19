@@ -1,3 +1,4 @@
+import React from "react";
 import { BrowserRouter, Navigate, Route, Routes, useLocation } from "react-router-dom";
 
 import { Layout } from "../components/Layout";
@@ -6,6 +7,10 @@ import { AdminPage } from "../pages/AdminPage";
 import { MiniAppPage, MobileWebPage } from "../pages/MiniAppPage";
 import { PromoPage } from "../pages/PromoPage";
 import { TimelinePage } from "../pages/TimelinePage";
+
+const FormatSortPage = React.lazy(() =>
+  import("../pages/FormatSortPage").then((module) => ({ default: module.FormatSortPage }))
+);
 
 function isTabletUserAgent(userAgent: string): boolean {
   return /iPad|Tablet|PlayBook|Silk|(Android(?!.*Mobile))/i.test(userAgent);
@@ -45,6 +50,14 @@ export function App() {
         <Routes>
           <Route path="/" element={<TimelineEntryPage />} />
           <Route path="/promo" element={<PromoPage />} />
+          <Route
+            path="/format-sort"
+            element={
+              <React.Suspense fallback={<div className="card">Loading format lab...</div>}>
+                <FormatSortPage />
+              </React.Suspense>
+            }
+          />
           <Route path="/app" element={<MiniAppPage />} />
           <Route path="/m" element={<MobileWebPage />} />
           <Route path="/mobile" element={<MobileWebPage />} />

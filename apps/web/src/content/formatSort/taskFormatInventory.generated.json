@@ -1,0 +1,5108 @@
+[
+  {
+    "rawValue": "дин.лого",
+    "normalizedRawValue": "дин лого",
+    "count": 142,
+    "sampleTasks": [
+      {
+        "id": "0036614f-4957-4e3c-9a66-ca159440356c",
+        "title": "Tefal  [Время завтрака] дин.лого"
+      },
+      {
+        "id": "0097eab3-c975-4243-8205-beeb1df99bda",
+        "title": "Нацпроекты  [ШВ] дин.лого"
+      },
+      {
+        "id": "01450500-0a3e-4152-a46f-4cfca9042e2a",
+        "title": "Компливит  [Утро] дин.лого"
+      }
+    ],
+    "autoMatchFormatId": "dynamic_logo",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "граф. ролик",
+    "normalizedRawValue": "граф ролик",
+    "count": 122,
+    "sampleTasks": [
+      {
+        "id": "00017f0b-b9b2-44b6-8c7f-9efd5df5bf7a",
+        "title": "Cool Cola [СОКР ИМП] граф. ролик"
+      },
+      {
+        "id": "096235b7-7fdf-4fb6-bb05-6c698d45d9e6",
+        "title": "Белая дача [Титаны] граф.ролик"
+      },
+      {
+        "id": "0a88aa54-4478-4795-8c95-4ffd185a7342",
+        "title": "ХАЛВА [ТНТ4] Граф ролик"
+      }
+    ],
+    "autoMatchFormatId": "grafrolik",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "брендинг",
+    "normalizedRawValue": "брендинг",
+    "count": 112,
+    "sampleTasks": [
+      {
+        "id": "018a14ab-12b0-44f0-be45-bff2183bb17f",
+        "title": "AWARD [ШВ] брендинг"
+      },
+      {
+        "id": "01bc25a7-c3ea-47b8-b31b-ae5b9574a5c4",
+        "title": "Уралсиб [Камеди ] брендинг"
+      },
+      {
+        "id": "0308f57d-c1b9-48ad-9b34-681a2ba13713",
+        "title": "Я. ПЛЮС [Фабрика звезд] Брендинг"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "3D лого",
+    "normalizedRawValue": "3d лого",
+    "count": 26,
+    "sampleTasks": [
+      {
+        "id": "00fada25-2802-418a-8379-e4d8b3c8ae62",
+        "title": "RUTUBE [Невеста для экстрасенса] 3D лого"
+      },
+      {
+        "id": "0bd304a2-908d-447f-b372-1d6133ba48df",
+        "title": "ВТБ [Большой Хит ] 3D лого"
+      },
+      {
+        "id": "183b218d-5df6-44ca-afe6-33794f6512e5",
+        "title": "RUTUBE [ЗВА ] 3D лого"
+      }
+    ],
+    "autoMatchFormatId": "logo_3d",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "динлого",
+    "normalizedRawValue": "динлого",
+    "count": 22,
+    "sampleTasks": [
+      {
+        "id": "153b2935-9796-499b-ad6b-88805227a986",
+        "title": "RED [ЗВА] динлого"
+      },
+      {
+        "id": "2a59021d-7ef6-4895-9fe6-f0a16865f2ce",
+        "title": "FUNKY MONKEY [ШВ] Динлого"
+      },
+      {
+        "id": "2e0a5b54-5a11-4d56-9ae6-a6143ecc3cd7",
+        "title": "VK МУЗЫКА [КОНФЕТКА] Динлого"
+      }
+    ],
+    "autoMatchFormatId": "dynamic_logo",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "3D",
+    "normalizedRawValue": "3d",
+    "count": 21,
+    "sampleTasks": [
+      {
+        "id": "0cbfe387-c526-40d5-932a-4638ca158472",
+        "title": "АЛЬФА [СОКР ИМП ] 3D"
+      },
+      {
+        "id": "35e609fc-1c5b-4f65-b924-5760aba1d53d",
+        "title": "Энтерофурил [Б КУШ] 3D"
+      },
+      {
+        "id": "3bdf9b7a-19d0-48f8-a760-f115e9a40295",
+        "title": "ДОДО [ЭФИР] 3D"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "стоп-кадр",
+    "normalizedRawValue": "стоп кадр",
+    "count": 21,
+    "sampleTasks": [
+      {
+        "id": "076c1d7b-7268-4f83-96d2-3cc4ba243bf9",
+        "title": "Спортлото  [Эфир ] стоп-кадр"
+      },
+      {
+        "id": "0e76a7d9-fe47-4f2e-b0f3-3aa27e858ace",
+        "title": "SHU [Б_ЭКСТР] стоп-кадр"
+      },
+      {
+        "id": "11bffc5c-9bcb-4481-b468-62b3095b0755",
+        "title": "Билайн  [к сериалу(эфир)] стоп-кадр"
+      }
+    ],
+    "autoMatchFormatId": "still_frame",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "адаптация",
+    "normalizedRawValue": "адаптация",
+    "count": 18,
+    "sampleTasks": [
+      {
+        "id": "0a48773e-c07c-49db-a96f-cf717c5e0c48",
+        "title": "Бондюэль  [Звезды в Джунглях ] адаптация"
+      },
+      {
+        "id": "19971ab1-9d52-49de-ad5c-8f3b187724c8",
+        "title": "Hyper  [Титаны] адаптация"
+      },
+      {
+        "id": "30c4ed0d-8ef4-489d-a139-857b7c785122",
+        "title": "Москва на волне [Эфир] адаптация"
+      }
+    ],
+    "autoMatchFormatId": "video_adaptation",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "скринкаст",
+    "normalizedRawValue": "скринкаст",
+    "count": 17,
+    "sampleTasks": [
+      {
+        "id": "1a62bc54-24c1-4221-be3f-1a97394b3cc1",
+        "title": "ВТБ [Первые на деревне ] скринкаст"
+      },
+      {
+        "id": "1cc64903-9d0b-4889-9633-63319bd5a2c9",
+        "title": "WB [КОНФ] скринкаст"
+      },
+      {
+        "id": "250d9116-de85-4575-b4ee-644e02224a97",
+        "title": "Rutube [Титаны ] скринкаст"
+      }
+    ],
+    "autoMatchFormatId": "screencast",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Адаптация ролика",
+    "normalizedRawValue": "адаптация ролика",
+    "count": 15,
+    "sampleTasks": [
+      {
+        "id": "0fa2e75f-9bd6-4f27-a0c5-9bd12ffbe56d",
+        "title": "ГИЛАН [] Адаптация ролика"
+      },
+      {
+        "id": "14a5a4df-2fc4-4ea6-aeba-58ac78d39682",
+        "title": "SHU [по Эфиру ] адаптация ролика"
+      },
+      {
+        "id": "22f04a28-04d4-4945-b93b-fa0ea2b84bd5",
+        "title": "Астория [90 сек ] адаптация ролика"
+      }
+    ],
+    "autoMatchFormatId": "video_adaptation",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Эл.лого",
+    "normalizedRawValue": "эл лого",
+    "count": 14,
+    "sampleTasks": [
+      {
+        "id": "257fdfc7-a085-4ead-a084-7fa7aaea427a",
+        "title": "REAL ME [ЯЗ] Эл.лого"
+      },
+      {
+        "id": "3596b406-a322-4c87-8801-d2454b46dd15",
+        "title": "GORENJE [Хочу перемен] Эл лого"
+      },
+      {
+        "id": "40ce25fc-3084-4780-a4a0-3b8832df3889",
+        "title": "Боржоми [Время завтрака] эл.лого"
+      }
+    ],
+    "autoMatchFormatId": "electronic_logo",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Граф.ролик\n10 сек",
+    "normalizedRawValue": "граф ролик 10 сек",
+    "count": 11,
+    "sampleTasks": [
+      {
+        "id": "0faf76f5-1fde-41d8-9e7a-0bac954bbeda",
+        "title": "ESTEL [Игры без границ] Граф.ролик"
+      },
+      {
+        "id": "361c2981-9ab3-4b83-a754-1f0bf441f2e3",
+        "title": "МОМАТ РИНО [Однажды в джунглях] Граф.ролик 10 сек"
+      },
+      {
+        "id": "3c288701-749a-482d-9d29-57106537ea0f",
+        "title": "КАПИТАН [СашаТаня] Граф ролик"
+      }
+    ],
+    "autoMatchFormatId": "grafrolik",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "устник",
+    "normalizedRawValue": "устник",
+    "count": 10,
+    "sampleTasks": [
+      {
+        "id": "0ae11f69-f841-46a0-a4ff-3263675a25f0",
+        "title": "ВТБ [Большой хит ] устник"
+      },
+      {
+        "id": "16f93d7d-4856-40e6-b25f-5a1057e4fedd",
+        "title": "WB [КОНФ ] устник"
+      },
+      {
+        "id": "179ee3c3-35fb-4ee4-b501-c142cd5d377c",
+        "title": "Халва [ЯЗ] устник"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Брендинг экрана",
+    "normalizedRawValue": "брендинг экрана",
+    "count": 9,
+    "sampleTasks": [
+      {
+        "id": "380093e4-4b44-4f6b-a4e6-cc2ca7809b6c",
+        "title": "ESTEL [ЯЗ] Брендинг экрана"
+      },
+      {
+        "id": "38de72e6-cf95-49ac-bda7-67d8e8125732",
+        "title": "Сбер Страхование [Караоке клаб ] брендинг экрана"
+      },
+      {
+        "id": "651cfe20-8c31-40a3-b6b2-8252aa8daded",
+        "title": "ВТБ [МУЗ ИНТ] брендинг экрана"
+      }
+    ],
+    "autoMatchFormatId": "screen_branding",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Дин лого до 7% \n5 сек",
+    "normalizedRawValue": "дин лого до 7 5 сек",
+    "count": 9,
+    "sampleTasks": [
+      {
+        "id": "0963511a-2dd8-45f1-be83-c2d59de3b51f",
+        "title": "ТИНЬКОФФ [Титаны] Дин лого до 7%"
+      },
+      {
+        "id": "16f75b57-a85a-44e0-923c-e85e0e647cd7",
+        "title": "RUTUBE [Невеста для экстрасенса] Дин лого до 7% 5 сек"
+      },
+      {
+        "id": "39968959-319c-45d9-ba0f-2e770c28a594",
+        "title": "STELLARY [Невеста для экстрасенса] Дин лого до 7% - 5 сек"
+      }
+    ],
+    "autoMatchFormatId": "dynamic_logo",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Баннеры",
+    "normalizedRawValue": "баннеры",
+    "count": 8,
+    "sampleTasks": [
+      {
+        "id": "36d040f2-2a0d-4e5f-ae55-b6b434caa61d",
+        "title": "ПСБ [Фабрика звезд] Баннеры"
+      },
+      {
+        "id": "8c869487-e26a-4dfa-8ddb-476d6d25511c",
+        "title": "САМОКАТ [БП] Баннеры"
+      },
+      {
+        "id": "9e4a7d19-6529-48df-aa41-17853035cd2a",
+        "title": "Омода  [GISMETEO] баннеры"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Дин лого\nдо  7%",
+    "normalizedRawValue": "дин лого до 7",
+    "count": 8,
+    "sampleTasks": [
+      {
+        "id": "4ec5c0e6-4da7-406f-8b16-fe5c7d0f4cfb",
+        "title": "НЕОБУТИН [Сокровище императора] Дин лого"
+      },
+      {
+        "id": "5fb1991d-6ba2-4de5-a44f-07c6b55611b7",
+        "title": "МТС [Стендап] Дин.Лого"
+      },
+      {
+        "id": "87135ea3-f00f-4265-b76c-637b418acad2",
+        "title": "ТРИМЕДАТ [ШВ] Дин лого до 7%"
+      }
+    ],
+    "autoMatchFormatId": "dynamic_logo",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "3Д",
+    "normalizedRawValue": "3д",
+    "count": 6,
+    "sampleTasks": [
+      {
+        "id": "1b038677-199a-4b14-8f29-3727e81a3662",
+        "title": "ВТБ [Б КУШ] 3Д"
+      },
+      {
+        "id": "236f3741-b145-4616-99e9-ead105ddba40",
+        "title": "Rutube [ЯЗ ] 3Д"
+      },
+      {
+        "id": "2725d568-178c-4851-b394-cc7ef82211f2",
+        "title": "ВТБ [Б КУШ] 3Д"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Графическая заставка 10 сек",
+    "normalizedRawValue": "графическая заставка 10 сек",
+    "count": 6,
+    "sampleTasks": [
+      {
+        "id": "19a319dd-6e42-4397-8dc0-ca54eae3d628",
+        "title": "RUTUBE [Вызов] Графическая заставка 10 сек"
+      },
+      {
+        "id": "7d5b86c1-9a17-4936-ad2d-0f5767853517",
+        "title": "UNAGRANDE [БП] Графическая заставка (10 сек)"
+      },
+      {
+        "id": "9fb9eeaa-ed48-4468-b3be-332b1180a34d",
+        "title": "ОФЛОМИЛ [Выжить в Дубае] Графическая заставка"
+      }
+    ],
+    "autoMatchFormatId": "grafrolik",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "графический ролик",
+    "normalizedRawValue": "графический ролик",
+    "count": 6,
+    "sampleTasks": [
+      {
+        "id": "0f2e14ac-214e-46a3-aba0-fd3c38d7b7e7",
+        "title": "Флуимуцил [Прогноз погоды] графический ролик"
+      },
+      {
+        "id": "20b56abf-6b9f-4b80-b0a3-2721b088cf32",
+        "title": "Халва [Модные игры ] Графический ролик"
+      },
+      {
+        "id": "7ddc6f32-570a-429b-8a91-10078ac9ca2f",
+        "title": "Анвимакс [Битва Экстрасенсов] Графический ролик"
+      }
+    ],
+    "autoMatchFormatId": "grafrolik",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "3D лого\n5 сек",
+    "normalizedRawValue": "3d лого 5 сек",
+    "count": 5,
+    "sampleTasks": [
+      {
+        "id": "329f3995-d116-48b1-a0ee-d541435d628d",
+        "title": "ПСБ [Фабрика звезд] 3D лого"
+      },
+      {
+        "id": "354e9f0a-d989-48c3-902e-306e8e6d36c6",
+        "title": "ESTEL [Бьюти Баттл ] 3D-ЛОГО (5 сек.)"
+      },
+      {
+        "id": "7d6e1d32-0317-4beb-8352-2eb7eaa065ce",
+        "title": "КАГОЦЕЛ [КОНФ] 3D лого"
+      }
+    ],
+    "autoMatchFormatId": "logo_3d",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Динлого 7%",
+    "normalizedRawValue": "динлого 7",
+    "count": 5,
+    "sampleTasks": [
+      {
+        "id": "3c46af34-8532-4a37-8f61-0b5fe2192e8f",
+        "title": "ПСБ [Вызов] Динлого 7%"
+      },
+      {
+        "id": "4fa68d34-4ce5-4c9c-b75e-b45e3bfeacb6",
+        "title": "RUTUBE [Вызов] Динлого 7%"
+      },
+      {
+        "id": "53bf6956-6661-4997-b590-62169024f605",
+        "title": "ХАЛВА [ЯЗ] Динлого"
+      }
+    ],
+    "autoMatchFormatId": "dynamic_logo",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "интеграция в логотип",
+    "normalizedRawValue": "интеграция в логотип",
+    "count": 5,
+    "sampleTasks": [
+      {
+        "id": "6ab5231c-89cf-4f9d-b7aa-2dcaca15ba77",
+        "title": "Билайн [Итеграция в логотип] интеграция в логотип"
+      },
+      {
+        "id": "6c9aae36-c13c-473c-9520-e4cf7be56f52",
+        "title": "АЛЬФА [ЭФИР] интеграция в логотип"
+      },
+      {
+        "id": "6d4e6594-66a2-49ff-b9d6-de250223f329",
+        "title": "Альфабанк Бузова [Эфир] Интеграция в логотип"
+      }
+    ],
+    "autoMatchFormatId": "logo_integration",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Пост в ВК",
+    "normalizedRawValue": "пост в вк",
+    "count": 5,
+    "sampleTasks": [
+      {
+        "id": "05edeb26-78fa-464d-a15d-319ef9813f65",
+        "title": "VIOLETTE [Фабрика звезд] Пост в ВК"
+      },
+      {
+        "id": "2f8c909f-88f8-4338-87c1-42c657721908",
+        "title": "REAL ME [ЯЗ] Пост в ВК"
+      },
+      {
+        "id": "3fc847e9-e510-4ae2-841c-fffcaa18eaca",
+        "title": "ДОМ РФ [] Пост"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "3Д лого",
+    "normalizedRawValue": "3д лого",
+    "count": 4,
+    "sampleTasks": [
+      {
+        "id": "0a2222e8-9c17-42b6-a513-56f6a7f11a88",
+        "title": "ВТБ [Б КУШ ] 3Д лого"
+      },
+      {
+        "id": "1c4895fd-1072-4da8-b5a1-824e4f09c738",
+        "title": "ВТБ [Б КУШ ] 3Д лого"
+      },
+      {
+        "id": "5eb1baef-21f2-4a28-a1ae-9a39596357ef",
+        "title": "ВТБ [Б КУШ ] 3Д лого"
+      }
+    ],
+    "autoMatchFormatId": "logo_3d",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Адаптация ролика клиента\n10 сек",
+    "normalizedRawValue": "адаптация ролика клиента 10 сек",
+    "count": 4,
+    "sampleTasks": [
+      {
+        "id": "2aa310bc-5497-40d3-9cd9-aae11e0ff250",
+        "title": "КАПИТАН [Сокровище императора] Адаптация ролика клиента"
+      },
+      {
+        "id": "4909ab6a-9a4f-4a6a-af76-635d6cddfa1e",
+        "title": "МАГУРО [Сокровище императора] Адаптация ролика клиента"
+      },
+      {
+        "id": "6eb6408c-fbd4-4525-86b1-f8c4231fdcb9",
+        "title": "FUNKY MONKEY [Камеди Клаб]"
+      }
+    ],
+    "autoMatchFormatId": "video_adaptation",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "адаптация роликов",
+    "normalizedRawValue": "адаптация роликов",
+    "count": 4,
+    "sampleTasks": [
+      {
+        "id": "81fddb6c-5a39-447a-a2ad-6eb0e33373e5",
+        "title": "Магуро [ШВ] адаптация роликов"
+      },
+      {
+        "id": "bb5f4fb5-fdea-4650-b7fa-d344cff0c3ec",
+        "title": "BURGER KING [] Адаптация роликов"
+      },
+      {
+        "id": "c05f417e-0405-4575-a7ea-15104b036c72",
+        "title": "МИРАТОРГ  [Утро на ТНТ] адаптация роликов"
+      }
+    ],
+    "autoMatchFormatId": "video_adaptation",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "брендинг экранов",
+    "normalizedRawValue": "брендинг экранов",
+    "count": 4,
+    "sampleTasks": [
+      {
+        "id": "1c3529f8-a9c4-4f32-b96f-a60fe1b83f09",
+        "title": "Сбербизнес [ШВ ] брендинг экранов"
+      },
+      {
+        "id": "36782463-cfe0-4910-90bf-b7fed35fabac",
+        "title": "ВТБ [ШВ] брендинг экранов"
+      },
+      {
+        "id": "94b9e96d-ac59-4d22-87df-66d84c0f67e4",
+        "title": "Сбербизнес [ШВ ] брендинг экранов"
+      }
+    ],
+    "autoMatchFormatId": "screen_branding",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "спонсорская заставка\n15 сек, адаптация",
+    "normalizedRawValue": "спонсорская заставка 15 сек адаптация",
+    "count": 4,
+    "sampleTasks": [
+      {
+        "id": "01bf5247-ea4c-4b8c-9575-85bbafec1626",
+        "title": "МИРАТОРГ [Утро] спонсорская заставка"
+      },
+      {
+        "id": "7791f3c6-7b05-4c89-acb5-75610bf16c02",
+        "title": "Smartavia [ТНТ4] спонсорская заставка"
+      },
+      {
+        "id": "8bdc90ff-5a0a-449b-9462-e5d580aa52b0",
+        "title": "Smartavia [Утро] спонсорская заставка"
+      }
+    ],
+    "autoMatchFormatId": "video_adaptation",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Стоп-кадр\n5 сек",
+    "normalizedRawValue": "стоп кадр 5 сек",
+    "count": 4,
+    "sampleTasks": [
+      {
+        "id": "1a96bcaf-db13-428c-9461-f7c89f9e4134",
+        "title": "STELLARY [Невеста для экстрасенса] Стоп-кадр"
+      },
+      {
+        "id": "1c575605-1bf2-46cd-b640-b9fd2526df33",
+        "title": "КЕРХЕР [НГ] Стоп кадр"
+      },
+      {
+        "id": "36cfa830-dc05-4271-8be5-f2ed77e38f29",
+        "title": "ЧЕРКИЗОВО [НГ] Стоп-кадр"
+      }
+    ],
+    "autoMatchFormatId": "still_frame",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Стопкадр",
+    "normalizedRawValue": "стопкадр",
+    "count": 4,
+    "sampleTasks": [
+      {
+        "id": "1b4dd882-45b9-45ac-b890-ce56f8cd1976",
+        "title": "ShoppingLive [Перезагрузка] Стопкадр"
+      },
+      {
+        "id": "3284c5d0-a4d5-4992-9d0b-fe8abe36bc76",
+        "title": "RUTUBE [Игры без границ] Стопкадр"
+      },
+      {
+        "id": "86a9eace-9c03-49bd-a24d-112e4f8ab959",
+        "title": "Сбербизнес [ШВ] Стопкадр"
+      }
+    ],
+    "autoMatchFormatId": "still_frame",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "устники",
+    "normalizedRawValue": "устники",
+    "count": 4,
+    "sampleTasks": [
+      {
+        "id": "228ab2db-2c7d-4b0f-ab6f-1cf93c921e52",
+        "title": "ВТБ [МУЗ ИНТ] устники"
+      },
+      {
+        "id": "5dca5356-ee1f-43b1-af05-ce3891000684",
+        "title": "Яндекс плюс [Камеди клаб] устники"
+      },
+      {
+        "id": "7b7e8bdb-d44f-4993-b8f9-790eb03c0e3f",
+        "title": "Яндекс музыка  [Камеди ] устники"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "QR код",
+    "normalizedRawValue": "qr код",
+    "count": 4,
+    "sampleTasks": [
+      {
+        "id": "0b7b640f-4385-401b-9639-8dfd40669244",
+        "title": "ХАЛВА [ЯЗ] QR код"
+      },
+      {
+        "id": "25c464b3-f08f-4080-b54c-731c063cb9a6",
+        "title": "Сбербизнес  [ШВ] QR код"
+      },
+      {
+        "id": "6d1c0128-f3dc-4e1b-9f26-7dcf486334f8",
+        "title": "УРАЛСИБ [Камеди Клаб] QR код"
+      }
+    ],
+    "autoMatchFormatId": "branded_qr",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "- Брендинг - 5 сек",
+    "normalizedRawValue": "брендинг 5 сек",
+    "count": 3,
+    "sampleTasks": [
+      {
+        "id": "218cc968-1bd1-4aee-91a5-05d4bf4654e8",
+        "title": "LEVEL GROUP [Камеди Клаб] - Брендинг - 5 сек"
+      },
+      {
+        "id": "3c8709b3-a648-4c35-bda1-d66075e0db7f",
+        "title": "СБЕР ДЕВАЙСЫ [ШВ] Брендинг"
+      },
+      {
+        "id": "3ca874a7-d6b6-44b0-a928-cbd81e6b3abf",
+        "title": "ИНДИЛАЙТ [ШВ] Брендинг"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "3D лого (зафиналили)\nДин лого (зафиналили)",
+    "normalizedRawValue": "3d лого зафиналили дин лого зафиналили",
+    "count": 3,
+    "sampleTasks": [
+      {
+        "id": "84aa8d70-f19d-4128-b794-d663b67d444e",
+        "title": "Я.МУЗЫКА [Фабрика звезд] 3D лого (зафиналили)"
+      },
+      {
+        "id": "9143605b-651a-4c76-ae0e-07fb25141c94",
+        "title": "Я.СПЛИТ [Фабрика звезд] 3D лого (зафиналили)"
+      },
+      {
+        "id": "dd6fc303-84ac-40c2-b475-ff4282dfbbf8",
+        "title": "Я.АЛИСА [Фабрика звезд] 3D лого (зафиналили)"
+      }
+    ],
+    "autoMatchFormatId": "dynamic_logo",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Брендинг (зафиналили)\nГраф ролик (зафиналили)",
+    "normalizedRawValue": "брендинг зафиналили граф ролик зафиналили",
+    "count": 3,
+    "sampleTasks": [
+      {
+        "id": "3aa9c734-e167-42c1-bf6a-aabfb2353222",
+        "title": "Я.АЛИСА [Фабрика звезд] Брендинг (зафиналили)"
+      },
+      {
+        "id": "80961add-c37c-4012-a19d-15cdd3c26571",
+        "title": "Я.СПЛИТ [Фабрика звезд] Брендинг (зафиналили)"
+      },
+      {
+        "id": "a1cd385c-b5f4-455f-8e77-4ea6cdb0ab4d",
+        "title": "Я.МУЗЫКА [Фабрика звезд] Брендинг (зафиналили)"
+      }
+    ],
+    "autoMatchFormatId": "grafrolik",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "брендинг экрана (5 сек.)",
+    "normalizedRawValue": "брендинг экрана 5 сек",
+    "count": 3,
+    "sampleTasks": [
+      {
+        "id": "48a5720d-a5f3-4c9d-b1ac-d8ee18e6c06e",
+        "title": "ESTEL [Бьюти Баттл ]  брендинг экрана (5 сек.)"
+      },
+      {
+        "id": "91128899-17fa-4c16-a550-ab72a0bbd845",
+        "title": "УРАЛСИБ [Камеди Клаб] - Брендинг экрана 5 сек"
+      },
+      {
+        "id": "fa2b4c7a-2964-48d7-bc0a-4ef34c28f327",
+        "title": "ТРИМЕДАТ [ШВ] Брендинг"
+      }
+    ],
+    "autoMatchFormatId": "screen_branding",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Граф.ролик \n15 сек",
+    "normalizedRawValue": "граф ролик 15 сек",
+    "count": 3,
+    "sampleTasks": [
+      {
+        "id": "1ad852b7-19f3-495d-9e2c-8ac841c8adb6",
+        "title": "СБЕРДЕВАЙС [] Граф.ролик"
+      },
+      {
+        "id": "98bbe2f5-9e0d-4a07-92a2-bcf596e5d2f8",
+        "title": "ПСБ [Фабрика звезд] Граф ролик"
+      },
+      {
+        "id": "c50ad9d3-f22c-481f-9aee-9c40ddce2c18",
+        "title": "Я. ДИДЖИТАЛ\nПЛЮС [Фабрика звезд] Граф ролик"
+      }
+    ],
+    "autoMatchFormatId": "grafrolik",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "графролик",
+    "normalizedRawValue": "графролик",
+    "count": 3,
+    "sampleTasks": [
+      {
+        "id": "0b03bccc-f28c-4f23-a5fd-fdd4e6903869",
+        "title": "Нацпроекты [ШВ] графролик"
+      },
+      {
+        "id": "71869a74-df2f-4ead-9dc9-80a779e2d5cf",
+        "title": "КАГОЦЕЛ [ЯЗ] Графролик"
+      },
+      {
+        "id": "c0ffd357-4f96-4fae-92dd-7b16fcd8f61b",
+        "title": "OIRO [Эфир] Графролик"
+      }
+    ],
+    "autoMatchFormatId": "grafrolik",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Дин лого\n5 сек до 7%",
+    "normalizedRawValue": "дин лого 5 сек до 7",
+    "count": 3,
+    "sampleTasks": [
+      {
+        "id": "0498b057-cf14-4b83-9695-332a2302371a",
+        "title": "Smartavia [Утро] Дин лого"
+      },
+      {
+        "id": "8c93c919-50f7-4154-9e41-02e9f9013c05",
+        "title": "МИРАТОРГ [Утро] Дин лого"
+      },
+      {
+        "id": "a986870d-1c9b-4d4f-991d-30a4bef3cb8e",
+        "title": "Smartavia [Шоу воли] Дин лого"
+      }
+    ],
+    "autoMatchFormatId": "dynamic_logo",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "дин. Лого до 7%, хронометраж 5 сек.",
+    "normalizedRawValue": "дин лого до 7 хронометраж 5 сек",
+    "count": 3,
+    "sampleTasks": [
+      {
+        "id": "7f488d28-8b9c-4cf0-9cff-720302440e9d",
+        "title": "DEONICA [Выжить в Дубае] дин. Лого до 7%, хронометраж 5 сек."
+      },
+      {
+        "id": "81295ea0-546f-4df2-890d-a9b70b825436",
+        "title": "RUTUBE [Выжить в Дубае] дин. Лого до 7%, хронометраж 5 сек."
+      },
+      {
+        "id": "bd2a9874-b047-457c-896d-da88f3277325",
+        "title": "ПИКАДОР [Женский Стендап ] дин. Лого до 7%, хронометраж 5 сек."
+      }
+    ],
+    "autoMatchFormatId": "dynamic_logo",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "транзишен",
+    "normalizedRawValue": "транзишен",
+    "count": 3,
+    "sampleTasks": [
+      {
+        "id": "2d1f94f6-ea38-4c9f-9043-96a688a6eee5",
+        "title": "Tefal  [эфир ] транзишен"
+      },
+      {
+        "id": "317ed299-ece9-44ef-aba9-e7e8ebf8ecec",
+        "title": "Tefal  [эфир ] транзишен"
+      },
+      {
+        "id": "fb94e9c1-7ffe-46a3-8cb6-10159e0e48e7",
+        "title": "Билайн  [Битва пикников] транзишен"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "транзишн",
+    "normalizedRawValue": "транзишн",
+    "count": 3,
+    "sampleTasks": [
+      {
+        "id": "1ad72223-db59-4343-9d60-38c7df075566",
+        "title": "Flamenco [Битва пикников] транзишн"
+      },
+      {
+        "id": "2345392c-90c3-46c7-8fe7-1edbd3b52ae4",
+        "title": "ДОМКЛИК [Хочу Перемен] Транзишн"
+      },
+      {
+        "id": "5ed90a80-f476-4cb5-b09a-ec9f28dd31c8",
+        "title": "Exponenta  [Время завтрака ] транзишн"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Эл лого\n5 сек",
+    "normalizedRawValue": "эл лого 5 сек",
+    "count": 3,
+    "sampleTasks": [
+      {
+        "id": "02f57a96-8f2c-4e64-973c-18a64a7c57b5",
+        "title": "МОМАТ РИНО [Однажды в джунглях] Эл лого"
+      },
+      {
+        "id": "39027e45-9a82-45ea-8e2e-077f9722965d",
+        "title": "РОССЕЛЬХОЗБАНК [Битва пикников] Эл лого"
+      },
+      {
+        "id": "cf47c8e0-4b83-4343-946b-df16e26e18d5",
+        "title": "Найз гель [Однажды в Джунглях] Эл лого 5 сек"
+      }
+    ],
+    "autoMatchFormatId": "electronic_logo",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "- Граф ролик 10\n- Стопкадр 5 сек (на основе ролика)",
+    "normalizedRawValue": "граф ролик 10 стопкадр 5 сек на основе ролика",
+    "count": 2,
+    "sampleTasks": [
+      {
+        "id": "39d11cf4-081d-4f7e-bbd7-40540375bbaa",
+        "title": "КАРДИОМАГНИЛ [ШВ] - Граф ролик 10"
+      },
+      {
+        "id": "829e30db-2948-4349-b4b5-6f39f0e82dd2",
+        "title": "КАРДИО М [ШВ] - Граф ролик 10"
+      }
+    ],
+    "autoMatchFormatId": "grafrolik",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "..",
+    "normalizedRawValue": "",
+    "count": 2,
+    "sampleTasks": [
+      {
+        "id": "54af2d9c-1f0b-4285-8298-964105e60b67",
+        "title": "2221.. [..] .."
+      },
+      {
+        "id": "feef4d80-9e65-4e29-9c56-2fa096ea4e11",
+        "title": "1111.. [..] .."
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "3 граф.ролика",
+    "normalizedRawValue": "3 граф ролика",
+    "count": 2,
+    "sampleTasks": [
+      {
+        "id": "9434a7f1-0ad2-472a-a6c0-64024bc5b222",
+        "title": "ИНДИЛАЙТ [Первые на деревне ] 3 граф.ролика"
+      },
+      {
+        "id": "b905851a-1f36-421c-9031-18e12d4c32e2",
+        "title": "ИНДИЛАЙТ [Игры без границ] 3 граф.ролика"
+      }
+    ],
+    "autoMatchFormatId": "grafrolik",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "3д лого\n5сек",
+    "normalizedRawValue": "3д лого 5сек",
+    "count": 2,
+    "sampleTasks": [
+      {
+        "id": "13f8fd2a-3390-4a03-9eec-20bb5ac0c84d",
+        "title": "ВТБ [Шоу Историй] 3д лого"
+      },
+      {
+        "id": "174e9102-9735-427b-a43e-475773300782",
+        "title": "ВТБ [Игры без границ] 3д лого"
+      }
+    ],
+    "autoMatchFormatId": "logo_3d",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Анонс\nот первого лица",
+    "normalizedRawValue": "анонс от первого лица",
+    "count": 2,
+    "sampleTasks": [
+      {
+        "id": "ae247e57-add0-43ac-a23c-741a8bbbccf0",
+        "title": "RUTUBE [КОНФ] Анонс"
+      },
+      {
+        "id": "c90c5200-1c4c-42ac-acdf-32f099c73cbc",
+        "title": "МТС [Стендап] Анонс"
+      }
+    ],
+    "autoMatchFormatId": "first_person_announce",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Граф ролик \n10 и 15 сек",
+    "normalizedRawValue": "граф ролик 10 и 15 сек",
+    "count": 2,
+    "sampleTasks": [
+      {
+        "id": "1f68ba7d-0fae-467e-b14a-9cec3b85116c",
+        "title": "Я.МАРКЕТ [Фабрика звезд] Граф ролик"
+      },
+      {
+        "id": "d1da3530-7e12-49c4-b0c3-43a0dc3f79ea",
+        "title": "Я.МУЗЫКА [Фабрика звезд] Граф ролик"
+      }
+    ],
+    "autoMatchFormatId": "grafrolik",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Граф ролик 5 сек",
+    "normalizedRawValue": "граф ролик 5 сек",
+    "count": 2,
+    "sampleTasks": [
+      {
+        "id": "05b715fb-3606-41ef-86f1-b55c5039b4e0",
+        "title": "АЕВИТ [Салон] Граф ролик 5 сек"
+      },
+      {
+        "id": "0c8e6fca-0ab5-4fcf-a417-386dfbd0058a",
+        "title": "GOLDEN LIFE [Выжить в Дубае] граф ролик 5 сек"
+      }
+    ],
+    "autoMatchFormatId": "grafrolik",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "граф.ролики",
+    "normalizedRawValue": "граф ролики",
+    "count": 2,
+    "sampleTasks": [
+      {
+        "id": "64eeab2d-d09d-4731-a1e2-74155e14a2e7",
+        "title": "Зефирюшки [СТАМБУЛ] граф.ролики"
+      },
+      {
+        "id": "b6ecf787-328f-4c27-9653-05584003cd25",
+        "title": "Зефирюшки [СТАМБУЛ] граф.ролики"
+      }
+    ],
+    "autoMatchFormatId": "grafrolik",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "графический ролик, хрон. 10 сек.",
+    "normalizedRawValue": "графический ролик хрон 10 сек",
+    "count": 2,
+    "sampleTasks": [
+      {
+        "id": "24c8b93b-00aa-4c3c-91cb-473f545971d9",
+        "title": "КЕТО ПЛЮС [Однажды в Джунглях] графический ролик, хрон. 10 сек."
+      },
+      {
+        "id": "9ec4efab-4bf1-41ab-a32f-98682ec9896a",
+        "title": "ОФЛОМИЛ  [Однажды в Джунглях] графический ролик, хрон. 10 сек."
+      }
+    ],
+    "autoMatchFormatId": "grafrolik",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Дин лого\n5 сек",
+    "normalizedRawValue": "дин лого 5 сек",
+    "count": 2,
+    "sampleTasks": [
+      {
+        "id": "1f198017-0863-4860-9b1c-4594c75b9b9e",
+        "title": "ЛАТИФА [Выжить в Дубае] Дин лого"
+      },
+      {
+        "id": "86088323-d10c-4a07-b82a-be8f279fa936",
+        "title": "GOLDEN LIFE [Выжить в Дубае] Дин лого"
+      }
+    ],
+    "autoMatchFormatId": "dynamic_logo",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Дин лого\n7%",
+    "normalizedRawValue": "дин лого 7",
+    "count": 2,
+    "sampleTasks": [
+      {
+        "id": "948451ab-25c8-41de-aae8-b86164f19bd0",
+        "title": "LIBREDERM [САМАРКАНД] Дин лого"
+      },
+      {
+        "id": "e9a26387-e3cb-485c-828b-b86b041ae2f3",
+        "title": "RUTUBE [САМАРКАНД] Дин лого"
+      }
+    ],
+    "autoMatchFormatId": "dynamic_logo",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Дин лого\n7%, 5 сек",
+    "normalizedRawValue": "дин лого 7 5 сек",
+    "count": 2,
+    "sampleTasks": [
+      {
+        "id": "5869698f-8486-4bea-a250-3b2a7eee7603",
+        "title": "ХАЛВА [Лига Городов] Дин лого"
+      },
+      {
+        "id": "841dd785-aa3e-42f9-9c1c-e7794cee9864",
+        "title": "GOLDEN LIFE [САМАРКАНД] Дин лого"
+      }
+    ],
+    "autoMatchFormatId": "dynamic_logo",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Динлого\nСтоп-кадр",
+    "normalizedRawValue": "динлого стоп кадр",
+    "count": 2,
+    "sampleTasks": [
+      {
+        "id": "1434067f-d6fd-465c-abd4-824fa36b57d7",
+        "title": "ОЗОН Акция 11.11 [ЗВА] Динлого"
+      },
+      {
+        "id": "22806142-b81d-4fbe-b339-319353367ff9",
+        "title": "ОЗОН Чёрная Пятница [ЗВА] Динлого"
+      }
+    ],
+    "autoMatchFormatId": "dynamic_logo",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Игра",
+    "normalizedRawValue": "игра",
+    "count": 2,
+    "sampleTasks": [
+      {
+        "id": "b375c928-8113-4ac8-ace4-ae70abe76906",
+        "title": "МСП [] Игра"
+      },
+      {
+        "id": "d95eb77d-adc4-4a61-9d9c-bbb4a2524fc2",
+        "title": "ГАЗПРОМБАНК [ШВ] Игра"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "ИТВ",
+    "normalizedRawValue": "итв",
+    "count": 2,
+    "sampleTasks": [
+      {
+        "id": "16802398-d0d6-4648-81a5-ee4fcbf5cd5b",
+        "title": "Tecno [] ИТВ"
+      },
+      {
+        "id": "f1c94577-45b8-4b85-beef-83fb5f0e4909",
+        "title": "АЛЬФА-БАНК [] ИТВ"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Кнопка",
+    "normalizedRawValue": "кнопка",
+    "count": 2,
+    "sampleTasks": [
+      {
+        "id": "4f9d3893-6a11-49a7-9fa3-d27d24060c57",
+        "title": "PRESIDENT [Спецпроект] Кнопка"
+      },
+      {
+        "id": "966df733-78a2-44a9-99a5-c392be5937be",
+        "title": "ГАЗПРОМБАНК [На сайт] Кнопка"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Лендинг",
+    "normalizedRawValue": "лендинг",
+    "count": 2,
+    "sampleTasks": [
+      {
+        "id": "64e171d3-9c4c-4afd-bc5d-f6ff539ff39e",
+        "title": "САМОКАТ [БП] Лендинг"
+      },
+      {
+        "id": "c8bb7f61-f29a-4c80-b7d0-fcafe91f5edf",
+        "title": "МСП [] Лендинг"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "обратный отсчет",
+    "normalizedRawValue": "обратный отсчет",
+    "count": 2,
+    "sampleTasks": [
+      {
+        "id": "50566f60-5187-42ab-b589-b7f4439453a4",
+        "title": "ОТП Банк [Эфир] обратный отсчет"
+      },
+      {
+        "id": "9ebeb955-1f82-4a12-a010-4ae612e37c7a",
+        "title": "Вкусно и точка  [Эфир ] обратный отсчёт"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "пекшот",
+    "normalizedRawValue": "пекшот",
+    "count": 2,
+    "sampleTasks": [
+      {
+        "id": "9b1267c9-19b3-4e10-97ac-fd50f92a1da5",
+        "title": "КАПИТАН [Б КУШ] пекшот"
+      },
+      {
+        "id": "ebe8ee8f-a8b7-4256-9df8-44cdc056104b",
+        "title": "МАГУРО [Б КУШ] пекшот"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "пристёжка",
+    "normalizedRawValue": "пристежка",
+    "count": 2,
+    "sampleTasks": [
+      {
+        "id": "7e6a304d-93cb-4f69-9510-22e4757806f9",
+        "title": "ВТБ [Большой Хит ] пристёжка"
+      },
+      {
+        "id": "fb55810f-d76f-4325-bec2-a12f40a5fc98",
+        "title": "ВТБ [Большой хит ] пристёжка"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Скрин-каст (5 сек)",
+    "normalizedRawValue": "скрин каст 5 сек",
+    "count": 2,
+    "sampleTasks": [
+      {
+        "id": "20bdaf66-1ae4-4075-a071-6f07b82698ca",
+        "title": "OZON [ЗВА] Скрин-каст (5 сек)"
+      },
+      {
+        "id": "44f88672-0666-4e07-adae-c0d344a01056",
+        "title": "OZON [ЗВА] Скрин-каст (5 сек)"
+      }
+    ],
+    "autoMatchFormatId": "screencast",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Съемочный ролик",
+    "normalizedRawValue": "съемочный ролик",
+    "count": 2,
+    "sampleTasks": [
+      {
+        "id": "314e11c9-4fc8-461f-ad93-c95a962b5705",
+        "title": "MIPAO [] Съемочный ролик"
+      },
+      {
+        "id": "5aa6b8ea-7d3f-4c48-bc55-7d87baac5d85",
+        "title": "ХАЛВА [Место силы] Съемочный ролик"
+      }
+    ],
+    "autoMatchFormatId": "shooting_video",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Шортсы",
+    "normalizedRawValue": "шортсы",
+    "count": 2,
+    "sampleTasks": [
+      {
+        "id": "cbf4bd88-3b81-43ee-b894-0ecce3e555cb",
+        "title": "АГЕНТСТВА НЕДВИЖИМОСТИ ЭТАЖИ [] Шортсы"
+      },
+      {
+        "id": "cf260646-e506-462d-882a-03feaade6746",
+        "title": "ВТБ [] Шортсы"
+      }
+    ],
+    "autoMatchFormatId": "shorts",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Эллого",
+    "normalizedRawValue": "эллого",
+    "count": 2,
+    "sampleTasks": [
+      {
+        "id": "cd41bdeb-b1d7-4d67-bb83-bbe7509f93ae",
+        "title": "ХАЛВА [ЖC] Эллого"
+      },
+      {
+        "id": "fa308698-8568-442d-8de5-5ca9968d78a4",
+        "title": "Диван Босс [Хочу Перемен ] ЭлЛого"
+      }
+    ],
+    "autoMatchFormatId": "electronic_logo",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "DIGITAL\nЛендинг",
+    "normalizedRawValue": "digital лендинг",
+    "count": 2,
+    "sampleTasks": [
+      {
+        "id": "48bb0b14-60aa-4d3c-a7a9-f2aaa3737e5d",
+        "title": "МОСКАР [ШВ] DIGITAL"
+      },
+      {
+        "id": "a321b698-97af-410d-aa42-7d9c428e898e",
+        "title": "МОСКАР [ШВ] DIGITAL"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "- анонс от первого лица с Юнусовым",
+    "normalizedRawValue": "анонс от первого лица с юнусовым",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "9ae5a964-4823-4dcb-bee1-d9cab05214f4",
+        "title": "САМОКАТ [БП] - анонс от первого лица с Юнусовым"
+      }
+    ],
+    "autoMatchFormatId": "first_person_announce",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "- Графическая заставка (10 сек)\nТНТ и ТНТ4 (звук)",
+    "normalizedRawValue": "графическая заставка 10 сек тнт и тнт4 звук",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "b4a98d9a-229d-4822-9987-45fae15542ba",
+        "title": "РЯБА  [ЗВА] - Графическая заставка (10 сек)"
+      }
+    ],
+    "autoMatchFormatId": "grafrolik",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "- Графическая заставка (10 сек)  ТНТ",
+    "normalizedRawValue": "графическая заставка 10 сек тнт",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "6cdc2e2e-1638-46d3-a727-3e0c1181dce2",
+        "title": "OZON [ЗВА] - Графическая заставка (10 сек)  ТНТ"
+      }
+    ],
+    "autoMatchFormatId": "grafrolik",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "- графический переход к анонсу Камеди",
+    "normalizedRawValue": "графический переход к анонсу камеди",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "a238502f-bd2d-4f08-a5ab-858dc1a7f97c",
+        "title": "FUNKY MONKEY [Камеди Клаб] - графический переход к анонсу Камеди"
+      }
+    ],
+    "autoMatchFormatId": "graphic_transition",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "- Графический ролик 10 сек\n- 3D виртуальный логотип.",
+    "normalizedRawValue": "графический ролик 10 сек 3d виртуальный логотип",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "aaaf5733-68c6-48e1-b325-b567ac3fbb9c",
+        "title": "КАРДИО М [Выжить в Дубае] - Графический ролик 10 сек"
+      }
+    ],
+    "autoMatchFormatId": "logo_3d",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "- Графический ролик 10 сек\n- Брендинг экранов 5 сек",
+    "normalizedRawValue": "графический ролик 10 сек брендинг экранов 5 сек",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "bde43e2e-2e15-41f6-8141-fd87cb8ef7af",
+        "title": "ГАЗПРОМБАНК [Шоу Павла Воли] - Графический ролик 10 сек"
+      }
+    ],
+    "autoMatchFormatId": "grafrolik",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "- Графический ролик 10 сек\n- Графический ролик ТНТ4 10 сек",
+    "normalizedRawValue": "графический ролик 10 сек графический ролик тнт4 10 сек",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "3e55e5aa-2d29-4d3d-a3bc-87e6732e85ec",
+        "title": "УРАЛСИБ [Камеди Клаб]"
+      }
+    ],
+    "autoMatchFormatId": "grafrolik",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "- Дженерик + графический переход + графролик клиента",
+    "normalizedRawValue": "дженерик графический переход графролик клиента",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "5ee10dfc-3850-4ba2-a46a-340883f7718c",
+        "title": "ДОБРЫЙ КОЛА [дженерик \"финалы\" ] - Дженерик + графический переход + графролик клиента"
+      }
+    ],
+    "autoMatchFormatId": "grafrolik",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "- динамический логотип 7% (5 сек) в НГ Камеди",
+    "normalizedRawValue": "динамический логотип 7 5 сек в нг камеди",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "622dd3e8-b12e-4a4c-b8f9-af608b38cde6",
+        "title": "FUNKY MONKEY [Камеди Клаб] - динамический логотип 7% (5 сек) в НГ Камеди"
+      }
+    ],
+    "autoMatchFormatId": "dynamic_logo",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "- Динлого 7%\n- Брендинг экранов клиент делаем сам. Возможно надо будет подгонять под ТТ",
+    "normalizedRawValue": "динлого 7 брендинг экранов клиент делаем сам возможно надо будет подгонять под тт",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "03e946cd-f369-4de1-b3c5-01fdfaf42ff5",
+        "title": "RUTUBE [Лига Городов] - Динлого 7%"
+      }
+    ],
+    "autoMatchFormatId": "dynamic_logo",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "- заставка к сериалам 15 сек\n- стопкадр к сериалам 5 сек\n- заставка к шоу 15 сек\n- стопкадр к шоу 5 сек\n- заставка к Звездной Кухне 15 сек\n- стопкадр к Звездной Кухне 5 сек",
+    "normalizedRawValue": "заставка к сериалам 15 сек стопкадр к сериалам 5 сек заставка к шоу 15 сек стопкадр к шоу 5 сек заставка к звездной кухне 15 сек стопкадр к звездной кухне 5 сек",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "37f72066-43f2-4fca-a3a3-aee010b3e245",
+        "title": "САМОКАТ [Жуки] - заставка к сериалам 15 сек"
+      }
+    ],
+    "autoMatchFormatId": "still_frame",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "- Заставка на каналах ТНТ и ТНТ4(единая) - 10 сек",
+    "normalizedRawValue": "заставка на каналах тнт и тнт4 единая 10 сек",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "0f99017d-186c-45a2-be24-9d6f7b39ac3d",
+        "title": "LEVEL GROUP [Камеди Клаб] - Заставка на каналах ТНТ и ТНТ4(единая) - 10 сек"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "- Интеграция в лого с зайцами\n- Графический ролик с зайцами.",
+    "normalizedRawValue": "интеграция в лого с зайцами графический ролик с зайцами",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "453f4870-11eb-48e9-812a-2dbbcb003c97",
+        "title": "МЕГАФОН  [] - Интеграция в лого с зайцами"
+      }
+    ],
+    "autoMatchFormatId": "grafrolik",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "- Пуш 5 сек\n- Стопкадр - 5 сек",
+    "normalizedRawValue": "пуш 5 сек стопкадр 5 сек",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "30cb6063-e623-404b-9c15-ef8049f75121",
+        "title": "ОЗОН [ЗВА] - Пуш 5 сек"
+      }
+    ],
+    "autoMatchFormatId": "still_frame",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "- Съемочный ролик с Еленой Новиковой\n- Съемочный ролик с Зоей Бербер",
+    "normalizedRawValue": "съемочный ролик с еленой новиковой съемочный ролик с зоей бербер",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "fa5ef777-1b9a-4602-b02d-e114a9921e40",
+        "title": "MABELLE [Заставки по эфиру] - Съемочный ролик с Еленой Новиковой"
+      }
+    ],
+    "autoMatchFormatId": "shooting_video",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "- Эл.лого + qr код с информером",
+    "normalizedRawValue": "эл лого qr код с информером",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "76857f2b-910d-4338-bc98-4c76c7a1b7fe",
+        "title": "САМОКАТ [БП] - Эл.лого + qr код с информером"
+      }
+    ],
+    "autoMatchFormatId": "electronic_logo",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "2 дин лого по 5 сек (можно сдать позже)\nВариант 1: кредитка\nВариант 2: малый бизнес",
+    "normalizedRawValue": "2 дин лого по 5 сек можно сдать позже вариант 1 кредитка вариант 2 малый бизнес",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "0fec89dd-c622-4ce9-9ba1-d82ea82c4448",
+        "title": "АЛЬФА [Салон] 2 дин лого по 5 сек (можно сдать позже)"
+      }
+    ],
+    "autoMatchFormatId": "dynamic_logo",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "2 Динлого до 7%",
+    "normalizedRawValue": "2 динлого до 7",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "f5f53de2-75bd-4cf3-ab18-225246862d25",
+        "title": "RUTUBE [Фабрика звезд] 2 Динлого до 7%"
+      }
+    ],
+    "autoMatchFormatId": "dynamic_logo",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "2 ролика, хрон. 15 сек. и 10 сек.",
+    "normalizedRawValue": "2 ролика хрон 15 сек и 10 сек",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "cfcf1ebb-ddaa-4946-9a81-a46d8e9a77a4",
+        "title": "МАГНИТ КОСМЕТИК  [ТНТ] 2 ролика, хрон. 15 сек. и 10 сек."
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "2 стопкадра 10 сек и 5 сек",
+    "normalizedRawValue": "2 стопкадра 10 сек и 5 сек",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "518f9432-a939-473a-8f37-7669c2a7539b",
+        "title": "Бургер Кинг  [ТНТ] 2 стопкадра 10 сек и 5 сек"
+      }
+    ],
+    "autoMatchFormatId": "still_frame",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "3 графических ролика - хронометраж 20 сек.",
+    "normalizedRawValue": "3 графических ролика хронометраж 20 сек",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "432c12d1-d5e7-44bb-a607-633fcbfb2539",
+        "title": "БЕТСИТИ  [] 3 графических ролика - хронометраж 20 сек."
+      }
+    ],
+    "autoMatchFormatId": "grafrolik",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "3 стоп кадра",
+    "normalizedRawValue": "3 стоп кадра",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "f9723c82-f31b-46cd-87f0-6982f55c9c38",
+        "title": "ИНДИЛАЙТ [Первые на деревне ] 3 стоп кадра"
+      }
+    ],
+    "autoMatchFormatId": "still_frame",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "3)        Брендинг стола жюри",
+    "normalizedRawValue": "3 брендинг стола жюри",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "98e186d8-8f76-4f27-b76b-94393eb2fecd",
+        "title": "ГАЗПРОМБАНК [КОНФ] 3)        Брендинг стола жюри"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "3D \n5 сек",
+    "normalizedRawValue": "3d 5 сек",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "69021576-6443-4062-8069-18279c8ee169",
+        "title": "RUTUBE [Выжить в Дубае] 3D"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "3D лого\n5 креативов под каждый продукт\n1. Дебетовая карта (зафиналили)\n2. Кредитная карта (зафиналили)\n3. Альфа-пей (зафиналили)\n4. Альфа-тревел сервис (зафиналили)\n5. Альфа-тревел карта (зафиналили)",
+    "normalizedRawValue": "3d лого 5 креативов под каждый продукт 1 дебетовая карта зафиналили 2 кредитная карта зафиналили 3 альфа пей зафиналили 4 альфа тревел сервис зафиналили 5 альфа тревел карта зафиналили",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "dd216474-fc01-4290-ad97-47f1f1218cf2",
+        "title": "АЛЬФА [Сокровище Императора] 3D лого"
+      }
+    ],
+    "autoMatchFormatId": "logo_3d",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "3D лого (отказался клиент)",
+    "normalizedRawValue": "3d лого отказался клиент",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "da21f81b-8731-4bc6-a4bf-4c77e084847a",
+        "title": "RUTUBE [Сокровище императора] 3D лого (отказался клиент)"
+      }
+    ],
+    "autoMatchFormatId": "logo_3d",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "3D лого более 7% (5 сек)",
+    "normalizedRawValue": "3d лого более 7 5 сек",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "3e37a051-81cd-4f1c-a98e-07f10fd72a50",
+        "title": "МОСКАР [ШВ] 3D лого более 7% (5 сек)"
+      }
+    ],
+    "autoMatchFormatId": "logo_3d",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "3D logo\n5 сек\nПУСТЫНЯ",
+    "normalizedRawValue": "3d logo 5 сек пустыня",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "829a0542-88bf-43a8-b4a0-6d3f3506c7ac",
+        "title": "АЛЬФА [Выжить в Дубае] 3D logo"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "3D logo\n5 сек ГОРОД",
+    "normalizedRawValue": "3d logo 5 сек город",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "acec7d1f-e786-4692-b7a7-435120e7d363",
+        "title": "ХАЛВА [Место силы] 3D logo"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "3D logo\n5 сек ДОМ",
+    "normalizedRawValue": "3d logo 5 сек дом",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "37beff18-a612-455a-bf0d-25c354441130",
+        "title": "ХАЛВА [Место силы] 3D logo"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "3D, Владимир",
+    "normalizedRawValue": "3d владимир",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "aaf20e65-6f36-4625-9b8f-dbb19a02623a",
+        "title": "ОТП Банк [Тревел шоу \"Кто Куда\" ] 3D, Владимир"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "3D, Выборг",
+    "normalizedRawValue": "3d выборг",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "b044be46-e011-4e2c-b9bc-9ff94790314a",
+        "title": "ОТП Банк [Тревел шоу \"Кто Куда\" ] 3D, Выборг"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "3D, Казань",
+    "normalizedRawValue": "3d казань",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "cf5a47c2-0629-44eb-b614-f548952ec462",
+        "title": "ОТП Банк [Тревел шоу \"Кто Куда\" ] 3D, Казань"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "3D, Ярославль",
+    "normalizedRawValue": "3d ярославль",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "e90a0222-3b9f-4b5f-940e-31830f80eb20",
+        "title": "ОТП Банк [Тревел шоу \"Кто Куда\" ] 3D, Ярославль"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Адаптация Граф ролика 10 сек",
+    "normalizedRawValue": "адаптация граф ролика 10 сек",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "f024fe97-3ffb-45f2-a19b-0479b166248f",
+        "title": "LEVEL [ЖC] Адаптация Граф ролика 10 сек"
+      }
+    ],
+    "autoMatchFormatId": "grafrolik",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Адаптация граф ролика клиента 15 сек",
+    "normalizedRawValue": "адаптация граф ролика клиента 15 сек",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "9cf409f5-4d8f-4b6c-9c39-4d2167b7c374",
+        "title": "ПСБ [Вызов] Адаптация граф ролика клиента 15 сек"
+      }
+    ],
+    "autoMatchFormatId": "grafrolik",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Адаптация прошлого ролика без пятерочки",
+    "normalizedRawValue": "адаптация прошлого ролика без пятерочки",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "01c6f65f-b77f-44cb-981a-2404e83ffc23",
+        "title": "РЯБА [ЗВА] Адаптация прошлого ролика без пятерочки"
+      }
+    ],
+    "autoMatchFormatId": "video_adaptation",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Адаптация ролика \nс Пятерочкой (10 сек и 5 сек)\nРяба+Пятёрочка Оливковый",
+    "normalizedRawValue": "адаптация ролика с пятерочкой 10 сек и 5 сек ряба пятерочка оливковый",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "6a5dc195-7cc5-47c7-9eac-c09d356f329d",
+        "title": "РЯБА+ПЯТЕРОЧКА [ЗВА] Адаптация ролика"
+      }
+    ],
+    "autoMatchFormatId": "video_adaptation",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "адаптация ролика 5 сек",
+    "normalizedRawValue": "адаптация ролика 5 сек",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "584a6671-0297-43c8-bfa2-75a92c7c3636",
+        "title": "RED [ЗВА] адаптация ролика 5 сек"
+      }
+    ],
+    "autoMatchFormatId": "video_adaptation",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Адаптация ролика 5сек и 10 сек",
+    "normalizedRawValue": "адаптация ролика 5сек и 10 сек",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "f6ecb366-ec34-4b8d-bfbe-fe8594dd2acf",
+        "title": "ЛАТИФА [Выжить в Дубае] Адаптация ролика 5сек и 10 сек"
+      }
+    ],
+    "autoMatchFormatId": "video_adaptation",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Адаптация ролика клиента",
+    "normalizedRawValue": "адаптация ролика клиента",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "fca93a3c-4ee5-4f1d-834c-c507726cc5b1",
+        "title": "LE MOUSSE [] Адаптация ролика клиента"
+      }
+    ],
+    "autoMatchFormatId": "video_adaptation",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Адаптация ролика под диджитал",
+    "normalizedRawValue": "адаптация ролика под диджитал",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "b8f4d39a-9b33-41b0-9c21-4ad03fd606c3",
+        "title": "Ряба  [] Адаптация ролика под диджитал"
+      }
+    ],
+    "autoMatchFormatId": "video_adaptation",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Адаптация ролика с Пятерочкой (10 сек и 5 сек)",
+    "normalizedRawValue": "адаптация ролика с пятерочкой 10 сек и 5 сек",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "308fa858-1ce7-42ff-81d8-475e6f043514",
+        "title": "РЯБА+ПЯТЕРОЧКА [ЗВА] Адаптация ролика с Пятерочкой (10 сек и 5 сек)"
+      }
+    ],
+    "autoMatchFormatId": "video_adaptation",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Адаптация ТВ для Диджитал",
+    "normalizedRawValue": "адаптация тв для диджитал",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "74826d23-c8e3-45b3-a06f-23d134a05bc0",
+        "title": "VIOLETTE [Фабрика звезд] Адаптация ТВ для Диджитал"
+      }
+    ],
+    "autoMatchFormatId": "video_adaptation",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "адаптация,  брендинг экрана",
+    "normalizedRawValue": "адаптация брендинг экрана",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "05dd01db-2baf-4296-a99b-3af61f698c86",
+        "title": "Revyline [ШВ ] адаптация,  брендинг экрана"
+      }
+    ],
+    "autoMatchFormatId": "screen_branding",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "адаптация, переход",
+    "normalizedRawValue": "адаптация переход",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "59a42754-fad0-4fd3-ae82-39310f4e6b9c",
+        "title": "WB [КОНФ ] адаптация, переход"
+      }
+    ],
+    "autoMatchFormatId": "video_adaptation",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "анонс",
+    "normalizedRawValue": "анонс",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "79111201-1a77-46ce-b78a-dc25652d2a3e",
+        "title": "ВТБ [Первые на деревне ] анонс"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Анонс от 1-го лица",
+    "normalizedRawValue": "анонс от 1 го лица",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "16e3ce15-ec0e-49a5-aba1-171827a778ec",
+        "title": "МТС [Стендап] Анонс от 1-го лица"
+      }
+    ],
+    "autoMatchFormatId": "first_person_announce",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Анонсы от Кравец + съемочные пристежки (2шт)",
+    "normalizedRawValue": "анонсы от кравец съемочные пристежки 2шт",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "0ddffad7-11af-4334-b582-f4652845b4f9",
+        "title": "VK МУЗЫКА [КОНФЕТКА] Анонсы от Кравец + съемочные пристежки (2шт)"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "апдейт дин.лого",
+    "normalizedRawValue": "апдейт дин лого",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "0cd8b49f-c765-4f57-a76d-04ffa4890666",
+        "title": "Нацпроекты  [ШВ] апдейт дин.лого"
+      }
+    ],
+    "autoMatchFormatId": "dynamic_logo",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "апдейт интеграции",
+    "normalizedRawValue": "апдейт интеграции",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "03c39ba1-13ba-4100-93eb-291911317cca",
+        "title": "Альфа-банк  [Эфир ТНТ Батрудинов ] апдейт интеграции"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Апдейт пэкшота сданного ролика.",
+    "normalizedRawValue": "апдейт пэкшота сданного ролика",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "5c0886be-cb8b-428c-97bc-a2fb253628df",
+        "title": "БЕЛЫЙ УГОЛЬ [] Апдейт пэкшота сданного ролика."
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Апдейт ролика",
+    "normalizedRawValue": "апдейт ролика",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "98f4d33c-3bbc-4d67-b320-861957344560",
+        "title": "ГАЗПРОМБАНК [ШВ] Апдейт ролика"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Апдейт слогана к графическому ролику",
+    "normalizedRawValue": "апдейт слогана к графическому ролику",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "d2d1d2a1-f66a-4e4a-9417-ea1aceb2d8a9",
+        "title": "РЯБА  [] Апдейт слогана к графическому ролику"
+      }
+    ],
+    "autoMatchFormatId": "grafrolik",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Баннер",
+    "normalizedRawValue": "баннер",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "a5e68448-5aed-47bf-ad2a-583c9cc8c987",
+        "title": "CARTE NOIR [] Баннер"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Баннеры \n16 шт в ВК",
+    "normalizedRawValue": "баннеры 16 шт в вк",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "c192eed0-20ae-4b1f-ae49-97297845b4c7",
+        "title": "ГАЗПРОМБАНК [ШВ] Баннеры"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Баннеры / перетяжки",
+    "normalizedRawValue": "баннеры перетяжки",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "687bf919-2535-42c9-a0c0-34db2c90a787",
+        "title": "ЛЕРУА [] Баннеры / перетяжки"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Баннеры наружной рекламы",
+    "normalizedRawValue": "баннеры наружной рекламы",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "1c76dd74-f89d-4321-9f61-1d463fc15371",
+        "title": "МОСКАР [ШВ] Баннеры наружной рекламы"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Баннеры с лицами артистов (из фотобанка канала) на сайте ТНТ-Онлайн – 5 форматов",
+    "normalizedRawValue": "баннеры с лицами артистов из фотобанка канала на сайте тнт онлайн 5 форматов",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "be76f34d-bfaf-44a2-b7af-ba26c3822b75",
+        "title": "ДОМ РФ [Спец проект\n90 сек] Баннеры с лицами артистов (из фотобанка канала) на сайте ТНТ-Онлайн – 5 форматов"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "БАННЕРЫ:\nбрендирование (десктоп), \nсупер баннер (десктоп и мобилка), \nстикер с экстендером (десктоп и мобилка) \nфулскрин (мобилка)",
+    "normalizedRawValue": "баннеры брендирование десктоп супер баннер десктоп и мобилка стикер с экстендером десктоп и мобилка фулскрин мобилка",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "eefa9601-8d18-4153-bce3-95894a5d1998",
+        "title": "PRESIDENT [ЯЗ] БАННЕРЫ:"
+      }
+    ],
+    "autoMatchFormatId": "screencast",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Брендинг\n+ редакционный брендинг",
+    "normalizedRawValue": "брендинг редакционный брендинг",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "09fc86c4-e9d7-46f0-9463-4a56f0f623bd",
+        "title": "SMART START [Это Нормально] Брендинг"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Брендинг\n+устник (экран 5 сек)",
+    "normalizedRawValue": "брендинг устник экран 5 сек",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "3c9ef698-dcbb-45de-98b1-fe35310ffe6a",
+        "title": "REAL ME [ЯЗ] Брендинг"
+      }
+    ],
+    "autoMatchFormatId": "screen_branding",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Брендинг\n10-15 сек",
+    "normalizedRawValue": "брендинг 10 15 сек",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "5f3c781f-3518-4033-8dbb-47486279b0b0",
+        "title": "АЛЬФА [МУЗ ИНТ] Брендинг"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Брендинг\n2 шт",
+    "normalizedRawValue": "брендинг 2 шт",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "976d1c5d-4849-4d0a-b732-795846ec1688",
+        "title": "УРАЛСИБ [Камеди Клаб] Брендинг"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Брендинг\nколонны",
+    "normalizedRawValue": "брендинг колонны",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "056db840-6b32-4096-ad62-f3c3bc11f2ce",
+        "title": "RUTUBE [Выжить в Дубае] Брендинг"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Брендинг\nколонны\n10 сек",
+    "normalizedRawValue": "брендинг колонны 10 сек",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "e4c36480-8e1c-4f08-97cd-f230bcfe729b",
+        "title": "RUTUBE [САМАРКАНД] Брендинг"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Брендинг\nстолов",
+    "normalizedRawValue": "брендинг столов",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "01bd30a7-5891-4844-8ebb-eac4a37f94cc",
+        "title": "RUTUBE [КОНФ] Брендинг"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Брендинг - 2",
+    "normalizedRawValue": "брендинг 2",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "2d5f57c9-b008-4d9b-8f75-697da8c6ff8d",
+        "title": "ВТБ [Игры без границ] Брендинг - 2"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Брендинг (зафиналили)\nГраф ролик (сдали)",
+    "normalizedRawValue": "брендинг зафиналили граф ролик сдали",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "3f9b9c18-19b6-4c69-a089-f0e3525227b5",
+        "title": "Я.МАРКЕТ [Фабрика звезд] Брендинг (зафиналили)"
+      }
+    ],
+    "autoMatchFormatId": "grafrolik",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Брендинг 10 сек",
+    "normalizedRawValue": "брендинг 10 сек",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "48c8f0dd-1a2b-478c-8ebd-0a20f6929dc2",
+        "title": "CONCEPT [Фабрика звезд] Брендинг 10 сек"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Брендинг 5 сек\nАквакрем и мицеллярка",
+    "normalizedRawValue": "брендинг 5 сек аквакрем и мицеллярка",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "398155cb-9970-47a5-aff8-a987f0699f1b",
+        "title": "NATURA SIBERICA [Фабрика звезд] Брендинг 5 сек"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Брендинг 5 сек\nПэдсы и маска",
+    "normalizedRawValue": "брендинг 5 сек пэдсы и маска",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "1ed9fbaa-113b-48d4-9b00-dcd60495f92d",
+        "title": "NATURA SIBERICA [Фабрика звезд] Брендинг 5 сек"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "брендинг на плазмы в шоу",
+    "normalizedRawValue": "брендинг на плазмы в шоу",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "ac973e8c-ba98-4391-a91a-ce4c58f1d68b",
+        "title": "КАРИ [Модные игры ] брендинг на плазмы в шоу"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Брендинг планшета",
+    "normalizedRawValue": "брендинг планшета",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "0df318bd-16a5-4f10-a3fd-54aab29c01d7",
+        "title": "АЛЬФА [Салон] Брендинг планшета"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "брендинг профайлов",
+    "normalizedRawValue": "брендинг профайлов",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "9fb91941-afb6-4a18-9a80-07526e420e34",
+        "title": "ВТБ [МУЗ ИНТ] брендинг профайлов"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Брендинг спасения",
+    "normalizedRawValue": "брендинг спасения",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "37a6d369-d112-4cdc-bc64-db25d32e1dc1",
+        "title": "ХАЛВА [ЯЗ] Брендинг спасения"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Брендинг тоннеля",
+    "normalizedRawValue": "брендинг тоннеля",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "9a7ecb34-74a0-4bb4-9eaf-f376630f4a77",
+        "title": "Вивьен Сабо [ЯЗ] Брендинг тоннеля"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Брендинг экрана (тоннель)",
+    "normalizedRawValue": "брендинг экрана тоннель",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "e0e4d12b-11e7-49e6-944a-7ab43402ddd0",
+        "title": "ESTEL [ЯЗ] Брендинг экрана (тоннель)"
+      }
+    ],
+    "autoMatchFormatId": "screen_branding",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "брендинг экрана 2",
+    "normalizedRawValue": "брендинг экрана 2",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "27615f7e-c73e-46d2-b3fd-b959a1e71485",
+        "title": "Сбер Изи Бизнес  [Караоке клаб ] брендинг экрана 2"
+      }
+    ],
+    "autoMatchFormatId": "screen_branding",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Брендинг экрана в шоу",
+    "normalizedRawValue": "брендинг экрана в шоу",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "9f72f49a-c6f2-48c0-9d81-a44fb49bf7db",
+        "title": "МОСКАР [ШВ] Брендинг экрана в шоу"
+      }
+    ],
+    "autoMatchFormatId": "screen_branding",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Брендинг экрана студии",
+    "normalizedRawValue": "брендинг экрана студии",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "36778ebc-790d-4bb1-813c-9809fdb24545",
+        "title": "ХАЛВА [ЯЗ] Брендинг экрана студии"
+      }
+    ],
+    "autoMatchFormatId": "screen_branding",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "брендинг экрана № 1",
+    "normalizedRawValue": "брендинг экрана 1",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "ab3d200f-8193-4d29-8f83-4848319bc40b",
+        "title": "Сбер Страхование [Караоке клаб ] брендинг экрана № 1"
+      }
+    ],
+    "autoMatchFormatId": "screen_branding",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "брендинг, ирригатор",
+    "normalizedRawValue": "брендинг ирригатор",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "6040ef10-b786-4b96-87c7-45dc6251142d",
+        "title": "Revyline [Камеди ] брендинг, ирригатор"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Варианты пэкшота",
+    "normalizedRawValue": "варианты пэкшота",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "28f26a16-1ab7-4a07-acae-df997de1571b",
+        "title": "РЯБА+ПЯТЕРОЧКА [ЗВА] Варианты пэкшота"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Вызов. Интеграция в название испытания",
+    "normalizedRawValue": "вызов интеграция в название испытания",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "7e8422a0-084f-4517-b4b3-6f5f0db9f183",
+        "title": "ОЗОН [] Вызов. Интеграция в название испытания"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Гаф заставка\n10 сек",
+    "normalizedRawValue": "гаф заставка 10 сек",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "cdc430ac-32f4-4a35-8ac1-819b76bc2141",
+        "title": "CARTE NOIRE [Постучись в мою дверь] Гаф заставка"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Граф заставка\n10 сек для ТНТ и ТНТ4",
+    "normalizedRawValue": "граф заставка 10 сек для тнт и тнт4",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "beb47725-9920-4201-86b8-a55799cf0595",
+        "title": "ОФЛОМИЛ [Сокровище императора] Граф заставка"
+      }
+    ],
+    "autoMatchFormatId": "grafrolik",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Граф ролик\n15 и 10 сек",
+    "normalizedRawValue": "граф ролик 15 и 10 сек",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "8cbdda8b-4497-46cd-bfd7-437d60a3a458",
+        "title": "Я.ЕДА [Фабрика звезд] Граф ролик"
+      }
+    ],
+    "autoMatchFormatId": "grafrolik",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Граф ролик\n15 сек (длинное тело)",
+    "normalizedRawValue": "граф ролик 15 сек длинное тело",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "ae711adc-a809-41b1-89b7-e6e100684c0b",
+        "title": "Я.АЛИСА\nЯ.АЛИСА реалити\nЯ.СПЛИТ\nЯ.МУЗЫКА [Фабрика звезд] Граф ролик"
+      }
+    ],
+    "autoMatchFormatId": "grafrolik",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Граф ролик\n15 сек и 10 сек",
+    "normalizedRawValue": "граф ролик 15 сек и 10 сек",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "c907b4ed-cc1a-4f05-8e4c-14d6444745d6",
+        "title": "Я.ГОУ [Фабрика звезд] Граф ролик"
+      }
+    ],
+    "autoMatchFormatId": "grafrolik",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Граф ролик\n15 сек и кат на 10 сек",
+    "normalizedRawValue": "граф ролик 15 сек и кат на 10 сек",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "63a3aa10-c671-439f-9a79-b579ddf83b6b",
+        "title": "Я. ПЛЮС [Фабрика звезд] Граф ролик"
+      }
+    ],
+    "autoMatchFormatId": "grafrolik",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Граф ролик\n5 сек графическая часть (делаем мы) + 10 сек ролик клиента (делает клиент)",
+    "normalizedRawValue": "граф ролик 5 сек графическая часть делаем мы 10 сек ролик клиента делает клиент",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "df20744e-4bb8-42fa-b981-51a20a126141",
+        "title": "ВКУСНО И ТОЧКА [НГ] Граф ролик"
+      }
+    ],
+    "autoMatchFormatId": "grafrolik",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Граф ролик\nдля ТНТ4 (апдейт старого ролика)",
+    "normalizedRawValue": "граф ролик для тнт4 апдейт старого ролика",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "582326c9-9cb4-4ad2-8870-86058db0251e",
+        "title": "ХАЛВА [] Граф ролик"
+      }
+    ],
+    "autoMatchFormatId": "grafrolik",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Граф ролик\nк конкурсу",
+    "normalizedRawValue": "граф ролик к конкурсу",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "e02116ab-6851-425c-94d5-6ded5898e512",
+        "title": "ПСБ [Фабрика звезд] Граф ролик"
+      }
+    ],
+    "autoMatchFormatId": "grafrolik",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Граф ролик \n10 сек ТНТ и ТНТ 4\nПеремонтаж",
+    "normalizedRawValue": "граф ролик 10 сек тнт и тнт 4 перемонтаж",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "3bfa004f-b8ff-4a23-a7c1-99a393b5ae9a",
+        "title": "ДОМКЛИК [Хочу Перемен] Граф ролик"
+      }
+    ],
+    "autoMatchFormatId": "grafrolik",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Граф ролик \n3 из 3 - хронометраж 20 сек.",
+    "normalizedRawValue": "граф ролик 3 из 3 хронометраж 20 сек",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "1d95eb82-5e86-4ace-8218-9c27604d4f2a",
+        "title": "БЕТСИТИ  [] Граф ролик"
+      }
+    ],
+    "autoMatchFormatId": "grafrolik",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Граф ролик (ТНТ и ТНТ4)\n2 ролика (10 сек и 5 сек)",
+    "normalizedRawValue": "граф ролик тнт и тнт4 2 ролика 10 сек и 5 сек",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "50d8f4fa-fbe7-497b-8e0b-49337684cc1e",
+        "title": "КАРАТ\nбренд VIOLETTE [Фабрика звезд] Граф ролик (ТНТ и ТНТ4)"
+      }
+    ],
+    "autoMatchFormatId": "grafrolik",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Граф ролик 10 сек и 15 сек",
+    "normalizedRawValue": "граф ролик 10 сек и 15 сек",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "5e1a71f2-48c3-422e-808d-6bb71f816ab7",
+        "title": "Я.ПЭЙ [Фабрика звезд] Граф ролик 10 сек и 15 сек"
+      }
+    ],
+    "autoMatchFormatId": "grafrolik",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "граф ролик 2 из 3 - хронометраж 20 сек.",
+    "normalizedRawValue": "граф ролик 2 из 3 хронометраж 20 сек",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "c595172d-5b30-4cbc-bd99-e95cf7c09c31",
+        "title": "БЕТСИТИ  [] граф ролик 2 из 3 - хронометраж 20 сек."
+      }
+    ],
+    "autoMatchFormatId": "grafrolik",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Граф ролик для ТНТ4",
+    "normalizedRawValue": "граф ролик для тнт4",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "11bda5a4-8770-48b4-8732-5f650ed281d2",
+        "title": "ХАЛВА [] Граф ролик для ТНТ4"
+      }
+    ],
+    "autoMatchFormatId": "grafrolik",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Граф ролика 5 сек\n2 шт",
+    "normalizedRawValue": "граф ролика 5 сек 2 шт",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "f5c58c8a-f7f0-45c6-910e-4c1bca40b79c",
+        "title": "КАРАТ [Битва пикников] Граф ролика 5 сек"
+      }
+    ],
+    "autoMatchFormatId": "grafrolik",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Граф ролики \n10 сек\n3 пэкшота:\n1. стейк+стейк по-мексикански\n2. котлеты+фарш\n3. сабросо+ветчина",
+    "normalizedRawValue": "граф ролики 10 сек 3 пэкшота 1 стейк стейк по мексикански 2 котлеты фарш 3 сабросо ветчина",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "be6b20f7-a44d-4cc7-9785-0192533418b6",
+        "title": "ИНДИЛАЙТ [сериал Букины] Граф ролики"
+      }
+    ],
+    "autoMatchFormatId": "grafrolik",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Граф. ролик\n10 сек\nтнт и тнт-4",
+    "normalizedRawValue": "граф ролик 10 сек тнт и тнт 4",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "e17d2a0e-e3b4-4787-bb28-807d83546792",
+        "title": "ПОЛИСОРБ [НГ] Граф. ролик"
+      }
+    ],
+    "autoMatchFormatId": "grafrolik",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Граф. ролик\n2 шт по 10 сек",
+    "normalizedRawValue": "граф ролик 2 шт по 10 сек",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "6da06b44-bac2-4021-8cb1-fd64485671be",
+        "title": "ИНДИЛАЙТ [Битва пикников] Граф. ролик"
+      }
+    ],
+    "autoMatchFormatId": "grafrolik",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "граф. ролик, Магнит",
+    "normalizedRawValue": "граф ролик магнит",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "22b6495f-d921-4535-82f8-d53e4369fb29",
+        "title": "Ряба  [Эфир] граф. ролик, Магнит"
+      }
+    ],
+    "autoMatchFormatId": "grafrolik",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "граф. ролик, Пятерочка",
+    "normalizedRawValue": "граф ролик пятерочка",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "3e882550-9ee0-42ae-a446-d13bc1840060",
+        "title": "Ряба  [Эфир] граф. ролик, Пятерочка"
+      }
+    ],
+    "autoMatchFormatId": "grafrolik",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Граф.заставка",
+    "normalizedRawValue": "граф заставка",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "6f6863cc-620c-4532-a119-458502057353",
+        "title": "ПАНТОВИГАР [Бьютти Баттл] Граф.заставка"
+      }
+    ],
+    "autoMatchFormatId": "grafrolik",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Граф.ролик\n20 сек",
+    "normalizedRawValue": "граф ролик 20 сек",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "30bb8bbe-09cd-4446-925d-268dfc068158",
+        "title": "Бетсити  [] Граф.ролик"
+      }
+    ],
+    "autoMatchFormatId": "grafrolik",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "графика",
+    "normalizedRawValue": "графика",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "5d25db1f-0ebb-4b3b-ad56-82c50543640c",
+        "title": "Нацпроекты  [Одныжды в России ] графика"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Графика\nдля дженерика",
+    "normalizedRawValue": "графика для дженерика",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "b36b8cfb-918e-4e0d-aae0-25a404b338f0",
+        "title": "ГАЗПРОМБАНК [] Графика"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Графика\nпод устники\n\n1 очередь \nСценарий 3 (карта с бенефитами)\nСценарий 5 (карта с бенефитами)\nСценарий 6 (эллого) (зафиналили)",
+    "normalizedRawValue": "графика под устники 1 очередь сценарий 3 карта с бенефитами сценарий 5 карта с бенефитами сценарий 6 эллого зафиналили",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "e39db6f0-e1b1-4da6-95f7-df64429aacb5",
+        "title": "ХАЛВА [Женский Стендап] Графика"
+      }
+    ],
+    "autoMatchFormatId": "electronic_logo",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Графика\nпод устники\n\n2 очередь\nСценарий 1 (скринкаст арбуз)\nСценарий 4 (скринкаст с перебором)",
+    "normalizedRawValue": "графика под устники 2 очередь сценарий 1 скринкаст арбуз сценарий 4 скринкаст с перебором",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "52d67b6b-026e-4943-a293-3706b18a11aa",
+        "title": "ХАЛВА [Женский Стендап] Графика"
+      }
+    ],
+    "autoMatchFormatId": "screencast",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Графика\nпод устники\n\n3 очередь\nСценарий 2 (плащ)",
+    "normalizedRawValue": "графика под устники 3 очередь сценарий 2 плащ",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "898d5830-c985-4aed-b2af-eedeae8258e6",
+        "title": "ХАЛВА [Женский Стендап] Графика"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "графика внутрь (стол)",
+    "normalizedRawValue": "графика внутрь стол",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "ec7a2407-5294-4137-9d19-17316824a6c7",
+        "title": "АЛЬФА [Салон] графика внутрь (стол)"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Графика к устникам \n(Мартиросян в образах) Кейс",
+    "normalizedRawValue": "графика к устникам мартиросян в образах кейс",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "4a50d84a-03d5-4ac6-b707-d0ad90fd9f72",
+        "title": "ХАЛВА [ЯЗ] Графика к устникам"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Графика к устникам \n(Мартиросян в образах) Хлопушка",
+    "normalizedRawValue": "графика к устникам мартиросян в образах хлопушка",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "bc137a5d-c50e-4cb5-8fa4-267fec277d18",
+        "title": "ХАЛВА [ЯЗ] Графика к устникам"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "графичексий ролик, хрон 10 сек.",
+    "normalizedRawValue": "графичексий ролик хрон 10 сек",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "0059ed8a-4915-4223-870d-79b4d1882a05",
+        "title": "Анвимакс  [Экстрасенсы. Реванш] графичексий ролик, хрон 10 сек."
+      }
+    ],
+    "autoMatchFormatId": "grafrolik",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Графическая заставка",
+    "normalizedRawValue": "графическая заставка",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "7578f444-a6ca-433c-8ed4-b3e033588efd",
+        "title": "РУСФИК \n(белый уголь) [по эфиру] Графическая заставка"
+      }
+    ],
+    "autoMatchFormatId": "grafrolik",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Графическая заставка \n(15 сек)",
+    "normalizedRawValue": "графическая заставка 15 сек",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "1c8a42f0-e25f-4fb1-b090-0ab91c741a6f",
+        "title": "КАПИТАН [ЗВА] Графическая заставка"
+      }
+    ],
+    "autoMatchFormatId": "grafrolik",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Графическая заставка 5 сек",
+    "normalizedRawValue": "графическая заставка 5 сек",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "df83ea0a-38cb-4bc4-83ab-cc8453716c9d",
+        "title": "RUTUBE [Б_ЭКСТР] Графическая заставка 5 сек"
+      }
+    ],
+    "autoMatchFormatId": "grafrolik",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Графические заставки \n(15,10,5 сек) для ТНТ и ТНТ-4",
+    "normalizedRawValue": "графические заставки 15 10 5 сек для тнт и тнт 4",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "7af4ce78-3918-45fd-a691-3e7b38583147",
+        "title": "МАГУРО [ЗВА] Графические заставки"
+      }
+    ],
+    "autoMatchFormatId": "grafrolik",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Графический переход",
+    "normalizedRawValue": "графический переход",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "9942d02d-b22d-4d32-89b6-b21fca6b4415",
+        "title": "FUNKY MONKEY [ШВ] Графический переход"
+      }
+    ],
+    "autoMatchFormatId": "graphic_transition",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Графический переход от дженерика на ролик",
+    "normalizedRawValue": "графический переход от дженерика на ролик",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "9547bee8-14ee-467a-9cde-8eea4cb16f45",
+        "title": "ЧЕРКИЗОВО [Новогодний дженерик] Графический переход от дженерика на ролик"
+      }
+    ],
+    "autoMatchFormatId": "grafrolik",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Графический ролик\n10 сек\nТНТ и ТНТ-4",
+    "normalizedRawValue": "графический ролик 10 сек тнт и тнт 4",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "5c661921-2db2-4612-9251-04505a7dd720",
+        "title": "GOLDEN LIFE [САМАРКАНД] Графический ролик"
+      }
+    ],
+    "autoMatchFormatId": "grafrolik",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Графический ролик \n(10 сек) ТНТ4 и OLV",
+    "normalizedRawValue": "графический ролик 10 сек тнт4 и olv",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "1ac73dd0-f0cc-40bf-a47c-df6dadfc6d05",
+        "title": "МСП [] Графический ролик"
+      }
+    ],
+    "autoMatchFormatId": "grafrolik",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Графический ролик \n10 сек адаптация",
+    "normalizedRawValue": "графический ролик 10 сек адаптация",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "d1696519-6468-4423-bf85-4335a9188175",
+        "title": "ДОМ РФ [Спец проект\n90 сек] Графический ролик"
+      }
+    ],
+    "autoMatchFormatId": "grafrolik",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Графический ролик (10 сек) (3 разными пэкшотами/продуктами) + ТНТ4",
+    "normalizedRawValue": "графический ролик 10 сек 3 разными пэкшотами продуктами тнт4",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "c036f086-8a05-4fbd-8034-17c35a68c573",
+        "title": "ЛЕВРАНА [ЗВА ] Графический ролик (10 сек) (3 разными пэкшотами/продуктами) + ТНТ4"
+      }
+    ],
+    "autoMatchFormatId": "grafrolik",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Графический ролик (10 сек) ТНТ и ТНТ4",
+    "normalizedRawValue": "графический ролик 10 сек тнт и тнт4",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "19bdab8b-1cfe-4687-840d-4c2363685461",
+        "title": "РОЛЛТОН [По сетке канала] Графический ролик (10 сек) ТНТ и ТНТ4"
+      }
+    ],
+    "autoMatchFormatId": "grafrolik",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "графический ролик 10 сек",
+    "normalizedRawValue": "графический ролик 10 сек",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "79f88a2a-f13c-4127-9ac9-79bec0b607cd",
+        "title": "DEONICA [Выжить в Дубае] графический ролик 10 сек"
+      }
+    ],
+    "autoMatchFormatId": "grafrolik",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Графический ролик 10 сек - 4 шт (отличаются пэкшотами) \n- колбаса\n- ветчина\n- котлеты \n- стейки",
+    "normalizedRawValue": "графический ролик 10 сек 4 шт отличаются пэкшотами колбаса ветчина котлеты стейки",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "4c14b149-c51b-4e5f-b8f0-a9abe8aabec0",
+        "title": "ИНДИЛАЙТ [ЗВА] Графический ролик 10 сек - 4 шт (отличаются пэкшотами)"
+      }
+    ],
+    "autoMatchFormatId": "grafrolik",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Графический ролик на основе их вертикального проекта",
+    "normalizedRawValue": "графический ролик на основе их вертикального проекта",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "9259031c-d022-4850-abc7-ec0a75e75e8c",
+        "title": "ГУД ЛАКК [] Графический ролик на основе их вертикального проекта"
+      }
+    ],
+    "autoMatchFormatId": "grafrolik",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Графическй ролик\n10 сек",
+    "normalizedRawValue": "графическй ролик 10 сек",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "6779a039-d55b-492d-8016-b322a1eef883",
+        "title": "PRESIDENT [ЯЗ] Графическй ролик"
+      }
+    ],
+    "autoMatchFormatId": "grafrolik",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Графролик\n15 сек",
+    "normalizedRawValue": "графролик 15 сек",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "27e1d54d-ac05-4cac-942a-45214ba6e472",
+        "title": "ВТБ [Игры без границ] Графролик"
+      }
+    ],
+    "autoMatchFormatId": "grafrolik",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Графролик адаптация",
+    "normalizedRawValue": "графролик адаптация",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "7c8c193a-121d-46f2-8a39-6a342afd75b5",
+        "title": "Smartavia [Утро] Графролик адаптация"
+      }
+    ],
+    "autoMatchFormatId": "grafrolik",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Графролики",
+    "normalizedRawValue": "графролики",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "3e92028b-59c2-4c01-abdc-1a10f354e07d",
+        "title": "Яндекс Сплит/Пэй [Камеди Клаб] Графролики"
+      }
+    ],
+    "autoMatchFormatId": "grafrolik",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Два граф ролика для Брендов: Сырболл и Сытопуз. \nhttps://russkart.com/sales/",
+    "normalizedRawValue": "два граф ролика для брендов сырболл и сытопуз https russkart com sales",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "55c13a41-963c-4d58-a8d4-b56244b64de1",
+        "title": "РУССКАРТ [] Два граф ролика для Брендов: Сырболл и Сытопуз."
+      }
+    ],
+    "autoMatchFormatId": "grafrolik",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Демонстрация моб приложения",
+    "normalizedRawValue": "демонстрация моб приложения",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "3593fe6a-c520-455a-8330-8cee4e7f57f5",
+        "title": "ДОМКЛИК [Однажды в России ] Демонстрация моб приложения"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Дженерик",
+    "normalizedRawValue": "дженерик",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "306b262c-c7bc-48cc-bec8-dd97b8544bf2",
+        "title": "ГАЗПРОМБАНК []"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Дженерик + графический переход",
+    "normalizedRawValue": "дженерик графический переход",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "739cba26-7196-4080-a042-d2d5784f1c20",
+        "title": "Газпромбанк [] Дженерик + графический переход"
+      }
+    ],
+    "autoMatchFormatId": "graphic_transition",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Диджитал в ТВ ролик",
+    "normalizedRawValue": "диджитал в тв ролик",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "12895327-ad46-4d0c-8220-d38412eb8421",
+        "title": "КАРАТ [] Диджитал в ТВ ролик"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Диджитал ВК",
+    "normalizedRawValue": "диджитал вк",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "94a29452-9840-46fb-aaae-e4d0d51163eb",
+        "title": "ЛЕРУА [] Диджитал ВК"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Диджитал ролик",
+    "normalizedRawValue": "диджитал ролик",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "d1ea5e9d-f083-43bf-800e-d5a910210cef",
+        "title": "Я.ГОУ [Фабрика звезд] Диджитал ролик"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Дин лого\n1 креатива",
+    "normalizedRawValue": "дин лого 1 креатива",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "261a38fc-f00a-4a95-b57d-4a40d0537039",
+        "title": "RUTUBE [Место силы] Дин лого"
+      }
+    ],
+    "autoMatchFormatId": "dynamic_logo",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Дин лого\n2 креатива по 5 сек",
+    "normalizedRawValue": "дин лого 2 креатива по 5 сек",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "f6762fea-67fe-4a82-9bff-a3e1caf89aad",
+        "title": "СБЕР ДЕВАЙСЫ [ШВ] Дин лого"
+      }
+    ],
+    "autoMatchFormatId": "dynamic_logo",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Дин лого\nдо 7%\n3 шт",
+    "normalizedRawValue": "дин лого до 7 3 шт",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "60f65eb1-1040-4da2-9279-f389c2d39fc4",
+        "title": "МТС [Стендап] Дин лого"
+      }
+    ],
+    "autoMatchFormatId": "dynamic_logo",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Дин лого\nдо 7%\n5 креативов под каждый продукт\n1. Дебетовая карта (зафиналили)\n2. Кредитная карта (зафиналили)\n3. Альфа-пей (зафиналили)\n4. Альфа-тревел сервис (зафиналили)\n5. Альфа-тревел карта (зафиналили)",
+    "normalizedRawValue": "дин лого до 7 5 креативов под каждый продукт 1 дебетовая карта зафиналили 2 кредитная карта зафиналили 3 альфа пей зафиналили 4 альфа тревел сервис зафиналили 5 альфа тревел карта зафиналили",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "dd53d407-6020-41b4-81ea-0fe5c855642c",
+        "title": "АЛЬФА [Сокровище Императора] Дин лого"
+      }
+    ],
+    "autoMatchFormatId": "dynamic_logo",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Дин лого\nс промокодом",
+    "normalizedRawValue": "дин лого с промокодом",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "1b1a9e11-4c11-47bb-a099-71bbb3b16bda",
+        "title": "Я.ГОУ [Фабрика звезд] Дин лого"
+      }
+    ],
+    "autoMatchFormatId": "dynamic_logo",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Дин лого \nдо 7% - 10 сек",
+    "normalizedRawValue": "дин лого до 7 10 сек",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "f27f52e3-5322-441b-aee9-2170e8b8e89a",
+        "title": "ДОМ РФ [Спец проект\n90 сек] Дин лого"
+      }
+    ],
+    "autoMatchFormatId": "dynamic_logo",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Дин лого \nдо 7% 10 сек, только бренд Астория",
+    "normalizedRawValue": "дин лого до 7 10 сек только бренд астория",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "8203cc91-7f3b-4d31-bac0-db09ccbe37b3",
+        "title": "АСТОРИЯ [90 секунд] Дин лого"
+      }
+    ],
+    "autoMatchFormatId": "dynamic_logo",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "дин. лого более 7% , «Выгода на полной скорости»",
+    "normalizedRawValue": "дин лого более 7 выгода на полной скорости",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "1baaf2e4-5039-4207-b3f9-9e33a60bb46c",
+        "title": "ОЗОН [Вызов] дин. лого более 7% , «Выгода на полной скорости»"
+      }
+    ],
+    "autoMatchFormatId": "dynamic_logo",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "дин. лого более 7% , «Охота на скидки»",
+    "normalizedRawValue": "дин лого более 7 охота на скидки",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "997bf478-1a77-48bb-a93f-7b8b8e8dfde0",
+        "title": "ОЗОН [Вызов] дин. лого более 7% , «Охота на скидки»"
+      }
+    ],
+    "autoMatchFormatId": "dynamic_logo",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "дин. лого более 7% , «Руки-загребуки»",
+    "normalizedRawValue": "дин лого более 7 руки загребуки",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "14f6811a-da14-4274-adc7-da66fe37cda1",
+        "title": "ОЗОН [Вызов] дин. лого более 7% , «Руки-загребуки»"
+      }
+    ],
+    "autoMatchFormatId": "dynamic_logo",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "дин. лого более 7% , «Удар по ценам»",
+    "normalizedRawValue": "дин лого более 7 удар по ценам",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "bca0da79-5eca-4c37-8a2d-f588a7ed098b",
+        "title": "ОЗОН [Вызов] дин. лого более 7% , «Удар по ценам»"
+      }
+    ],
+    "autoMatchFormatId": "dynamic_logo",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Дин. Лого до 7% (хрон 5 сек)",
+    "normalizedRawValue": "дин лого до 7 хрон 5 сек",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "c2263c51-72e0-4538-83f7-7e02b9c6e318",
+        "title": "ДОДО [НГ] Дин. Лого до 7% (хрон 5 сек)"
+      }
+    ],
+    "autoMatchFormatId": "dynamic_logo",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Дин.Лого \n(5 сек) - показываем в данной опции продукцию (баночки)",
+    "normalizedRawValue": "дин лого 5 сек показываем в данной опции продукцию баночки",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "afaaa9f5-6a0e-4442-8faf-176a0dc53fdc",
+        "title": "КАПИТАН [ЗВА] Дин.Лого"
+      }
+    ],
+    "autoMatchFormatId": "dynamic_logo",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Дин.Лого (5 сек) - показываем логотип Леврана (без отдельных продуктов в кадре)",
+    "normalizedRawValue": "дин лого 5 сек показываем логотип леврана без отдельных продуктов в кадре",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "505b470c-b4a6-4867-9b41-c9bf059a865c",
+        "title": "ЛЕВРАНА [ЗВА] Дин.Лого (5 сек) - показываем логотип Леврана (без отдельных продуктов в кадре)"
+      }
+    ],
+    "autoMatchFormatId": "dynamic_logo",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "дин.лого 10 сек.",
+    "normalizedRawValue": "дин лого 10 сек",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "fab6e43e-9675-4d35-9009-7ea8ec1e840f",
+        "title": "НАЦПРОЕКТЫ  [ШВ] дин.лого 10 сек."
+      }
+    ],
+    "autoMatchFormatId": "dynamic_logo",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Дин.Лого до 7% (5сек) (четыре разных пэкшота)",
+    "normalizedRawValue": "дин лого до 7 5сек четыре разных пэкшота",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "9f61d638-8e86-472a-bd7e-7eb0653a4c64",
+        "title": "UNAGRANDE [БП] Дин.Лого до 7% (5сек) (четыре разных пэкшота)"
+      }
+    ],
+    "autoMatchFormatId": "dynamic_logo",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Дин.лого до 7% 6 шт",
+    "normalizedRawValue": "дин лого до 7 6 шт",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "eea0f1a6-e27a-4e9b-96d8-dc955157819e",
+        "title": "ДОДО [Музыкальная Интуиция] Дин.лого до 7% 6 шт"
+      }
+    ],
+    "autoMatchFormatId": "dynamic_logo",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "дин.лого, эл.лого",
+    "normalizedRawValue": "дин лого эл лого",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "7c7993c7-9baf-4068-8089-6fa1b16a4093",
+        "title": "АЛЬФА [СОКР ИМП ] дин.лого, эл.лого"
+      }
+    ],
+    "autoMatchFormatId": "dynamic_logo",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Динамический логотип до 7%",
+    "normalizedRawValue": "динамический логотип до 7",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "46f3d0e3-9361-488a-b297-715daac6bc7f",
+        "title": "ХАЛВА [Место силы] Динамический логотип до 7%"
+      }
+    ],
+    "autoMatchFormatId": "dynamic_logo",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Динамический логотип к фильму",
+    "normalizedRawValue": "динамический логотип к фильму",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "8fe285c4-a87b-484c-984c-1dcc0204b152",
+        "title": "ДОБРЫЙ КОЛА [] Динамический логотип к фильму"
+      }
+    ],
+    "autoMatchFormatId": "dynamic_logo",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Динлого\n5 сек",
+    "normalizedRawValue": "динлого 5 сек",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "3c3292b1-0cf9-484f-a2e8-3e56eb1e0b74",
+        "title": "ВТБ [Шоу Историй] Динлого"
+      }
+    ],
+    "autoMatchFormatId": "dynamic_logo",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Динлого\nБрендинг спасения ()",
+    "normalizedRawValue": "динлого брендинг спасения",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "742fe613-628b-46f7-9bc2-75c78b6f0313",
+        "title": "ХАЛВА [ЯЗ] Динлого"
+      }
+    ],
+    "autoMatchFormatId": "dynamic_logo",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Динлого\nдо 7%",
+    "normalizedRawValue": "динлого до 7",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "50c3a24c-6582-47a0-a58a-70a5c1c37986",
+        "title": "RUTUBE [Сокровище императора] Динлого"
+      }
+    ],
+    "autoMatchFormatId": "dynamic_logo",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Динлого  +QR",
+    "normalizedRawValue": "динлого qr",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "35ad1c33-fbd1-4bbd-919d-11e7698e0efa",
+        "title": "Леруа  [] Динлого  +QR"
+      }
+    ],
+    "autoMatchFormatId": "dynamic_logo",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Динлого + QR-код",
+    "normalizedRawValue": "динлого qr код",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "d0d9e15a-e2b9-4182-9c49-eea378bafb72",
+        "title": "ShoppingLive [Перезагрузка] Динлого + QR-код"
+      }
+    ],
+    "autoMatchFormatId": "dynamic_logo",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "ДО СЮДА ПОСЧИТАЛ",
+    "normalizedRawValue": "до сюда посчитал",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "1cc0bbaa-99e6-4cff-aec6-f7e39d7c2125",
+        "title": "ДО СЮДА ПОСЧИТАЛ\n [ДО СЮДА ПОСЧИТАЛ\n] ДО СЮДА ПОСЧИТАЛ"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "ДрифтЛого",
+    "normalizedRawValue": "дрифтлого",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "1e01024e-6b23-4506-9d91-cd785d61bc9c",
+        "title": "Джидрайв  [Вызов] ДрифтЛого"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Замена брендинга на отснятом материала",
+    "normalizedRawValue": "замена брендинга на отснятом материала",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "44808401-df1b-45be-bb4f-a0b15f438d82",
+        "title": "ГАЗПРОМБАНК [ШВ] Замена брендинга на отснятом материала"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "заставка",
+    "normalizedRawValue": "заставка",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "08b0693a-9163-40b0-9531-3efe8f157cc4",
+        "title": "Натахтари  [НГ фильм] заставка"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Заставка \n10 сек (Астория + Пятёрочка) съемочная при участи Шеф повара - Константина Оганесяна\n15 сек",
+    "normalizedRawValue": "заставка 10 сек астория пятерочка съемочная при участи шеф повара константина оганесяна 15 сек",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "c51e4f5c-4252-4485-837c-d5c0dc0d40e5",
+        "title": "АСТОРИЯ [90 секунд] Заставка"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Заставки и стопкадры",
+    "normalizedRawValue": "заставки и стопкадры",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "9dfba8e9-e5fb-48be-8fb4-a09ee461ce9f",
+        "title": "ЧЕРКИЗОВО [Самоирония (новогодний фильм)] Заставки и стопкадры"
+      }
+    ],
+    "autoMatchFormatId": "still_frame",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "инеграция лого",
+    "normalizedRawValue": "инеграция лого",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "9cf7f88e-6e55-4823-9ec5-29b72e3c71aa",
+        "title": "Альфа-банк  [Эфир] инеграция лого"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Интеграция в лого",
+    "normalizedRawValue": "интеграция в лого",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "3f7b8692-2745-4c8f-8bf8-04f5f87624e0",
+        "title": "ХАЛВА [] Интеграция в лого"
+      }
+    ],
+    "autoMatchFormatId": "logo_integration",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "интеграция в лого\nБебуришвили",
+    "normalizedRawValue": "интеграция в лого бебуришвили",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "14ec775b-3b8b-40a4-822b-b7d8be314769",
+        "title": "АЛЬФА [] интеграция в лого"
+      }
+    ],
+    "autoMatchFormatId": "logo_integration",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Интеграция в лого \n1 из 3 креативов",
+    "normalizedRawValue": "интеграция в лого 1 из 3 креативов",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "75e177c2-f80c-4228-90f8-e27fb14244d5",
+        "title": "АЛЬФА [] Интеграция в лого"
+      }
+    ],
+    "autoMatchFormatId": "logo_integration",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Интеграция в лого \n2 из 3 креативов",
+    "normalizedRawValue": "интеграция в лого 2 из 3 креативов",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "15f6b3db-f99c-42a5-a19e-02ba14fe5ede",
+        "title": "АЛЬФА [] Интеграция в лого"
+      }
+    ],
+    "autoMatchFormatId": "logo_integration",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Интеграция в лого \n3 из 3 креативов с Бузовой",
+    "normalizedRawValue": "интеграция в лого 3 из 3 креативов с бузовой",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "da236247-b502-4395-9fd4-4903f178a588",
+        "title": "АЛЬФА [] Интеграция в лого"
+      }
+    ],
+    "autoMatchFormatId": "logo_integration",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "интеграция в лого \nс Федункив. 2 креатива",
+    "normalizedRawValue": "интеграция в лого с федункив 2 креатива",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "8a28bc15-3cde-4542-a670-854e936e06cd",
+        "title": "МСП [] интеграция в лого"
+      }
+    ],
+    "autoMatchFormatId": "logo_integration",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Интеграция в лого / Преза",
+    "normalizedRawValue": "интеграция в лого преза",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "98061d40-a5b5-4edc-bfdc-1498b10a7e9e",
+        "title": "Альфабанк [] Интеграция в лого / Преза"
+      }
+    ],
+    "autoMatchFormatId": "logo_integration",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Интеграция в лого Абрамов",
+    "normalizedRawValue": "интеграция в лого абрамов",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "69def7d7-a9bc-48b3-a445-8b6653bc3881",
+        "title": "АЛЬФА-БАНК [] Интеграция в лого Абрамов"
+      }
+    ],
+    "autoMatchFormatId": "logo_integration",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Интеграция в лого Бебуришвили. \n- Курьер",
+    "normalizedRawValue": "интеграция в лого бебуришвили курьер",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "21966413-5c2d-4821-a645-3a009aa5e32e",
+        "title": "АЛЬФА-БАНК  [] Интеграция в лого Бебуришвили."
+      }
+    ],
+    "autoMatchFormatId": "logo_integration",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Интеграция в лого Бебуришвили. \n- Переводы",
+    "normalizedRawValue": "интеграция в лого бебуришвили переводы",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "b50b5941-edfd-40f6-8aed-0424189af8c6",
+        "title": "АЛЬФА-БАНК [] Интеграция в лого Бебуришвили."
+      }
+    ],
+    "autoMatchFormatId": "logo_integration",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Интеграция в лого ТНТ",
+    "normalizedRawValue": "интеграция в лого тнт",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "c7e71121-0125-417d-a5f9-f90ddcfb1596",
+        "title": "МВидео [] Интеграция в лого ТНТ"
+      }
+    ],
+    "autoMatchFormatId": "logo_integration",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Интерактивный устник",
+    "normalizedRawValue": "интерактивный устник",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "afb2f3f5-fed0-4207-8af9-5c7bf09273b1",
+        "title": "ВТБ [Первые на деревне ] Интерактивный устник"
+      }
+    ],
+    "autoMatchFormatId": "interactive_ustnik",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Интергация в лого / Преза",
+    "normalizedRawValue": "интергация в лого преза",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "be7a35a4-707f-44b7-a08e-9cb6b0b64efd",
+        "title": "Мегафон  [] Интергация в лого / Преза"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Карельский драйв",
+    "normalizedRawValue": "карельский драйв",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "f0f44f9b-f16d-4e85-a573-4b64e0147dbf",
+        "title": "Джидрайв  [Вызов] Карельский драйв"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "картинка",
+    "normalizedRawValue": "картинка",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "8fffba98-b20e-4fe0-958d-fd35ce8761de",
+        "title": "ВТБ [Б КУШ ] картинка"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Клинап",
+    "normalizedRawValue": "клинап",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "4d469016-06a6-479a-aed0-621d9609c1db",
+        "title": "FUNKY MONKEY [ШВ] Клинап"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Лайт ролик",
+    "normalizedRawValue": "лайт ролик",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "571b9a8f-0c5c-442a-afbe-00b8b02f32a5",
+        "title": "KARI [Салон] Лайт ролик"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Лайт ролик\n3 шт по 20 сек",
+    "normalizedRawValue": "лайт ролик 3 шт по 20 сек",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "523f622c-5ca2-4f85-ac65-ed5cbda35a46",
+        "title": "МТС [Женский Стендап] Лайт ролик"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Лайт ролики\nМария Маркова",
+    "normalizedRawValue": "лайт ролики мария маркова",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "822141b2-ca74-432c-b5e6-e9f546f67a30",
+        "title": "СБЕР СБЕРЕЖЕНИЯ [] Лайт ролики"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "левом нижнем углу экрана",
+    "normalizedRawValue": "левом нижнем углу экрана",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "7d2da773-532e-4c95-9096-820cd8bfafc1",
+        "title": "ТИНЬКОФФ [Титаны] левом нижнем углу экрана"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Лендинг + конкурс",
+    "normalizedRawValue": "лендинг конкурс",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "c42c3dc5-6bc7-4045-8e57-2618d8e9af9b",
+        "title": "PRESIDENT [ЯЗ] Лендинг + конкурс"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "логотип",
+    "normalizedRawValue": "логотип",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "845f55e5-b185-4f41-9f4a-47686112fc36",
+        "title": "RUTUBE [САМАРКАНД] логотип"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "логотип на пэкшот",
+    "normalizedRawValue": "логотип на пэкшот",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "6da2eeb9-7ea6-4dcc-8825-f8349a7ca204",
+        "title": "МАГУРО [Ролик] логотип на пэкшот"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Лэндинг",
+    "normalizedRawValue": "лэндинг",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "d5ecf201-b7ae-4cd9-8b10-6ad4ac4fa973",
+        "title": "ГАЗПРОМБАНК [ШВ] Лэндинг"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Мобильный супербаннер",
+    "normalizedRawValue": "мобильный супербаннер",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "c78fd48b-377c-46aa-aa92-e536aa64c2cf",
+        "title": "АЕВИТ [] Мобильный супербаннер"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Монтаж с пэкшотом 10 сек",
+    "normalizedRawValue": "монтаж с пэкшотом 10 сек",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "cfdedb3d-98b0-4049-92d0-afee402f7215",
+        "title": "Tecno [Новые Танцы] Монтаж с пэкшотом 10 сек"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "НГ заставка 5 сек на базе их видео про духовку",
+    "normalizedRawValue": "нг заставка 5 сек на базе их видео про духовку",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "9178c1fc-75c6-45ea-843c-2be29db66e22",
+        "title": "GORENJE [] НГ заставка 5 сек на базе их видео про духовку"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Обложка на сайт",
+    "normalizedRawValue": "обложка на сайт",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "07af59bb-9b71-4ba4-a43c-f44ac4726a04",
+        "title": "УРАЛСИБ [Сайт тнт ] Обложка на сайт"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Один съемочный ролик в двух разных хронометражах\n\n- съемочный ролик на TV - 10 сек\n- съемочный ролик в DIGITAL - 15 сек",
+    "normalizedRawValue": "один съемочный ролик в двух разных хронометражах съемочный ролик на tv 10 сек съемочный ролик в digital 15 сек",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "f33f3aee-1d6a-4631-a21f-b1aa9cbd3f4c",
+        "title": "PULPY [] Один съемочный ролик в двух разных хронометражах"
+      }
+    ],
+    "autoMatchFormatId": "shooting_video",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Озвучка + набивки",
+    "normalizedRawValue": "озвучка набивки",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "f7f5c6b5-4058-420c-9187-122e1e3093b3",
+        "title": "СБЕРБИЗНЕС [Постучись в мою дверь] Озвучка + набивки"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Онлайн игра\nБаннеры",
+    "normalizedRawValue": "онлайн игра баннеры",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "ba68a77d-0057-4468-92ae-ee60e3b83c2a",
+        "title": "VIOLETTE [Фабрика звезд] Онлайн игра"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "переход",
+    "normalizedRawValue": "переход",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "9a0b023d-6996-42b0-92a9-8f66a1f6e3a9",
+        "title": "Яндекс музыка  [дженерик Камеди ] переход"
+      }
+    ],
+    "autoMatchFormatId": "graphic_transition",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Переход с анонсов\nна ролик клиента 20 сек",
+    "normalizedRawValue": "переход с анонсов на ролик клиента 20 сек",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "3c43a1e7-c60d-4720-bc41-050c2f83e5fd",
+        "title": "ПСБ [Вызов] Переход с анонсов"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "плашка для шоу",
+    "normalizedRawValue": "плашка для шоу",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "748d7e21-04c6-4720-b66e-93c7d0055da5",
+        "title": "КОНФ [КОНФ] плашка для шоу"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Подмигивание обезьяны на банке",
+    "normalizedRawValue": "подмигивание обезьяны на банке",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "0c58bdcf-6d8e-4805-8071-a6cf36d9a8cf",
+        "title": "FUNKY MONKEY [ШВ] Подмигивание обезьяны на банке"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Пост\nанонсирующий",
+    "normalizedRawValue": "пост анонсирующий",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "78da5bb2-e5b2-43ea-93a8-acb4132e83cd",
+        "title": "PRESIDENT [ОК и ВК] Пост"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Посты в ВК\n5 шт",
+    "normalizedRawValue": "посты в вк 5 шт",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "68273de7-01c9-4ec1-b215-19a6f027cbb0",
+        "title": "УРАЛСИБ [Камеди Клаб] Посты в ВК"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Пуш",
+    "normalizedRawValue": "пуш",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "26130c7f-1b8e-48be-b43b-016bb8b94459",
+        "title": "СБЕР [Зеленая неделя] Пуш"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Пуш\n3 шт",
+    "normalizedRawValue": "пуш 3 шт",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "22e0f435-525e-4628-b123-1affb6fe220e",
+        "title": "RUTUBE [По сетке канала] Пуш"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Пуш\n4 шт",
+    "normalizedRawValue": "пуш 4 шт",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "e1c2e774-9130-41dd-9360-479e19bf7749",
+        "title": "RUTUBE [По сетке канала] Пуш"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "пэкшот",
+    "normalizedRawValue": "пэкшот",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "318187ad-2749-4eb4-9edb-6c44decc1ee1",
+        "title": "JOONIES [эфир] пэкшот"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Ред брендинг",
+    "normalizedRawValue": "ред брендинг",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "af019232-de55-4364-af97-dc085ad32174",
+        "title": "Я.МАРКЕТ [] Ред брендинг"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Ред посты\nв вк",
+    "normalizedRawValue": "ред посты в вк",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "b57cf958-4f94-485b-b2dc-dd9b5027402f",
+        "title": "ПСБ [Фабрика звезд] Ред посты"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Редакционный брендинг\n20 сек в лупе",
+    "normalizedRawValue": "редакционный брендинг 20 сек в лупе",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "70589d3f-e02b-446f-9039-011768dae562",
+        "title": "ЯНДЕКС [Фабрика звезд] Редакционный брендинг"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Редбрендинг",
+    "normalizedRawValue": "редбрендинг",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "9b2844e7-bba1-4626-bf20-8a2c3e2364ee",
+        "title": "Вайлдбериз [КОНФ] Редбрендинг"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Ролик",
+    "normalizedRawValue": "ролик",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "8bd4711f-454f-4642-abd5-b256aa7c91bc",
+        "title": "МТС [ЖC] Ролик"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Ролик к анонсу НГ фильма10 сек (без графического перехода)",
+    "normalizedRawValue": "ролик к анонсу нг фильма10 сек без графического перехода",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "4bb33568-4354-447c-b2bb-652be0dc4fb2",
+        "title": "ДОБРЫЙ КОЛА [] Ролик к анонсу НГ фильма10 сек (без графического перехода)"
+      }
+    ],
+    "autoMatchFormatId": "grafrolik",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "ролики с VFX",
+    "normalizedRawValue": "ролики с vfx",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "ece9bbb0-73d3-4925-8aac-842c164df204",
+        "title": "АЛЬФА [СОКР ИМП ] ролики с VFX"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Скрикаст\nакция 11.11",
+    "normalizedRawValue": "скрикаст акция 11 11",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "b7021354-d1c1-42d6-a1e8-f0d11108425c",
+        "title": "ОЗОН [БП] Скрикаст"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "скрин-каст",
+    "normalizedRawValue": "скрин каст",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "7de4fb28-6d29-43f1-8f6b-b6295a8df33c",
+        "title": "VK ВИДЕО [Большое переселение ] скрин-каст"
+      }
+    ],
+    "autoMatchFormatId": "screencast",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Скринкаст\n11 шт",
+    "normalizedRawValue": "скринкаст 11 шт",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "0ae21e47-d8ef-46b7-8dd2-0fe5e9dff011",
+        "title": "ОЗОН [Вызов] Скринкаст"
+      }
+    ],
+    "autoMatchFormatId": "screencast",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Скринкаст\nв устник 5 сек",
+    "normalizedRawValue": "скринкаст в устник 5 сек",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "3e21a386-6045-4ee4-b78a-a90c1429a544",
+        "title": "ДОМ РФ [] Скринкаст"
+      }
+    ],
+    "autoMatchFormatId": "screencast",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Скринкаст\nЧерная Пятница",
+    "normalizedRawValue": "скринкаст черная пятница",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "f80c1098-8c18-40ca-b5bc-b93aa51a0f0d",
+        "title": "ОЗОН [Битва пикников] Скринкаст"
+      }
+    ],
+    "autoMatchFormatId": "screencast",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "скринкаст\nhttps://disk.yandex.ru/i/0rg22tlPkjI6Og",
+    "normalizedRawValue": "скринкаст https disk yandex ru i 0rg22tlpkji6og",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "6617f271-4abc-40b4-a083-eb87cffadbd2",
+        "title": "ВТБ [Большое переселение ] скринкаст"
+      }
+    ],
+    "autoMatchFormatId": "screencast",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Скринкасты",
+    "normalizedRawValue": "скринкасты",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "de272508-1e35-459d-ad06-e9471ffb2a40",
+        "title": "OZON FRESH [Битва пикников] Скринкасты"
+      }
+    ],
+    "autoMatchFormatId": "screencast",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Спец проект\nЛендинг",
+    "normalizedRawValue": "спец проект лендинг",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "88b226a8-3ea1-4927-86ce-8fb9ba548cc2",
+        "title": "ПСБ [Фабрика звезд] Спец проект"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "стикер",
+    "normalizedRawValue": "стикер",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "3e39b054-1f79-48fb-9248-4303501e1a2a",
+        "title": "УРАЛСИБ [Сайт тнт ] стикер"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Стоп кадр\n10 и 5 сек",
+    "normalizedRawValue": "стоп кадр 10 и 5 сек",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "2d58c3f4-c1fe-4b6c-8833-2772ea663139",
+        "title": "РЯБА+ПЯТЕРОЧКА [НГ] Стоп кадр"
+      }
+    ],
+    "autoMatchFormatId": "still_frame",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Стоп-кадр\n10 сек\n+ГЗК\nКОЛЕСО",
+    "normalizedRawValue": "стоп кадр 10 сек гзк колесо",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "fe86fa62-f6e4-49b0-b7e5-1d0403b5928a",
+        "title": "АЛЬФА [Выжить в Дубае. Возвращение] Стоп-кадр"
+      }
+    ],
+    "autoMatchFormatId": "still_frame",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Стоп-кадр\n5 сек для ТНТ и ТНТ-4",
+    "normalizedRawValue": "стоп кадр 5 сек для тнт и тнт 4",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "0623a9d3-8b6c-4561-83dd-861aeabcca92",
+        "title": "АКВАФОР [Хочу Перемен] Стоп-кадр"
+      }
+    ],
+    "autoMatchFormatId": "still_frame",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "стоп-кадры\n4 стоп-кадра (первым стеклоочиститель)",
+    "normalizedRawValue": "стоп кадры 4 стоп кадра первым стеклоочиститель",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "2d21144e-eaca-4791-a601-9798f60b2dec",
+        "title": "КЕРХЕР [] стоп-кадры"
+      }
+    ],
+    "autoMatchFormatId": "still_frame",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Стопкадр (5 сек)!",
+    "normalizedRawValue": "стопкадр 5 сек",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "f84f88d8-ac9a-418b-9aca-4f0b5bef8d1c",
+        "title": "ESTEL [Бьюти Баттл ] Стопкадр (5 сек)!"
+      }
+    ],
+    "autoMatchFormatId": "still_frame",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Съемки\nАбрамов 2 по 15 сек",
+    "normalizedRawValue": "съемки абрамов 2 по 15 сек",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "cb8eb521-d32c-4edb-a10b-9e144767343f",
+        "title": "АЛЬФА [] Съемки"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Съемки+графика\n20 сек",
+    "normalizedRawValue": "съемки графика 20 сек",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "d5686db2-8ee6-4b53-a867-0f4ec535a56e",
+        "title": "БЕТСИТИ  [] Съемки+графика"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "съёмочные ролики",
+    "normalizedRawValue": "съемочные ролики",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "3ab4937d-b728-4ae9-8849-79e0902b795b",
+        "title": "Яндекс Сплит/Пэй [Камеди Клаб] съёмочные ролики"
+      }
+    ],
+    "autoMatchFormatId": "shooting_video",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Съемочные ролики 2  по 15 сек",
+    "normalizedRawValue": "съемочные ролики 2 по 15 сек",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "db228211-87e9-4caf-a11f-d779dfdd50b8",
+        "title": "ХАЛВА [Лига Городов] Съемочные ролики 2  по 15 сек"
+      }
+    ],
+    "autoMatchFormatId": "shooting_video",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Съемочный ролик\n10 сек",
+    "normalizedRawValue": "съемочный ролик 10 сек",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "1043aba0-3973-47dd-b0c4-226d4a7ffe4f",
+        "title": "ХАЛВА [ЯЗ] Съемочный ролик"
+      }
+    ],
+    "autoMatchFormatId": "shooting_video",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Съемочный ролик\n10 сек с Родригесом",
+    "normalizedRawValue": "съемочный ролик 10 сек с родригесом",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "97b1de6b-18a8-41cd-b853-7dddea5aca4c",
+        "title": "ХАЛВА [Лига Городов\n2 сезон] Съемочный ролик"
+      }
+    ],
+    "autoMatchFormatId": "shooting_video",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Съемочный ролик\n2 по 10 сек",
+    "normalizedRawValue": "съемочный ролик 2 по 10 сек",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "9bb7ed4c-bc71-48e9-9dd4-91152a1e73ec",
+        "title": "ХАЛВА [Женский Стендап] Съемочный ролик"
+      }
+    ],
+    "autoMatchFormatId": "shooting_video",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Съемочный ролик\n2 по 15 сек\nДиджитал",
+    "normalizedRawValue": "съемочный ролик 2 по 15 сек диджитал",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "56646332-1fce-4f23-8d9e-3e8fbfd70bad",
+        "title": "НИЗОРАЛ [] Съемочный ролик"
+      }
+    ],
+    "autoMatchFormatId": "shooting_video",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Съемочный ролик \n10 сек и 15 сек с Лагашкиным\n+ 5 сек (пэкшот)",
+    "normalizedRawValue": "съемочный ролик 10 сек и 15 сек с лагашкиным 5 сек пэкшот",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "ff44e43c-c236-454c-934f-0bd2d150e2d1",
+        "title": "РЯБА [НГ] Съемочный ролик"
+      }
+    ],
+    "autoMatchFormatId": "shooting_video",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Съемочный ролик 30 сек \n- съемочный ролик 15 сек - ролик тизер, используем отснятые материалы для 30 сек ролика",
+    "normalizedRawValue": "съемочный ролик 30 сек съемочный ролик 15 сек ролик тизер используем отснятые материалы для 30 сек ролика",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "285ddc7f-f4bb-48b2-99e1-d0cfaa360e47",
+        "title": "OPPO [ЗВА] Съемочный ролик 30 сек"
+      }
+    ],
+    "autoMatchFormatId": "shooting_video",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Съемочный ролик с Саймоном 2шт",
+    "normalizedRawValue": "съемочный ролик с саймоном 2шт",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "9a4cc0df-4473-480a-bd17-120b0913345b",
+        "title": "Магнит [] Съемочный ролик с Саймоном 2шт"
+      }
+    ],
+    "autoMatchFormatId": "shooting_video",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Съемочный ролик с Хилькевич",
+    "normalizedRawValue": "съемочный ролик с хилькевич",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "3a02ddd4-85ec-4e6a-ad46-7c15e5f23870",
+        "title": "Капитан Вкусов [] Съемочный ролик с Хилькевич"
+      }
+    ],
+    "autoMatchFormatId": "shooting_video",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Тв заставка 10сек",
+    "normalizedRawValue": "тв заставка 10сек",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "ab6521f8-3120-486f-8496-70eb5939f64c",
+        "title": "ГАЗПРОМБАНК [КОНФ] Тв заставка 10сек"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "тест",
+    "normalizedRawValue": "тест",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "1111111111",
+        "title": "тест [тест] тест"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "тизер",
+    "normalizedRawValue": "тизер",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "ab44b164-bce2-48d6-879f-e0c072e80acb",
+        "title": "Сбербизнес [Новогодний фильм ] тизер"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "ТНТ\nРолик имиджевый 10 сек",
+    "normalizedRawValue": "тнт ролик имиджевый 10 сек",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "bc92af23-2a12-4f2b-b18a-7d2885a351ff",
+        "title": "МОСКАР [ШВ] ТНТ"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "ТНТ - Ролик с акцией 10 сек\nТНТ4 - Такой же ролик но с другой озвучкой",
+    "normalizedRawValue": "тнт ролик с акцией 10 сек тнт4 такой же ролик но с другой озвучкой",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "e44f67a4-2748-435d-89c5-1ee7f6361147",
+        "title": "МОСКАР [ШВ] ТНТ - Ролик с акцией 10 сек"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "ТНТ 4\nРолик имиджевый 10 сек",
+    "normalizedRawValue": "тнт 4 ролик имиджевый 10 сек",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "7092a448-5a89-45aa-abfc-7e26a5cc717b",
+        "title": "МОСКАР [ШВ] ТНТ 4"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Транзишн (3 сек)",
+    "normalizedRawValue": "транзишн 3 сек",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "f74c4c53-a49f-4551-beb4-5d876e69811b",
+        "title": "UNAGRANDE [БП] Транзишн (3 сек)"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Устник (Лого и инфографика)",
+    "normalizedRawValue": "устник лого и инфографика",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "f97022eb-7690-4a7d-8ebc-ae26e5e626d4",
+        "title": "НацПроект  [Однажды в Росии] Устник (Лого и инфографика)"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Устник (ноутбук)",
+    "normalizedRawValue": "устник ноутбук",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "d4546676-2a72-446a-b64f-b5afc0471b67",
+        "title": "НацПроекты [Однажды в России] Устник (ноутбук)"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "устник ДЕБ КАРТА",
+    "normalizedRawValue": "устник деб карта",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "75cc9246-f21e-4ff1-86a6-0e84b3ed11cf",
+        "title": "ВТБ [Большой хит ] устник ДЕБ КАРТА"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "устник монетки",
+    "normalizedRawValue": "устник монетки",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "99518c75-b0be-49a8-ac18-1c505cc6bba5",
+        "title": "ВТБ [Большой хит ] устник монетки"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Устник Петрозаводск",
+    "normalizedRawValue": "устник петрозаводск",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "d9ec2c6b-d0f8-401f-b005-b9b212fc8f4b",
+        "title": "ОТП Банк [Тревел шоу] Устник Петрозаводск"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Устник Плёс",
+    "normalizedRawValue": "устник плес",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "b79865ee-28cc-45a6-b827-f9d444ce1d2e",
+        "title": "ОТП Банк [Тревел шоу] Устник Плёс"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "устник Псков",
+    "normalizedRawValue": "устник псков",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "b1bbc65a-2de0-4f92-9721-518f0e9d3f69",
+        "title": "ОТП Банк [Тревел шоу] устник Псков"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Устник с графикой\n25сек",
+    "normalizedRawValue": "устник с графикой 25сек",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "f4c45c74-af1e-4a31-963d-2810dfe1317d",
+        "title": "ВТБ [Шоу Историй] Устник с графикой"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Устник Санкт-Петербург",
+    "normalizedRawValue": "устник санкт петербург",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "31bd07da-c6bb-42fe-a519-b081dbb2c9e0",
+        "title": "ОТП Банк [Тревел шоу] Устник Санкт-Петербург"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Устник Саратов",
+    "normalizedRawValue": "устник саратов",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "93928733-d0f3-4d84-bf7a-5176727c8bdb",
+        "title": "ОТП Банк [Тревел шоу] Устник Саратов"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Устник Сергиев Посад",
+    "normalizedRawValue": "устник сергиев посад",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "fae25358-d215-4329-9a15-440474f5b464",
+        "title": "ОТП Банк [Тревел шоу] Устник Сергиев Посад"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Устники 25 сек – 3 шт",
+    "normalizedRawValue": "устники 25 сек 3 шт",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "147e67da-fa2b-42ff-a6cd-87e5ad688dcb",
+        "title": "ХАЛВА [Место силы] Устники 25 сек – 3 шт"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Устники с графикой\n6 шт",
+    "normalizedRawValue": "устники с графикой 6 шт",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "ba8e1d53-762e-43e7-8f91-6098723fd404",
+        "title": "ХАЛВА [ЖC] Устники с графикой"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Устники с интерактивной графикой\n3 по 30 сек",
+    "normalizedRawValue": "устники с интерактивной графикой 3 по 30 сек",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "1516fb22-684b-4572-877c-37923609db2a",
+        "title": "ХАЛВА [Лига Городов\nвесна] Устники с интерактивной графикой"
+      }
+    ],
+    "autoMatchFormatId": "interactive_ustnik",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Фотопост",
+    "normalizedRawValue": "фотопост",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "9a2fb0ac-16c3-479f-8bef-88cfe4415cc3",
+        "title": "ГАЗПРОМБАНК [ШВ] Фотопост"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "фотопост в ВК",
+    "normalizedRawValue": "фотопост в вк",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "413235c1-6a25-4246-a77b-9d3e0ec10674",
+        "title": "УРАЛСИБ [группа в ВК] фотопост в ВК"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Фотопосты",
+    "normalizedRawValue": "фотопосты",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "7b7f7e7f-acbe-4d09-8fd6-18cb609ca41b",
+        "title": "ЯНДЕКС [Фабрика звезд] Фотопосты"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "чатбот",
+    "normalizedRawValue": "чатбот",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "5e64e10f-b959-45f2-bca5-307cad8a3b19",
+        "title": "REXONA [Звездные танцы ] чатбот"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Эл лого\nдо 7%",
+    "normalizedRawValue": "эл лого до 7",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "4ba2f901-34f9-4b8c-a4e8-e068aea67be5",
+        "title": "КАПИТАН [Сокровище императора] Эл лого"
+      }
+    ],
+    "autoMatchFormatId": "electronic_logo",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Эл лого\nдо 7% - 5 сек (2 креатива)",
+    "normalizedRawValue": "эл лого до 7 5 сек 2 креатива",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "b4a660ce-7404-4c1a-a584-d7e33ac46abb",
+        "title": "КАРАТ [Фабрика звезд] Эл лого"
+      }
+    ],
+    "autoMatchFormatId": "electronic_logo",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Эл лого\nдо 7% 5 сек",
+    "normalizedRawValue": "эл лого до 7 5 сек",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "4922dc29-89c4-454b-a678-235dcbb579cc",
+        "title": "МАГУРО [Сокровище императора] Эл лого"
+      }
+    ],
+    "autoMatchFormatId": "electronic_logo",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Электронный логотип",
+    "normalizedRawValue": "электронный логотип",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "10d2f5c4-67c3-4644-a0e4-61c9293e6c79",
+        "title": "Черкизово [БП] Электронный логотип"
+      }
+    ],
+    "autoMatchFormatId": "electronic_logo",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "ЭлЛого + QR",
+    "normalizedRawValue": "эллого qr",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "e80dbf7e-879a-45ca-9198-6504a81e97bf",
+        "title": "Леруа  [] ЭлЛого + QR"
+      }
+    ],
+    "autoMatchFormatId": "electronic_logo",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "DIGITAL\nбаннеры 9 шт.",
+    "normalizedRawValue": "digital баннеры 9 шт",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "b42fd934-1825-457d-b2e0-f071bb8df465",
+        "title": "МОСКАР [ШВ] DIGITAL"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "DIGITAL\nКнопка для сайта",
+    "normalizedRawValue": "digital кнопка для сайта",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "88f65b5f-7c34-47d0-aaec-596967c85c37",
+        "title": "МОСКАР [ШВ] DIGITAL"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "DIGITAL\nфотопост в ВК - 2 шт",
+    "normalizedRawValue": "digital фотопост в вк 2 шт",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "1ecd9c5a-8da1-4633-905f-5915b6c21bbe",
+        "title": "МОСКАР [ШВ] DIGITAL"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Digital / Баннеры",
+    "normalizedRawValue": "digital баннеры",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "b317d1dd-a706-4fcc-bd1e-6337169f44a5",
+        "title": "VK МУЗЫКА [КОНФЕТКА] Digital / Баннеры"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "Digital / Обложки для плей-листов",
+    "normalizedRawValue": "digital обложки для плей листов",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "51a9f46e-cc5e-428f-97b9-6999dbae0578",
+        "title": "VK МУЗЫКА [КОНФЕТКА] Digital / Обложки для плей-листов"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "fullscreen banner",
+    "normalizedRawValue": "fullscreen banner",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "ccf3b33c-a195-47b2-bd33-f3ce40140575",
+        "title": "УРАЛСИБ [Сайт тнт ] fullscreen banner"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "KV",
+    "normalizedRawValue": "kv",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "9f47bf69-b835-41f4-9338-58e1e0dcfd80",
+        "title": "МАГУРО [] KV"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "QR код\n10 сек",
+    "normalizedRawValue": "qr код 10 сек",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "776b4eb8-0ba7-4684-a2d7-1e14ecfdbe80",
+        "title": "ХАЛВА [Женский Стендап] QR код"
+      }
+    ],
+    "autoMatchFormatId": "branded_qr",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "QR код\n20 сек, 2 креатива",
+    "normalizedRawValue": "qr код 20 сек 2 креатива",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "a2e5fac8-efab-4154-b520-aabb1ba2ef85",
+        "title": "ХАЛВА [Место силы] QR код"
+      }
+    ],
+    "autoMatchFormatId": "branded_qr",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "QR код под устник",
+    "normalizedRawValue": "qr код под устник",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "4134d674-fb50-434d-a1c0-2ea4aff6c994",
+        "title": "Халва [Модные игры ] QR код под устник"
+      }
+    ],
+    "autoMatchFormatId": "branded_qr",
+    "manualFormatId": null
+  },
+  {
+    "rawValue": "VIP-Анонс + переход + пристежка 15 сек",
+    "normalizedRawValue": "vip анонс переход пристежка 15 сек",
+    "count": 1,
+    "sampleTasks": [
+      {
+        "id": "9c41c19c-b000-449b-97f1-9f3e0e38f6d9",
+        "title": "САМОКАТ [Жуки] VIP-Анонс + переход + пристежка 15 сек"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": null
+  }
+]

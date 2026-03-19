@@ -1,0 +1,249 @@
+.formatSortPage {
+  min-height: 100dvh;
+}
+
+.formatSortShell {
+  display: grid;
+  gap: 18px;
+  max-width: 1680px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.formatSortHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.formatSortEyebrow {
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(206, 219, 255, 0.62);
+}
+
+.formatSortTitle {
+  margin: 8px 0 10px;
+  font-size: 34px;
+}
+
+.formatSortHeaderMeta {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.formatSortMetaBadge {
+  padding: 8px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(170, 132, 255, 0.35);
+  background: linear-gradient(180deg, rgba(38, 44, 82, 0.92), rgba(26, 22, 50, 0.94));
+  color: #eef3ff;
+  font-size: 13px;
+}
+
+.formatSortToolbar {
+  display: grid;
+  gap: 14px;
+}
+
+.formatSortToolbarPrimary,
+.formatSortToolbarSecondary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 12px;
+}
+
+.formatSortField {
+  display: grid;
+  gap: 6px;
+  min-width: 260px;
+}
+
+.formatSortField.isSmall {
+  min-width: 96px;
+  width: 96px;
+}
+
+.formatSortField span {
+  font-size: 12px;
+  color: rgba(210, 220, 255, 0.68);
+}
+
+.formatSortCheckbox {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 42px;
+  padding: 0 4px;
+  color: #f2f5ff;
+}
+
+.formatSortNotice,
+.formatSortError {
+  padding: 12px 14px;
+  border-radius: 16px;
+  font-size: 14px;
+}
+
+.formatSortNotice {
+  border: 1px solid rgba(116, 239, 214, 0.28);
+  background: rgba(34, 74, 67, 0.42);
+  color: #dffef6;
+}
+
+.formatSortError {
+  border: 1px solid rgba(255, 133, 178, 0.35);
+  background: rgba(90, 34, 56, 0.48);
+  color: #ffe3ef;
+}
+
+.formatSortStats {
+  font-size: 13px;
+}
+
+.formatSortGrid {
+  display: grid;
+  gap: 18px;
+}
+
+.formatSortCatalogGrid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+}
+
+.formatSortPanel {
+  min-height: 180px;
+  border-radius: 22px;
+  border: 1px solid rgba(130, 143, 214, 0.22);
+  background:
+    linear-gradient(180deg, rgba(24, 31, 58, 0.96), rgba(14, 18, 38, 0.98)),
+    radial-gradient(circle at top left, rgba(255, 142, 201, 0.16), transparent 46%);
+  box-shadow:
+    0 18px 48px rgba(0, 0, 0, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  transition: border-color 140ms ease, box-shadow 140ms ease, transform 140ms ease;
+}
+
+.formatSortPanel.isPrimary {
+  min-height: 280px;
+  background:
+    linear-gradient(180deg, rgba(33, 37, 70, 0.96), rgba(17, 19, 40, 0.98)),
+    radial-gradient(circle at top left, rgba(255, 176, 112, 0.14), transparent 44%);
+}
+
+.formatSortPanel.isOver {
+  border-color: rgba(132, 220, 255, 0.52);
+  box-shadow:
+    0 22px 56px rgba(0, 0, 0, 0.34),
+    0 0 0 1px rgba(132, 220, 255, 0.22);
+  transform: translateY(-2px);
+}
+
+.formatSortPanelHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 18px 12px;
+}
+
+.formatSortPanelTitle {
+  margin: 0;
+  font-size: 19px;
+}
+
+.formatSortPanelSubtitle {
+  margin-top: 6px;
+  color: rgba(214, 223, 255, 0.68);
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.formatSortPanelCount {
+  min-width: 34px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(103, 117, 204, 0.26);
+  color: #f5f7ff;
+  text-align: center;
+  font-size: 13px;
+}
+
+.formatSortPanelBody {
+  display: flex;
+  flex-wrap: wrap;
+  align-content: flex-start;
+  gap: 10px;
+  min-height: 116px;
+  padding: 0 18px 18px;
+}
+
+.formatSortPanelEmpty {
+  color: rgba(208, 218, 255, 0.45);
+  font-size: 13px;
+}
+
+.formatSortChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  max-width: 100%;
+  padding: 8px 10px 8px 12px;
+  border: 1px solid rgba(150, 164, 234, 0.26);
+  border-radius: 12px;
+  background: linear-gradient(180deg, rgba(54, 60, 112, 0.88), rgba(34, 32, 72, 0.92));
+  color: #f6f7ff;
+  cursor: grab;
+  text-align: left;
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.18);
+}
+
+.formatSortChip.isDragging {
+  opacity: 0.82;
+  cursor: grabbing;
+}
+
+.formatSortChipLabel {
+  max-width: 220px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.formatSortChipCount {
+  min-width: 26px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  font-size: 12px;
+  text-align: center;
+}
+
+.formatSortRepoInfo {
+  padding-top: 4px;
+}
+
+@media (max-width: 900px) {
+  .formatSortHeader {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .formatSortHeaderMeta {
+    justify-content: flex-start;
+  }
+
+  .formatSortShell {
+    padding: 18px;
+  }
+
+  .formatSortTitle {
+    font-size: 28px;
+  }
+}

@@ -168,8 +168,9 @@ export function Layout(props: { children: React.ReactNode }) {
   }));
   const authSession = useAuthSession();
   const isPromoRoute = location.pathname === "/promo";
+  const isFormatSortRoute = location.pathname === "/format-sort";
   const snapshotState = useSnapshot(runtimeDefaults, {
-    enabled: !authSession.blockInitialDataLoad && !isPromoRoute,
+    enabled: !authSession.blockInitialDataLoad && !isPromoRoute && !isFormatSortRoute,
   });
   const [design, setDesign] = React.useState<DesignControls>(() => readStoredLayoutDraft());
   const [keyColors, setKeyColors] = React.useState<KeyColors>(() => readStoredColorDraft());
@@ -605,7 +606,7 @@ export function Layout(props: { children: React.ReactNode }) {
     const prevBodyOverflow = body.style.overflow;
     const prevHtmlOverflow = documentElement.style.overflow;
 
-    if (isPromoRoute) {
+    if (isPromoRoute || isFormatSortRoute) {
       body.style.overflow = "auto";
       documentElement.style.overflow = "auto";
     }
@@ -614,10 +615,10 @@ export function Layout(props: { children: React.ReactNode }) {
       body.style.overflow = prevBodyOverflow;
       documentElement.style.overflow = prevHtmlOverflow;
     };
-  }, [isPromoRoute]);
+  }, [isFormatSortRoute, isPromoRoute]);
 
-  const appShellClassName = `appShell${isAdminRoute ? " adminShell" : ""}${isPromoRoute ? " promoShell" : ""}`;
-  const containerClassName = `${isAdminRoute ? "container adminContainer" : "container"}${isMiniAppRoute ? " miniAppContainer" : ""}${isPromoRoute ? " promoContainer" : ""}`;
+  const appShellClassName = `appShell${isAdminRoute ? " adminShell" : ""}${isPromoRoute || isFormatSortRoute ? " promoShell" : ""}`;
+  const containerClassName = `${isAdminRoute ? "container adminContainer" : "container"}${isMiniAppRoute ? " miniAppContainer" : ""}${isPromoRoute || isFormatSortRoute ? " promoContainer" : ""}`;
 
   return (
     <LayoutContext.Provider
@@ -656,7 +657,7 @@ export function Layout(props: { children: React.ReactNode }) {
       }}
     >
       <div className={appShellClassName} style={layoutVarsStyle}>
-        {!isMiniAppRoute && !isPromoRoute ? (
+        {!isMiniAppRoute && !isPromoRoute && !isFormatSortRoute ? (
           <div className="topbar">
             <div className="nav">
               <div className="brand">
@@ -694,7 +695,7 @@ export function Layout(props: { children: React.ReactNode }) {
             />
           </div>
         ) : null}
-        {!isPromoRoute ? (
+        {!isPromoRoute && !isFormatSortRoute ? (
           <div className="controlDock">
             <ControlsWorkbench />
           </div>
