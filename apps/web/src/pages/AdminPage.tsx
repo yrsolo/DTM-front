@@ -320,6 +320,7 @@ function UserCardContent(props: {
   user: AdminUserCard;
   roleText?: string;
   roleClassName?: string;
+  actionClassName?: string;
   actions: React.ReactNode;
 }) {
   return (
@@ -336,7 +337,7 @@ function UserCardContent(props: {
         {props.user.telegramUsername ? <div className="muted">Telegram: @{props.user.telegramUsername}</div> : null}
         <div className="muted">Заявка: {formatDateTime(props.user.requestedAt)}</div>
       </div>
-      <div className="adminUserActions">{props.actions}</div>
+      <div className={`adminUserActions ${props.actionClassName ?? ""}`.trim()}>{props.actions}</div>
     </>
   );
 }
@@ -1376,6 +1377,7 @@ export function AdminPage() {
                                   user={user}
                                   roleText={isAdmin ? "Администратор" : "Пользователь"}
                                   roleClassName={isAdmin ? "isAdmin" : ""}
+                                  actionClassName="adminUserActionsFitDelete"
                                   actions={
                                     <>
                                       <label className="adminUserToggle">

@@ -3591,6 +3591,16 @@ button:hover {
   justify-content: center;
 }
 
+.adminUserActionsFitDelete {
+  grid-template-columns: max-content minmax(0, 1fr);
+}
+
+.adminUserActionsFitDelete > button:first-of-type {
+  width: max-content;
+  justify-self: start;
+  padding-inline: 20px;
+}
+
 .adminPresetToolbar {
   display: flex;
   gap: 8px;
