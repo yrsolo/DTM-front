@@ -168,7 +168,7 @@ export function Layout(props: { children: React.ReactNode }) {
   }));
   const authSession = useAuthSession();
   const isPromoRoute = location.pathname === "/promo";
-  const isFormatSortRoute = location.pathname === "/format-sort";
+  const isFormatSortRoute = location.pathname === "/format-sort" || location.pathname === "/designer-sort";
   const snapshotState = useSnapshot(runtimeDefaults, {
     enabled: !authSession.blockInitialDataLoad && !isPromoRoute && !isFormatSortRoute,
   });

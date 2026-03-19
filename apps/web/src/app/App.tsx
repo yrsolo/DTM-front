@@ -11,6 +11,9 @@ import { TimelinePage } from "../pages/TimelinePage";
 const FormatSortPage = React.lazy(() =>
   import("../pages/FormatSortPage").then((module) => ({ default: module.FormatSortPage }))
 );
+const DesignerSortPage = React.lazy(() =>
+  import("../pages/DesignerSortPage").then((module) => ({ default: module.DesignerSortPage }))
+);
 
 function isTabletUserAgent(userAgent: string): boolean {
   return /iPad|Tablet|PlayBook|Silk|(Android(?!.*Mobile))/i.test(userAgent);
@@ -55,6 +58,14 @@ export function App() {
             element={
               <React.Suspense fallback={<div className="card">Loading format lab...</div>}>
                 <FormatSortPage />
+              </React.Suspense>
+            }
+          />
+          <Route
+            path="/designer-sort"
+            element={
+              <React.Suspense fallback={<div className="card">????????? ??????????? ??????????...</div>}>
+                <DesignerSortPage />
               </React.Suspense>
             }
           />

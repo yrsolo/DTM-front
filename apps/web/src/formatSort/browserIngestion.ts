@@ -111,7 +111,7 @@ async function fetchFrontendPayload(params: URLSearchParams): Promise<any> {
   return await response.json();
 }
 
-export async function downloadAllTasksFromBrowser(config: TaskFormatConfig): Promise<BrowserFormatSortDataset> {
+export async function downloadFullTaskSnapshotFromBrowser(): Promise<TaskFormatSourceSnapshot> {
   const seedParams = new URLSearchParams({
     statuses: "work,pre_done,done,wait",
     include_people: "true",
@@ -169,6 +169,11 @@ export async function downloadAllTasksFromBrowser(config: TaskFormatConfig): Pro
     throw new Error(`Неполная выгрузка: собрано ${snapshot.tasksTotalCollected}, ожидалось ${expectedTotal}.`);
   }
 
+  return snapshot;
+}
+
+export async function downloadAllTasksFromBrowser(config: TaskFormatConfig): Promise<BrowserFormatSortDataset> {
+  const snapshot = await downloadFullTaskSnapshotFromBrowser();
   return {
     snapshot,
     inventory: buildRawTaskFormatInventory(snapshot, config),
