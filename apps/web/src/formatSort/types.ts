@@ -13,7 +13,8 @@ export type NormalizedTaskFormatId =
   | "screen_branding"
   | "dynamic_logo"
   | "electronic_logo"
-  | "branded_qr";
+  | "branded_qr"
+  | "web";
 
 export type TaskFormatCatalogEntry = {
   id: NormalizedTaskFormatId;

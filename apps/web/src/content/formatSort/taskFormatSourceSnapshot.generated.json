@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-03-19T01:17:52.407Z",
+  "generatedAt": "2026-03-19T08:59:06.159Z",
   "contour": "prod",
   "tasksTotalExpected": 1034,
   "tasksTotalCollected": 1034,
@@ -9,14 +9,14 @@
       "artifact": "dtm_frontend_api_v2",
       "contractVersion": "2.0.1",
       "generatedAt": "2026-03-18T20:21:04Z",
-      "syncedAt": "2026-03-19T01:15:03Z",
+      "syncedAt": "2026-03-19T08:56:20Z",
       "source": {
         "env": "prod",
         "sourceId": "sheet:Спонсорские ТНТ:ТАБЛИЧКА:A1:Z2000",
         "sheetName": "Спонсорские ТНТ",
         "sheetUrl": null
       },
-      "hash": "ce290809fee1c4c10ab3df9993055f88bd9ddea7e0e72d635dade3360602ac7b",
+      "hash": "7c357d3a2bf995fbc10427fb7d50ad272ca4f5c0957911d90eb1ec7587877c3c",
       "features": {
         "taskHash": true,
         "taskRevision": true,

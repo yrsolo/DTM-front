@@ -3,8 +3,8 @@
     { "id": "grafrolik", "title": "Графролик", "description": "Графическая заставка и близкие форматы.", "sortOrder": 10 },
     { "id": "logo_integration", "title": "Интеграция в лого", "description": "Интеграции и встройка в логотип.", "sortOrder": 20 },
     { "id": "shorts", "title": "Шортс", "description": "Короткие вертикальные и shorts-форматы.", "sortOrder": 30 },
-    { "id": "shooting_video", "title": "Съемочный ролик", "description": "Съемочные и live-action ролики.", "sortOrder": 40 },
-    { "id": "logo_3d", "title": "3D лого", "description": "Трехмерные логотипы и лого-ролики.", "sortOrder": 50 },
+    { "id": "shooting_video", "title": "Съёмочный ролик", "description": "Съёмочные и live-action ролики.", "sortOrder": 40 },
+    { "id": "logo_3d", "title": "3D лого", "description": "Трёхмерные логотипы и лого-ролики.", "sortOrder": 50 },
     { "id": "interactive_ustnik", "title": "Интерактивный устник", "description": "Интерактивные устники и related variants.", "sortOrder": 60 },
     { "id": "first_person_announce", "title": "Анонс от 1 лица", "description": "Анонсы от первого лица.", "sortOrder": 70 },
     { "id": "still_frame", "title": "Стоп-кадр", "description": "Стоп-кадры и freeze-frame варианты.", "sortOrder": 80 },
@@ -14,7 +14,8 @@
     { "id": "screen_branding", "title": "Брендинг экранов", "description": "Брендинг экранов и экранные пакеты.", "sortOrder": 120 },
     { "id": "dynamic_logo", "title": "Дин лого", "description": "Динамический логотип.", "sortOrder": 130 },
     { "id": "electronic_logo", "title": "Эл лого", "description": "Электронный логотип.", "sortOrder": 140 },
-    { "id": "branded_qr", "title": "Брендированный QR код", "description": "Брендированные QR-коды.", "sortOrder": 150 }
+    { "id": "branded_qr", "title": "Брендированный QR код", "description": "Брендированные QR-коды.", "sortOrder": 150 },
+    { "id": "web", "title": "Web", "description": "Лендинги, страницы, кнопки и обложки для сайта.", "sortOrder": 160 }
   ],
   "aliasRules": [
     {
@@ -69,7 +70,8 @@
       "formatId": "graphic_transition",
       "aliases": ["графический переход", "граф переход", "переход", "transition"],
       "containsAll": [["граф", "переход"], ["transition"]],
-      "priority": 90
+      "priority": 90,
+      "excludes": ["сайт", "лендинг", "страниц"]
     },
     {
       "formatId": "screencast",
@@ -106,6 +108,21 @@
       "aliases": ["брендированный qr код", "брендированный qr", "qr код", "qr-code", "qr"],
       "containsAll": [["qr"], ["кьюар"], ["бренд", "qr"]],
       "priority": 80
+    },
+    {
+      "formatId": "web",
+      "aliases": ["лендинг", "landing", "web", "digital лендинг", "лендинг конкурс", "обложка на сайт", "кнопка для сайта"],
+      "containsAll": [
+        ["лендинг"],
+        ["landing"],
+        ["сайт"],
+        ["страниц"],
+        ["web"],
+        ["digital", "лендинг"],
+        ["кнопка", "сайт"],
+        ["обложка", "сайт"]
+      ],
+      "priority": 115
     }
   ],
   "manualOverrides": []
