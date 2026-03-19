@@ -22,6 +22,8 @@ import type {
   BrowserFormatSortDataset,
   NormalizedTaskFormatId,
   RawTaskFormatEntry,
+  TaskFormatAliasRule,
+  TaskFormatCatalogEntry,
   TaskFormatConfig,
   TaskFormatManualOverride,
   TaskFormatSourceSnapshot,
@@ -45,6 +47,65 @@ function readStoredJson<T>(key: string): T | null {
 function writeStoredJson(key: string, value: unknown) {
   if (typeof window === "undefined") return;
   window.localStorage.setItem(key, JSON.stringify(value));
+}
+
+function mergeCatalog(
+  defaults: TaskFormatCatalogEntry[],
+  stored: TaskFormatCatalogEntry[] | undefined
+): TaskFormatCatalogEntry[] {
+  const byId = new Map(defaults.map((entry) => [entry.id, entry]));
+  for (const entry of stored ?? []) {
+    if (!byId.has(entry.id)) {
+      byId.set(entry.id, entry);
+    }
+  }
+  return [...byId.values()].sort((left, right) => left.sortOrder - right.sortOrder);
+}
+
+function mergeAliasRules(defaults: TaskFormatAliasRule[], stored: TaskFormatAliasRule[] | undefined): TaskFormatAliasRule[] {
+  const seen = new Set<string>();
+  const merged: TaskFormatAliasRule[] = [];
+
+  for (const rule of [...(defaults ?? []), ...(stored ?? [])]) {
+    const aliases = [...(rule.aliases ?? [])].sort();
+    const containsAll = [...(rule.containsAll ?? [])].map((entry) => [...entry].sort()).sort();
+    const excludes = [...(rule.excludes ?? [])].sort();
+    const key = JSON.stringify({
+      formatId: rule.formatId,
+      aliases,
+      containsAll,
+      excludes,
+      priority: rule.priority ?? 0,
+    });
+    if (seen.has(key)) continue;
+    seen.add(key);
+    merged.push(rule);
+  }
+
+  return merged.sort((left, right) => (right.priority ?? 0) - (left.priority ?? 0));
+}
+
+function mergeManualOverrides(
+  defaults: TaskFormatManualOverride[],
+  stored: TaskFormatManualOverride[] | undefined
+): TaskFormatManualOverride[] {
+  const byRaw = new Map<string, TaskFormatManualOverride>();
+  for (const entry of defaults ?? []) {
+    byRaw.set(normalizeFormatText(entry.rawValue), entry);
+  }
+  for (const entry of stored ?? []) {
+    byRaw.set(normalizeFormatText(entry.rawValue), entry);
+  }
+  return [...byRaw.values()].sort((left, right) => left.rawValue.localeCompare(right.rawValue, "ru"));
+}
+
+function mergeConfig(defaultConfig: TaskFormatConfig, storedConfig: TaskFormatConfig | null): TaskFormatConfig {
+  if (!storedConfig) return defaultConfig;
+  return {
+    catalog: mergeCatalog(defaultConfig.catalog, storedConfig.catalog),
+    aliasRules: mergeAliasRules(defaultConfig.aliasRules, storedConfig.aliasRules),
+    manualOverrides: mergeManualOverrides(defaultConfig.manualOverrides, storedConfig.manualOverrides),
+  };
 }
 
 function buildDefaultDataset(config: TaskFormatConfig): BrowserFormatSortDataset {
@@ -142,8 +203,8 @@ function FormatPanel(props: {
 
 export function FormatSortPage() {
   const defaultConfig = formatConfigJson as TaskFormatConfig;
-  const [config, setConfig] = React.useState<TaskFormatConfig>(
-    () => readStoredJson<TaskFormatConfig>(CONFIG_STORAGE_KEY) ?? defaultConfig
+  const [config, setConfig] = React.useState<TaskFormatConfig>(() =>
+    mergeConfig(defaultConfig, readStoredJson<TaskFormatConfig>(CONFIG_STORAGE_KEY))
   );
   const [dataset, setDataset] = React.useState<BrowserFormatSortDataset>(() => {
     const stored = readStoredJson<BrowserFormatSortDataset>(DATASET_STORAGE_KEY);
@@ -158,6 +219,10 @@ export function FormatSortPage() {
   const [draggingEntry, setDraggingEntry] = React.useState<RawTaskFormatEntry | null>(null);
   const fileInputRef = React.useRef<HTMLInputElement | null>(null);
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }));
+
+  React.useEffect(() => {
+    setConfig((prev) => mergeConfig(defaultConfig, prev));
+  }, [defaultConfig]);
 
   React.useEffect(() => {
     writeStoredJson(CONFIG_STORAGE_KEY, config);
@@ -234,7 +299,7 @@ export function FormatSortPage() {
     reader.onload = () => {
       try {
         const parsed = JSON.parse(String(reader.result)) as TaskFormatConfig;
-        setConfig(parsed);
+        setConfig(mergeConfig(defaultConfig, parsed));
         setNotice("Config импортирован.");
         setError(null);
       } catch {
@@ -245,8 +310,9 @@ export function FormatSortPage() {
   }
 
   function handleResetLocalState() {
-    const nextDataset = buildDefaultDataset(defaultConfig);
-    setConfig(defaultConfig);
+    const nextConfig = mergeConfig(defaultConfig, null);
+    const nextDataset = buildDefaultDataset(nextConfig);
+    setConfig(nextConfig);
     setDataset(nextDataset);
     if (typeof window !== "undefined") {
       window.localStorage.removeItem(CONFIG_STORAGE_KEY);
