@@ -3,7 +3,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const REPO_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const CONFIG_PATH = path.join(REPO_ROOT, "apps/web/src/content/formatSort/taskFormatConfig.json");
+const CONFIG_PATH = path.join(REPO_ROOT, "apps/web/src/content/formatSort/taskFormatConfig.yaml");
 const SNAPSHOT_OUTPUT_PATH = path.join(
   REPO_ROOT,
   "apps/web/src/content/formatSort/taskFormatSourceSnapshot.generated.json"
@@ -76,6 +76,169 @@ function parseSimpleYaml(raw) {
 function loadDeployConfig() {
   const raw = fs.readFileSync(path.join(REPO_ROOT, "config/deploy.yaml"), "utf8");
   return parseSimpleYaml(raw);
+}
+
+function countIndent(value) {
+  let indent = 0;
+  while (indent < value.length && value[indent] === " ") {
+    indent += 1;
+  }
+  return indent;
+}
+
+function parseScalar(rawValue) {
+  const value = rawValue.trim();
+  if (!value) return "";
+  if (value.startsWith("\"")) {
+    return JSON.parse(value);
+  }
+  return value;
+}
+
+function parseNumber(rawValue) {
+  const value = Number(rawValue.trim());
+  return Number.isFinite(value) ? value : 0;
+}
+
+function parseInlineArray(rawValue) {
+  return JSON.parse(rawValue.trim());
+}
+
+function parseTaskFormatYaml(raw) {
+  const document = {
+    formats: {},
+    aliases: {},
+    manual_overrides: {},
+  };
+
+  let section = null;
+  let currentFormatId = null;
+  let currentListKey = null;
+
+  for (const rawLine of raw.split(/\r?\n/)) {
+    const line = rawLine.replace(/\s+$/, "");
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith("#")) continue;
+
+    const indent = countIndent(line);
+    if (indent === 0) {
+      if (!trimmed.endsWith(":")) continue;
+      section = trimmed.slice(0, -1);
+      currentFormatId = null;
+      currentListKey = null;
+      continue;
+    }
+
+    if (indent === 2) {
+      if (!section || !trimmed.endsWith(":")) continue;
+      currentFormatId = trimmed.slice(0, -1);
+      currentListKey = null;
+      if (section === "formats") {
+        document.formats[currentFormatId] ??= { title: currentFormatId, sort_order: 9999 };
+      } else if (section === "aliases") {
+        document.aliases[currentFormatId] ??= {};
+      } else if (section === "manual_overrides") {
+        document.manual_overrides[currentFormatId] ??= [];
+      }
+      continue;
+    }
+
+    if (!section || !currentFormatId) continue;
+
+    if (section === "formats" && indent === 4) {
+      const separatorIndex = trimmed.indexOf(":");
+      if (separatorIndex < 0) continue;
+      const key = trimmed.slice(0, separatorIndex).trim();
+      const value = trimmed.slice(separatorIndex + 1).trim();
+      const entry = document.formats[currentFormatId] ?? { title: currentFormatId, sort_order: 9999 };
+      if (key === "sort_order") {
+        entry.sort_order = parseNumber(value);
+      } else if (key === "title" || key === "description") {
+        entry[key] = parseScalar(value);
+      }
+      document.formats[currentFormatId] = entry;
+      continue;
+    }
+
+    if (section === "aliases") {
+      const group = document.aliases[currentFormatId] ?? {};
+      if (indent === 4) {
+        const separatorIndex = trimmed.indexOf(":");
+        if (separatorIndex < 0) continue;
+        const key = trimmed.slice(0, separatorIndex).trim();
+        const value = trimmed.slice(separatorIndex + 1).trim();
+        currentListKey = key;
+        if (key === "priority") {
+          group.priority = parseNumber(value);
+          currentListKey = null;
+        } else if (!value) {
+          if (key === "exact" || key === "excludes") {
+            group[key] ??= [];
+          } else if (key === "contains_all") {
+            group[key] ??= [];
+          }
+        }
+        document.aliases[currentFormatId] = group;
+        continue;
+      }
+
+      if (indent === 6 && trimmed.startsWith("- ") && currentListKey) {
+        const value = trimmed.slice(2).trim();
+        if (currentListKey === "contains_all") {
+          group.contains_all ??= [];
+          group.contains_all.push(parseInlineArray(value));
+        } else if (currentListKey === "exact" || currentListKey === "excludes") {
+          group[currentListKey] ??= [];
+          group[currentListKey].push(parseScalar(value));
+        }
+        document.aliases[currentFormatId] = group;
+      }
+      continue;
+    }
+
+    if (section === "manual_overrides" && indent === 4 && trimmed.startsWith("- ")) {
+      document.manual_overrides[currentFormatId] ??= [];
+      document.manual_overrides[currentFormatId].push(parseScalar(trimmed.slice(2).trim()));
+    }
+  }
+
+  return document;
+}
+
+function loadTaskFormatConfig() {
+  const raw = fs.readFileSync(CONFIG_PATH, "utf8");
+  const document = parseTaskFormatYaml(raw);
+
+  const catalog = Object.entries(document.formats ?? {})
+    .map(([id, entry]) => ({
+      id,
+      title: entry?.title ?? id,
+      description: entry?.description ?? null,
+      sortOrder: Number(entry?.sort_order ?? 9999),
+    }))
+    .sort((left, right) => left.sortOrder - right.sortOrder);
+
+  const aliasRules = Object.entries(document.aliases ?? {})
+    .map(([formatId, group]) => ({
+      formatId,
+      aliases: [...(group?.exact ?? [])],
+      containsAll: [...(group?.contains_all ?? [])],
+      excludes: [...(group?.excludes ?? [])],
+      priority: group?.priority,
+    }))
+    .filter((rule) => rule.aliases.length || rule.containsAll.length || rule.excludes.length || rule.priority != null)
+    .sort((left, right) => (right.priority ?? 0) - (left.priority ?? 0));
+
+  const manualOverrides = Object.entries(document.manual_overrides ?? {})
+    .flatMap(([formatId, values]) =>
+      (values ?? []).map((rawValue) => ({
+        rawValue,
+        formatId,
+      }))
+    )
+    .sort((left, right) => left.rawValue.localeCompare(right.rawValue, "ru"));
+
+  return { catalog, aliasRules, manualOverrides };
 }
 
 function normalizeFormatText(value) {
@@ -264,7 +427,7 @@ async function main() {
     throw new Error(`Missing api origin for target=${target}`);
   }
 
-  const config = JSON.parse(fs.readFileSync(CONFIG_PATH, "utf8"));
+  const config = loadTaskFormatConfig();
   const baseUrl = `${String(apiOrigin).replace(/\/+$/, "")}/api/v2/frontend`;
   const headers = {
     accept: "application/json",

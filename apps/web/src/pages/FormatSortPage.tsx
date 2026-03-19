@@ -13,9 +13,9 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 
 import "../styles/formatSort.css";
-import formatConfigJson from "../content/formatSort/taskFormatConfig.json";
 import generatedInventoryJson from "../content/formatSort/taskFormatInventory.generated.json";
 import generatedSnapshotJson from "../content/formatSort/taskFormatSourceSnapshot.generated.json";
+import { taskFormatConfig } from "../formatSort/config";
 import { downloadAllTasksFromBrowser } from "../formatSort/browserIngestion";
 import { buildRawTaskFormatInventory, normalizeFormatText, UNSORTED_FORMAT_ID } from "../formatSort/resolver";
 import type {
@@ -202,7 +202,7 @@ function FormatPanel(props: {
 }
 
 export function FormatSortPage() {
-  const defaultConfig = formatConfigJson as TaskFormatConfig;
+  const defaultConfig = taskFormatConfig as TaskFormatConfig;
   const [config, setConfig] = React.useState<TaskFormatConfig>(() =>
     mergeConfig(defaultConfig, readStoredJson<TaskFormatConfig>(CONFIG_STORAGE_KEY))
   );
