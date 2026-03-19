@@ -22,3 +22,4 @@ config/API_Gateway.yaml
 .tmp.release.json
 
 ref
+apps/web/public/promo/penpot-draft
