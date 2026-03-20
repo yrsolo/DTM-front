@@ -3,6 +3,7 @@ import type { DesignerSortAssignment, DesignerSortBucketId } from "../designerSo
 import type { NormalizedTaskFormatId } from "../formatSort/types";
 
 export type DepartmentCapacityMode = "auto" | "manual";
+export type AnalyticsDonutPeriodMode = "month" | "quarter" | "year" | "custom";
 
 export type AnalyticsSourceDataset = {
   snapshot: SnapshotV1;
@@ -19,6 +20,11 @@ export type DepartmentAnalyticsConfig = {
   manualHoursPerDesigner: number;
   includeOutsource: boolean;
   includeWebDigital: boolean;
+  donutPeriodMode: AnalyticsDonutPeriodMode;
+  donutAnchorDate: string;
+  donutCustomStart: string;
+  donutCustomEnd: string;
+  smoothingWindowMonths: number;
 };
 
 export type AnalyticsDesignerConfig = {
@@ -55,6 +61,28 @@ export type DepartmentAnalyticsSummary = {
   totalTheoreticalHours: number;
   averageHoursPerActiveDesigner: number;
   topFormats: Array<{ formatId: NormalizedTaskFormatId | "unsorted"; title: string; count: number }>;
+};
+
+export type AnalyticsDonutTaskLine = {
+  id: string;
+  brand: string | null;
+  show: string | null;
+};
+
+export type AnalyticsDonutSegment = {
+  formatId: NormalizedTaskFormatId | "unsorted";
+  title: string;
+  taskCount: number;
+  hours: number;
+  share: number;
+  tasks: AnalyticsDonutTaskLine[];
+};
+
+export type AnalyticsDonutBreakdown = {
+  periodLabel: string;
+  totalHours: number;
+  totalTasks: number;
+  segments: AnalyticsDonutSegment[];
 };
 
 export type DepartmentAnalyticsReport = {

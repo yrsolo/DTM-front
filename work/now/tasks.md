@@ -15,6 +15,7 @@
 - [ ] CAM-USER-ALL-TASKS-FLAG - admin-controlled all-tasks access + hide designer grouping for non-privileged users.
 - [ ] CAM-FORMAT-NORMALIZATION-LAB-V1 - repo-owned full task snapshot, YAML source-of-truth for normalized `format_` rules/manual mappings, local `/format-sort`, and local `/designer-sort` drag-and-drop labs with manual full-data refresh and JSON export.
 - [ ] CAM-DEPARTMENT-ANALYTICS-PAGE-V1 - standalone `/analytics` lab with manual full SnapshotV1 refresh, monthly production table, weighted department-load chart, editable format-hour prices, and designer-category filters via local designer-sort config.
+- [ ] CAM-DEPARTMENT-ANALYTICS-UX-REFINE-V2 - `/analytics` rebuilt around donut-based format breakdowns, period controls, and a cleaner productivity chart with smoothed load/capacity lines and tooltips.
 - [ ] CAM-TEMP-LINK-TASKS-GROUPING-FIX - restore task visibility for temp-link sessions, add per-link designer-grouping toggle, and roll out auth/web changes with YDB migration.
 - [ ] CAM-API-V2-LOADING-SWR-CACHE - finalize manual evidence pack.
 - [x] CAM-SCHEMA-CONTRACT-GOVERNANCE - schema/types sync + validate:schema + guarantees.

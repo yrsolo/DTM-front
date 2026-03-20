@@ -156,6 +156,47 @@
   gap: 10px;
 }
 
+.analyticsFormatsView,
+.analyticsProductivityView {
+  display: grid;
+  gap: 16px;
+}
+
+.analyticsPeriodToolbar {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+}
+
+.analyticsPeriodModeTabs,
+.analyticsPeriodStepper,
+.analyticsPeriodCustomFields {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+.analyticsPeriodStepper {
+  padding: 6px;
+  border: 1px solid rgba(130, 143, 214, 0.2);
+  border-radius: 16px;
+  background: rgba(14, 18, 38, 0.82);
+}
+
+.analyticsPeriodStepperLabel {
+  min-width: 140px;
+  text-align: center;
+  font-weight: 600;
+  color: #eef3ff;
+}
+
+.analyticsFieldDate {
+  min-width: 150px;
+}
+
 .analyticsPriceTableWrap,
 .analyticsTableScroll,
 .analyticsProductivityTableWrap,
@@ -222,11 +263,6 @@
   font-weight: 600;
 }
 
-.analyticsProductivityView {
-  display: grid;
-  gap: 16px;
-}
-
 .analyticsChart {
   display: block;
   width: 100%;
@@ -239,19 +275,26 @@
   stroke-dasharray: 4 8;
 }
 
-.analyticsChartBar {
-  fill: rgba(255, 148, 148, 0.72);
+.analyticsChartBarCapacity {
+  fill: rgba(137, 211, 147, 0.65);
 }
 
-.analyticsChartLine {
-  stroke: #9fdf9f;
+.analyticsChartBarLoad {
+  fill: rgba(255, 121, 121, 0.72);
+}
+
+.analyticsChartLineCapacity {
+  stroke: #91f2a6;
   stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
-.analyticsChartPoint {
-  fill: #dfffe0;
-  stroke: #7fc77f;
-  stroke-width: 2;
+.analyticsChartLineLoad {
+  stroke: #ff6b6b;
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 .analyticsChartLabel {
@@ -259,10 +302,121 @@
   font-size: 11px;
 }
 
+.analyticsDonutLayout {
+  display: grid;
+  grid-template-columns: minmax(320px, 460px) minmax(260px, 1fr);
+  gap: 18px;
+  align-items: start;
+}
+
+.analyticsDonutWrap,
+.analyticsDonutLegend {
+  padding: 16px;
+  border-radius: 22px;
+  border: 1px solid rgba(130, 143, 214, 0.2);
+  background: linear-gradient(180deg, rgba(22, 28, 54, 0.96), rgba(13, 17, 34, 0.98));
+}
+
+.analyticsDonutChart {
+  display: block;
+  width: 100%;
+  max-width: 420px;
+  margin: 0 auto;
+}
+
+.analyticsDonutBase {
+  fill: rgba(46, 57, 98, 0.5);
+}
+
+.analyticsDonutEmptyRing {
+  fill: rgba(78, 90, 144, 0.4);
+}
+
+.analyticsDonutHole {
+  fill: rgba(11, 14, 28, 0.98);
+}
+
+.analyticsDonutSlice {
+  cursor: pointer;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.analyticsDonutSlice:hover {
+  opacity: 0.92;
+}
+
+.analyticsDonutCenter {
+  display: grid;
+  gap: 4px;
+  width: 100%;
+  height: 100%;
+  align-content: center;
+  justify-items: center;
+  text-align: center;
+}
+
+.analyticsDonutCenterLabel {
+  color: rgba(214, 223, 255, 0.7);
+  font-size: 12px;
+}
+
+.analyticsDonutCenterValue {
+  color: #f7f8ff;
+  font-size: 26px;
+  font-weight: 700;
+}
+
+.analyticsDonutCenterSubvalue {
+  color: rgba(214, 223, 255, 0.75);
+  font-size: 13px;
+}
+
+.analyticsDonutLegend {
+  display: grid;
+  gap: 10px;
+  align-content: start;
+  max-height: 420px;
+  overflow: auto;
+}
+
+.analyticsDonutLegendRow {
+  display: grid;
+  grid-template-columns: 12px 1fr;
+  gap: 12px;
+  align-items: start;
+}
+
+.analyticsDonutLegendSwatch {
+  width: 12px;
+  height: 12px;
+  border-radius: 999px;
+  margin-top: 5px;
+}
+
+.analyticsDonutLegendBody {
+  display: grid;
+  gap: 4px;
+}
+
+.analyticsDonutLegendTitle {
+  color: #f3f5ff;
+  font-weight: 600;
+}
+
+.analyticsDonutLegendMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  color: rgba(214, 223, 255, 0.72);
+  font-size: 13px;
+}
+
 .analyticsTooltipContent {
   display: grid;
   gap: 4px;
   max-width: 360px;
+  max-height: 260px;
+  overflow: auto;
 }
 
 @media (max-width: 900px) {
@@ -281,5 +435,13 @@
 
   .analyticsTitle {
     font-size: 28px;
+  }
+
+  .analyticsDonutLayout {
+    grid-template-columns: 1fr;
+  }
+
+  .analyticsPeriodStepperLabel {
+    min-width: 110px;
   }
 }

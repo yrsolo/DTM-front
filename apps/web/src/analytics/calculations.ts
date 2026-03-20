@@ -5,6 +5,8 @@ import { taskFormatConfig } from "../formatSort/config";
 import { resolveNormalizedTaskFormat, UNSORTED_FORMAT_ID } from "../formatSort/resolver";
 import { toShortPersonName } from "../utils/personName";
 import type {
+  AnalyticsDonutBreakdown,
+  AnalyticsDonutTaskLine,
   AnalyticsDesignerConfig,
   AnalyticsTaskRef,
   DepartmentAnalyticsConfig,
@@ -22,6 +24,19 @@ function monthKeyToLabel(monthKey: string): string {
   const [year, month] = monthKey.split("-").map(Number);
   const date = new Date(Date.UTC(year, (month || 1) - 1, 1));
   return date.toLocaleDateString("ru-RU", { month: "2-digit", year: "numeric", timeZone: "UTC" });
+}
+
+function monthKeyToParts(monthKey: string): { year: number; month: number } {
+  const [year, month] = monthKey.split("-").map(Number);
+  return {
+    year: Number.isFinite(year) ? year : 1970,
+    month: Number.isFinite(month) ? month : 1,
+  };
+}
+
+function toMonthIndex(monthKey: string): number {
+  const { year, month } = monthKeyToParts(monthKey);
+  return year * 12 + (month - 1);
 }
 
 function normalizeIdentity(value: string | null | undefined): string {
@@ -290,5 +305,163 @@ export function buildDepartmentAnalyticsReport(
     autoHoursDetails: usedDesignerConfig
       ? "Категории дизайнеров учтены из local designer-sort config."
       : "Designer-sort config не найден, все дизайнеры временно считаются штатными.",
+  };
+}
+
+function clampPositiveInteger(value: number, fallback: number): number {
+  if (!Number.isFinite(value)) return fallback;
+  return Math.max(1, Math.floor(value));
+}
+
+export function buildAnalyticsMovingAverage(values: number[], windowSize: number): number[] {
+  const width = clampPositiveInteger(windowSize, 3);
+  return values.map((_, index) => {
+    const start = Math.max(0, index - width + 1);
+    const slice = values.slice(start, index + 1);
+    const total = slice.reduce((sum, value) => sum + value, 0);
+    return Number((total / slice.length).toFixed(1));
+  });
+}
+
+function formatPeriodMonthLabel(anchorDate: Date): string {
+  return anchorDate.toLocaleDateString("ru-RU", { month: "long", year: "numeric" });
+}
+
+function formatPeriodQuarterLabel(anchorDate: Date): string {
+  const quarter = Math.floor(anchorDate.getUTCMonth() / 3) + 1;
+  return `Q${quarter} ${anchorDate.getUTCFullYear()}`;
+}
+
+function formatPeriodYearLabel(anchorDate: Date): string {
+  return String(anchorDate.getUTCFullYear());
+}
+
+function toIsoDateOnly(value: Date): string {
+  return value.toISOString().slice(0, 10);
+}
+
+function parseAnchorDate(value: string): Date {
+  const parsed = new Date(`${value || "1970-01-01"}T00:00:00Z`);
+  return Number.isFinite(parsed.getTime()) ? parsed : new Date();
+}
+
+function buildRangeFromConfig(config: DepartmentAnalyticsConfig): {
+  startMonthIndex: number;
+  endMonthIndex: number;
+  periodLabel: string;
+} {
+  const anchor = parseAnchorDate(config.donutAnchorDate);
+  if (config.donutPeriodMode === "month") {
+    const monthKey = toIsoDateOnly(new Date(Date.UTC(anchor.getUTCFullYear(), anchor.getUTCMonth(), 1))).slice(0, 7);
+    const index = toMonthIndex(monthKey);
+    return {
+      startMonthIndex: index,
+      endMonthIndex: index,
+      periodLabel: formatPeriodMonthLabel(anchor),
+    };
+  }
+
+  if (config.donutPeriodMode === "quarter") {
+    const quarterStartMonth = Math.floor(anchor.getUTCMonth() / 3) * 3;
+    const startKey = toIsoDateOnly(new Date(Date.UTC(anchor.getUTCFullYear(), quarterStartMonth, 1))).slice(0, 7);
+    const startIndex = toMonthIndex(startKey);
+    return {
+      startMonthIndex: startIndex,
+      endMonthIndex: startIndex + 2,
+      periodLabel: formatPeriodQuarterLabel(anchor),
+    };
+  }
+
+  if (config.donutPeriodMode === "custom") {
+    const start = parseAnchorDate(config.donutCustomStart || config.donutAnchorDate);
+    const end = parseAnchorDate(config.donutCustomEnd || config.donutAnchorDate);
+    const startDate = start <= end ? start : end;
+    const endDate = start <= end ? end : start;
+    const startIndex = toMonthIndex(toIsoDateOnly(new Date(Date.UTC(startDate.getUTCFullYear(), startDate.getUTCMonth(), 1))).slice(0, 7));
+    const endIndex = toMonthIndex(toIsoDateOnly(new Date(Date.UTC(endDate.getUTCFullYear(), endDate.getUTCMonth(), 1))).slice(0, 7));
+    return {
+      startMonthIndex: startIndex,
+      endMonthIndex: endIndex,
+      periodLabel: `${toIsoDateOnly(startDate)} - ${toIsoDateOnly(endDate)}`,
+    };
+  }
+
+  const yearKey = toIsoDateOnly(new Date(Date.UTC(anchor.getUTCFullYear(), 0, 1))).slice(0, 7);
+  const startIndex = toMonthIndex(yearKey);
+  return {
+    startMonthIndex: startIndex,
+    endMonthIndex: startIndex + 11,
+    periodLabel: formatPeriodYearLabel(anchor),
+  };
+}
+
+export function buildAnalyticsDonutBreakdown(
+  report: DepartmentAnalyticsReport,
+  config: DepartmentAnalyticsConfig
+): AnalyticsDonutBreakdown {
+  const range = buildRangeFromConfig(config);
+  const formatTitles = new Map(taskFormatConfig.catalog.map((entry) => [entry.id, entry.title]));
+  const segments = new Map<string, { formatId: AnalyticsDonutBreakdown["segments"][number]["formatId"]; title: string; taskCount: number; hours: number; tasks: AnalyticsDonutTaskLine[] }>();
+
+  for (const row of report.rows) {
+    const monthIndex = toMonthIndex(row.monthKey);
+    if (monthIndex < range.startMonthIndex || monthIndex > range.endMonthIndex) continue;
+
+    for (const [formatId, tasks] of Object.entries(row.tasksByFormat)) {
+      const typedFormatId = formatId as AnalyticsDonutBreakdown["segments"][number]["formatId"];
+      const current = segments.get(formatId) ?? {
+        formatId: typedFormatId,
+        title: formatTitles.get(formatId as any) ?? formatId,
+        taskCount: 0,
+        hours: 0,
+        tasks: [],
+      };
+      current.taskCount += tasks.length;
+      current.hours += tasks.length * (config.formatHoursById[typedFormatId as keyof typeof config.formatHoursById] ?? 0);
+      current.tasks.push(
+        ...tasks.map((task) => ({
+          id: task.id,
+          brand: task.brand,
+          show: task.show,
+        }))
+      );
+      segments.set(formatId, current);
+    }
+
+    if (row.unsortedTaskCount > 0) {
+      const current = segments.get(UNSORTED_FORMAT_ID) ?? {
+        formatId: UNSORTED_FORMAT_ID,
+        title: "Несортировано",
+        taskCount: 0,
+        hours: 0,
+        tasks: [],
+      };
+      current.taskCount += row.unsortedTaskCount;
+      current.tasks.push(
+        ...row.unsortedTasks.map((task) => ({
+          id: task.id,
+          brand: task.brand,
+          show: task.show,
+        }))
+      );
+      segments.set(UNSORTED_FORMAT_ID, current);
+    }
+  }
+
+  const ordered = [...segments.values()].filter((segment) => segment.taskCount > 0);
+  const totalHours = ordered.reduce((sum, segment) => sum + segment.hours, 0);
+  const totalTasks = ordered.reduce((sum, segment) => sum + segment.taskCount, 0);
+
+  return {
+    periodLabel: range.periodLabel,
+    totalHours: Number(totalHours.toFixed(1)),
+    totalTasks,
+    segments: ordered
+      .map((segment) => ({
+        ...segment,
+        hours: Number(segment.hours.toFixed(1)),
+        share: totalHours > 0 ? segment.hours / totalHours : 0,
+      }))
+      .sort((left, right) => right.hours - left.hours),
   };
 }
