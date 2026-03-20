@@ -27,6 +27,7 @@ type AccessLinkCardPayload = {
   createdBy: string | null;
   lastUsedAt: string | null;
   useCount: number;
+  showDesignerGrouping: boolean;
   usageEvents: Array<{
     id: string;
     usedAt: string;
@@ -127,6 +128,16 @@ function computeExpiresAt(body: Record<string, unknown>): Date | null {
   return null;
 }
 
+function parseShowDesignerGrouping(rawValue: unknown, fallback = false): boolean {
+  if (typeof rawValue === "boolean") return rawValue;
+  if (typeof rawValue === "string") {
+    const normalized = rawValue.trim().toLowerCase();
+    if (normalized === "true" || normalized === "1" || normalized === "yes" || normalized === "on") return true;
+    if (normalized === "false" || normalized === "0" || normalized === "no" || normalized === "off") return false;
+  }
+  return fallback;
+}
+
 function effectiveLinkStatus(link: Pick<AccessLinkRecord, "status" | "expiresAt">): AccessLinkStatus {
   if (link.status === "revoked") return "revoked";
   const expiresAtMs = Date.parse(link.expiresAt);
@@ -142,6 +153,7 @@ async function ensureStoredStatus(link: AccessLinkRecord): Promise<AccessLinkRec
       label: link.label,
       expiresAt: new Date(link.expiresAt),
       status: nextStatus,
+      showDesignerGrouping: link.showDesignerGrouping,
     });
     const refreshed = await getAccessLinkById(link.id);
     return refreshed ?? { ...link, status: nextStatus };
@@ -182,6 +194,7 @@ async function toAccessLinkCard(link: AccessLinkRecord): Promise<AccessLinkCardP
     createdBy: normalized.createdBy,
     lastUsedAt: normalized.lastUsedAt,
     useCount: normalized.useCount,
+    showDesignerGrouping: normalized.showDesignerGrouping,
     usageEvents,
   };
 }
@@ -221,6 +234,7 @@ export async function createAccessLinkHandler(req: NormalizedRequest) {
   if (!expiresAt || expiresAt.getTime() <= Date.now()) {
     return badRequest("A future expiresAt or expiryHours is required");
   }
+  const showDesignerGrouping = parseShowDesignerGrouping(body.showDesignerGrouping, false);
 
   const linkId = randomUUID();
   const rawToken = makeShortAccessLinkCode(linkId);
@@ -230,6 +244,7 @@ export async function createAccessLinkHandler(req: NormalizedRequest) {
     tokenHash: hashToken(rawToken),
     expiresAt,
     createdBy: auth.user.displayName || auth.user.email || auth.user.id,
+    showDesignerGrouping,
   });
   const card = await toAccessLinkCard(created);
   await writeAuditLog({
@@ -261,6 +276,7 @@ export async function updateAccessLinkHandler(req: NormalizedRequest, linkId: st
 
   const label = typeof body.label === "string" && body.label.trim() ? body.label.trim() : existing.label;
   const expiresAt = computeExpiresAt(body) ?? new Date(existing.expiresAt);
+  const showDesignerGrouping = parseShowDesignerGrouping(body.showDesignerGrouping, existing.showDesignerGrouping);
   if (expiresAt.getTime() <= Date.now() && existing.status !== "revoked") {
     return badRequest("expiresAt must be in the future");
   }
@@ -275,6 +291,7 @@ export async function updateAccessLinkHandler(req: NormalizedRequest, linkId: st
     label,
     expiresAt,
     status: nextStatus,
+    showDesignerGrouping,
   });
   const updated = await getAccessLinkById(existing.id);
   if (!updated) {
@@ -323,6 +340,7 @@ export async function activateAccessLinkHandler(req: NormalizedRequest, linkId: 
     label: existing.label,
     expiresAt,
     status: "active",
+    showDesignerGrouping: existing.showDesignerGrouping,
   });
   const activated = await getAccessLinkById(linkId);
   await writeAuditLog({

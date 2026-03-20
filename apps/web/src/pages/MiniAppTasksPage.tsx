@@ -44,22 +44,23 @@ export function MiniAppTasksPage(props: {
   items: MiniTaskListItem[];
   surfaceMode: MobileSurfaceMode;
   canViewAllTasks: boolean;
+  canUseDesignerGrouping: boolean;
   unresolvedPersonLink: boolean;
   authState: AuthSessionState;
   onOpenTask: (taskId: string) => void;
 }) {
-  const groupingOptions: MiniTaskGroupingMode[] = props.canViewAllTasks ? ["designer", "brand", "show"] : ["brand", "show"];
+  const groupingOptions: MiniTaskGroupingMode[] = props.canUseDesignerGrouping ? ["designer", "brand", "show"] : ["brand", "show"];
   const [groupingMode, setGroupingMode] = React.useState<MiniTaskGroupingMode>(
-    props.canViewAllTasks ? "designer" : "brand"
+    props.canUseDesignerGrouping ? "designer" : "brand"
   );
   const [toggleAllToken, setToggleAllToken] = React.useState(0);
 
   React.useEffect(() => {
-    if (props.canViewAllTasks) return;
+    if (props.canUseDesignerGrouping) return;
     if (groupingMode === "designer") {
       setGroupingMode("brand");
     }
-  }, [props.canViewAllTasks, groupingMode]);
+  }, [props.canUseDesignerGrouping, groupingMode]);
 
   function handleGroupingClick(mode: MiniTaskGroupingMode) {
     if (groupingMode === mode) {

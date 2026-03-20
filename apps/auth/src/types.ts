@@ -50,6 +50,7 @@ export type SessionUser = AuthUser & {
   expiresAt: string | null;
   temporaryAccessLabel: string | null;
   sourceAccessLinkId?: string | null;
+  canUseDesignerGrouping: boolean;
 };
 
 export type AccessLinkRecord = {
@@ -62,6 +63,7 @@ export type AccessLinkRecord = {
   createdBy: string | null;
   lastUsedAt: string | null;
   useCount: number;
+  showDesignerGrouping: boolean;
 };
 
 export type AccessLinkUsageRecord = {

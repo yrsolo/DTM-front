@@ -12,6 +12,7 @@ function decorateUserSession(user: AuthUser, provider: Exclude<SessionKind, "tem
     expiresAt: null,
     temporaryAccessLabel: null,
     sourceAccessLinkId: null,
+    canUseDesignerGrouping: user.role === "admin" || user.canViewAllTasks,
   };
 }
 
@@ -31,7 +32,7 @@ function materializeTempLinkSession(claims: TempLinkSessionClaims, link: Awaited
     personName: null,
     telegramId: null,
     telegramUsername: null,
-    canViewAllTasks: false,
+    canViewAllTasks: true,
     status: "approved",
     role: "viewer",
     sessionVersion: 1,
@@ -41,6 +42,7 @@ function materializeTempLinkSession(claims: TempLinkSessionClaims, link: Awaited
     expiresAt: link.expiresAt,
     temporaryAccessLabel: link.label,
     sourceAccessLinkId: link.id,
+    canUseDesignerGrouping: link.showDesignerGrouping,
   };
 }
 
@@ -121,6 +123,7 @@ export function buildMePayload(user: SessionUser | null) {
           telegramId: user.telegramId,
           telegramUsername: user.telegramUsername,
           canViewAllTasks: user.canViewAllTasks,
+          canUseDesignerGrouping: user.canUseDesignerGrouping,
           role: user.role,
           status: user.status,
         }

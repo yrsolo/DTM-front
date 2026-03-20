@@ -73,6 +73,9 @@ export function MobileAppPage(props: { mode: MobileSurfaceMode }) {
   );
   const canViewAllTasks =
     authSession.state.user?.role === "admin" || Boolean(authSession.state.user?.canViewAllTasks);
+  const canUseDesignerGrouping =
+    authSession.state.user?.role === "admin" ||
+    Boolean(authSession.state.user?.canUseDesignerGrouping ?? authSession.state.user?.canViewAllTasks);
   const resolvedOwnerNames = useResolvedOwnerNames(snapshot?.tasks ?? [], !canViewAllTasks && Boolean(currentPerson.personName));
   const scopedTasks = canViewAllTasks
     ? sortTasksForMobile(selectAllTasks(snapshot))
@@ -103,6 +106,7 @@ export function MobileAppPage(props: { mode: MobileSurfaceMode }) {
         items={taskItems}
         surfaceMode={props.mode}
         canViewAllTasks={canViewAllTasks}
+        canUseDesignerGrouping={canUseDesignerGrouping}
         unresolvedPersonLink={!currentPerson.personId && !currentPerson.personName}
         authState={authSession.state}
         onOpenTask={setSelectedTaskId}

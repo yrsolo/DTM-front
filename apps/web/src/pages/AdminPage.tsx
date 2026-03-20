@@ -76,12 +76,14 @@ type AccessLinkCard = {
   createdBy: string | null;
   lastUsedAt: string | null;
   useCount: number;
+  showDesignerGrouping: boolean;
   usageEvents: AccessLinkUsageEvent[];
 };
 
 type AccessLinkDraft = {
   label: string;
   expiresAt: string;
+  showDesignerGrouping: boolean;
 };
 
 type DragListKey = "pendingUsers" | "approvedUsers" | "colorPresets" | "layoutPresets";
@@ -675,6 +677,7 @@ export function AdminPage() {
   const [selectedUiId, setSelectedUiId] = React.useState<string>(() => UI_STYLE_REGISTRY[0]?.id ?? "");
   const [draftLinkLabel, setDraftLinkLabel] = React.useState("");
   const [draftLinkExpiryHours, setDraftLinkExpiryHours] = React.useState("72");
+  const [draftLinkShowDesignerGrouping, setDraftLinkShowDesignerGrouping] = React.useState(false);
   const [linkDrafts, setLinkDrafts] = React.useState<Record<string, AccessLinkDraft>>({});
   const [, setLinksClock] = React.useState(() => Date.now());
   const importRef = React.useRef<HTMLInputElement | null>(null);
@@ -733,6 +736,7 @@ export function AdminPage() {
           {
             label: link.label,
             expiresAt: toDateTimeInputValue(link.expiresAt),
+            showDesignerGrouping: Boolean(link.showDesignerGrouping),
           },
         ])
       )
@@ -1138,18 +1142,19 @@ export function AdminPage() {
       method: "POST",
       credentials: "include",
       headers: { "content-type": "application/json", accept: "application/json" },
-      body: JSON.stringify({ label, expiresInHours }),
+      body: JSON.stringify({ label, expiresInHours, showDesignerGrouping: draftLinkShowDesignerGrouping }),
     });
     await expectOk(res, "Не удалось создать временную ссылку");
     const payload = (await res.json()) as { link?: AccessLinkCard | null };
     setDraftLinkLabel("");
     setDraftLinkExpiryHours("72");
+    setDraftLinkShowDesignerGrouping(false);
     if (payload.link?.browserUrl) {
       await copyBrowserLink(payload.link.browserUrl);
       setActionNotice("Ссылка создана и скопирована");
     }
     await loadOverview();
-  }, [copyBrowserLink, draftLinkExpiryHours, draftLinkLabel, loadOverview]);
+  }, [copyBrowserLink, draftLinkExpiryHours, draftLinkLabel, draftLinkShowDesignerGrouping, loadOverview]);
 
   const updateAccessLinkDraft = React.useCallback((linkId: string, patch: Partial<AccessLinkDraft>) => {
     setLinkDrafts((prev) => ({
@@ -1157,6 +1162,7 @@ export function AdminPage() {
       [linkId]: {
         label: prev[linkId]?.label ?? "",
         expiresAt: prev[linkId]?.expiresAt ?? "",
+        showDesignerGrouping: prev[linkId]?.showDesignerGrouping ?? false,
         ...patch,
       },
     }));
@@ -1179,7 +1185,11 @@ export function AdminPage() {
         method: "PATCH",
         credentials: "include",
         headers: { "content-type": "application/json", accept: "application/json" },
-        body: JSON.stringify({ label: draft.label.trim(), expiresAt: expiresAt.toISOString() }),
+        body: JSON.stringify({
+          label: draft.label.trim(),
+          expiresAt: expiresAt.toISOString(),
+          showDesignerGrouping: Boolean(draft.showDesignerGrouping),
+        }),
       });
       await expectOk(res, "Не удалось обновить временную ссылку");
       await loadOverview();
@@ -1458,6 +1468,14 @@ export function AdminPage() {
                       <input className="input" type="number" min={1} step={1} value={draftLinkExpiryHours} onChange={(event) => setDraftLinkExpiryHours(event.target.value)} />
                     </label>
                   </div>
+                  <label className="adminUserToggle adminLinkOptionToggle">
+                    <input
+                      type="checkbox"
+                      checked={draftLinkShowDesignerGrouping}
+                      onChange={(event) => setDraftLinkShowDesignerGrouping(event.target.checked)}
+                    />
+                    <span>Показывать группировку по дизайнерам</span>
+                  </label>
                   <div className="adminLinkDraftActions">
                     <button type="button" onClick={() => void runAdminAction(createAccessLink, "Ссылка создана")}>Создать ссылку</button>
                     <div className="muted">После создания ссылка сразу копируется в буфер обмена.</div>
@@ -1503,6 +1521,7 @@ export function AdminPage() {
                           <span>Осталось: {formatRemainingTime(link.expiresAt)}</span>
                           <span>Использований: {link.useCount}</span>
                           <span>Последний вход: {formatDateTime(link.lastUsedAt)}</span>
+                          <span>Группировка по дизайнерам: {(linkDrafts[link.id]?.showDesignerGrouping ?? link.showDesignerGrouping) ? "вкл" : "выкл"}</span>
                         </div>
                         <div className="adminLinkDraftGrid">
                           <label className="adminFieldStack">
@@ -1523,6 +1542,14 @@ export function AdminPage() {
                             />
                           </label>
                         </div>
+                        <label className="adminUserToggle adminLinkOptionToggle">
+                          <input
+                            type="checkbox"
+                            checked={Boolean(linkDrafts[link.id]?.showDesignerGrouping ?? link.showDesignerGrouping)}
+                            onChange={(event) => updateAccessLinkDraft(link.id, { showDesignerGrouping: event.target.checked })}
+                          />
+                          <span>Показывать группировку по дизайнерам</span>
+                        </label>
                         <div className="adminAccessLinkActions">
                           <button
                             type="button"

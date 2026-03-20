@@ -13,6 +13,7 @@ export type AuthSessionUser = {
   telegramId?: string | null;
   telegramUsername?: string | null;
   canViewAllTasks?: boolean | null;
+  canUseDesignerGrouping?: boolean | null;
   role: "admin" | "viewer";
   status: "pending" | "approved" | "blocked";
 };

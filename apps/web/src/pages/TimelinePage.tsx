@@ -408,6 +408,9 @@ export function TimelinePage() {
   });
   const canViewAllTasks =
     authSession.state.user?.role === "admin" || Boolean(authSession.state.user?.canViewAllTasks);
+  const canUseDesignerGrouping =
+    authSession.state.user?.role === "admin" ||
+    Boolean(authSession.state.user?.canUseDesignerGrouping ?? authSession.state.user?.canViewAllTasks);
   const resolvedOwnerNames = useResolvedOwnerNames(snapshot?.tasks ?? [], !canViewAllTasks && authSession.state.authenticated);
   const forcedOwnerId =
     !canViewAllTasks && authSession.state.authenticated ? currentPersonLink.personId ?? "" : "";
@@ -421,17 +424,17 @@ export function TimelinePage() {
   }, [pageView]);
 
   React.useEffect(() => {
-    if (pageView === "designers" && !canViewAllTasks) {
+    if (pageView === "designers" && !canUseDesignerGrouping) {
       setPageView("tasks");
     }
-  }, [pageView, canViewAllTasks]);
+  }, [pageView, canUseDesignerGrouping]);
 
   React.useEffect(() => {
-    if (canViewAllTasks) return;
+    if (canUseDesignerGrouping) return;
     if (viewMode === "designer_brand_show") {
       setViewMode("brand_designer_show");
     }
-  }, [canViewAllTasks, viewMode, setViewMode]);
+  }, [canUseDesignerGrouping, viewMode, setViewMode]);
   const rowH = design.tableRowHeight;
   const peopleById = React.useMemo(() => {
     const map = new Map<string, string>();
@@ -787,7 +790,7 @@ export function TimelinePage() {
             >
               {PAGE_LABEL_TASKS}
             </button>
-            {canViewAllTasks ? (
+            {canUseDesignerGrouping ? (
               <button
                 type="button"
                 className={`modeMiniBtn ${pageView === "designers" ? "active" : ""}`}
@@ -1223,7 +1226,7 @@ export function TimelinePage() {
               ["--mode-scale" as string]: String(design.timelineModeDockScale),
             }}
           >
-            {canViewAllTasks ? (
+            {canUseDesignerGrouping ? (
               <button
                 type="button"
                 className={`modeMiniBtn ${viewMode === "designer_brand_show" ? "active" : ""}`}

@@ -13,8 +13,9 @@
 - [ ] CAM-ATTACHMENTS-PDF-PREVIEW-STANDARDIZATION - force PDF.js preview even with missing metadata, align modal copy, and avoid browser viewer fallbacks.
 - [ ] CAM-TELEGRAM-MINIAPP-NO-YANDEX-AUTH - allow Telegram Mini App access for people directory telegram IDs without Yandex login.
 - [ ] CAM-USER-ALL-TASKS-FLAG - admin-controlled all-tasks access + hide designer grouping for non-privileged users.
-- [ ] CAM-FORMAT-NORMALIZATION-LAB-V1 - repo-owned full task snapshot, YAML source-of-truth for normalized `format_` rules/manual mappings, and local `/format-sort` drag-and-drop normalization tool with manual full-data refresh.
+- [ ] CAM-FORMAT-NORMALIZATION-LAB-V1 - repo-owned full task snapshot, YAML source-of-truth for normalized `format_` rules/manual mappings, local `/format-sort`, and local `/designer-sort` drag-and-drop labs with manual full-data refresh and JSON export.
 - [ ] CAM-DEPARTMENT-ANALYTICS-PAGE-V1 - standalone `/analytics` lab with manual full SnapshotV1 refresh, monthly production table, weighted department-load chart, editable format-hour prices, and designer-category filters via local designer-sort config.
+- [ ] CAM-TEMP-LINK-TASKS-GROUPING-FIX - restore task visibility for temp-link sessions, add per-link designer-grouping toggle, and roll out auth/web changes with YDB migration.
 - [ ] CAM-API-V2-LOADING-SWR-CACHE - finalize manual evidence pack.
 - [x] CAM-SCHEMA-CONTRACT-GOVERNANCE - schema/types sync + validate:schema + guarantees.
 - [ ] CAM-DOCS-CANONICAL-REWRITE - rebuild root README and docs tree around current frontend state.
@@ -49,3 +50,6 @@ See: `docs/deep/TROUBLESHOOTING.md`
 - [x] Admin panel expanded: pending and approved user lists, soft reject flow, admin role controls, request timestamps, avatars, and self-lockout protection. Test frontend/auth contour redeployed.
 - [x] Backend auth handoff clarified: browser masking toggle now maps to `with auth` vs `without auth` API requests; auth proxy forwards trusted `x-dtm-*` access headers upstream; Yandex avatar URL is stored from profile metadata.
 - [x] Workbench re-architecture: canonical tabs replaced historical taxonomy, duplicate/orphan controls removed from layout, workbench tab persistence added, and audit report + taxonomy docs prepared.
+
+## Session 2026-03-19
+- [x] Standalone static demo page added at `presentation/hr-analytics/`: modern corporate dark presentation rebuilt from HR analytics slide as isolated HTML/CSS/JS, with deploy alias support for nested `index.html` -> slashless static URLs.

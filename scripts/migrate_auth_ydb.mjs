@@ -197,6 +197,7 @@ async function main() {
         new Column("created_by", optional(Types.UTF8)),
         new Column("last_used_at", optional(Types.TIMESTAMP)),
         new Column("use_count", Types.INT32),
+        new Column("show_designer_grouping", optional(Types.BOOL)),
       );
 
     const accessLinkUsage = new TableDescription()
@@ -224,6 +225,9 @@ async function main() {
       new Column("telegram_id", optional(Types.UTF8)),
       new Column("telegram_username", optional(Types.UTF8)),
       new Column("can_view_all_tasks", optional(Types.BOOL)),
+    ]);
+    await ensureOptionalColumns(driver, "access_links", [
+      new Column("show_designer_grouping", optional(Types.BOOL)),
     ]);
 
     console.log(`Auth YDB migration completed for ${target}`);
