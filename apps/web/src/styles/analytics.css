@@ -1,0 +1,285 @@
+.analyticsPage {
+  min-height: 100dvh;
+}
+
+.analyticsShell {
+  display: grid;
+  gap: 16px;
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 20px;
+}
+
+.analyticsHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.analyticsEyebrow {
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(206, 219, 255, 0.62);
+}
+
+.analyticsTitle {
+  margin: 8px 0 10px;
+  font-size: 34px;
+}
+
+.analyticsHeaderMeta {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.analyticsMetaBadge {
+  padding: 8px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(170, 132, 255, 0.35);
+  background: linear-gradient(180deg, rgba(38, 44, 82, 0.92), rgba(26, 22, 50, 0.94));
+  color: #eef3ff;
+  font-size: 13px;
+}
+
+.analyticsToolbar,
+.analyticsToolbarPrimary,
+.analyticsToolbarSecondary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: flex-end;
+}
+
+.analyticsToolbar {
+  display: grid;
+  gap: 14px;
+}
+
+.analyticsField {
+  display: grid;
+  gap: 6px;
+  min-width: 160px;
+}
+
+.analyticsFieldSmall {
+  min-width: 130px;
+  width: 130px;
+}
+
+.analyticsField span {
+  font-size: 12px;
+  color: rgba(210, 220, 255, 0.68);
+}
+
+.analyticsCheckbox {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 42px;
+  padding: 0 4px;
+  color: #f2f5ff;
+}
+
+.analyticsNotice,
+.analyticsError,
+.analyticsEmpty {
+  padding: 12px 14px;
+  border-radius: 16px;
+  font-size: 14px;
+}
+
+.analyticsNotice {
+  border: 1px solid rgba(116, 239, 214, 0.28);
+  background: rgba(34, 74, 67, 0.42);
+  color: #dffef6;
+}
+
+.analyticsError {
+  border: 1px solid rgba(255, 133, 178, 0.35);
+  background: rgba(90, 34, 56, 0.48);
+  color: #ffe3ef;
+}
+
+.analyticsEmpty {
+  border: 1px solid rgba(130, 143, 214, 0.22);
+  background: rgba(20, 24, 48, 0.82);
+  color: rgba(214, 223, 255, 0.82);
+}
+
+.analyticsStats {
+  font-size: 13px;
+}
+
+.analyticsSummaryGrid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.analyticsSummaryCard {
+  padding: 14px 16px;
+  border-radius: 18px;
+  border: 1px solid rgba(130, 143, 214, 0.22);
+  background: linear-gradient(180deg, rgba(24, 31, 58, 0.96), rgba(14, 18, 38, 0.98));
+}
+
+.analyticsSummaryLabel {
+  color: rgba(214, 223, 255, 0.68);
+  font-size: 12px;
+}
+
+.analyticsSummaryValue {
+  margin-top: 8px;
+  font-size: 28px;
+  font-weight: 700;
+}
+
+.analyticsTopFormats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+.analyticsTopFormatsLabel {
+  color: rgba(214, 223, 255, 0.72);
+  font-size: 13px;
+}
+
+.analyticsTabs {
+  display: flex;
+  gap: 10px;
+}
+
+.analyticsPriceTableWrap,
+.analyticsTableScroll,
+.analyticsProductivityTableWrap,
+.analyticsChartScroll {
+  overflow: auto;
+}
+
+.analyticsPriceTable,
+.analyticsTable,
+.analyticsProductivityTable {
+  width: max-content;
+  min-width: 100%;
+  border-collapse: collapse;
+}
+
+.analyticsPriceTable th,
+.analyticsPriceTable td,
+.analyticsTable th,
+.analyticsTable td,
+.analyticsProductivityTable th,
+.analyticsProductivityTable td {
+  padding: 10px 12px;
+  border: 1px solid rgba(130, 143, 214, 0.18);
+  background: rgba(15, 19, 37, 0.92);
+  vertical-align: top;
+}
+
+.analyticsPriceTable th,
+.analyticsTable th,
+.analyticsProductivityTable th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: rgba(25, 30, 56, 0.98);
+  text-align: left;
+  white-space: nowrap;
+}
+
+.analyticsPriceInput {
+  min-width: 70px;
+  width: 70px;
+}
+
+.analyticsPriceHint {
+  color: rgba(214, 223, 255, 0.72);
+  white-space: nowrap;
+}
+
+.analyticsTable td,
+.analyticsProductivityTable td {
+  text-align: center;
+}
+
+.analyticsTable td:first-child,
+.analyticsProductivityTable td:first-child {
+  text-align: left;
+  white-space: nowrap;
+}
+
+.analyticsTable td:nth-last-child(4),
+.analyticsTable td:nth-last-child(3),
+.analyticsTable td:nth-last-child(2),
+.analyticsTable td:nth-last-child(1) {
+  font-weight: 600;
+}
+
+.analyticsProductivityView {
+  display: grid;
+  gap: 16px;
+}
+
+.analyticsChart {
+  display: block;
+  width: 100%;
+  min-width: 840px;
+  height: 340px;
+}
+
+.analyticsChartGrid {
+  stroke: rgba(149, 165, 236, 0.2);
+  stroke-dasharray: 4 8;
+}
+
+.analyticsChartBar {
+  fill: rgba(255, 148, 148, 0.72);
+}
+
+.analyticsChartLine {
+  stroke: #9fdf9f;
+  stroke-width: 3;
+}
+
+.analyticsChartPoint {
+  fill: #dfffe0;
+  stroke: #7fc77f;
+  stroke-width: 2;
+}
+
+.analyticsChartLabel {
+  fill: rgba(214, 223, 255, 0.72);
+  font-size: 11px;
+}
+
+.analyticsTooltipContent {
+  display: grid;
+  gap: 4px;
+  max-width: 360px;
+}
+
+@media (max-width: 900px) {
+  .analyticsHeader {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .analyticsHeaderMeta {
+    justify-content: flex-start;
+  }
+
+  .analyticsShell {
+    padding: 18px;
+  }
+
+  .analyticsTitle {
+    font-size: 28px;
+  }
+}

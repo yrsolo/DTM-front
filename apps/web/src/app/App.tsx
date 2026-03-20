@@ -11,6 +11,9 @@ import { TimelinePage } from "../pages/TimelinePage";
 const FormatSortPage = React.lazy(() =>
   import("../pages/FormatSortPage").then((module) => ({ default: module.FormatSortPage }))
 );
+const AnalyticsPage = React.lazy(() =>
+  import("../pages/AnalyticsPage").then((module) => ({ default: module.AnalyticsPage }))
+);
 const DesignerSortPage = React.lazy(() =>
   import("../pages/DesignerSortPage").then((module) => ({ default: module.DesignerSortPage }))
 );
@@ -64,6 +67,14 @@ export function App() {
           <Route
             path="/designer-sort"
             element={
+          <Route
+            path="/analytics"
+            element={
+              <React.Suspense fallback={<div className="card">Loading analytics...</div>}>
+                <AnalyticsPage />
+              </React.Suspense>
+            }
+          />
               <React.Suspense fallback={<div className="card">????????? ??????????? ??????????...</div>}>
                 <DesignerSortPage />
               </React.Suspense>
