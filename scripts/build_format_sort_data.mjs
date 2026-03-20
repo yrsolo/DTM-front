@@ -373,6 +373,25 @@ function normalizeTask(task) {
   };
 }
 
+function collectPeople(payload, peopleMap) {
+  const candidates = Array.isArray(payload?.entities?.people)
+    ? payload.entities.people
+    : Array.isArray(payload?.people)
+      ? payload.people
+      : [];
+
+  for (const person of candidates) {
+    const id = typeof person?.id === "string" ? person.id.trim() : "";
+    const name = typeof person?.name === "string" ? person.name.trim() : "";
+    if (!id || !name) continue;
+    peopleMap.set(id, {
+      id,
+      name,
+      position: typeof person?.position === "string" && person.position.trim() ? person.position.trim() : null,
+    });
+  }
+}
+
 function buildInventory(snapshot, config) {
   const grouped = new Map();
   const manualMap = buildManualOverrideMap(config.manualOverrides);
@@ -450,6 +469,9 @@ async function main() {
   const coverage = extractTaskDateCoverage(seedPayload?.tasks ?? []);
   const windows = buildMonthlyWindows(coverage.start, coverage.end);
   const taskMap = new Map();
+  const peopleMap = new Map();
+
+  collectPeople(seedPayload, peopleMap);
 
   for (const task of seedPayload?.tasks ?? []) {
     const normalized = normalizeTask(task);
@@ -466,6 +488,7 @@ async function main() {
       window_mode: "intersects",
     });
     const payload = await fetchJson(`${baseUrl}?${params.toString()}`, headers);
+    collectPeople(payload, peopleMap);
     for (const task of payload?.tasks ?? []) {
       const normalized = normalizeTask(task);
       if (normalized.id) taskMap.set(normalized.id, normalized);
@@ -483,6 +506,7 @@ async function main() {
       seedSummary: seedPayload?.summary ?? null,
       windows,
     },
+    people: [...peopleMap.values()].sort((left, right) => left.name.localeCompare(right.name, "ru")),
     tasks: [...taskMap.values()].sort((left, right) => left.id.localeCompare(right.id)),
   };
 

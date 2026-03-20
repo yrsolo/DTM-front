@@ -2,7 +2,7 @@
   {
     "rawValue": "дин.лого",
     "normalizedRawValue": "дин лого",
-    "count": 142,
+    "count": 144,
     "sampleTasks": [
       {
         "id": "0036614f-4957-4e3c-9a66-ca159440356c",
@@ -60,7 +60,7 @@
       }
     ],
     "autoMatchFormatId": null,
-    "manualFormatId": null
+    "manualFormatId": "screen_branding"
   },
   {
     "rawValue": "3D лого",
@@ -123,7 +123,7 @@
       }
     ],
     "autoMatchFormatId": null,
-    "manualFormatId": null
+    "manualFormatId": "logo_3d"
   },
   {
     "rawValue": "стоп-кадр",
@@ -270,7 +270,7 @@
       }
     ],
     "autoMatchFormatId": null,
-    "manualFormatId": null
+    "manualFormatId": "interactive_ustnik"
   },
   {
     "rawValue": "Брендинг экрана",
@@ -333,7 +333,7 @@
       }
     ],
     "autoMatchFormatId": null,
-    "manualFormatId": null
+    "manualFormatId": "web"
   },
   {
     "rawValue": "Дин лого\nдо  7%",
@@ -375,7 +375,7 @@
       }
     ],
     "autoMatchFormatId": null,
-    "manualFormatId": null
+    "manualFormatId": "logo_3d"
   },
   {
     "rawValue": "Графическая заставка 10 сек",
@@ -501,7 +501,7 @@
       }
     ],
     "autoMatchFormatId": null,
-    "manualFormatId": null
+    "manualFormatId": "web"
   },
   {
     "rawValue": "3Д лого",
@@ -651,6 +651,27 @@
     "manualFormatId": null
   },
   {
+    "rawValue": "транзишн",
+    "normalizedRawValue": "транзишн",
+    "count": 4,
+    "sampleTasks": [
+      {
+        "id": "1ad72223-db59-4343-9d60-38c7df075566",
+        "title": "Flamenco [Битва пикников] транзишн"
+      },
+      {
+        "id": "2345392c-90c3-46c7-8fe7-1edbd3b52ae4",
+        "title": "ДОМКЛИК [Хочу Перемен] Транзишн"
+      },
+      {
+        "id": "5ed90a80-f476-4cb5-b09a-ec9f28dd31c8",
+        "title": "Exponenta  [Время завтрака ] транзишн"
+      }
+    ],
+    "autoMatchFormatId": null,
+    "manualFormatId": "still_frame"
+  },
+  {
     "rawValue": "устники",
     "normalizedRawValue": "устники",
     "count": 4,
@@ -669,7 +690,7 @@
       }
     ],
     "autoMatchFormatId": null,
-    "manualFormatId": null
+    "manualFormatId": "interactive_ustnik"
   },
   {
     "rawValue": "QR код",
@@ -711,7 +732,7 @@
       }
     ],
     "autoMatchFormatId": null,
-    "manualFormatId": null
+    "manualFormatId": "screen_branding"
   },
   {
     "rawValue": "3D лого (зафиналили)\nДин лого (зафиналили)",
@@ -879,28 +900,7 @@
       }
     ],
     "autoMatchFormatId": null,
-    "manualFormatId": null
-  },
-  {
-    "rawValue": "транзишн",
-    "normalizedRawValue": "транзишн",
-    "count": 3,
-    "sampleTasks": [
-      {
-        "id": "1ad72223-db59-4343-9d60-38c7df075566",
-        "title": "Flamenco [Битва пикников] транзишн"
-      },
-      {
-        "id": "2345392c-90c3-46c7-8fe7-1edbd3b52ae4",
-        "title": "ДОМКЛИК [Хочу Перемен] Транзишн"
-      },
-      {
-        "id": "5ed90a80-f476-4cb5-b09a-ec9f28dd31c8",
-        "title": "Exponenta  [Время завтрака ] транзишн"
-      }
-    ],
-    "autoMatchFormatId": null,
-    "manualFormatId": null
+    "manualFormatId": "still_frame"
   },
   {
     "rawValue": "Эл лого\n5 сек",
@@ -1159,7 +1159,7 @@
       }
     ],
     "autoMatchFormatId": null,
-    "manualFormatId": null
+    "manualFormatId": "web"
   },
   {
     "rawValue": "ИТВ",
@@ -1176,7 +1176,7 @@
       }
     ],
     "autoMatchFormatId": null,
-    "manualFormatId": null
+    "manualFormatId": "web"
   },
   {
     "rawValue": "Кнопка",
@@ -1193,7 +1193,7 @@
       }
     ],
     "autoMatchFormatId": null,
-    "manualFormatId": null
+    "manualFormatId": "web"
   },
   {
     "rawValue": "Лендинг",
@@ -1227,7 +1227,7 @@
       }
     ],
     "autoMatchFormatId": null,
-    "manualFormatId": null
+    "manualFormatId": "still_frame"
   },
   {
     "rawValue": "пекшот",
@@ -1244,7 +1244,7 @@
       }
     ],
     "autoMatchFormatId": null,
-    "manualFormatId": null
+    "manualFormatId": "still_frame"
   },
   {
     "rawValue": "пристёжка",
@@ -1261,7 +1261,7 @@
       }
     ],
     "autoMatchFormatId": null,
-    "manualFormatId": null
+    "manualFormatId": "still_frame"
   },
   {
     "rawValue": "Скрин-каст (5 сек)",
@@ -1502,7 +1502,7 @@
       }
     ],
     "autoMatchFormatId": null,
-    "manualFormatId": null
+    "manualFormatId": "still_frame"
   },
   {
     "rawValue": "- Интеграция в лого с зайцами\n- Графический ролик с зайцами.",
@@ -1593,7 +1593,7 @@
       }
     ],
     "autoMatchFormatId": null,
-    "manualFormatId": null
+    "manualFormatId": "grafrolik"
   },
   {
     "rawValue": "2 стопкадра 10 сек и 5 сек",
@@ -1645,7 +1645,7 @@
       }
     ],
     "autoMatchFormatId": null,
-    "manualFormatId": null
+    "manualFormatId": "screen_branding"
   },
   {
     "rawValue": "3D \n5 сек",
@@ -1658,7 +1658,7 @@
       }
     ],
     "autoMatchFormatId": null,
-    "manualFormatId": null
+    "manualFormatId": "logo_3d"
   },
   {
     "rawValue": "3D лого\n5 креативов под каждый продукт\n1. Дебетовая карта (зафиналили)\n2. Кредитная карта (зафиналили)\n3. Альфа-пей (зафиналили)\n4. Альфа-тревел сервис (зафиналили)\n5. Альфа-тревел карта (зафиналили)",
@@ -1710,7 +1710,7 @@
       }
     ],
     "autoMatchFormatId": null,
-    "manualFormatId": null
+    "manualFormatId": "logo_3d"
   },
   {
     "rawValue": "3D logo\n5 сек ГОРОД",
@@ -1723,7 +1723,7 @@
       }
     ],
     "autoMatchFormatId": null,
-    "manualFormatId": null
+    "manualFormatId": "logo_3d"
   },
   {
     "rawValue": "3D logo\n5 сек ДОМ",
@@ -1736,7 +1736,7 @@
       }
     ],
     "autoMatchFormatId": null,
-    "manualFormatId": null
+    "manualFormatId": "logo_3d"
   },
   {
     "rawValue": "3D, Владимир",
@@ -1749,7 +1749,7 @@
       }
     ],
     "autoMatchFormatId": null,
-    "manualFormatId": null
+    "manualFormatId": "logo_3d"
   },
   {
     "rawValue": "3D, Выборг",
@@ -1762,7 +1762,7 @@
       }
     ],
     "autoMatchFormatId": null,
-    "manualFormatId": null
+    "manualFormatId": "logo_3d"
   },
   {
     "rawValue": "3D, Казань",
@@ -1775,7 +1775,7 @@
       }
     ],
     "autoMatchFormatId": null,
-    "manualFormatId": null
+    "manualFormatId": "logo_3d"
   },
   {
     "rawValue": "3D, Ярославль",
@@ -1788,7 +1788,7 @@
       }
     ],
     "autoMatchFormatId": null,
-    "manualFormatId": null
+    "manualFormatId": "logo_3d"
   },
   {
     "rawValue": "Адаптация Граф ролика 10 сек",
@@ -1957,7 +1957,7 @@
       }
     ],
     "autoMatchFormatId": null,
-    "manualFormatId": null
+    "manualFormatId": "first_person_announce"
   },
   {
     "rawValue": "Анонс от 1-го лица",
@@ -1983,7 +1983,7 @@
       }
     ],
     "autoMatchFormatId": null,
-    "manualFormatId": null
+    "manualFormatId": "first_person_announce"
   },
   {
     "rawValue": "апдейт дин.лого",
@@ -2009,7 +2009,7 @@
       }
     ],
     "autoMatchFormatId": null,
-    "manualFormatId": null
+    "manualFormatId": "video_adaptation"
   },
   {
     "rawValue": "Апдейт пэкшота сданного ролика.",
@@ -2022,7 +2022,7 @@
       }
     ],
     "autoMatchFormatId": null,
-    "manualFormatId": null
+    "manualFormatId": "video_adaptation"
   },
   {
     "rawValue": "Апдейт ролика",
@@ -2035,7 +2035,7 @@
       }
     ],
     "autoMatchFormatId": null,
-    "manualFormatId": null
+    "manualFormatId": "video_adaptation"
   },
   {
     "rawValue": "Апдейт слогана к графическому ролику",
@@ -2061,7 +2061,7 @@
       }
     ],
     "autoMatchFormatId": null,
-    "manualFormatId": null
+    "manualFormatId": "web"
   },
   {
     "rawValue": "Баннеры \n16 шт в ВК",
@@ -2074,7 +2074,7 @@
       }
     ],
     "autoMatchFormatId": null,
-    "manualFormatId": null
+    "manualFormatId": "web"
   },
   {
     "rawValue": "Баннеры / перетяжки",
@@ -2087,7 +2087,7 @@
       }
     ],
     "autoMatchFormatId": null,
-    "manualFormatId": null
+    "manualFormatId": "web"
   },
   {
     "rawValue": "Баннеры наружной рекламы",
@@ -2100,7 +2100,7 @@
       }
     ],
     "autoMatchFormatId": null,
-    "manualFormatId": null
+    "manualFormatId": "web"
   },
   {
     "rawValue": "Баннеры с лицами артистов (из фотобанка канала) на сайте ТНТ-Онлайн – 5 форматов",
@@ -2139,7 +2139,7 @@
       }
     ],
     "autoMatchFormatId": null,
-    "manualFormatId": null
+    "manualFormatId": "screen_branding"
   },
   {
     "rawValue": "Брендинг\n+устник (экран 5 сек)",
@@ -2165,7 +2165,7 @@
       }
     ],
     "autoMatchFormatId": null,
-    "manualFormatId": null
+    "manualFormatId": "screen_branding"
   },
   {
     "rawValue": "Брендинг\n2 шт",
@@ -2178,7 +2178,7 @@
       }
     ],
     "autoMatchFormatId": null,
-    "manualFormatId": null
+    "manualFormatId": "screen_branding"
   },
   {
     "rawValue": "Брендинг\nколонны",
@@ -2191,7 +2191,7 @@
       }
     ],
     "autoMatchFormatId": null,
-    "manualFormatId": null
+    "manualFormatId": "screen_branding"
   },
   {
     "rawValue": "Брендинг\nколонны\n10 сек",
@@ -2204,7 +2204,7 @@
       }
     ],
     "autoMatchFormatId": null,
-    "manualFormatId": null
+    "manualFormatId": "screen_branding"
   },
   {
     "rawValue": "Брендинг\nстолов",
@@ -2217,7 +2217,7 @@
       }
     ],
     "autoMatchFormatId": null,
-    "manualFormatId": null
+    "manualFormatId": "screen_branding"
   },
   {
     "rawValue": "Брендинг - 2",
@@ -2230,7 +2230,7 @@
       }
     ],
     "autoMatchFormatId": null,
-    "manualFormatId": null
+    "manualFormatId": "screen_branding"
   },
   {
     "rawValue": "Брендинг (зафиналили)\nГраф ролик (сдали)",
@@ -2256,7 +2256,7 @@
       }
     ],
     "autoMatchFormatId": null,
-    "manualFormatId": null
+    "manualFormatId": "screen_branding"
   },
   {
     "rawValue": "Брендинг 5 сек\nАквакрем и мицеллярка",
@@ -2269,7 +2269,7 @@
       }
     ],
     "autoMatchFormatId": null,
-    "manualFormatId": null
+    "manualFormatId": "screen_branding"
   },
   {
     "rawValue": "Брендинг 5 сек\nПэдсы и маска",
@@ -2282,7 +2282,7 @@
       }
     ],
     "autoMatchFormatId": null,
-    "manualFormatId": null
+    "manualFormatId": "screen_branding"
   },
   {
     "rawValue": "брендинг на плазмы в шоу",
@@ -2295,7 +2295,7 @@
       }
     ],
     "autoMatchFormatId": null,
-    "manualFormatId": null
+    "manualFormatId": "screen_branding"
   },
   {
     "rawValue": "Брендинг планшета",
@@ -2308,7 +2308,7 @@
       }
     ],
     "autoMatchFormatId": null,
-    "manualFormatId": null
+    "manualFormatId": "screen_branding"
   },
   {
     "rawValue": "брендинг профайлов",
@@ -2321,7 +2321,7 @@
       }
     ],
     "autoMatchFormatId": null,
-    "manualFormatId": null
+    "manualFormatId": "screen_branding"
   },
   {
     "rawValue": "Брендинг спасения",
@@ -2334,7 +2334,7 @@
       }
     ],
     "autoMatchFormatId": null,
-    "manualFormatId": null
+    "manualFormatId": "dynamic_logo"
   },
   {
     "rawValue": "Брендинг тоннеля",
@@ -2347,7 +2347,7 @@
       }
     ],
     "autoMatchFormatId": null,
-    "manualFormatId": null
+    "manualFormatId": "screen_branding"
   },
   {
     "rawValue": "Брендинг экрана (тоннель)",
@@ -2425,7 +2425,7 @@
       }
     ],
     "autoMatchFormatId": null,
-    "manualFormatId": null
+    "manualFormatId": "screen_branding"
   },
   {
     "rawValue": "Варианты пэкшота",
@@ -2438,7 +2438,7 @@
       }
     ],
     "autoMatchFormatId": null,
-    "manualFormatId": null
+    "manualFormatId": "still_frame"
   },
   {
     "rawValue": "Вызов. Интеграция в название испытания",
@@ -2451,7 +2451,7 @@
       }
     ],
     "autoMatchFormatId": null,
-    "manualFormatId": null
+    "manualFormatId": "still_frame"
   },
   {
     "rawValue": "Гаф заставка\n10 сек",
@@ -2464,7 +2464,7 @@
       }
     ],
     "autoMatchFormatId": null,
-    "manualFormatId": null
+    "manualFormatId": "grafrolik"
   },
   {
     "rawValue": "Граф заставка\n10 сек для ТНТ и ТНТ4",
@@ -2763,7 +2763,7 @@
       }
     ],
     "autoMatchFormatId": null,
-    "manualFormatId": null
+    "manualFormatId": "screen_branding"
   },
   {
     "rawValue": "Графика\nдля дженерика",
@@ -2776,7 +2776,7 @@
       }
     ],
     "autoMatchFormatId": null,
-    "manualFormatId": null
+    "manualFormatId": "video_adaptation"
   },
   {
     "rawValue": "Графика\nпод устники\n\n1 очередь \nСценарий 3 (карта с бенефитами)\nСценарий 5 (карта с бенефитами)\nСценарий 6 (эллого) (зафиналили)",
@@ -2815,7 +2815,7 @@
       }
     ],
     "autoMatchFormatId": null,
-    "manualFormatId": null
+    "manualFormatId": "interactive_ustnik"
   },
   {
     "rawValue": "графика внутрь (стол)",
@@ -2828,7 +2828,7 @@
       }
     ],
     "autoMatchFormatId": null,
-    "manualFormatId": null
+    "manualFormatId": "still_frame"
   },
   {
     "rawValue": "Графика к устникам \n(Мартиросян в образах) Кейс",
@@ -2841,7 +2841,7 @@
       }
     ],
     "autoMatchFormatId": null,
-    "manualFormatId": null
+    "manualFormatId": "interactive_ustnik"
   },
   {
     "rawValue": "Графика к устникам \n(Мартиросян в образах) Хлопушка",
@@ -2854,7 +2854,7 @@
       }
     ],
     "autoMatchFormatId": null,
-    "manualFormatId": null
+    "manualFormatId": "interactive_ustnik"
   },
   {
     "rawValue": "графичексий ролик, хрон 10 сек.",
@@ -3127,7 +3127,7 @@
       }
     ],
     "autoMatchFormatId": null,
-    "manualFormatId": null
+    "manualFormatId": "screencast"
   },
   {
     "rawValue": "Дженерик",
@@ -3140,7 +3140,7 @@
       }
     ],
     "autoMatchFormatId": null,
-    "manualFormatId": null
+    "manualFormatId": "grafrolik"
   },
   {
     "rawValue": "Дженерик + графический переход",
@@ -3166,7 +3166,7 @@
       }
     ],
     "autoMatchFormatId": null,
-    "manualFormatId": null
+    "manualFormatId": "grafrolik"
   },
   {
     "rawValue": "Диджитал ВК",
@@ -3179,7 +3179,7 @@
       }
     ],
     "autoMatchFormatId": null,
-    "manualFormatId": null
+    "manualFormatId": "web"
   },
   {
     "rawValue": "Диджитал ролик",
@@ -3192,7 +3192,7 @@
       }
     ],
     "autoMatchFormatId": null,
-    "manualFormatId": null
+    "manualFormatId": "grafrolik"
   },
   {
     "rawValue": "Дин лого\n1 креатива",
@@ -3543,7 +3543,7 @@
       }
     ],
     "autoMatchFormatId": null,
-    "manualFormatId": null
+    "manualFormatId": "still_frame"
   },
   {
     "rawValue": "Замена брендинга на отснятом материала",
@@ -3556,7 +3556,7 @@
       }
     ],
     "autoMatchFormatId": null,
-    "manualFormatId": null
+    "manualFormatId": "screen_branding"
   },
   {
     "rawValue": "заставка",
@@ -3569,7 +3569,7 @@
       }
     ],
     "autoMatchFormatId": null,
-    "manualFormatId": null
+    "manualFormatId": "grafrolik"
   },
   {
     "rawValue": "Заставка \n10 сек (Астория + Пятёрочка) съемочная при участи Шеф повара - Константина Оганесяна\n15 сек",
@@ -3582,7 +3582,7 @@
       }
     ],
     "autoMatchFormatId": null,
-    "manualFormatId": null
+    "manualFormatId": "grafrolik"
   },
   {
     "rawValue": "Заставки и стопкадры",
@@ -3608,7 +3608,7 @@
       }
     ],
     "autoMatchFormatId": null,
-    "manualFormatId": null
+    "manualFormatId": "logo_integration"
   },
   {
     "rawValue": "Интеграция в лого",
@@ -3777,7 +3777,7 @@
       }
     ],
     "autoMatchFormatId": null,
-    "manualFormatId": null
+    "manualFormatId": "logo_integration"
   },
   {
     "rawValue": "Карельский драйв",
@@ -3790,7 +3790,7 @@
       }
     ],
     "autoMatchFormatId": null,
-    "manualFormatId": null
+    "manualFormatId": "still_frame"
   },
   {
     "rawValue": "картинка",
@@ -3803,7 +3803,7 @@
       }
     ],
     "autoMatchFormatId": null,
-    "manualFormatId": null
+    "manualFormatId": "web"
   },
   {
     "rawValue": "Клинап",
@@ -3816,7 +3816,7 @@
       }
     ],
     "autoMatchFormatId": null,
-    "manualFormatId": null
+    "manualFormatId": "video_adaptation"
   },
   {
     "rawValue": "Лайт ролик",
@@ -3829,7 +3829,7 @@
       }
     ],
     "autoMatchFormatId": null,
-    "manualFormatId": null
+    "manualFormatId": "shooting_video"
   },
   {
     "rawValue": "Лайт ролик\n3 шт по 20 сек",
@@ -3842,7 +3842,7 @@
       }
     ],
     "autoMatchFormatId": null,
-    "manualFormatId": null
+    "manualFormatId": "shooting_video"
   },
   {
     "rawValue": "Лайт ролики\nМария Маркова",
@@ -3855,7 +3855,7 @@
       }
     ],
     "autoMatchFormatId": null,
-    "manualFormatId": null
+    "manualFormatId": "shooting_video"
   },
   {
     "rawValue": "левом нижнем углу экрана",
@@ -3868,7 +3868,7 @@
       }
     ],
     "autoMatchFormatId": null,
-    "manualFormatId": null
+    "manualFormatId": "dynamic_logo"
   },
   {
     "rawValue": "Лендинг + конкурс",
@@ -3894,7 +3894,7 @@
       }
     ],
     "autoMatchFormatId": null,
-    "manualFormatId": null
+    "manualFormatId": "electronic_logo"
   },
   {
     "rawValue": "логотип на пэкшот",
@@ -3907,7 +3907,7 @@
       }
     ],
     "autoMatchFormatId": null,
-    "manualFormatId": null
+    "manualFormatId": "video_adaptation"
   },
   {
     "rawValue": "Лэндинг",
@@ -3920,7 +3920,7 @@
       }
     ],
     "autoMatchFormatId": null,
-    "manualFormatId": null
+    "manualFormatId": "web"
   },
   {
     "rawValue": "Мобильный супербаннер",
@@ -3933,7 +3933,7 @@
       }
     ],
     "autoMatchFormatId": null,
-    "manualFormatId": null
+    "manualFormatId": "web"
   },
   {
     "rawValue": "Монтаж с пэкшотом 10 сек",
@@ -3946,7 +3946,7 @@
       }
     ],
     "autoMatchFormatId": null,
-    "manualFormatId": null
+    "manualFormatId": "still_frame"
   },
   {
     "rawValue": "НГ заставка 5 сек на базе их видео про духовку",
@@ -3959,7 +3959,7 @@
       }
     ],
     "autoMatchFormatId": null,
-    "manualFormatId": null
+    "manualFormatId": "still_frame"
   },
   {
     "rawValue": "Обложка на сайт",
@@ -3998,7 +3998,7 @@
       }
     ],
     "autoMatchFormatId": null,
-    "manualFormatId": null
+    "manualFormatId": "video_adaptation"
   },
   {
     "rawValue": "Онлайн игра\nБаннеры",
@@ -4011,7 +4011,7 @@
       }
     ],
     "autoMatchFormatId": null,
-    "manualFormatId": null
+    "manualFormatId": "web"
   },
   {
     "rawValue": "переход",
@@ -4037,7 +4037,7 @@
       }
     ],
     "autoMatchFormatId": null,
-    "manualFormatId": null
+    "manualFormatId": "video_adaptation"
   },
   {
     "rawValue": "плашка для шоу",
@@ -4050,7 +4050,7 @@
       }
     ],
     "autoMatchFormatId": null,
-    "manualFormatId": null
+    "manualFormatId": "dynamic_logo"
   },
   {
     "rawValue": "Подмигивание обезьяны на банке",
@@ -4063,7 +4063,7 @@
       }
     ],
     "autoMatchFormatId": null,
-    "manualFormatId": null
+    "manualFormatId": "video_adaptation"
   },
   {
     "rawValue": "Пост\nанонсирующий",
@@ -4076,7 +4076,7 @@
       }
     ],
     "autoMatchFormatId": null,
-    "manualFormatId": null
+    "manualFormatId": "web"
   },
   {
     "rawValue": "Посты в ВК\n5 шт",
@@ -4089,7 +4089,7 @@
       }
     ],
     "autoMatchFormatId": null,
-    "manualFormatId": null
+    "manualFormatId": "web"
   },
   {
     "rawValue": "Пуш",
@@ -4102,7 +4102,7 @@
       }
     ],
     "autoMatchFormatId": null,
-    "manualFormatId": null
+    "manualFormatId": "dynamic_logo"
   },
   {
     "rawValue": "Пуш\n3 шт",
@@ -4115,7 +4115,7 @@
       }
     ],
     "autoMatchFormatId": null,
-    "manualFormatId": null
+    "manualFormatId": "dynamic_logo"
   },
   {
     "rawValue": "Пуш\n4 шт",
@@ -4128,7 +4128,7 @@
       }
     ],
     "autoMatchFormatId": null,
-    "manualFormatId": null
+    "manualFormatId": "dynamic_logo"
   },
   {
     "rawValue": "пэкшот",
@@ -4141,7 +4141,7 @@
       }
     ],
     "autoMatchFormatId": null,
-    "manualFormatId": null
+    "manualFormatId": "video_adaptation"
   },
   {
     "rawValue": "Ред брендинг",
@@ -4154,7 +4154,7 @@
       }
     ],
     "autoMatchFormatId": null,
-    "manualFormatId": null
+    "manualFormatId": "screen_branding"
   },
   {
     "rawValue": "Ред посты\nв вк",
@@ -4167,7 +4167,7 @@
       }
     ],
     "autoMatchFormatId": null,
-    "manualFormatId": null
+    "manualFormatId": "web"
   },
   {
     "rawValue": "Редакционный брендинг\n20 сек в лупе",
@@ -4180,7 +4180,7 @@
       }
     ],
     "autoMatchFormatId": null,
-    "manualFormatId": null
+    "manualFormatId": "screen_branding"
   },
   {
     "rawValue": "Редбрендинг",
@@ -4193,7 +4193,7 @@
       }
     ],
     "autoMatchFormatId": null,
-    "manualFormatId": null
+    "manualFormatId": "screen_branding"
   },
   {
     "rawValue": "Ролик",
@@ -4206,7 +4206,7 @@
       }
     ],
     "autoMatchFormatId": null,
-    "manualFormatId": null
+    "manualFormatId": "grafrolik"
   },
   {
     "rawValue": "Ролик к анонсу НГ фильма10 сек (без графического перехода)",
@@ -4232,7 +4232,7 @@
       }
     ],
     "autoMatchFormatId": null,
-    "manualFormatId": null
+    "manualFormatId": "grafrolik"
   },
   {
     "rawValue": "Скрикаст\nакция 11.11",
@@ -4245,7 +4245,7 @@
       }
     ],
     "autoMatchFormatId": null,
-    "manualFormatId": null
+    "manualFormatId": "screencast"
   },
   {
     "rawValue": "скрин-каст",
@@ -4349,7 +4349,7 @@
       }
     ],
     "autoMatchFormatId": null,
-    "manualFormatId": null
+    "manualFormatId": "web"
   },
   {
     "rawValue": "Стоп кадр\n10 и 5 сек",
@@ -4427,7 +4427,7 @@
       }
     ],
     "autoMatchFormatId": null,
-    "manualFormatId": null
+    "manualFormatId": "logo_integration"
   },
   {
     "rawValue": "Съемки+графика\n20 сек",
@@ -4440,7 +4440,7 @@
       }
     ],
     "autoMatchFormatId": null,
-    "manualFormatId": null
+    "manualFormatId": "shooting_video"
   },
   {
     "rawValue": "съёмочные ролики",
@@ -4583,7 +4583,7 @@
       }
     ],
     "autoMatchFormatId": null,
-    "manualFormatId": null
+    "manualFormatId": "grafrolik"
   },
   {
     "rawValue": "тест",
@@ -4609,7 +4609,7 @@
       }
     ],
     "autoMatchFormatId": null,
-    "manualFormatId": null
+    "manualFormatId": "still_frame"
   },
   {
     "rawValue": "ТНТ\nРолик имиджевый 10 сек",
@@ -4622,7 +4622,7 @@
       }
     ],
     "autoMatchFormatId": null,
-    "manualFormatId": null
+    "manualFormatId": "grafrolik"
   },
   {
     "rawValue": "ТНТ - Ролик с акцией 10 сек\nТНТ4 - Такой же ролик но с другой озвучкой",
@@ -4635,7 +4635,7 @@
       }
     ],
     "autoMatchFormatId": null,
-    "manualFormatId": null
+    "manualFormatId": "grafrolik"
   },
   {
     "rawValue": "ТНТ 4\nРолик имиджевый 10 сек",
@@ -4648,7 +4648,7 @@
       }
     ],
     "autoMatchFormatId": null,
-    "manualFormatId": null
+    "manualFormatId": "grafrolik"
   },
   {
     "rawValue": "Транзишн (3 сек)",
@@ -4661,7 +4661,7 @@
       }
     ],
     "autoMatchFormatId": null,
-    "manualFormatId": null
+    "manualFormatId": "still_frame"
   },
   {
     "rawValue": "Устник (Лого и инфографика)",
@@ -4674,7 +4674,7 @@
       }
     ],
     "autoMatchFormatId": null,
-    "manualFormatId": null
+    "manualFormatId": "interactive_ustnik"
   },
   {
     "rawValue": "Устник (ноутбук)",
@@ -4687,7 +4687,7 @@
       }
     ],
     "autoMatchFormatId": null,
-    "manualFormatId": null
+    "manualFormatId": "interactive_ustnik"
   },
   {
     "rawValue": "устник ДЕБ КАРТА",
@@ -4700,7 +4700,7 @@
       }
     ],
     "autoMatchFormatId": null,
-    "manualFormatId": null
+    "manualFormatId": "interactive_ustnik"
   },
   {
     "rawValue": "устник монетки",
@@ -4713,7 +4713,7 @@
       }
     ],
     "autoMatchFormatId": null,
-    "manualFormatId": null
+    "manualFormatId": "interactive_ustnik"
   },
   {
     "rawValue": "Устник Петрозаводск",
@@ -4726,7 +4726,7 @@
       }
     ],
     "autoMatchFormatId": null,
-    "manualFormatId": null
+    "manualFormatId": "interactive_ustnik"
   },
   {
     "rawValue": "Устник Плёс",
@@ -4739,7 +4739,7 @@
       }
     ],
     "autoMatchFormatId": null,
-    "manualFormatId": null
+    "manualFormatId": "interactive_ustnik"
   },
   {
     "rawValue": "устник Псков",
@@ -4752,7 +4752,7 @@
       }
     ],
     "autoMatchFormatId": null,
-    "manualFormatId": null
+    "manualFormatId": "interactive_ustnik"
   },
   {
     "rawValue": "Устник с графикой\n25сек",
@@ -4765,7 +4765,7 @@
       }
     ],
     "autoMatchFormatId": null,
-    "manualFormatId": null
+    "manualFormatId": "interactive_ustnik"
   },
   {
     "rawValue": "Устник Санкт-Петербург",
@@ -4778,7 +4778,7 @@
       }
     ],
     "autoMatchFormatId": null,
-    "manualFormatId": null
+    "manualFormatId": "interactive_ustnik"
   },
   {
     "rawValue": "Устник Саратов",
@@ -4791,7 +4791,7 @@
       }
     ],
     "autoMatchFormatId": null,
-    "manualFormatId": null
+    "manualFormatId": "interactive_ustnik"
   },
   {
     "rawValue": "Устник Сергиев Посад",
@@ -4804,7 +4804,7 @@
       }
     ],
     "autoMatchFormatId": null,
-    "manualFormatId": null
+    "manualFormatId": "interactive_ustnik"
   },
   {
     "rawValue": "Устники 25 сек – 3 шт",
@@ -4817,7 +4817,7 @@
       }
     ],
     "autoMatchFormatId": null,
-    "manualFormatId": null
+    "manualFormatId": "interactive_ustnik"
   },
   {
     "rawValue": "Устники с графикой\n6 шт",
@@ -4830,7 +4830,7 @@
       }
     ],
     "autoMatchFormatId": null,
-    "manualFormatId": null
+    "manualFormatId": "interactive_ustnik"
   },
   {
     "rawValue": "Устники с интерактивной графикой\n3 по 30 сек",
@@ -4856,7 +4856,7 @@
       }
     ],
     "autoMatchFormatId": null,
-    "manualFormatId": null
+    "manualFormatId": "web"
   },
   {
     "rawValue": "фотопост в ВК",
@@ -4869,7 +4869,7 @@
       }
     ],
     "autoMatchFormatId": null,
-    "manualFormatId": null
+    "manualFormatId": "web"
   },
   {
     "rawValue": "Фотопосты",
@@ -4882,7 +4882,7 @@
       }
     ],
     "autoMatchFormatId": null,
-    "manualFormatId": null
+    "manualFormatId": "web"
   },
   {
     "rawValue": "чатбот",
@@ -4895,7 +4895,7 @@
       }
     ],
     "autoMatchFormatId": null,
-    "manualFormatId": null
+    "manualFormatId": "web"
   },
   {
     "rawValue": "Эл лого\nдо 7%",
@@ -4973,7 +4973,7 @@
       }
     ],
     "autoMatchFormatId": null,
-    "manualFormatId": null
+    "manualFormatId": "web"
   },
   {
     "rawValue": "DIGITAL\nКнопка для сайта",
@@ -4999,7 +4999,7 @@
       }
     ],
     "autoMatchFormatId": null,
-    "manualFormatId": null
+    "manualFormatId": "web"
   },
   {
     "rawValue": "Digital / Баннеры",
@@ -5012,7 +5012,7 @@
       }
     ],
     "autoMatchFormatId": null,
-    "manualFormatId": null
+    "manualFormatId": "web"
   },
   {
     "rawValue": "Digital / Обложки для плей-листов",
@@ -5025,7 +5025,7 @@
       }
     ],
     "autoMatchFormatId": null,
-    "manualFormatId": null
+    "manualFormatId": "web"
   },
   {
     "rawValue": "fullscreen banner",
@@ -5038,7 +5038,7 @@
       }
     ],
     "autoMatchFormatId": null,
-    "manualFormatId": null
+    "manualFormatId": "web"
   },
   {
     "rawValue": "KV",
@@ -5051,7 +5051,7 @@
       }
     ],
     "autoMatchFormatId": null,
-    "manualFormatId": null
+    "manualFormatId": "web"
   },
   {
     "rawValue": "QR код\n10 сек",
@@ -5103,6 +5103,6 @@
       }
     ],
     "autoMatchFormatId": null,
-    "manualFormatId": null
+    "manualFormatId": "first_person_announce"
   }
 ]

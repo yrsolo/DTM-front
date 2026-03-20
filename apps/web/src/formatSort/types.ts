@@ -77,6 +77,11 @@ export type TaskFormatSourceSnapshot = {
   tasksTotalExpected: number;
   tasksTotalCollected: number;
   sourceMeta: Record<string, unknown>;
+  people?: Array<{
+    id: string;
+    name: string;
+    position?: string | null;
+  }>;
   tasks: FormatSortTaskSnapshot[];
 };
 

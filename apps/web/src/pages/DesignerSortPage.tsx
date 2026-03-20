@@ -14,6 +14,7 @@ import { CSS } from "@dnd-kit/utilities";
 
 import "../styles/formatSort.css";
 import generatedSnapshotJson from "../content/formatSort/taskFormatSourceSnapshot.generated.json";
+import { getAuthRequestBase } from "../config/runtimeContour";
 import { fetchPersonNamesByOwnerIds } from "../data/api";
 import { downloadFullTaskSnapshotFromBrowser } from "../formatSort/browserIngestion";
 import { normalizeFormatText } from "../formatSort/resolver";
@@ -31,6 +32,14 @@ const DESIGNER_CONFIG_STORAGE_KEY = "dtm.designerSort.config.v1";
 const DESIGNER_DATASET_STORAGE_KEY = "dtm.designerSort.dataset.v1";
 const SNAPSHOT_STORAGE_KEY = "dtm.snapshot.v1";
 const FILE_INPUT_ACCEPT = "application/json,.json";
+
+type AdminOverviewUser = {
+  displayName?: string | null;
+  personName?: string | null;
+  status?: string | null;
+};
+
+type SnapshotPerson = NonNullable<TaskFormatSourceSnapshot["people"]>[number];
 
 const DESIGNER_BUCKETS: DesignerSortBucket[] = [
   {
@@ -94,6 +103,17 @@ function readPersistedPeopleNames(): Record<string, string> {
   }
 }
 
+function buildPeopleNameMap(people: SnapshotPerson[] | undefined): Record<string, string> {
+  return (people ?? []).reduce<Record<string, string>>((acc, person) => {
+    const id = typeof person?.id === "string" ? person.id.trim() : "";
+    const name = typeof person?.name === "string" ? person.name.trim() : "";
+    if (id && name) {
+      acc[id] = name;
+    }
+    return acc;
+  }, {});
+}
+
 function exportJsonFile(filename: string, payload: unknown) {
   const blob = new Blob([`${JSON.stringify(payload, null, 2)}\n`], { type: "application/json" });
   const url = URL.createObjectURL(blob);
@@ -112,6 +132,10 @@ function buildDefaultDataset(): BrowserDesignerSortDataset {
   };
 }
 
+function buildAuthUrl(path: string): string {
+  return `${getAuthRequestBase()}${path}`;
+}
+
 function normalizeDesignerKey(designerId: string | null, displayName: string | null): string {
   const normalizedName = normalizeFormatText(displayName);
   if (designerId?.trim()) {
@@ -120,14 +144,52 @@ function normalizeDesignerKey(designerId: string | null, displayName: string | n
   return `name:${normalizedName || "unknown"}`;
 }
 
+function normalizeDesignerNameVariants(value: string | null | undefined): string[] {
+  const base = normalizeFormatText(value);
+  if (!base) return [];
+  const parts = base.split(" ").filter(Boolean);
+  const variants = new Set<string>([base]);
+  if (parts.length >= 2) {
+    variants.add(`${parts[0]} ${parts[1]}`);
+    variants.add(`${parts[1]} ${parts[0]}`);
+    variants.add(`${parts[0]} ${parts[1][0] ?? ""}`.trim());
+    variants.add(`${parts[1]} ${parts[0][0] ?? ""}`.trim());
+  }
+  return [...variants].filter(Boolean);
+}
+
+async function fetchStaffDesignerNamesFromAdminOverview(): Promise<Set<string>> {
+  const response = await fetch(buildAuthUrl("/admin/overview"), {
+    credentials: "include",
+    headers: { accept: "application/json" },
+    cache: "no-store",
+  });
+  if (!response.ok) {
+    throw new Error(`HTTP ${response.status}`);
+  }
+  const payload = (await response.json()) as { approvedUsers?: AdminOverviewUser[] };
+  const names = new Set<string>();
+  for (const user of payload.approvedUsers ?? []) {
+    for (const candidate of [user.personName, user.displayName]) {
+      for (const variant of normalizeDesignerNameVariants(candidate)) {
+        names.add(variant);
+      }
+    }
+  }
+  return names;
+}
+
 function buildDesignerInventory(
   snapshot: TaskFormatSourceSnapshot,
   resolvedOwnerNames: Record<string, string>
 ): DesignerSortEntry[] {
   const grouped = new Map<string, DesignerSortEntry>();
+  const snapshotPeopleNames = buildPeopleNameMap(snapshot.people);
 
   for (const task of snapshot.tasks) {
-    const resolvedName = task.ownerId ? resolvedOwnerNames[task.ownerId]?.trim() ?? "" : "";
+    const resolvedName = task.ownerId
+      ? snapshotPeopleNames[task.ownerId]?.trim() || resolvedOwnerNames[task.ownerId]?.trim() || ""
+      : "";
     const displayName = task.ownerName?.trim() || resolvedName || task.ownerId?.trim() || "[Не назначен]";
     const designerKey = normalizeDesignerKey(task.ownerId, displayName);
     const normalizedName = normalizeFormatText(displayName);
@@ -183,9 +245,15 @@ function mergeConfig(defaultConfig: DesignerSortConfig, storedConfig: DesignerSo
 
 function visibleBucketId(
   entry: DesignerSortEntry,
-  config: DesignerSortConfig
+  config: DesignerSortConfig,
+  inferredStaffNames: Set<string>
 ): DesignerSortBucketId {
-  return config.assignments.find((assignment) => assignment.designerKey === entry.designerKey)?.bucketId ?? "unsorted";
+  const manual = config.assignments.find((assignment) => assignment.designerKey === entry.designerKey)?.bucketId;
+  if (manual) return manual;
+  if (normalizeDesignerNameVariants(entry.displayName).some((variant) => inferredStaffNames.has(variant))) {
+    return "staff";
+  }
+  return "unsorted";
 }
 
 function upsertAssignment(
@@ -272,7 +340,11 @@ export function DesignerSortPage() {
   const [error, setError] = React.useState<string | null>(null);
   const [isRefreshing, setIsRefreshing] = React.useState(false);
   const [draggingEntry, setDraggingEntry] = React.useState<DesignerSortEntry | null>(null);
-  const [resolvedOwnerNames, setResolvedOwnerNames] = React.useState<Record<string, string>>(() => readPersistedPeopleNames());
+  const [resolvedOwnerNames, setResolvedOwnerNames] = React.useState<Record<string, string>>(() => ({
+    ...buildPeopleNameMap((generatedSnapshotJson as TaskFormatSourceSnapshot).people),
+    ...readPersistedPeopleNames(),
+  }));
+  const [inferredStaffNames, setInferredStaffNames] = React.useState<Set<string>>(() => new Set());
   const fileInputRef = React.useRef<HTMLInputElement | null>(null);
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }));
 
@@ -288,14 +360,15 @@ export function DesignerSortPage() {
     let cancelled = false;
     const ownerIds = [...new Set(dataset.snapshot.tasks.map((task) => task.ownerId?.trim() ?? "").filter(Boolean))];
     if (!ownerIds.length) return;
+    const snapshotPeopleNames = buildPeopleNameMap(dataset.snapshot.people);
     const persistedPeopleNames = readPersistedPeopleNames();
-    if (Object.keys(persistedPeopleNames).length) {
-      setResolvedOwnerNames((prev) => ({ ...persistedPeopleNames, ...prev }));
+    if (Object.keys(snapshotPeopleNames).length || Object.keys(persistedPeopleNames).length) {
+      setResolvedOwnerNames((prev) => ({ ...snapshotPeopleNames, ...persistedPeopleNames, ...prev }));
     }
 
     void fetchPersonNamesByOwnerIds(ownerIds).then((next) => {
       if (!cancelled && Object.keys(next).length) {
-        setResolvedOwnerNames((prev) => ({ ...persistedPeopleNames, ...prev, ...next }));
+        setResolvedOwnerNames((prev) => ({ ...snapshotPeopleNames, ...persistedPeopleNames, ...prev, ...next }));
       }
     });
 
@@ -303,6 +376,20 @@ export function DesignerSortPage() {
       cancelled = true;
     };
   }, [dataset.snapshot]);
+
+  React.useEffect(() => {
+    let cancelled = false;
+    void fetchStaffDesignerNamesFromAdminOverview()
+      .then((names) => {
+        if (!cancelled) setInferredStaffNames(names);
+      })
+      .catch(() => {
+        if (!cancelled) setInferredStaffNames(new Set());
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const inventory = React.useMemo(
     () => buildDesignerInventory(dataset.snapshot, resolvedOwnerNames),
@@ -312,7 +399,7 @@ export function DesignerSortPage() {
   const filteredEntries = React.useMemo(() => {
     const normalizedSearch = normalizeFormatText(search);
     return inventory.filter((entry) => {
-      const assignedBucket = visibleBucketId(entry, config);
+      const assignedBucket = visibleBucketId(entry, config, inferredStaffNames);
       if (hideSorted && assignedBucket !== "unsorted") return false;
       if (!normalizedSearch) return true;
       const haystack = [
@@ -326,7 +413,7 @@ export function DesignerSortPage() {
         .toLowerCase();
       return haystack.includes(normalizedSearch);
     });
-  }, [config, hideSorted, inventory, search]);
+  }, [config, hideSorted, inferredStaffNames, inventory, search]);
 
   const limitedEntries = React.useMemo(
     () => filteredEntries.slice(0, Math.max(1, Math.min(1000, displayLimit))),
@@ -339,10 +426,10 @@ export function DesignerSortPage() {
       grouped.set(bucket.id, []);
     }
     for (const entry of limitedEntries) {
-      grouped.get(visibleBucketId(entry, config))?.push(entry);
+      grouped.get(visibleBucketId(entry, config, inferredStaffNames))?.push(entry);
     }
     return grouped;
-  }, [config, limitedEntries]);
+  }, [config, inferredStaffNames, limitedEntries]);
 
   async function handleManualRefresh() {
     setIsRefreshing(true);

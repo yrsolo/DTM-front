@@ -7,6 +7,8 @@ import type {
 } from "./types";
 import { buildRawTaskFormatInventory } from "./resolver";
 
+type SnapshotPerson = NonNullable<TaskFormatSourceSnapshot["people"]>[number];
+
 function toIsoDate(value: unknown): string | null {
   if (typeof value !== "string" || !value.trim()) return null;
   const date = new Date(value);
@@ -96,6 +98,25 @@ function normalizeTask(task: any): FormatSortTaskSnapshot {
   };
 }
 
+function collectPeople(payload: any, peopleMap: Map<string, SnapshotPerson>) {
+  const candidates = Array.isArray(payload?.entities?.people)
+    ? payload.entities.people
+    : Array.isArray(payload?.people)
+      ? payload.people
+      : [];
+
+  for (const person of candidates) {
+    const id = typeof person?.id === "string" ? person.id.trim() : "";
+    const name = typeof person?.name === "string" ? person.name.trim() : "";
+    if (!id || !name) continue;
+    peopleMap.set(id, {
+      id,
+      name,
+      position: typeof person?.position === "string" && person.position.trim() ? person.position.trim() : null,
+    });
+  }
+}
+
 async function fetchFrontendPayload(params: URLSearchParams): Promise<any> {
   const base = `${getApiProxyRequestBase().replace(/\/+$/, "")}/v2/frontend`;
   const response = await fetch(`${base}?${params.toString()}`, {
@@ -126,6 +147,9 @@ export async function downloadFullTaskSnapshotFromBrowser(): Promise<TaskFormatS
   const coverage = extractTaskDateCoverage(seedPayload?.tasks ?? []);
   const windows = buildMonthlyWindows(coverage.start, coverage.end);
   const taskMap = new Map<string, FormatSortTaskSnapshot>();
+  const peopleMap = new Map<string, SnapshotPerson>();
+
+  collectPeople(seedPayload, peopleMap);
 
   for (const task of seedPayload?.tasks ?? []) {
     const normalized = normalizeTask(task);
@@ -145,6 +169,7 @@ export async function downloadFullTaskSnapshotFromBrowser(): Promise<TaskFormatS
     if (payload?.meta?.access?.mode !== "full") {
       throw new Error("Во время window-fetch snapshot перестал быть full-access.");
     }
+    collectPeople(payload, peopleMap);
     for (const task of payload?.tasks ?? []) {
       const normalized = normalizeTask(task);
       if (normalized.id) taskMap.set(normalized.id, normalized);
@@ -162,6 +187,7 @@ export async function downloadFullTaskSnapshotFromBrowser(): Promise<TaskFormatS
       windows,
       source: "browser-manual-refresh",
     },
+    people: [...peopleMap.values()].sort((left, right) => left.name.localeCompare(right.name, "ru")),
     tasks: [...taskMap.values()].sort((left, right) => left.id.localeCompare(right.id)),
   };
 

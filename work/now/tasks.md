@@ -54,3 +54,6 @@ See: `docs/deep/TROUBLESHOOTING.md`
 
 ## Session 2026-03-19
 - [x] Standalone static demo page added at `presentation/hr-analytics/`: modern corporate dark presentation rebuilt from HR analytics slide as isolated HTML/CSS/JS, with deploy alias support for nested `index.html` -> slashless static URLs.
+
+## Session 2026-03-20
+- [x] Designer-sort name source corrected: full format-sort snapshots now preserve `people`, `/designer-sort` resolves historical designers from snapshot people first, and approved auth people seed automatic `В штате` grouping.

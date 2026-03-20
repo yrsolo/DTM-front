@@ -1,22 +1,22 @@
 {
-  "generatedAt": "2026-03-19T08:59:06.159Z",
+  "generatedAt": "2026-03-20T19:10:11.435Z",
   "contour": "prod",
-  "tasksTotalExpected": 1034,
-  "tasksTotalCollected": 1034,
+  "tasksTotalExpected": 1037,
+  "tasksTotalCollected": 1037,
   "sourceMeta": {
     "apiOrigin": "https://dtm-api.solofarm.ru",
     "seedMeta": {
       "artifact": "dtm_frontend_api_v2",
       "contractVersion": "2.0.1",
-      "generatedAt": "2026-03-18T20:21:04Z",
-      "syncedAt": "2026-03-19T08:56:20Z",
+      "generatedAt": "2026-03-20T14:40:57Z",
+      "syncedAt": "2026-03-20T19:07:03Z",
       "source": {
         "env": "prod",
         "sourceId": "sheet:Спонсорские ТНТ:ТАБЛИЧКА:A1:Z2000",
         "sheetName": "Спонсорские ТНТ",
         "sheetUrl": null
       },
-      "hash": "7c357d3a2bf995fbc10427fb7d50ad272ca4f5c0957911d90eb1ec7587877c3c",
+      "hash": "38f7f1ae00b6750e7b6cbc3441d006c127370ae30d4b742f73080c98897ea6ad",
       "features": {
         "taskHash": true,
         "taskRevision": true,
@@ -28,7 +28,7 @@
         "limit": 1000,
         "nextCursor": null
       },
-      "sourceHash": "f2547bf6677a3dad0439f9730e3b90887b0c239a071e2b850fe5b3271ad25f6e",
+      "sourceHash": "b9598f1bfc58195d9c8baa03390b46c9f7964d7611c51a8358b23e7a7728590b",
       "sourceId": "sheet:Спонсорские ТНТ:ТАБЛИЧКА:A1:Z2000",
       "readmodelSource": "s3_snapshot",
       "queryFilterApplied": true,
@@ -44,11 +44,11 @@
       }
     },
     "seedSummary": {
-      "tasksTotal": 1034,
+      "tasksTotal": 1037,
       "tasksReturned": 1000,
       "peopleTotal": 46,
-      "groupsTotal": 155,
-      "milestonesTotal": 5735
+      "groupsTotal": 153,
+      "milestonesTotal": 5740
     },
     "windows": [
       {
@@ -2769,6 +2769,248 @@
       }
     ]
   },
+  "people": [
+    {
+      "id": "ea2363d14b7d0c4d",
+      "name": "[Не назначен]",
+      "position": "designer"
+    },
+    {
+      "id": "70d169be891bb94f",
+      "name": "Алемасов Никита",
+      "position": "designer"
+    },
+    {
+      "id": "c0a7a3e911bcf613",
+      "name": "Андрей Зотов (фриланс)",
+      "position": "designer"
+    },
+    {
+      "id": "fdf8f83db3f2d5f1",
+      "name": "Андрей Пичугин",
+      "position": "designer"
+    },
+    {
+      "id": "62aff03e861bc6a9",
+      "name": "Баранов Артем",
+      "position": "designer"
+    },
+    {
+      "id": "02e7085b01cc0b43",
+      "name": "Бирюков Артем",
+      "position": "designer"
+    },
+    {
+      "id": "b673c50f9f7e4edc",
+      "name": "Брин Алексей",
+      "position": "designer"
+    },
+    {
+      "id": "1a2c143445dfe7d0",
+      "name": "Вишневская Наташа",
+      "position": "designer"
+    },
+    {
+      "id": "88b512b80f0184c6",
+      "name": "Владимир Гунбин",
+      "position": "designer"
+    },
+    {
+      "id": "fea17c6b055aa8e8",
+      "name": "Грибцов Родион",
+      "position": "designer"
+    },
+    {
+      "id": "b823c0d267cbfbc0",
+      "name": "Данилков Вадим (фриланс)",
+      "position": "designer"
+    },
+    {
+      "id": "1ba6cc1be835a81f",
+      "name": "Диджтл-лаб",
+      "position": "designer"
+    },
+    {
+      "id": "0b384f7cebf411c0",
+      "name": "ДО СЮДА ПОСЧИТАЛ",
+      "position": "designer"
+    },
+    {
+      "id": "4ddaf05dd200ac3a",
+      "name": "Егор Видеокартовфф",
+      "position": "designer"
+    },
+    {
+      "id": "1ed07177685b14ae",
+      "name": "Жигалов Сергей",
+      "position": "designer"
+    },
+    {
+      "id": "8f494a4449479ba4",
+      "name": "Казарин Миша",
+      "position": "designer"
+    },
+    {
+      "id": "18d218a900e7c731",
+      "name": "Карнаухов Иван",
+      "position": "designer"
+    },
+    {
+      "id": "842f944da58f1eda",
+      "name": "Кожина Вика",
+      "position": "designer"
+    },
+    {
+      "id": "67c0911977404d51",
+      "name": "Козлов Дима",
+      "position": "designer"
+    },
+    {
+      "id": "aa6fe0a1fbc5144b",
+      "name": "Кузнецов Андрей",
+      "position": "designer"
+    },
+    {
+      "id": "c961d4b31bbc5121",
+      "name": "Кутлугаллямов Ильнур",
+      "position": "designer"
+    },
+    {
+      "id": "36596789c8cc73cb",
+      "name": "Левашова Лера",
+      "position": "designer"
+    },
+    {
+      "id": "5776c917534e48ff",
+      "name": "Мартынов Рома",
+      "position": "designer"
+    },
+    {
+      "id": "588e62c641ec2012",
+      "name": "Муратов Эдуард",
+      "position": "designer"
+    },
+    {
+      "id": "87279702153149be",
+      "name": "Попов Володя",
+      "position": "designer"
+    },
+    {
+      "id": "754ab7aa6b7abd70",
+      "name": "Постпро18",
+      "position": "designer"
+    },
+    {
+      "id": "ebf4ce1fecd21787",
+      "name": "Продакшн/Селистра",
+      "position": "designer"
+    },
+    {
+      "id": "854534883257e35a",
+      "name": "Промо Групп",
+      "position": "designer"
+    },
+    {
+      "id": "317772fa3aca53b9",
+      "name": "Рыбкин Сергей",
+      "position": "designer"
+    },
+    {
+      "id": "424f7d3429dec641",
+      "name": "Рыбкин Сережа",
+      "position": "designer"
+    },
+    {
+      "id": "5f5b921f49dbc20c",
+      "name": "Салопин Алексей",
+      "position": "designer"
+    },
+    {
+      "id": "7f8fb11dad4bef3f",
+      "name": "Сергей Жигалов (фриланс)",
+      "position": "designer"
+    },
+    {
+      "id": "0be747fc5de3d6d3",
+      "name": "Соколов Саша",
+      "position": "designer"
+    },
+    {
+      "id": "d803d3daf1a03dc5",
+      "name": "Соловьев Юра",
+      "position": "designer"
+    },
+    {
+      "id": "d514a94759ce3a18",
+      "name": "Статкевич Андрей",
+      "position": "designer"
+    },
+    {
+      "id": "4b196c1384082372",
+      "name": "студия \"Громко\"",
+      "position": "designer"
+    },
+    {
+      "id": "1b0be26a9c4b09a6",
+      "name": "Студия \"Громко\"",
+      "position": "designer"
+    },
+    {
+      "id": "2dee1770d57bb881",
+      "name": "студия Громко",
+      "position": "designer"
+    },
+    {
+      "id": "38c2858cd3a6dba1",
+      "name": "студия knife",
+      "position": "designer"
+    },
+    {
+      "id": "7871b03c33dff791",
+      "name": "Студия Postpro18",
+      "position": "designer"
+    },
+    {
+      "id": "3b48963f4cd3b68e",
+      "name": "тест",
+      "position": "designer"
+    },
+    {
+      "id": "1078e2bc5f16f0f1",
+      "name": "Тушите свет",
+      "position": "designer"
+    },
+    {
+      "id": "b3de4ebc5ad5c3f4",
+      "name": "Упадышев Денис",
+      "position": "designer"
+    },
+    {
+      "id": "0859a2a8ad32e5b9",
+      "name": "Фриланс Егор",
+      "position": "designer"
+    },
+    {
+      "id": "29c52d5de94e8ca2",
+      "name": "Чуфаров Влад",
+      "position": "designer"
+    },
+    {
+      "id": "c7a6ad82dd238a68",
+      "name": "Шадрин Саша",
+      "position": "designer"
+    },
+    {
+      "id": "2b0bdca1d7fdafd0",
+      "name": "Элианора Гутентаг",
+      "position": "designer"
+    },
+    {
+      "id": "690ab53f8fe0c735",
+      "name": "Mayd prod.",
+      "position": "designer"
+    }
+  ],
   "tasks": [
     {
       "id": "00017f0b-b9b2-44b6-8c7f-9efd5df5bf7a",
@@ -5258,8 +5500,8 @@
       "brand": "Момат рино (окно)",
       "groupId": "e3b7a53f18d3c9a7",
       "status": "work",
-      "start": "2026-03-20",
-      "end": "2026-04-03",
+      "start": "2026-03-01",
+      "end": "2026-03-31",
       "nextDue": null
     },
     {
@@ -5680,6 +5922,20 @@
       "status": "done",
       "start": "2024-11-07",
       "end": "2024-11-24",
+      "nextDue": null
+    },
+    {
+      "id": "349a184e-d17d-4b53-8dfc-32a6ad6a0b4a",
+      "title": "VICI [Битва пикников] дин лого",
+      "format_": "дин лого",
+      "type": null,
+      "ownerId": "ea2363d14b7d0c4d",
+      "ownerName": null,
+      "brand": "VICI",
+      "groupId": "0dfa37369f2e481e",
+      "status": "work",
+      "start": "2026-03-20",
+      "end": "2026-03-20",
       "nextDue": null
     },
     {
@@ -7679,7 +7935,7 @@
       "ownerName": null,
       "brand": "2221..",
       "groupId": "fcf095209bb325e4",
-      "status": "work",
+      "status": "done",
       "start": "2026-04-21",
       "end": "2026-04-21",
       "nextDue": null
@@ -8718,6 +8974,20 @@
       "status": "done",
       "start": "2024-12-10",
       "end": "2024-12-16",
+      "nextDue": null
+    },
+    {
+      "id": "665a92e3-9ea3-4f4e-8901-776aa827c077",
+      "title": "VICI [Битва пикников] транзишн",
+      "format_": "транзишн",
+      "type": null,
+      "ownerId": "ea2363d14b7d0c4d",
+      "ownerName": null,
+      "brand": "VICI",
+      "groupId": "0dfa37369f2e481e",
+      "status": "work",
+      "start": "2026-03-20",
+      "end": "2026-03-20",
       "nextDue": null
     },
     {
@@ -12750,6 +13020,20 @@
       "status": "done",
       "start": "2023-10-02",
       "end": "2023-10-29",
+      "nextDue": null
+    },
+    {
+      "id": "afae9166-be99-4baf-ad06-b7dffed019d4",
+      "title": "Момат рино  [Сокровища Императора] дин лого",
+      "format_": "дин лого",
+      "type": null,
+      "ownerId": "d514a94759ce3a18",
+      "ownerName": null,
+      "brand": "Момат рино",
+      "groupId": "5fdfb6491d246502",
+      "status": "work",
+      "start": "2026-03-26",
+      "end": "2026-04-06",
       "nextDue": null
     },
     {
@@ -17102,8 +17386,8 @@
       "brand": "Озон банк",
       "groupId": "2801d361097513f1",
       "status": "work",
-      "start": "2026-03-18",
-      "end": "2026-03-18",
+      "start": "2026-03-20",
+      "end": "2026-04-08",
       "nextDue": null
     },
     {
@@ -17171,7 +17455,7 @@
       "ownerName": null,
       "brand": "1111..",
       "groupId": "fcf095209bb325e4",
-      "status": "work",
+      "status": "done",
       "start": "2026-04-20",
       "end": "2026-04-20",
       "nextDue": null
