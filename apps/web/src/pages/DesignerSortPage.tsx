@@ -29,6 +29,7 @@ import type {
 
 const DESIGNER_CONFIG_STORAGE_KEY = "dtm.designerSort.config.v1";
 const DESIGNER_DATASET_STORAGE_KEY = "dtm.designerSort.dataset.v1";
+const SNAPSHOT_STORAGE_KEY = "dtm.snapshot.v1";
 const FILE_INPUT_ACCEPT = "application/json,.json";
 
 const DESIGNER_BUCKETS: DesignerSortBucket[] = [
@@ -72,6 +73,25 @@ function readStoredJson<T>(key: string): T | null {
 function writeStoredJson(key: string, value: unknown) {
   if (typeof window === "undefined") return;
   window.localStorage.setItem(key, JSON.stringify(value));
+}
+
+function readPersistedPeopleNames(): Record<string, string> {
+  if (typeof window === "undefined") return {};
+  try {
+    const raw = window.localStorage.getItem(SNAPSHOT_STORAGE_KEY);
+    if (!raw) return {};
+    const parsed = JSON.parse(raw) as { people?: Array<{ id?: string; name?: string }> };
+    return (parsed.people ?? []).reduce<Record<string, string>>((acc, person) => {
+      const id = typeof person?.id === "string" ? person.id.trim() : "";
+      const name = typeof person?.name === "string" ? person.name.trim() : "";
+      if (id && name) {
+        acc[id] = name;
+      }
+      return acc;
+    }, {});
+  } catch {
+    return {};
+  }
 }
 
 function exportJsonFile(filename: string, payload: unknown) {
@@ -252,7 +272,7 @@ export function DesignerSortPage() {
   const [error, setError] = React.useState<string | null>(null);
   const [isRefreshing, setIsRefreshing] = React.useState(false);
   const [draggingEntry, setDraggingEntry] = React.useState<DesignerSortEntry | null>(null);
-  const [resolvedOwnerNames, setResolvedOwnerNames] = React.useState<Record<string, string>>({});
+  const [resolvedOwnerNames, setResolvedOwnerNames] = React.useState<Record<string, string>>(() => readPersistedPeopleNames());
   const fileInputRef = React.useRef<HTMLInputElement | null>(null);
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }));
 
@@ -268,10 +288,14 @@ export function DesignerSortPage() {
     let cancelled = false;
     const ownerIds = [...new Set(dataset.snapshot.tasks.map((task) => task.ownerId?.trim() ?? "").filter(Boolean))];
     if (!ownerIds.length) return;
+    const persistedPeopleNames = readPersistedPeopleNames();
+    if (Object.keys(persistedPeopleNames).length) {
+      setResolvedOwnerNames((prev) => ({ ...persistedPeopleNames, ...prev }));
+    }
 
     void fetchPersonNamesByOwnerIds(ownerIds).then((next) => {
       if (!cancelled && Object.keys(next).length) {
-        setResolvedOwnerNames((prev) => ({ ...prev, ...next }));
+        setResolvedOwnerNames((prev) => ({ ...persistedPeopleNames, ...prev, ...next }));
       }
     });
 
