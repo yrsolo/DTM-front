@@ -14,6 +14,7 @@ import { CSS } from "@dnd-kit/utilities";
 
 import "../styles/formatSort.css";
 import generatedSnapshotJson from "../content/formatSort/taskFormatSourceSnapshot.generated.json";
+import { fetchPersonNamesByOwnerIds } from "../data/api";
 import { downloadFullTaskSnapshotFromBrowser } from "../formatSort/browserIngestion";
 import { normalizeFormatText } from "../formatSort/resolver";
 import type { TaskFormatSourceSnapshot } from "../formatSort/types";
@@ -99,11 +100,15 @@ function normalizeDesignerKey(designerId: string | null, displayName: string | n
   return `name:${normalizedName || "unknown"}`;
 }
 
-function buildDesignerInventory(snapshot: TaskFormatSourceSnapshot): DesignerSortEntry[] {
+function buildDesignerInventory(
+  snapshot: TaskFormatSourceSnapshot,
+  resolvedOwnerNames: Record<string, string>
+): DesignerSortEntry[] {
   const grouped = new Map<string, DesignerSortEntry>();
 
   for (const task of snapshot.tasks) {
-    const displayName = task.ownerName?.trim() || task.ownerId?.trim() || "[Не назначен]";
+    const resolvedName = task.ownerId ? resolvedOwnerNames[task.ownerId]?.trim() ?? "" : "";
+    const displayName = task.ownerName?.trim() || resolvedName || task.ownerId?.trim() || "[Не назначен]";
     const designerKey = normalizeDesignerKey(task.ownerId, displayName);
     const normalizedName = normalizeFormatText(displayName);
     const existing = grouped.get(designerKey);
@@ -247,6 +252,7 @@ export function DesignerSortPage() {
   const [error, setError] = React.useState<string | null>(null);
   const [isRefreshing, setIsRefreshing] = React.useState(false);
   const [draggingEntry, setDraggingEntry] = React.useState<DesignerSortEntry | null>(null);
+  const [resolvedOwnerNames, setResolvedOwnerNames] = React.useState<Record<string, string>>({});
   const fileInputRef = React.useRef<HTMLInputElement | null>(null);
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }));
 
@@ -258,7 +264,26 @@ export function DesignerSortPage() {
     writeStoredJson(DESIGNER_DATASET_STORAGE_KEY, dataset);
   }, [dataset]);
 
-  const inventory = React.useMemo(() => buildDesignerInventory(dataset.snapshot), [dataset.snapshot]);
+  React.useEffect(() => {
+    let cancelled = false;
+    const ownerIds = [...new Set(dataset.snapshot.tasks.map((task) => task.ownerId?.trim() ?? "").filter(Boolean))];
+    if (!ownerIds.length) return;
+
+    void fetchPersonNamesByOwnerIds(ownerIds).then((next) => {
+      if (!cancelled && Object.keys(next).length) {
+        setResolvedOwnerNames((prev) => ({ ...prev, ...next }));
+      }
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [dataset.snapshot]);
+
+  const inventory = React.useMemo(
+    () => buildDesignerInventory(dataset.snapshot, resolvedOwnerNames),
+    [dataset.snapshot, resolvedOwnerNames]
+  );
 
   const filteredEntries = React.useMemo(() => {
     const normalizedSearch = normalizeFormatText(search);
@@ -302,7 +327,9 @@ export function DesignerSortPage() {
     try {
       const snapshot = await downloadFullTaskSnapshotFromBrowser();
       setDataset({ snapshot });
-      setNotice(`Собрано ${snapshot.tasksTotalCollected} задач и ${buildDesignerInventory(snapshot).length} дизайнеров.`);
+      setNotice(
+        `Собрано ${snapshot.tasksTotalCollected} задач и ${buildDesignerInventory(snapshot, resolvedOwnerNames).length} дизайнеров.`
+      );
     } catch (nextError) {
       setError(nextError instanceof Error ? nextError.message : "Не удалось скачать полный набор задач.");
     } finally {
