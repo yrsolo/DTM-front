@@ -36,7 +36,7 @@ function normalizeIdentity(value: string | null | undefined): string {
 function resolveDesignerDisplayName(task: TaskV1, peopleById: Map<string, PersonV1>): string | null {
   if (task.ownerId && peopleById.has(task.ownerId)) return peopleById.get(task.ownerId)?.name ?? null;
   if (task.ownerName?.trim()) return task.ownerName.trim();
-  if (task.ownerId?.trim()) return task.ownerId.trim();
+  if (task.ownerId?.trim()) return "Неизвестный дизайнер";
   return null;
 }
 
