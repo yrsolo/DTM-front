@@ -45,6 +45,54 @@ curl.exe -i -H "Origin: http://localhost:5173" https://dtm.solofarm.ru/test/ops/
 curl.exe -i -H "Origin: http://localhost:5173" "https://dtm.solofarm.ru/test/ops/bff/v2/frontend?statuses=work,pre_done&include_people=true&limit=2"
 ```
 
+## Local developer auth lane
+
+The localhost-only developer lane is intended for visual design and QA work without Yandex or Telegram login.
+
+Required runtime conditions:
+- auth contour = `test`
+- request origin = localhost (`localhost`, `127.0.0.1`, `::1`, `*.local`)
+- auth runtime env:
+  - `LOCAL_DEV_AUTH_ENABLED_TEST=1`
+  - `LOCAL_DEV_AUTH_TOKEN=<bootstrap token>`
+- local frontend env:
+  - `VITE_LOCAL_DEV_AUTH_TOKEN=<bootstrap token>`
+
+Expected behavior:
+- auth panel on localhost shows a `Local dev auth` block
+- the block can load persona catalog from:
+  - bootstrap token
+  - admin-created dev-token
+- persona switching issues a normal `test` session cookie
+- `/test/ops/auth/me` then reports `sessionKind = "dev_local"`
+
+Supported local personas:
+- real approved users
+- real pending users
+- `guest`
+- synthetic `blocked`
+
+If the dev panel is missing:
+- confirm the app is opened from localhost, not deployed `/test/`
+- confirm `VITE_LOCAL_DEV_AUTH_TOKEN` is present in local frontend env
+- confirm auth runtime has `LOCAL_DEV_AUTH_ENABLED_TEST=1`
+- hard refresh localhost after env change
+
+If localhost dev token exchange returns `403`:
+- confirm request origin is really localhost
+- confirm you are talking to `https://dtm.solofarm.ru/test/ops/auth/*`, not prod
+- confirm the bootstrap token or admin-generated dev-token is active and not expired
+
+Quick manual checks:
+
+```powershell
+curl.exe -i ^
+  -H "Origin: http://localhost:5173" ^
+  -H "Content-Type: application/json" ^
+  -d "{\"token\":\"<bootstrap-or-dev-token>\"}" ^
+  https://dtm.solofarm.ru/test/ops/auth/dev/session/catalog
+```
+
 ## Login opens a full white page
 
 Expected behavior now:

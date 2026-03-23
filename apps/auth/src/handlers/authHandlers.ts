@@ -275,23 +275,31 @@ export async function telegramSession(req: NormalizedRequest) {
   if (!user) {
     return telegramSessionError(404, "telegram_user_not_linked", telegramUser.id);
   }
+  let linkedUser = user;
 
-  if (!user.avatarUrl && telegramUser.photoUrl) {
-    await setUserAvatarUrl(user.id, telegramUser.photoUrl);
-    user = await getUserById(user.id);
+  if (!linkedUser.avatarUrl && telegramUser.photoUrl) {
+    await setUserAvatarUrl(linkedUser.id, telegramUser.photoUrl);
+    linkedUser = (await getUserById(linkedUser.id)) ?? linkedUser;
   }
 
-  if (user.status !== "approved") {
-    await setUserStatus(user.id, "approved");
-    user = await getUserById(user.id);
+  if (linkedUser.status !== "approved") {
+    await setUserStatus(linkedUser.id, "approved");
+    linkedUser = (await getUserById(linkedUser.id)) ?? linkedUser;
   }
 
-  const sessionCookie = buildSessionCookieForUser(user, "telegram");
-  user = await getUserById(user.id);
+  const sessionCookie = buildSessionCookieForUser(linkedUser, "telegram");
+  const currentUser = (await getUserById(linkedUser.id)) ?? linkedUser;
   const result = json(200, {
     ok: true,
-    accessMode: getAccessMode(user),
-    user: buildMePayload(user).user,
+    accessMode: getAccessMode(currentUser),
+    user: buildMePayload({
+      ...currentUser,
+      sessionKind: "telegram",
+      expiresAt: null,
+      temporaryAccessLabel: null,
+      sourceAccessLinkId: null,
+      canUseDesignerGrouping: currentUser.role === "admin" || currentUser.canViewAllTasks,
+    }).user,
   });
   return appendSetCookie(result, sessionCookie);
 }

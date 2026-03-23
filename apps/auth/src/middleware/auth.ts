@@ -3,9 +3,18 @@ import { getAccessLinkById } from "../db/accessLinksRepo";
 import { isEmailAllowed } from "../db/allowlistRepo";
 import { incrementSessionVersion, setUserStatus, getUserById, upsertRole } from "../db/usersRepo";
 import { clearSessionCookie, readSessionClaims } from "../session/cookieSession";
-import type { AccessMode, AuthUser, SessionClaims, SessionKind, SessionUser, TempLinkSessionClaims, UserSessionClaims } from "../types";
+import type {
+  AccessMode,
+  AuthUser,
+  DevLocalSessionClaims,
+  SessionClaims,
+  SessionKind,
+  SessionUser,
+  TempLinkSessionClaims,
+  UserSessionClaims,
+} from "../types";
 
-function decorateUserSession(user: AuthUser, provider: Exclude<SessionKind, "temp_link">): SessionUser {
+function decorateUserSession(user: AuthUser, provider: "yandex" | "telegram" | "dev_local"): SessionUser {
   return {
     ...user,
     sessionKind: provider,
@@ -13,6 +22,31 @@ function decorateUserSession(user: AuthUser, provider: Exclude<SessionKind, "tem
     temporaryAccessLabel: null,
     sourceAccessLinkId: null,
     canUseDesignerGrouping: user.role === "admin" || user.canViewAllTasks,
+  };
+}
+
+function materializeSyntheticBlockedSession(claims: Extract<DevLocalSessionClaims, { personaKind: "synthetic_blocked" }>): SessionUser {
+  return {
+    id: "dev-local:blocked",
+    yandexUid: "dev-local:blocked",
+    email: null,
+    displayName: claims.label,
+    avatarUrl: null,
+    personId: null,
+    personName: null,
+    telegramId: null,
+    telegramUsername: null,
+    canViewAllTasks: false,
+    status: "blocked",
+    role: "viewer",
+    sessionVersion: 1,
+    createdAt: new Date(claims.iat * 1000).toISOString(),
+    lastLoginAt: new Date(claims.iat * 1000).toISOString(),
+    sessionKind: "dev_local",
+    expiresAt: new Date(claims.exp * 1000).toISOString(),
+    temporaryAccessLabel: null,
+    sourceAccessLinkId: null,
+    canUseDesignerGrouping: false,
   };
 }
 
@@ -61,6 +95,25 @@ export async function resolveSession(
       return { claims: null, user: null, clearCookie: true };
     }
     return { claims, user, clearCookie: false };
+  }
+
+  if (claims.kind === "dev_local") {
+    if (claims.personaKind === "synthetic_blocked") {
+      return { claims, user: materializeSyntheticBlockedSession(claims), clearCookie: false };
+    }
+
+    const user = await getUserById(claims.userId);
+    if (!user) {
+      return { claims: null, user: null, clearCookie: true };
+    }
+    if (user.sessionVersion !== claims.sv || user.status === "blocked") {
+      return { claims: null, user: null, clearCookie: true };
+    }
+    return {
+      claims,
+      user: decorateUserSession(user, "dev_local"),
+      clearCookie: false,
+    };
   }
 
   const userClaims = claims as UserSessionClaims;

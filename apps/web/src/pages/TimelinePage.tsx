@@ -13,6 +13,7 @@ import { useResolvedOwnerNames } from "../data/useResolvedOwnerNames";
 import { UnifiedTimeline } from "../gantt/UnifiedTimeline";
 import { RenderTask } from "../gantt/types";
 import { readMaskingMode, writeMaskingMode } from "../auth/maskingMode";
+import { canUseLocalDevAuthUi } from "../config/localDevAuth";
 import { useElementWidth } from "../utils/useElementWidth";
 import { toShortPersonName } from "../utils/personName";
 
@@ -23,6 +24,8 @@ const MAX_ZOOM = 10;
 const TIMELINE_PAGE_VIEW_KEY = "dtm.timeline.pageView.v1";
 const PAGE_LABEL_TASKS = "\u0417\u0430\u0434\u0430\u0447\u0438";
 const PAGE_LABEL_DESIGNERS = "\u0414\u0438\u0437\u0430\u0439\u043d\u0435\u0440\u044b";
+const DEV_AUTH_TOKEN_STORAGE_KEY = "dtm.devAuth.token.v1";
+const DEV_AUTH_PERSONA_STORAGE_KEY = "dtm.devAuth.persona.v1";
 
 type AuthPanelContent = {
   title: string;
@@ -92,7 +95,7 @@ function buildAuthPanelContent(params: {
     role: "admin" | "viewer";
     status: "pending" | "approved" | "blocked";
   } | null;
-  sessionKind: "yandex" | "telegram" | "temp_link" | null;
+  sessionKind: "yandex" | "telegram" | "temp_link" | "dev_local" | null;
   expiresAt: string | null;
   temporaryAccessLabel: string | null;
   maskingForced: boolean;
@@ -170,6 +173,32 @@ function buildAuthPanelContent(params: {
       maskingHint: maskingLockedByAccess
         ? (locale === "ru" ? "Маскирование определяется уровнем доступа." : "Masking is defined by access level.")
         : (locale === "ru" ? "Во включённом режиме запросы к API отправляются без auth cookie." : "When enabled, API requests are sent without the auth cookie."),
+    };
+  }
+
+  if (user.status === "blocked") {
+    return {
+      title: user.displayName || user.email || (locale === "ru" ? "Доступ заблокирован" : "Blocked"),
+      statusLabel: locale === "ru" ? "Заблокирован" : "Blocked",
+      accessBadge: locale === "ru" ? "Маскирование включено" : "Masking enabled",
+      helpText:
+        sessionKind === "dev_local"
+          ? locale === "ru"
+            ? "Это synthetic blocked persona для локальной проверки UX."
+            : "This is a synthetic blocked persona for local UX checks."
+          : locale === "ru"
+            ? "Администратор заблокировал доступ этой учётной записи."
+            : "An administrator blocked access for this account.",
+      detailText:
+        locale === "ru"
+          ? "Полные данные недоступны. Используйте другой локальный persona switch, чтобы продолжить проверку."
+          : "Full data is unavailable. Switch to another local persona to continue testing.",
+      adminHint: locale === "ru" ? "Заблокированный пользователь не может открыть админку." : "Blocked users cannot open admin.",
+      primaryActionLabel: locale === "ru" ? "Выйти" : "Sign out",
+      canOpenAdmin: false,
+      canToggleMasking: false,
+      maskingTitle: locale === "ru" ? "Маскирование определяется уровнем доступа" : "Masking is defined by access level",
+      maskingHint: locale === "ru" ? "Для blocked persona всегда доступен только masked mode." : "Blocked personas always stay in masked mode.",
     };
   }
 
@@ -406,6 +435,11 @@ export function TimelinePage() {
     authSession: authSession.state,
     snapshot,
   });
+  const [devCatalogLoading, setDevCatalogLoading] = React.useState(false);
+  const [devCatalogError, setDevCatalogError] = React.useState<string | null>(null);
+  const [devCatalog, setDevCatalog] = React.useState<import("../auth/useAuthSession").DevLocalPersona[]>([]);
+  const [devTokenInput, setDevTokenInput] = React.useState("");
+  const [devSelectedPersonaId, setDevSelectedPersonaId] = React.useState("guest");
   const canViewAllTasks =
     authSession.state.user?.role === "admin" || Boolean(authSession.state.user?.canViewAllTasks);
   const canUseDesignerGrouping =
@@ -414,6 +448,17 @@ export function TimelinePage() {
   const resolvedOwnerNames = useResolvedOwnerNames(snapshot?.tasks ?? [], !canViewAllTasks && authSession.state.authenticated);
   const forcedOwnerId =
     !canViewAllTasks && authSession.state.authenticated ? currentPersonLink.personId ?? "" : "";
+
+  React.useEffect(() => {
+    const bootstrapToken = authSession.localDevBootstrapToken || "";
+    const storedToken =
+      typeof window === "undefined" ? "" : window.localStorage.getItem(DEV_AUTH_TOKEN_STORAGE_KEY) || "";
+    const nextToken = storedToken || bootstrapToken;
+    setDevTokenInput((prev) => (prev ? prev : nextToken));
+    const storedPersonaId =
+      typeof window === "undefined" ? "guest" : window.localStorage.getItem(DEV_AUTH_PERSONA_STORAGE_KEY) || "guest";
+    setDevSelectedPersonaId((prev) => (prev && prev !== "guest" ? prev : storedPersonaId));
+  }, [authSession.localDevBootstrapToken]);
 
   React.useEffect(() => {
     try {
@@ -660,6 +705,7 @@ export function TimelinePage() {
     maskingForced,
     maskingLockedByAccess,
   });
+  const localDevUiEnabled = canUseLocalDevAuthUi();
 
   const handleMaskToggle = () => {
     if (maskingLockedByAccess) return;
@@ -684,6 +730,72 @@ export function TimelinePage() {
     }
     void authSession.logout();
   };
+
+  const handleLoadDevCatalog = React.useCallback(async () => {
+    const trimmedToken = devTokenInput.trim();
+    if (!trimmedToken) {
+      setDevCatalogError(locale === "ru" ? "Нужен bootstrap или dev-token." : "A bootstrap or dev token is required.");
+      return;
+    }
+    setDevCatalogLoading(true);
+    setDevCatalogError(null);
+    try {
+      const result = await authSession.loadDevCatalog(trimmedToken);
+      setDevCatalog(result.personas);
+      const nextPersonaId =
+        result.personas.find((persona) => persona.id === devSelectedPersonaId)?.id ??
+        result.personas[0]?.id ??
+        "guest";
+      setDevSelectedPersonaId(nextPersonaId);
+      if (typeof window !== "undefined") {
+        window.localStorage.setItem(DEV_AUTH_TOKEN_STORAGE_KEY, trimmedToken);
+        window.localStorage.setItem(DEV_AUTH_PERSONA_STORAGE_KEY, nextPersonaId);
+      }
+    } catch (error) {
+      setDevCatalog([]);
+      setDevCatalogError(error instanceof Error ? error.message : locale === "ru" ? "Не удалось загрузить catalog." : "Failed to load catalog.");
+    } finally {
+      setDevCatalogLoading(false);
+    }
+  }, [authSession, devSelectedPersonaId, devTokenInput, locale]);
+
+  const handleDevPersonaSwitch = React.useCallback(async () => {
+    const trimmedToken = devTokenInput.trim();
+    if (!trimmedToken || !devSelectedPersonaId) {
+      setDevCatalogError(locale === "ru" ? "Сначала загрузи catalog и выбери persona." : "Load the catalog and choose a persona first.");
+      return;
+    }
+    setDevCatalogLoading(true);
+    setDevCatalogError(null);
+    try {
+      await authSession.impersonateDevPersona(trimmedToken, devSelectedPersonaId);
+      if (typeof window !== "undefined") {
+        window.localStorage.setItem(DEV_AUTH_TOKEN_STORAGE_KEY, trimmedToken);
+        window.localStorage.setItem(DEV_AUTH_PERSONA_STORAGE_KEY, devSelectedPersonaId);
+      }
+    } catch (error) {
+      setDevCatalogError(error instanceof Error ? error.message : locale === "ru" ? "Не удалось переключить persona." : "Failed to switch persona.");
+    } finally {
+      setDevCatalogLoading(false);
+    }
+  }, [authSession, devSelectedPersonaId, devTokenInput, locale]);
+
+  const handleDevLogout = React.useCallback(async () => {
+    setDevCatalogLoading(true);
+    setDevCatalogError(null);
+    try {
+      await authSession.logoutDevSession();
+    } catch (error) {
+      setDevCatalogError(error instanceof Error ? error.message : locale === "ru" ? "Не удалось очистить локальную dev-сессию." : "Failed to clear local dev session.");
+    } finally {
+      setDevCatalogLoading(false);
+    }
+  }, [authSession, locale]);
+
+  React.useEffect(() => {
+    if (typeof window === "undefined") return;
+    window.localStorage.setItem(DEV_AUTH_PERSONA_STORAGE_KEY, devSelectedPersonaId);
+  }, [devSelectedPersonaId]);
 
   const onDesignerCardHover = (e: React.MouseEvent, task: TaskV1) => {
     const manager = task.customer?.trim() || "-";
@@ -1030,6 +1142,87 @@ export function TimelinePage() {
                           ? "Включить крутилки"
                           : "Enable workbench"}
                     </button>
+                  </div>
+                ) : null}
+
+                {localDevUiEnabled ? (
+                  <div className="authPanelSection">
+                    <div className="authPanelLabel">{locale === "ru" ? "Local dev auth" : "Local dev auth"}</div>
+                    <div className="authPanelHint">
+                      {locale === "ru"
+                        ? "Работает только на localhost и только поверх test-контура."
+                        : "Works only on localhost and only against the test contour."}
+                    </div>
+                    <div style={{ display: "grid", gap: 8 }}>
+                      <input
+                        className="input"
+                        value={devTokenInput}
+                        onChange={(event) => setDevTokenInput(event.target.value)}
+                        placeholder={locale === "ru" ? "Bootstrap или dev-token" : "Bootstrap or dev token"}
+                        spellCheck={false}
+                        autoCapitalize="off"
+                        autoCorrect="off"
+                      />
+                      <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                        <button
+                          type="button"
+                          className="btn btnGhost authMenuAction"
+                          onClick={() => void handleLoadDevCatalog()}
+                          disabled={devCatalogLoading}
+                        >
+                          {devCatalogLoading
+                            ? locale === "ru"
+                              ? "Загружаем..."
+                              : "Loading..."
+                            : locale === "ru"
+                              ? "Загрузить catalog"
+                              : "Load catalog"}
+                        </button>
+                        {authSession.localDevBootstrapToken ? (
+                          <button
+                            type="button"
+                            className="btn btnGhost authMenuAction"
+                            onClick={() => setDevTokenInput(authSession.localDevBootstrapToken ?? "")}
+                          >
+                            {locale === "ru" ? "Подставить bootstrap token" : "Use bootstrap token"}
+                          </button>
+                        ) : null}
+                      </div>
+                      <select
+                        className="input"
+                        value={devSelectedPersonaId}
+                        onChange={(event) => setDevSelectedPersonaId(event.target.value)}
+                        disabled={!devCatalog.length}
+                      >
+                        {!devCatalog.length ? (
+                          <option value="guest">{locale === "ru" ? "Сначала загрузи catalog" : "Load catalog first"}</option>
+                        ) : null}
+                        {devCatalog.map((persona) => (
+                          <option key={persona.id} value={persona.id}>
+                            {persona.label} {persona.role ? `| ${persona.role}` : ""} | {persona.status}
+                          </option>
+                        ))}
+                      </select>
+                      <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                        <button
+                          type="button"
+                          className="btn authMenuAction"
+                          onClick={() => void handleDevPersonaSwitch()}
+                          disabled={devCatalogLoading || !devCatalog.length}
+                        >
+                          {locale === "ru" ? "Войти как persona" : "Impersonate persona"}
+                        </button>
+                        <button
+                          type="button"
+                          className="btn btnGhost authMenuAction"
+                          onClick={() => void handleDevLogout()}
+                          disabled={devCatalogLoading}
+                        >
+                          {locale === "ru" ? "Очистить dev-сессию" : "Clear dev session"}
+                        </button>
+                      </div>
+                      {devCatalogError ? <div className="authPanelHint" style={{ color: "#ffb0b0" }}>{devCatalogError}</div> : null}
+                    </div>
                   </div>
                 ) : null}
 

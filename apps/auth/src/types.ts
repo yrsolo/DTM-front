@@ -3,12 +3,14 @@ export type Contour = "test" | "prod";
 export type UserStatus = "pending" | "approved" | "blocked";
 export type UserRole = "admin" | "viewer";
 export type AccessMode = "masked" | "full";
-export type SessionKind = "yandex" | "telegram" | "temp_link";
+export type SessionKind = "yandex" | "telegram" | "temp_link" | "dev_local";
+export type AuthProvider = "yandex" | "telegram";
 export type AccessLinkStatus = "active" | "expired" | "revoked";
+export type DeveloperTokenStatus = "active" | "expired" | "revoked";
 
 export type UserSessionClaims = {
   kind?: "user";
-  provider?: Exclude<SessionKind, "temp_link">;
+  provider?: AuthProvider;
   userId: string;
   yandexUid: string;
   role: UserRole;
@@ -25,7 +27,24 @@ export type TempLinkSessionClaims = {
   exp: number;
 };
 
-export type SessionClaims = UserSessionClaims | TempLinkSessionClaims;
+export type DevLocalSessionClaims =
+  | {
+      kind: "dev_local";
+      personaKind: "real_user";
+      userId: string;
+      sv: number;
+      iat: number;
+      exp: number;
+    }
+  | {
+      kind: "dev_local";
+      personaKind: "synthetic_blocked";
+      label: string;
+      iat: number;
+      exp: number;
+    };
+
+export type SessionClaims = UserSessionClaims | TempLinkSessionClaims | DevLocalSessionClaims;
 
 export type AuthUser = {
   id: string;
@@ -69,6 +88,27 @@ export type AccessLinkRecord = {
 export type AccessLinkUsageRecord = {
   id: string;
   linkId: string;
+  usedAt: string;
+  ip: string | null;
+  city: string | null;
+  clientSummary: string | null;
+};
+
+export type DeveloperTokenRecord = {
+  id: string;
+  label: string;
+  tokenHash: string;
+  status: DeveloperTokenStatus;
+  expiresAt: string;
+  createdAt: string;
+  createdBy: string | null;
+  lastUsedAt: string | null;
+  useCount: number;
+};
+
+export type DeveloperTokenUsageRecord = {
+  id: string;
+  developerTokenId: string;
   usedAt: string;
   ip: string | null;
   city: string | null;

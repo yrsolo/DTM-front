@@ -17,6 +17,7 @@
 - [ ] CAM-DEPARTMENT-ANALYTICS-PAGE-V1 - standalone `/analytics` lab with manual full SnapshotV1 refresh, monthly production table, weighted department-load chart, editable format-hour prices, and designer-category filters via local designer-sort config.
 - [ ] CAM-DEPARTMENT-ANALYTICS-UX-REFINE-V2 - `/analytics` rebuilt around donut-based format breakdowns, period controls, and a cleaner productivity chart with smoothed load/capacity lines and tooltips.
 - [ ] CAM-TEMP-LINK-TASKS-GROUPING-FIX - restore task visibility for temp-link sessions, add per-link designer-grouping toggle, and roll out auth/web changes with YDB migration.
+- [x] CAM-LOCAL-DEV-AUTH-LANE-V1 - localhost-only `test` auth lane with `dev_local` sessions, bootstrap/dev-token exchange, localhost auth-panel persona switcher, admin-managed developer tokens, auth/docs refresh.
 - [ ] CAM-API-V2-LOADING-SWR-CACHE - finalize manual evidence pack.
 - [x] CAM-SCHEMA-CONTRACT-GOVERNANCE - schema/types sync + validate:schema + guarantees.
 - [ ] CAM-DOCS-CANONICAL-REWRITE - rebuild root README and docs tree around current frontend state.

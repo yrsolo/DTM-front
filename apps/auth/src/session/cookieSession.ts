@@ -1,7 +1,7 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
 
 import { getAuthRuntimeConfig } from "../config";
-import type { SessionClaims, TempLinkSessionClaims, UserSessionClaims } from "../types";
+import type { DevLocalSessionClaims, SessionClaims, TempLinkSessionClaims, UserSessionClaims } from "../types";
 
 function base64urlEncode(value: string): string {
   return Buffer.from(value, "utf8").toString("base64url");
@@ -69,6 +69,21 @@ function isTempLinkClaims(value: unknown): value is TempLinkSessionClaims {
   );
 }
 
+function isDevLocalClaims(value: unknown): value is DevLocalSessionClaims {
+  if (!value || typeof value !== "object") return false;
+  const claims = value as Record<string, unknown>;
+  if (claims.kind !== "dev_local" || typeof claims.iat !== "number" || typeof claims.exp !== "number") {
+    return false;
+  }
+  if (claims.personaKind === "real_user") {
+    return typeof claims.userId === "string" && typeof claims.sv === "number";
+  }
+  if (claims.personaKind === "synthetic_blocked") {
+    return typeof claims.label === "string";
+  }
+  return false;
+}
+
 export function readSessionClaims(cookieHeader: string | undefined): SessionClaims | null {
   const cfg = getAuthRuntimeConfig();
   const cookies = parseCookieHeader(cookieHeader);
@@ -87,7 +102,7 @@ export function readSessionClaims(cookieHeader: string | undefined): SessionClai
 
   try {
     const claims = JSON.parse(base64urlDecode(payload)) as SessionClaims;
-    if (!isUserClaims(claims) && !isTempLinkClaims(claims)) return null;
+    if (!isUserClaims(claims) && !isTempLinkClaims(claims) && !isDevLocalClaims(claims)) return null;
     if (Date.now() >= claims.exp * 1000) return null;
     return claims;
   } catch {

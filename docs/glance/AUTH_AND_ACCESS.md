@@ -237,6 +237,42 @@ Current admin IA:
   - auth-panel countdown until expiry
   - every successful redemption increments usage stats and writes a usage event
 
+The same `Доступ -> Ссылки` surface now also contains `Локальные dev-токены`:
+- these tokens are **not** viewer URLs and are never passed via query string
+- they exist only for localhost development against the `test` contour
+- operator actions:
+  - create
+  - copy raw token
+  - edit label / expiry
+  - revoke
+  - delete
+  - inspect usage log
+- dev-tokens are consumed only by the localhost dev panel and exchange into an ordinary `test` session cookie
+
+Local developer auth lane:
+- session kind:
+  - `dev_local`
+- auth endpoints:
+  - `POST /dev/session/catalog`
+  - `POST /dev/session/impersonate`
+  - `POST /dev/session/logout`
+- admin endpoints:
+  - `GET /admin/developer-tokens`
+  - `POST /admin/developer-tokens`
+  - `PATCH /admin/developer-tokens/:id`
+  - `POST /admin/developer-tokens/:id/revoke`
+  - `POST /admin/developer-tokens/:id/delete`
+  - `GET /admin/developer-tokens/:id/usage`
+- scope / safety:
+  - localhost only
+  - test contour only
+  - requires either bootstrap token or admin-created dev-token
+- localhost dev panel can impersonate:
+  - real approved/admin users
+  - real pending users
+  - `guest`
+  - synthetic `blocked`
+
 `Стиль -> Пресеты` hosts the existing color/layout preset management without changing the current preset business logic.
 
 ## OAuth apps
@@ -260,6 +296,20 @@ Current admin IA:
 - `POST /telegram/session` умеет on-demand восстанавливать linkage по цепочке `telegramId -> people directory -> (auth user by email) -> auth user`
 - если user по email не найден, auth создаёт telegram-based user и сразу выдаёт approved session
 - Mini App не запрашивает отдельный `my tasks` payload: frontend получает общий snapshot и затем делает client-side filtering `mine / all`
+
+## Local developer auth env
+
+Auth runtime:
+- `LOCAL_DEV_AUTH_ENABLED_TEST=1`
+- `LOCAL_DEV_AUTH_TOKEN=<bootstrap token>`
+
+Local frontend runtime:
+- `VITE_LOCAL_DEV_AUTH_TOKEN=<bootstrap token>`
+
+Expected localhost behavior:
+- localhost still talks to public `test` auth / bff routes
+- Yandex / Telegram remain available as fallback
+- dev panel is shown only on localhost and never on deployed `/test/*`
 
 ## Подробнее
 

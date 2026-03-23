@@ -86,6 +86,31 @@ type AccessLinkDraft = {
   showDesignerGrouping: boolean;
 };
 
+type DeveloperTokenUsageEvent = {
+  id: string;
+  usedAt: string;
+  ip: string | null;
+  city: string | null;
+  clientSummary: string | null;
+};
+
+type DeveloperTokenCard = {
+  id: string;
+  label: string;
+  status: "active" | "expired" | "revoked";
+  expiresAt: string | null;
+  createdAt: string;
+  createdBy: string | null;
+  lastUsedAt: string | null;
+  useCount: number;
+  usageEvents: DeveloperTokenUsageEvent[];
+};
+
+type DeveloperTokenDraft = {
+  label: string;
+  expiresAt: string;
+};
+
 type DragListKey = "pendingUsers" | "approvedUsers" | "colorPresets" | "layoutPresets";
 type AdminTopTab = "access" | "style";
 type AdminAccessTab = "people" | "links";
@@ -679,6 +704,11 @@ export function AdminPage() {
   const [draftLinkExpiryHours, setDraftLinkExpiryHours] = React.useState("72");
   const [draftLinkShowDesignerGrouping, setDraftLinkShowDesignerGrouping] = React.useState(false);
   const [linkDrafts, setLinkDrafts] = React.useState<Record<string, AccessLinkDraft>>({});
+  const [developerTokens, setDeveloperTokens] = React.useState<DeveloperTokenCard[]>([]);
+  const [draftDeveloperTokenLabel, setDraftDeveloperTokenLabel] = React.useState("");
+  const [draftDeveloperTokenExpiryHours, setDraftDeveloperTokenExpiryHours] = React.useState("168");
+  const [developerTokenDrafts, setDeveloperTokenDrafts] = React.useState<Record<string, DeveloperTokenDraft>>({});
+  const [developerTokenSecrets, setDeveloperTokenSecrets] = React.useState<Record<string, string>>({});
   const [, setLinksClock] = React.useState(() => Date.now());
   const importRef = React.useRef<HTMLInputElement | null>(null);
   const dragSnapshotRef = React.useRef<{ list: DragListKey; ids: string[] } | null>(null);
@@ -720,9 +750,25 @@ export function AdminPage() {
     }
   }, []);
 
+  const loadDeveloperTokens = React.useCallback(async () => {
+    try {
+      const res = await fetch(buildAuthUrl("/admin/developer-tokens"), {
+        credentials: "include",
+        headers: { accept: "application/json" },
+        cache: "no-store",
+      });
+      await expectOk(res, "Не удалось загрузить локальные dev-токены");
+      const payload = (await res.json()) as { tokens?: DeveloperTokenCard[] };
+      setDeveloperTokens(Array.isArray(payload.tokens) ? payload.tokens : []);
+    } catch (err) {
+      setActionError(err instanceof Error ? err.message : "Не удалось загрузить локальные dev-токены");
+    }
+  }, []);
+
   React.useEffect(() => {
     void loadOverview();
-  }, [loadOverview]);
+    void loadDeveloperTokens();
+  }, [loadDeveloperTokens, loadOverview]);
 
   React.useEffect(() => {
     setOrderedPendingUsers(overview?.pendingUsers ?? []);
@@ -742,6 +788,20 @@ export function AdminPage() {
       )
     );
   }, [overview]);
+
+  React.useEffect(() => {
+    setDeveloperTokenDrafts(
+      Object.fromEntries(
+        developerTokens.map((token) => [
+          token.id,
+          {
+            label: token.label,
+            expiresAt: toDateTimeInputValue(token.expiresAt),
+          },
+        ])
+      )
+    );
+  }, [developerTokens]);
 
   React.useEffect(() => {
     const timer = window.setInterval(() => {
@@ -1221,6 +1281,110 @@ export function AdminPage() {
     [loadOverview]
   );
 
+  const copyDeveloperToken = React.useCallback(async (tokenValue: string | null | undefined) => {
+    if (!tokenValue) {
+      throw new Error("Сырой токен доступен только сразу после создания.");
+    }
+    await navigator.clipboard.writeText(tokenValue);
+  }, []);
+
+  const createDeveloperToken = React.useCallback(async () => {
+    const label = draftDeveloperTokenLabel.trim();
+    const expiresInHours = Number(draftDeveloperTokenExpiryHours);
+    if (!label) {
+      throw new Error("Нужно указать название dev-токена.");
+    }
+    if (!Number.isFinite(expiresInHours) || expiresInHours <= 0) {
+      throw new Error("Срок действия должен быть положительным числом часов.");
+    }
+    const res = await fetch(buildAuthUrl("/admin/developer-tokens"), {
+      method: "POST",
+      credentials: "include",
+      headers: { "content-type": "application/json", accept: "application/json" },
+      body: JSON.stringify({ label, expiresInHours }),
+    });
+    await expectOk(res, "Не удалось создать локальный dev-токен");
+    const payload = (await res.json()) as { token?: (DeveloperTokenCard & { rawToken?: string | null }) | null };
+    const createdToken = payload.token;
+    if (createdToken) {
+      const { rawToken, ...tokenCard } = createdToken;
+      setDeveloperTokens((prev) => [tokenCard, ...prev.filter((item) => item.id !== tokenCard.id)]);
+      if (rawToken) {
+        setDeveloperTokenSecrets((prev) => ({ ...prev, [tokenCard.id]: rawToken }));
+        await copyDeveloperToken(rawToken);
+        setActionNotice("Dev-токен создан и скопирован");
+      }
+    }
+    setDraftDeveloperTokenLabel("");
+    setDraftDeveloperTokenExpiryHours("168");
+    await loadDeveloperTokens();
+  }, [copyDeveloperToken, draftDeveloperTokenExpiryHours, draftDeveloperTokenLabel, loadDeveloperTokens]);
+
+  const updateDeveloperTokenDraft = React.useCallback((tokenId: string, patch: Partial<DeveloperTokenDraft>) => {
+    setDeveloperTokenDrafts((prev) => ({
+      ...prev,
+      [tokenId]: {
+        label: prev[tokenId]?.label ?? "",
+        expiresAt: prev[tokenId]?.expiresAt ?? "",
+        ...patch,
+      },
+    }));
+  }, []);
+
+  const saveDeveloperToken = React.useCallback(
+    async (tokenId: string) => {
+      const draft = developerTokenDrafts[tokenId];
+      if (!draft?.label.trim()) {
+        throw new Error("Название dev-токена не может быть пустым.");
+      }
+      if (!draft.expiresAt) {
+        throw new Error("Укажите дату окончания dev-токена.");
+      }
+      const expiresAt = new Date(draft.expiresAt);
+      if (!Number.isFinite(expiresAt.getTime())) {
+        throw new Error("Некорректная дата окончания dev-токена.");
+      }
+      const res = await fetch(buildAuthUrl(`/admin/developer-tokens/${encodeURIComponent(tokenId)}`), {
+        method: "PATCH",
+        credentials: "include",
+        headers: { "content-type": "application/json", accept: "application/json" },
+        body: JSON.stringify({ label: draft.label.trim(), expiresAt: expiresAt.toISOString() }),
+      });
+      await expectOk(res, "Не удалось обновить локальный dev-токен");
+      await loadDeveloperTokens();
+    },
+    [developerTokenDrafts, loadDeveloperTokens]
+  );
+
+  const revokeDeveloperToken = React.useCallback(
+    async (tokenId: string) => {
+      const res = await fetch(buildAuthUrl(`/admin/developer-tokens/${encodeURIComponent(tokenId)}/revoke`), {
+        method: "POST",
+        credentials: "include",
+      });
+      await expectOk(res, "Не удалось отозвать локальный dev-токен");
+      await loadDeveloperTokens();
+    },
+    [loadDeveloperTokens]
+  );
+
+  const deleteDeveloperTokenAction = React.useCallback(
+    async (tokenId: string) => {
+      const res = await fetch(buildAuthUrl(`/admin/developer-tokens/${encodeURIComponent(tokenId)}/delete`), {
+        method: "POST",
+        credentials: "include",
+      });
+      await expectOk(res, "Не удалось удалить локальный dev-токен");
+      setDeveloperTokenSecrets((prev) => {
+        const next = { ...prev };
+        delete next[tokenId];
+        return next;
+      });
+      await loadDeveloperTokens();
+    },
+    [loadDeveloperTokens]
+  );
+
   const handlePeopleDragEnd = React.useCallback(
     async (event: DragEndEvent) => {
       const snapshot = dragSnapshotRef.current;
@@ -1610,6 +1774,142 @@ export function AdminPage() {
                     <div>
                       <div className="adminUserName">Временные ссылки еще не заведены</div>
                       <div className="muted">Создай первую reusable viewer ссылку выше. После redemption она даст full unmasked viewer access и покажет usage stats здесь же.</div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className="card adminSectionCard" style={{ marginTop: 16 }}>
+                <div className="adminSectionLead compact">
+                  <div>
+                    <h4 className="pageTitle adminSectionTitle">Локальные dev-токены</h4>
+                    <div className="muted">Токены для localhost-разработки поверх test auth contour. Не являются viewer-ссылками и не работают через URL.</div>
+                  </div>
+                  <div className="adminLinksSummary">
+                    <span className="adminCountBadge">{developerTokens.length}</span>
+                    <span className="muted">всего dev-токенов</span>
+                  </div>
+                </div>
+
+                <div className="card adminSectionCard" style={{ marginBottom: 16 }}>
+                  <h4 className="pageTitle" style={{ fontSize: 22 }}>Создание dev-токена</h4>
+                  <div className="adminLinkDraftGrid">
+                    <label className="adminFieldStack">
+                      <span className="muted">Название / оператор</span>
+                      <input
+                        className="input"
+                        value={draftDeveloperTokenLabel}
+                        onChange={(event) => setDraftDeveloperTokenLabel(event.target.value)}
+                        placeholder="Например, локальный дизайн-спринт"
+                      />
+                    </label>
+                    <label className="adminFieldStack">
+                      <span className="muted">Срок действия, часы</span>
+                      <input
+                        className="input"
+                        type="number"
+                        min={1}
+                        step={1}
+                        value={draftDeveloperTokenExpiryHours}
+                        onChange={(event) => setDraftDeveloperTokenExpiryHours(event.target.value)}
+                      />
+                    </label>
+                  </div>
+                  <div className="adminLinkDraftActions">
+                    <button type="button" onClick={() => void runAdminAction(createDeveloperToken, "Dev-токен создан")}>Создать dev-токен</button>
+                    <div className="muted">Сырой токен можно скопировать только сразу после создания или пока страница не перезагружена.</div>
+                  </div>
+                </div>
+
+                {developerTokens.length ? (
+                  <div className="adminAccessLinkList">
+                    {developerTokens.map((token) => (
+                      <div key={token.id} className="adminAccessLinkCard">
+                        <div className="adminAccessLinkHeader">
+                          <div>
+                            <div className="adminUserName">{token.label}</div>
+                            <div className="muted">Создан: {formatDateTime(token.createdAt)}{token.createdBy ? ` • ${token.createdBy}` : ""}</div>
+                          </div>
+                          <div className={`adminLinkStatusBadge is${token.status[0].toUpperCase()}${token.status.slice(1)}`}>{statusLabel(token.status)}</div>
+                        </div>
+                        <div className="adminAccessLinkMeta">
+                          <span>Истекает: {formatDateTime(token.expiresAt)}</span>
+                          <span>Осталось: {formatRemainingTime(token.expiresAt)}</span>
+                          <span>Использований: {token.useCount}</span>
+                          <span>Последний вход: {formatDateTime(token.lastUsedAt)}</span>
+                        </div>
+                        <div className="adminLinkDraftGrid">
+                          <label className="adminFieldStack">
+                            <span className="muted">Название</span>
+                            <input
+                              className="input"
+                              value={developerTokenDrafts[token.id]?.label ?? token.label}
+                              onChange={(event) => updateDeveloperTokenDraft(token.id, { label: event.target.value })}
+                            />
+                          </label>
+                          <label className="adminFieldStack">
+                            <span className="muted">Действует до</span>
+                            <input
+                              className="input"
+                              type="datetime-local"
+                              value={developerTokenDrafts[token.id]?.expiresAt ?? toDateTimeInputValue(token.expiresAt)}
+                              onChange={(event) => updateDeveloperTokenDraft(token.id, { expiresAt: event.target.value })}
+                            />
+                          </label>
+                        </div>
+                        <div className="adminAccessLinkActions">
+                          <button
+                            type="button"
+                            className="btn btnGhost"
+                            onClick={() => void runAdminAction(() => revokeDeveloperToken(token.id), "Dev-токен отозван")}
+                            disabled={token.status === "revoked"}
+                          >
+                            Отозвать
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => void runAdminAction(() => copyDeveloperToken(developerTokenSecrets[token.id]), "Dev-токен скопирован")}
+                          >
+                            Копировать токен
+                          </button>
+                          <button type="button" className="btn btnGhost" onClick={() => void runAdminAction(() => saveDeveloperToken(token.id), "Dev-токен обновлён")}>Сохранить</button>
+                          <button
+                            type="button"
+                            className="btn btnGhost"
+                            onClick={() => void runAdminAction(() => deleteDeveloperTokenAction(token.id), "Dev-токен удалён")}
+                          >
+                            Удалить
+                          </button>
+                        </div>
+                        {!developerTokenSecrets[token.id] ? (
+                          <div className="muted" style={{ marginTop: 8 }}>Сырой токен недоступен после перезагрузки страницы. Для нового копирования создай новый dev-токен.</div>
+                        ) : null}
+                        <details className="adminLinkDetails">
+                          <summary>Статистика и журнал</summary>
+                          {token.usageEvents.length ? (
+                            <div className="adminAccessLinkEvents">
+                              {token.usageEvents.map((event) => (
+                                <div key={event.id} className="tableRowGhost">
+                                  <div><strong>{formatDateTime(event.usedAt)}</strong></div>
+                                  <div className="muted">IP: {event.ip || "-"}</div>
+                                  <div className="muted">Город: {event.city || "-"}</div>
+                                  <div className="muted">{event.clientSummary || "Client summary появится из backend best-effort metadata."}</div>
+                                </div>
+                              ))}
+                            </div>
+                          ) : (
+                            <div className="muted">Пока нет usage events по этому dev-токену.</div>
+                          )}
+                        </details>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="adminStubEmptyState">
+                    <div className="adminStubEmptyIcon" aria-hidden="true">⌁</div>
+                    <div>
+                      <div className="adminUserName">Локальные dev-токены ещё не заведены</div>
+                      <div className="muted">Создай первый dev-токен выше, чтобы localhost мог входить в test-контур без Yandex и Telegram.</div>
                     </div>
                   </div>
                 )}

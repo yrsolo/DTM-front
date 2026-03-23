@@ -1,6 +1,7 @@
 import React from "react";
 
 import { getAdminRoute, getAuthRequestBase } from "../config/runtimeContour";
+import { getLocalDevBootstrapToken } from "../config/localDevAuth";
 import { getTelegramRuntimeInfo } from "../config/telegramRuntime";
 
 export type AuthSessionUser = {
@@ -16,6 +17,18 @@ export type AuthSessionUser = {
   canUseDesignerGrouping?: boolean | null;
   role: "admin" | "viewer";
   status: "pending" | "approved" | "blocked";
+};
+
+export type DevLocalPersona = {
+  id: string;
+  kind: "guest" | "real_user" | "synthetic_blocked";
+  label: string;
+  role: "admin" | "viewer" | null;
+  status: "pending" | "approved" | "blocked" | "guest";
+  email: string | null;
+  personName: string | null;
+  canViewAllTasks: boolean;
+  canUseDesignerGrouping: boolean;
 };
 
 export type TelegramBootstrapReason =
@@ -34,7 +47,7 @@ export type AuthSessionState = {
   accessMode: "masked" | "full";
   user: AuthSessionUser | null;
   available: boolean;
-  sessionKind: "yandex" | "telegram" | "temp_link" | null;
+  sessionKind: "yandex" | "telegram" | "temp_link" | "dev_local" | null;
   expiresAt: string | null;
   temporaryAccessLabel: string | null;
   telegramBootstrap: TelegramBootstrapState;
@@ -120,7 +133,10 @@ export function useAuthSession() {
         user: payload?.user ?? null,
         available: true,
         sessionKind:
-          payload?.sessionKind === "yandex" || payload?.sessionKind === "telegram" || payload?.sessionKind === "temp_link"
+          payload?.sessionKind === "yandex" ||
+          payload?.sessionKind === "telegram" ||
+          payload?.sessionKind === "temp_link" ||
+          payload?.sessionKind === "dev_local"
             ? payload.sessionKind
             : null,
         expiresAt: typeof payload?.expiresAt === "string" ? payload.expiresAt : null,
@@ -237,6 +253,7 @@ export function useAuthSession() {
   }, []);
 
   const adminHref = React.useMemo(() => getAdminRoute(), []);
+  const localDevBootstrapToken = React.useMemo(() => getLocalDevBootstrapToken(), []);
 
   const startLogin = React.useCallback(async () => {
     if (typeof window === "undefined") return;
@@ -300,6 +317,70 @@ export function useAuthSession() {
     await reload();
   }, [reload]);
 
+  const loadDevCatalog = React.useCallback(async (token: string) => {
+    const res = await fetch(buildAuthUrl("/dev/session/catalog"), {
+      method: "POST",
+      credentials: "include",
+      headers: {
+        "content-type": "application/json",
+        accept: "application/json",
+      },
+      body: JSON.stringify({ token }),
+    });
+    const payload = await res.json().catch(() => null);
+    if (!res.ok) {
+      const error =
+        typeof payload?.error === "string"
+          ? payload.error
+          : typeof payload?.message === "string"
+            ? payload.message
+            : `HTTP ${res.status}`;
+      throw new Error(error);
+    }
+    return {
+      tokenSource:
+        payload?.tokenSource === "bootstrap" || payload?.tokenSource === "developer_token"
+          ? payload.tokenSource
+          : "developer_token",
+      personas: Array.isArray(payload?.personas) ? (payload.personas as DevLocalPersona[]) : [],
+    };
+  }, []);
+
+  const impersonateDevPersona = React.useCallback(
+    async (token: string, personaId: string) => {
+      const res = await fetch(buildAuthUrl("/dev/session/impersonate"), {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "content-type": "application/json",
+          accept: "application/json",
+        },
+        body: JSON.stringify({ token, personaId }),
+      });
+      const payload = await res.json().catch(() => null);
+      if (!res.ok) {
+        const error =
+          typeof payload?.error === "string"
+            ? payload.error
+            : typeof payload?.message === "string"
+              ? payload.message
+              : `HTTP ${res.status}`;
+        throw new Error(error);
+      }
+      await reload();
+      return payload;
+    },
+    [reload]
+  );
+
+  const logoutDevSession = React.useCallback(async () => {
+    await fetch(buildAuthUrl("/dev/session/logout"), {
+      method: "POST",
+      credentials: "include",
+    });
+    await reload();
+  }, [reload]);
+
   return {
     state,
     blockInitialDataLoad: state.pendingAccessLinkBootstrap,
@@ -309,5 +390,9 @@ export function useAuthSession() {
     adminHref,
     logout,
     startTelegramSession,
+    localDevBootstrapToken,
+    loadDevCatalog,
+    impersonateDevPersona,
+    logoutDevSession,
   };
 }

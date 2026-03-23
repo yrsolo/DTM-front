@@ -6,4 +6,6 @@ export const AUTH_TABLES = {
   adminLayoutPrefs: "admin_layout_prefs",
   accessLinks: "access_links",
   accessLinkUsage: "access_link_usage",
+  developerTokens: "developer_tokens",
+  developerTokenUsage: "developer_token_usage",
 } as const;
