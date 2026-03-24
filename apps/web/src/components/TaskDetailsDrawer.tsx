@@ -353,6 +353,7 @@ export function TaskDetailsDrawer(props: {
       <div
         ref={drawerRef}
         className={`${drawerClassName} drawerAnim-${animState} ${attachmentDragActive ? "attachmentDrawerDropActive" : ""}`}
+        data-inspector-target-id="app.task.drawer"
         onClick={(e) => e.stopPropagation()}
         onWheel={(e) => e.stopPropagation()}
         onTouchMove={(e) => e.stopPropagation()}
@@ -411,6 +412,14 @@ export function TaskDetailsDrawer(props: {
             {ui.drawer.ownerResolveHint}
           </div>
         ) : null}
+
+        <TaskAttachmentsSection
+          task={t}
+          compact={presentation === "sheet"}
+          dragActive={attachmentDragActive}
+          droppedFile={pendingAttachmentFile}
+          onDroppedFileHandled={() => setPendingAttachmentFile(null)}
+        />
 
         <div className="card drawerSection">
           <div className="drawerSectionTitle">{ui.drawer.timing}</div>
@@ -541,14 +550,6 @@ export function TaskDetailsDrawer(props: {
             </div>
           </div>
         ) : null}
-
-        <TaskAttachmentsSection
-          task={t}
-          compact={presentation === "sheet"}
-          dragActive={attachmentDragActive}
-          droppedFile={pendingAttachmentFile}
-          onDroppedFileHandled={() => setPendingAttachmentFile(null)}
-        />
 
         {t.notes ? (
           <div className="card drawerSection">

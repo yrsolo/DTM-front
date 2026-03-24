@@ -75,6 +75,7 @@ Supported local personas:
 If the dev panel is missing:
 - confirm the app is opened from localhost, not deployed `/test/`
 - confirm `VITE_LOCAL_DEV_AUTH_TOKEN` is present in local frontend env
+- easiest Windows launch path: `npm run web:dev:test-local-auth` (reads `LOCAL_DEV_AUTH_TOKEN` from repo `.env` and forwards it into `VITE_LOCAL_DEV_AUTH_TOKEN`)
 - confirm auth runtime has `LOCAL_DEV_AUTH_ENABLED_TEST=1`
 - hard refresh localhost after env change
 

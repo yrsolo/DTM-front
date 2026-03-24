@@ -87,7 +87,7 @@ export function DesignersBoard(props: {
   }, [props.tasks, peopleById, props.unassignedLabel]);
 
   return (
-    <div className="designersBoardScroll">
+    <div className="designersBoardScroll" data-inspector-target-id="app.designers.board">
       <div className="designersBoard" style={{ ["--designer-cols" as string]: String(Math.max(1, columns.length)) }}>
         {columns.map((column) => (
           <section key={column.key} className="designerColumn">

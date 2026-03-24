@@ -4,49 +4,64 @@ import {
   InspectorProvider,
   InspectorSidebar,
   type InspectorAdapter,
+  type InspectorNode,
+  type InspectorNodeEnrichment,
+  type InspectorPropertiesSection,
 } from "@dtm/workbench-inspector";
 
+import { LayoutContext } from "../components/Layout";
 import { getWorkbenchInspectorActivation } from "./activation";
 import { getInspectorOwnershipRefs } from "./targetBindings";
-import { isInspectorTarget } from "./targetGuards";
-import { getInspectorTargetById, listInspectorTargets } from "./targetRegistry";
+import { getInspectorTargetById } from "./targetRegistry";
 import { openTargetInWorkbench } from "./openWorkbench";
 
-function createWorkbenchInspectorAdapter(): InspectorAdapter {
+function createWorkbenchInspectorAdapter(canUseWorkbench: boolean): InspectorAdapter {
   return {
     isEnabled() {
       return true;
     },
-    resolveTargetFromElement(element) {
-      const targetId = element.dataset.inspectorTargetId?.trim();
-      if (!targetId) return null;
-      const target = getInspectorTargetById(targetId);
-      return isInspectorTarget(target) ? target : null;
+    enrichNode(node) {
+      const semanticTargetId = node.semanticTargetId;
+      if (!semanticTargetId) return null;
+      const semanticTarget = getInspectorTargetById(semanticTargetId);
+      const propertySections: InspectorPropertiesSection[] = semanticTarget
+        ? [
+            {
+              id: "workbench-bridge",
+              title: "Workbench bridge",
+              fields: [
+                { id: "semantic-target", label: "Semantic target", value: semanticTarget.id },
+                { id: "workbench-open", label: "Workbench action", value: canUseWorkbench ? "available" : "unavailable" },
+              ],
+            },
+          ]
+        : [];
+
+      const enrichment: InspectorNodeEnrichment = {
+        label: semanticTarget?.label,
+        meta: semanticTarget?.meta,
+        ownershipRefs: getInspectorOwnershipRefs(semanticTargetId),
+        propertySections,
+      };
+      return enrichment;
     },
-    getTargetById(id) {
-      const target = getInspectorTargetById(id);
-      return isInspectorTarget(target) ? target : null;
+    canOpenNodeInWorkbench(node) {
+      return Boolean(canUseWorkbench && node.semanticTargetId);
     },
-    getParentTarget(id) {
-      const target = getInspectorTargetById(id);
-      if (!target?.parentId) return null;
-      return getInspectorTargetById(target.parentId);
-    },
-    getChildTargets(id) {
-      return listInspectorTargets().filter((target) => target.parentId === id);
-    },
-    getOwnershipRefs(targetId) {
-      return getInspectorOwnershipRefs(targetId);
-    },
-    openTargetInWorkbench(targetId) {
-      openTargetInWorkbench(targetId);
+    openNodeInWorkbench(node) {
+      if (!canUseWorkbench || !node.semanticTargetId) return;
+      openTargetInWorkbench(node.semanticTargetId);
     },
   };
 }
 
 export function WorkbenchInspectorMount() {
+  const layout = React.useContext(LayoutContext);
   const activation = React.useMemo(() => getWorkbenchInspectorActivation(), []);
-  const adapter = React.useMemo(() => createWorkbenchInspectorAdapter(), []);
+  const adapter = React.useMemo(
+    () => createWorkbenchInspectorAdapter(layout?.canUseWorkbench ?? false),
+    [layout?.canUseWorkbench]
+  );
 
   if (!activation.enabled) return null;
 

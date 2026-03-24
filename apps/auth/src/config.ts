@@ -10,6 +10,7 @@ export type AuthRuntimeConfig = {
   yandexClientId: string;
   yandexClientSecret: string;
   telegramBotToken: string | null;
+  telegramSdkProxyUrl: string | null;
   sessionSigningSecret: string;
   sessionTtlSeconds: number;
   cookieName: string;
@@ -94,6 +95,7 @@ export function getAuthRuntimeConfig(): AuthRuntimeConfig {
     yandexClientId: readRequired(yandexClientIdVar),
     yandexClientSecret: readRequired(yandexClientSecretVar),
     telegramBotToken: readOptional("TG_TOKEN"),
+    telegramSdkProxyUrl: readOptional("PROXY_URL"),
     sessionSigningSecret: readRequired("SESSION_SIGNING_SECRET"),
     sessionTtlSeconds: readNumber("SESSION_TTL_SECONDS", 60 * 60 * 12),
     cookieName: deriveContourCookieName(readRequired("COOKIE_NAME"), contour),

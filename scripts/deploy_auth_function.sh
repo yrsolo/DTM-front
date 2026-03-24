@@ -118,6 +118,7 @@ if [[ "$DRY_RUN" == "true" ]]; then
   echo "oauth_client_id_env: $oauth_client_id_env_name"
   echo "oauth_client_secret_env: $oauth_client_secret_env_name"
   echo "browser_auth_proxy_secret: lockbox:BROWSER_AUTH_PROXY_SECRET"
+  echo "telegram_sdk_proxy_url: lockbox:PROXY_URL"
   echo "telegram_bot_token: ${TG_TOKEN:+provided}"
   echo "people_sync_path: $people_sync_path"
   echo "preset_bucket: dtm-presets"
@@ -154,6 +155,7 @@ secret_args=(
   --secret "id=$lockbox_id,key=COOKIE_SECURE,environment-variable=COOKIE_SECURE"
   --secret "id=$lockbox_id,key=SESSION_TTL_SECONDS,environment-variable=SESSION_TTL_SECONDS"
   --secret "id=$lockbox_id,key=BROWSER_AUTH_PROXY_SECRET,environment-variable=BROWSER_AUTH_PROXY_SECRET"
+  --secret "id=$lockbox_id,key=PROXY_URL,environment-variable=PROXY_URL"
 )
 
 oauth_args=()

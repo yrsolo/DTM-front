@@ -15,6 +15,7 @@
 4. [AUTH_AND_ACCESS.md](AUTH_AND_ACCESS.md)
 5. [DESIGN_SYSTEM.md](DESIGN_SYSTEM.md)
 6. [PAGES_AND_LAYOUTS.md](PAGES_AND_LAYOUTS.md)
+7. [WORKBENCH_INSPECTOR_OVERVIEW.md](WORKBENCH_INSPECTOR_OVERVIEW.md)
 
 Если после этого нужны implementation details, переходите в [deep/README.md](../deep/README.md).
 

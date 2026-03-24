@@ -31,6 +31,7 @@ import {
 } from "./handlers/attachmentProxy";
 import { callback, login, logout, me, telegramSession } from "./handlers/authHandlers";
 import { proxyApiRequest } from "./handlers/apiProxy";
+import { proxyTelegramSdk } from "./handlers/telegramSdkProxy";
 import {
   createDeveloperTokenHandler,
   deleteDeveloperTokenHandler,
@@ -84,6 +85,9 @@ export async function routeRequest(req: NormalizedRequest): Promise<HttpResult> 
     }
     if (req.method === "POST" && req.routePath === "/telegram/session") {
       return telegramSession(req);
+    }
+    if ((req.method === "GET" || req.method === "HEAD") && req.routePath === "/telegram/sdk") {
+      return proxyTelegramSdk(req);
     }
     if (req.method === "POST" && req.routePath === "/dev/session/catalog") {
       return devSessionCatalogHandler(req);

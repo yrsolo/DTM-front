@@ -487,6 +487,7 @@ export function TaskAttachmentsSection(props: {
     <>
       <div
         className={`card drawerSection ${props.dragActive ? "attachmentDropZoneActive" : ""}`}
+        data-inspector-target-id="app.task.attachments"
       >
         <button
           type="button"

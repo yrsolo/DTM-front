@@ -1,14 +1,22 @@
 # Workbench Inspector Targets
 
-## Foundation rule
+## Rule
 
-Targets are semantic and stable, not arbitrary DOM wrappers.
+The inspector works on live DOM-derived nodes first, then enriches them with semantic targets when the host app can provide that mapping.
 
-At foundation stage:
+DOM-first nodes are used by:
 
-- the package supports target contracts
-- the app registry may stay empty/no-op
-- no selection behavior is required yet
+- pick mode and canvas inspect
+- hierarchy navigation
+- focus-set marking
+- generic properties inspection
+
+Semantic targets are used by:
+
+- label cleanup for important product surfaces
+- ownership handoff into the current workbench
+- availability and design-area hints
+- richer inspector properties when a node maps to a known app surface
 
 ## Target principles
 
@@ -20,3 +28,57 @@ At foundation stage:
 ## Target ownership
 
 Target ownership mapping belongs to the app integration layer, not the package.
+
+## Current app targets
+
+Current `apps/web` integration exposes a small semantic target set:
+
+- `app.chrome.topbar`
+- `app.timeline.controls`
+- `app.timeline.page-switch`
+- `app.timeline.filters`
+- `app.timeline.canvas`
+- `app.timeline.mode-dock`
+- `app.tasks.table`
+- `app.tasks.timeline`
+- `app.designers.timeline`
+- `app.designers.surface`
+- `app.designers.board`
+- `app.task.drawer`
+- `app.task.attachments`
+- `app.workbench.dock`
+
+## Current ownership shape
+
+Ownership refs are still app-owned and intentionally conservative.
+
+- baseline refs point to existing workbench tabs
+- richer refs may also point to app UI-style groups from `uiRegistry`
+- package code does not know where those refs came from
+
+## Metadata
+
+Targets may also expose small semantic metadata bags.
+
+- metadata stays app-owned
+- typical values describe scope, availability, mode, design area, tuning priority, owner tab, or other host-side facts
+- metadata is useful when a target exists in the semantic graph but is not currently mounted in the DOM
+
+Current metadata shape is intentionally lightweight:
+
+- `availability` communicates `live`, `conditional`, `mode-gated`, or `unmounted`
+- `designArea` helps group targets for design tuning
+- `tuningPriority` helps sort likely-important targets
+- `ownerTab` hints which workbench area is usually relevant
+
+## Parent-child rules
+
+Parent-child links stay explicit in the target registry.
+
+- `app.chrome.topbar` -> `app.workbench.dock`
+- `app.timeline.controls` -> `app.timeline.page-switch`, `app.timeline.filters`
+- `app.timeline.canvas` -> `app.timeline.mode-dock`
+- `app.designers.surface` -> `app.designers.board`
+- `app.task.drawer` -> `app.task.attachments`
+
+The semantic registry is not the primary inspector tree anymore. It is an enrichment layer over the DOM-derived tree and should stay intentionally small, stable, and product-meaningful.

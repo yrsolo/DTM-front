@@ -61,5 +61,18 @@ See: `docs/deep/TROUBLESHOOTING.md`
 # Workbench Inspector
 
 - [x] CAM-WORKBENCH-INSPECTOR-FOUNDATION - create package boundary, app integration seam, dev-only activation path, and baseline docs
-- [ ] CAM-WORKBENCH-INSPECTOR-SELECTION - semantic hover/select overlay
+- [x] CAM-WORKBENCH-INSPECTOR-SELECTION - semantic hover/select overlay
+- [x] CAM-WORKBENCH-INSPECTOR-NAVIGATION - DOM-first hierarchy tree, expand/collapse state, search, and pick-mode shell
+- [x] CAM-WORKBENCH-INSPECTOR-FOCUS-SETS - marked targets, focus-only filtering, local dev persistence
 - [ ] CAM-WORKBENCH-INSPECTOR-BINDINGS - target ownership mapping into current workbench
+- [ ] CAM-WORKBENCH-INSPECTOR-LIVE-COVERAGE - broaden verified target coverage across live surfaces
+
+## Session 2026-03-24
+- [x] Workbench Inspector bindings MVP expanded: semantic targets added for tasks timeline/table, designers timeline/board, task drawer, and attachments section.
+- [x] Inspector ownership refs now combine workbench tabs with app-side UI registry metadata for drawer / attachments / designers board without leaking app concerns into the package.
+- [x] Inspector selection no longer hijacks normal page clicks: live inspection now uses `Alt+Click`, and browser checks confirm normal drawer opening plus live targets for page switch and filters panel.
+- [x] Inspector sidebar now supports semantic target browsing and target metadata, including navigation to non-mounted targets like `app.designers.board` with explicit `mode-gated` status.
+- [x] Inspector hierarchy became a first-class tree: expand/collapse is independent from selection, search reveals semantic paths, and visibility badges stay app-owned.
+- [x] Inspector focus sets shipped as a dev-only package concern: targets can be marked from the tree or selected-target panel, focus mode hides unrelated branches, and local persistence survives reload.
+- [x] Inspector shell now has an always-visible draggable launcher for `?inspector=1`, can be expanded without prior selection, and collapses back into a narrow draggable button while preserving position.
+- [x] Inspector shell was rebuilt into a DOM-first Figma-like workspace: `react-arborist` tree on the left, mixed properties on the right, explicit pick-mode toggle with page shield, tree-hover page highlight, and semantic/workbench enrichment layered on top of universal node inspection.

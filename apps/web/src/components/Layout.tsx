@@ -661,7 +661,7 @@ export function Layout(props: { children: React.ReactNode }) {
     >
       <div className={appShellClassName} style={layoutVarsStyle}>
         {!isMiniAppRoute && !isPromoRoute && !isFormatSortRoute ? (
-          <div className="topbar">
+          <div className="topbar" data-inspector-target-id="app.chrome.topbar">
             <div className="nav">
               <div className="brand">
                 <button
@@ -699,7 +699,7 @@ export function Layout(props: { children: React.ReactNode }) {
           </div>
         ) : null}
         {!isPromoRoute && !isFormatSortRoute ? (
-          <div className="controlDock">
+          <div className="controlDock" data-inspector-target-id="app.workbench.dock">
             <ControlsWorkbench />
           </div>
         ) : null}

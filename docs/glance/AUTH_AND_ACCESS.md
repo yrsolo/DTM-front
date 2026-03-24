@@ -306,6 +306,10 @@ Auth runtime:
 Local frontend runtime:
 - `VITE_LOCAL_DEV_AUTH_TOKEN=<bootstrap token>`
 
+Convenience launch:
+- `npm run web:dev:test-local-auth`
+- or `scripts\dev_frontend_test_local_auth.cmd`
+
 Expected localhost behavior:
 - localhost still talks to public `test` auth / bff routes
 - Yandex / Telegram remain available as fallback

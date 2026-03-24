@@ -3536,7 +3536,7 @@ button:hover {
   grid-template-columns: 1fr;
   gap: 10px;
   min-height: 0;
-  min-width: 408px;
+  min-width: 0;
   align-content: start;
   justify-items: stretch;
   text-align: left;
@@ -3665,13 +3665,21 @@ button:hover {
 }
 
 .adminUserActionsFitDelete {
-  grid-template-columns: max-content minmax(0, 1fr);
+  grid-template-columns: max-content max-content;
+  justify-content: start;
 }
 
 .adminUserActionsFitDelete > button:first-of-type {
   width: max-content;
   justify-self: start;
-  padding-inline: 20px;
+  padding-inline: 18px;
+}
+
+.adminUserActionsFitDelete > button:last-of-type {
+  width: max-content;
+  justify-self: start;
+  padding-inline: 16px;
+  font-size: 13px;
 }
 
 .adminPresetToolbar {

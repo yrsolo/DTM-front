@@ -95,6 +95,7 @@ export function DesignersPage() {
       <div>
         <div
           className="card timelineScroll"
+          data-inspector-target-id="app.designers.timeline"
           ref={timelineHost.ref}
           onWheel={(e) => {
             e.preventDefault();

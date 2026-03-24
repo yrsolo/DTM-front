@@ -1,11 +1,11 @@
 import { useInspectorContext } from "../runtime/InspectorContext";
 
 export function useSelection() {
-  const { adapter, state, setSelectedTargetId } = useInspectorContext();
+  const { getNodeById, state, setSelectedNodeId } = useInspectorContext();
 
   return {
-    selectedTarget: state.selectedTargetId ? adapter.getTargetById(state.selectedTargetId) : null,
-    selectedTargetId: state.selectedTargetId,
-    selectTarget: setSelectedTargetId,
+    selectedNode: getNodeById(state.selectedNodeId),
+    selectedNodeId: state.selectedNodeId,
+    selectNode: setSelectedNodeId,
   };
 }

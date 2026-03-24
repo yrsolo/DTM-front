@@ -4,6 +4,7 @@ import { LayoutContext } from "../components/Layout";
 import { TaskDetailsDrawer } from "../components/TaskDetailsDrawer";
 import { MiniAppShell, MiniAppTab } from "../components/miniapp/MiniAppShell";
 import { MiniTaskListItem } from "../components/miniapp/MobileTaskList";
+import { ensureTelegramSdkLoaded } from "../config/telegramSdk";
 import { initTelegramMiniApp } from "../config/telegramRuntime";
 import { selectCurrentPersonLink } from "../data/selectors/sessionSelectors";
 import {
@@ -52,8 +53,23 @@ export function MobileAppPage(props: { mode: MobileSurfaceMode }) {
 
   React.useEffect(() => {
     if (!isTelegramMode) return;
-    initTelegramMiniApp();
-  }, [isTelegramMode]);
+    let cancelled = false;
+
+    void ensureTelegramSdkLoaded()
+      .then(async () => {
+        if (cancelled) return;
+        initTelegramMiniApp();
+        if (ctx?.authSession.state.authenticated) return;
+        await ctx?.authSession.startTelegramSession();
+      })
+      .catch(() => {
+        // Runtime diagnostics remain visible in the profile page if Telegram SDK is unreachable.
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [ctx, isTelegramMode]);
 
   if (!ctx) return null;
 

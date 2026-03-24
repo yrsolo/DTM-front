@@ -98,7 +98,7 @@ export function TasksPage() {
       ) : null}
 
       <div className="grid2">
-        <div className="card tablePinnedTop">
+        <div className="card tablePinnedTop" data-inspector-target-id="app.tasks.table">
           <table className="table tableFixedRows">
             <thead>
               <tr>
@@ -127,6 +127,7 @@ export function TasksPage() {
 
         <div
           className="card timelineScroll"
+          data-inspector-target-id="app.tasks.timeline"
           ref={timelineHost.ref}
           onWheel={(e) => {
             e.preventDefault();

@@ -889,12 +889,13 @@ export function TimelinePage() {
 
       <div
         className="timelineTopControlDock timelineTopControlDockExternal"
+        data-inspector-target-id="app.timeline.controls"
         style={{
           transform: `translate(${design.timelineTopControlDockOffsetX}px, ${design.timelineTopControlDockOffsetY}px)`,
         }}
       >
         <div className="timelineTopControlRow">
-          <div className="pageSwitchCtl">
+          <div className="pageSwitchCtl" data-inspector-target-id="app.timeline.page-switch">
             <button
               type="button"
               className={`modeMiniBtn ${pageView === "tasks" ? "active" : ""}`}
@@ -1241,7 +1242,7 @@ export function TimelinePage() {
         </div>
         {isRefreshPanelOpen ? <FiltersBar /> : null}
         {isDateFilterPanelOpen ? (
-          <div className="timelineDateFilterPanel">
+          <div className="timelineDateFilterPanel" data-inspector-target-id="app.timeline.filters">
             <div className="timelineDateFilterLayout">
               <div className="timelineDateFilterLeft">
                 <div className="timelineDateFilterRow">
@@ -1414,6 +1415,7 @@ export function TimelinePage() {
         {pageView === "tasks" ? (
           <div
             className="timelineModeDock"
+            data-inspector-target-id="app.timeline.mode-dock"
             style={{
               transform: `translate(${design.timelineModeDockOffsetX}px, ${design.timelineModeDockOffsetY}px)`,
               ["--mode-scale" as string]: String(design.timelineModeDockScale),
@@ -1462,6 +1464,7 @@ export function TimelinePage() {
         {pageView === "tasks" ? (
           <div
             className="card timelineScroll"
+            data-inspector-target-id="app.timeline.canvas"
             ref={timelineHost.ref}
             style={{
               overflow: "auto",
@@ -1621,7 +1624,11 @@ export function TimelinePage() {
             />
           </div>
         ) : (
-          <div className="card timelineScroll" style={{ overflow: "auto", paddingTop: 56 }}>
+          <div
+            className="card timelineScroll"
+            data-inspector-target-id="app.designers.surface"
+            style={{ overflow: "auto", paddingTop: 56 }}
+          >
             <DesignersBoard
               tasks={limitedTasks}
               people={snapshot.people}

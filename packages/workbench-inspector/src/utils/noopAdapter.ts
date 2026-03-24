@@ -4,19 +4,10 @@ export const noopInspectorAdapter: InspectorAdapter = {
   isEnabled() {
     return false;
   },
-  resolveTargetFromElement() {
-    return null;
+  canOpenNodeInWorkbench() {
+    return false;
   },
-  getTargetById() {
-    return null;
-  },
-  getParentTarget() {
-    return null;
-  },
-  getChildTargets() {
-    return [];
-  },
-  openTargetInWorkbench() {
+  openNodeInWorkbench() {
     // foundation no-op
   },
 };

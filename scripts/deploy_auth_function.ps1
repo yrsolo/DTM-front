@@ -83,6 +83,7 @@ $summary = [ordered]@{
   oauthClientIdEnv = $oauthClientIdEnvName
   oauthClientSecretEnv = $oauthClientSecretEnvName
   browserAuthProxySecret = "lockbox:BROWSER_AUTH_PROXY_SECRET"
+  telegramSdkProxyUrl = "lockbox:PROXY_URL"
   telegramBotToken = if ($env:TG_TOKEN) { "provided" } else { "not provided" }
   peopleSyncPath = $peopleSyncPath
   presetBucket = "dtm-presets"
@@ -124,7 +125,8 @@ $secretArgs = @(
   "--secret", "id=$($yc.lockbox_id),key=COOKIE_SAMESITE,environment-variable=COOKIE_SAMESITE",
   "--secret", "id=$($yc.lockbox_id),key=COOKIE_SECURE,environment-variable=COOKIE_SECURE",
   "--secret", "id=$($yc.lockbox_id),key=SESSION_TTL_SECONDS,environment-variable=SESSION_TTL_SECONDS",
-  "--secret", "id=$($yc.lockbox_id),key=BROWSER_AUTH_PROXY_SECRET,environment-variable=BROWSER_AUTH_PROXY_SECRET"
+  "--secret", "id=$($yc.lockbox_id),key=BROWSER_AUTH_PROXY_SECRET,environment-variable=BROWSER_AUTH_PROXY_SECRET",
+  "--secret", "id=$($yc.lockbox_id),key=PROXY_URL,environment-variable=PROXY_URL"
 )
 
 $oauthArgs = @()
