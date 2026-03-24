@@ -167,8 +167,11 @@ export function Layout(props: { children: React.ReactNode }) {
     loadLimit: runtimeDefaults.loadLimit,
   }));
   const authSession = useAuthSession();
-  const isPromoRoute = location.pathname === "/promo";
-  const isFormatSortRoute = location.pathname === "/format-sort" || location.pathname === "/designer-sort" || location.pathname === "/analytics";
+  const isPromoRoute = location.pathname === "/promo" || location.pathname === "/promo-draft";
+  const isFormatSortRoute =
+    location.pathname === "/format-sort" ||
+    location.pathname === "/designer-sort" ||
+    location.pathname === "/analytics";
   const snapshotState = useSnapshot(runtimeDefaults, {
     enabled: !authSession.blockInitialDataLoad && !isPromoRoute && !isFormatSortRoute,
   });

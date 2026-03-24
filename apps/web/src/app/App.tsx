@@ -3,19 +3,25 @@ import { BrowserRouter, Navigate, Route, Routes, useLocation } from "react-route
 
 import { Layout } from "../components/Layout";
 import { getFrontendBasePath } from "../config/runtimeContour";
+import { WorkbenchInspectorMount } from "../inspector-integration";
 import { AdminPage } from "../pages/AdminPage";
 import { MiniAppPage, MobileWebPage } from "../pages/MiniAppPage";
-import { PromoPage } from "../pages/PromoPage";
 import { TimelinePage } from "../pages/TimelinePage";
 
 const FormatSortPage = React.lazy(() =>
   import("../pages/FormatSortPage").then((module) => ({ default: module.FormatSortPage }))
 );
+const DesignerSortPage = React.lazy(() =>
+  import("../pages/DesignerSortPage").then((module) => ({ default: module.DesignerSortPage }))
+);
 const AnalyticsPage = React.lazy(() =>
   import("../pages/AnalyticsPage").then((module) => ({ default: module.AnalyticsPage }))
 );
-const DesignerSortPage = React.lazy(() =>
-  import("../pages/DesignerSortPage").then((module) => ({ default: module.DesignerSortPage }))
+const PromoPage = React.lazy(() =>
+  import("../pages/PromoPage").then((module) => ({ default: module.PromoPage }))
+);
+const PromoDraftPage = React.lazy(() =>
+  import("../pages/PromoDraftPage").then((module) => ({ default: module.PromoDraftPage }))
 );
 
 function isTabletUserAgent(userAgent: string): boolean {
@@ -55,11 +61,26 @@ export function App() {
       <Layout>
         <Routes>
           <Route path="/" element={<TimelineEntryPage />} />
-          <Route path="/promo" element={<PromoPage />} />
+          <Route
+            path="/promo"
+            element={
+              <React.Suspense fallback={<div className="card">Загружаем promo...</div>}>
+                <PromoPage />
+              </React.Suspense>
+            }
+          />
+          <Route
+            path="/promo-draft"
+            element={
+              <React.Suspense fallback={<div className="card">Загружаем promo draft...</div>}>
+                <PromoDraftPage />
+              </React.Suspense>
+            }
+          />
           <Route
             path="/format-sort"
             element={
-              <React.Suspense fallback={<div className="card">Loading format lab...</div>}>
+              <React.Suspense fallback={<div className="card">Загружаем лабораторию форматов...</div>}>
                 <FormatSortPage />
               </React.Suspense>
             }
@@ -67,16 +88,16 @@ export function App() {
           <Route
             path="/designer-sort"
             element={
-          <Route
-            path="/analytics"
-            element={
-              <React.Suspense fallback={<div className="card">Loading analytics...</div>}>
-                <AnalyticsPage />
+              <React.Suspense fallback={<div className="card">Загружаем лабораторию дизайнеров...</div>}>
+                <DesignerSortPage />
               </React.Suspense>
             }
           />
-              <React.Suspense fallback={<div className="card">????????? ??????????? ??????????...</div>}>
-                <DesignerSortPage />
+          <Route
+            path="/analytics"
+            element={
+              <React.Suspense fallback={<div className="card">Загружаем аналитику отдела...</div>}>
+                <AnalyticsPage />
               </React.Suspense>
             }
           />
@@ -86,6 +107,7 @@ export function App() {
           <Route path="/admin" element={<AdminPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
+        <WorkbenchInspectorMount />
       </Layout>
     </BrowserRouter>
   );

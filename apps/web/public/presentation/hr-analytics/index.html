@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HR Analytics Demo</title>
+    <meta
+      name="description"
+      content="Демонстрационная презентационная страница: аналитический HR-отчет по метрикам найма."
+    />
+    <script>
+      window.__HR_ASSET_BASE__ = window.location.pathname.endsWith("/") ? "./" : "./hr-analytics/";
+      const stylesheet = document.createElement("link");
+      stylesheet.rel = "stylesheet";
+      stylesheet.href = `${window.__HR_ASSET_BASE__}styles.css`;
+      document.head.appendChild(stylesheet);
+    </script>
+  </head>
+  <body>
+    <div class="pageShell">
+      <header class="demoHeader">
+        <div class="brandMark">DTM</div>
+        <div class="brandCopy">
+          <span class="brandEyebrow">Presentation Demo</span>
+          <strong>HR Analytics</strong>
+        </div>
+      </header>
+
+      <main class="demoMain">
+        <section id="slide-1-intro" class="slideIntro"></section>
+
+        <section class="heroCard">
+          <div class="heroCopy">
+            <span class="sectionEyebrow">Аналитический отчет</span>
+            <h1 id="hero-title"></h1>
+            <p id="hero-lead" class="heroLead"></p>
+            <div id="hero-summary" class="heroSummary"></div>
+          </div>
+
+          <div class="heroAside">
+            <div class="heroNoteCard">
+              <span class="sectionEyebrow">Как выглядело на слайде</span>
+              <p id="hero-layout-note"></p>
+            </div>
+            <div id="hero-stats" class="heroStats"></div>
+          </div>
+        </section>
+
+        <section class="analysisGrid">
+          <article class="panelCard panelCardWide">
+            <div class="panelHead">
+              <span class="sectionEyebrow">Воронка найма</span>
+              <h2>Этапы и конверсии</h2>
+            </div>
+            <div class="tableWrap">
+              <table class="stageTable">
+                <thead>
+                  <tr>
+                    <th>Этап</th>
+                    <th>Количество, чел.</th>
+                    <th>Конверсия к отклику, %</th>
+                    <th>Конверсия по этапам, %</th>
+                  </tr>
+                </thead>
+                <tbody id="stage-table-body"></tbody>
+              </table>
+            </div>
+          </article>
+
+          <article class="panelCard">
+            <div class="panelHead">
+              <span class="sectionEyebrow">Количественные показатели</span>
+              <h2>Ключевые KPI</h2>
+            </div>
+            <div id="summary-metrics" class="kpiStack"></div>
+          </article>
+
+          <article class="panelCard">
+            <div class="panelHead">
+              <span class="sectionEyebrow">Аналитические показатели</span>
+              <h2>Интерпретация конверсий</h2>
+            </div>
+            <div id="analysis-metrics" class="kpiStack"></div>
+          </article>
+        </section>
+
+        <section class="chartSection">
+          <article class="panelCard">
+            <div class="panelHead">
+              <span class="sectionEyebrow">Конверсия к откликам</span>
+              <h2>Горизонтальная диаграмма</h2>
+            </div>
+            <div id="response-chart" class="barChart" aria-label="Конверсия к откликам, проценты"></div>
+          </article>
+
+          <article class="panelCard">
+            <div class="panelHead">
+              <span class="sectionEyebrow">Конверсия по этапам</span>
+              <h2>Воронка</h2>
+            </div>
+            <div id="funnel-chart" class="funnelChart" aria-label="Конверсия по этапам, проценты"></div>
+          </article>
+        </section>
+
+        <section id="insights" class="insightSection"></section>
+
+        <section id="slide-2-intro" class="slideIntro"></section>
+        <section class="taskUniverseCard">
+          <div class="slideLayoutNote">
+            <span class="sectionEyebrow">Комментарий к исходнику</span>
+            <p id="slide-2-layout-note"></p>
+          </div>
+          <div id="task-universe-grid" class="taskUniverseGrid"></div>
+          <div class="sectionCaption">Круг задач HR-аналитика</div>
+        </section>
+
+        <section id="slide-3-intro" class="slideIntro"></section>
+        <section class="journeyCard">
+          <div class="slideLayoutNote">
+            <span class="sectionEyebrow">Комментарий к исходнику</span>
+            <p id="slide-3-layout-note"></p>
+          </div>
+          <div id="journey-steps" class="journeySteps"></div>
+        </section>
+      </main>
+    </div>
+
+    <script>
+      const contentScript = document.createElement("script");
+      contentScript.src = `${window.__HR_ASSET_BASE__}content.js`;
+      document.body.appendChild(contentScript);
+
+      const appScript = document.createElement("script");
+      appScript.src = `${window.__HR_ASSET_BASE__}app.js`;
+      document.body.appendChild(appScript);
+    </script>
+  </body>
+</html>

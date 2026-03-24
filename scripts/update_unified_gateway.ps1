@@ -262,6 +262,18 @@ paths:
         type: http
         url: $testFrontend/index.html
 
+  /test/promo-draft:
+    x-yc-apigateway-any-method:
+      x-yc-apigateway-integration:
+        type: http
+        url: $testFrontend/index.html
+
+  /test/promo-draft/:
+    x-yc-apigateway-any-method:
+      x-yc-apigateway-integration:
+        type: http
+        url: $testFrontend/index.html
+
   /test/{path+}:
     x-yc-apigateway-any-method:
       parameters:
@@ -323,6 +335,18 @@ paths:
         url: $prodFrontend/index.html
 
   /promo/:
+    x-yc-apigateway-any-method:
+      x-yc-apigateway-integration:
+        type: http
+        url: $prodFrontend/index.html
+
+  /promo-draft:
+    x-yc-apigateway-any-method:
+      x-yc-apigateway-integration:
+        type: http
+        url: $prodFrontend/index.html
+
+  /promo-draft/:
     x-yc-apigateway-any-method:
       x-yc-apigateway-integration:
         type: http

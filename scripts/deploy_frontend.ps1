@@ -176,6 +176,28 @@ function Get-ReleaseId {
   return "$DeployTarget-$datePart-$shaPart"
 }
 
+function Get-HtmlAliasTargets {
+  param([string]$RootDir)
+
+  $rootPath = (Resolve-Path $RootDir).Path
+  $rootIndex = Join-Path $rootPath "index.html"
+
+  return Get-ChildItem -Path $rootPath -Recurse -Filter "index.html" -File |
+    Where-Object { $_.FullName -ne $rootIndex } |
+    ForEach-Object {
+      $relativePath = $_.FullName.Substring($rootPath.Length).TrimStart('\', '/')
+      $directoryPath = Split-Path -Path $relativePath -Parent
+      if ([string]::IsNullOrWhiteSpace($directoryPath)) {
+        return
+      }
+
+      [PSCustomObject]@{
+        SourcePath = $_.FullName
+        AliasKey = ($directoryPath -replace '\\', '/')
+      }
+    }
+}
+
 $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
 $webDir = Join-Path $repoRoot "apps/web"
 $distDir = Join-Path $webDir "dist"
@@ -366,6 +388,19 @@ try {
     Write-Host "[DRY-RUN] aws s3 cp `"$distDir/index.html`" `"$indexTarget`" --endpoint-url `"$endpoint`" --content-type `"text/html; charset=utf-8`" --cache-control no-cache"
   } else {
     Invoke-Checked { aws s3 cp (Join-Path $distDir "index.html") $indexTarget --endpoint-url $endpoint --content-type "text/html; charset=utf-8" --cache-control "no-cache" }
+  }
+
+  $htmlAliases = @(Get-HtmlAliasTargets -RootDir $distDir)
+  if ($htmlAliases.Count -gt 0) {
+    Write-Host "Uploading static HTML aliases ..."
+    foreach ($alias in $htmlAliases) {
+      $aliasTarget = "s3://$bucket/$($alias.AliasKey)"
+      if ($DryRun) {
+        Write-Host "[DRY-RUN] aws s3 cp `"$($alias.SourcePath)`" `"$aliasTarget`" --endpoint-url `"$endpoint`" --content-type `"text/html; charset=utf-8`" --cache-control no-cache"
+      } else {
+        Invoke-Checked { aws s3 cp $alias.SourcePath $aliasTarget --endpoint-url $endpoint --content-type "text/html; charset=utf-8" --cache-control "no-cache" }
+      }
+    }
   }
 
   Write-Host "Uploading release metadata ..."

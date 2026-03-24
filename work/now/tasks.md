@@ -58,3 +58,8 @@ See: `docs/deep/TROUBLESHOOTING.md`
 
 ## Session 2026-03-20
 - [x] Designer-sort name source corrected: full format-sort snapshots now preserve `people`, `/designer-sort` resolves historical designers from snapshot people first, and approved auth people seed automatic `В штате` grouping.
+# Workbench Inspector
+
+- [x] CAM-WORKBENCH-INSPECTOR-FOUNDATION - create package boundary, app integration seam, dev-only activation path, and baseline docs
+- [ ] CAM-WORKBENCH-INSPECTOR-SELECTION - semantic hover/select overlay
+- [ ] CAM-WORKBENCH-INSPECTOR-BINDINGS - target ownership mapping into current workbench

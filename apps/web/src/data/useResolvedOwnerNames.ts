@@ -8,13 +8,13 @@ export function useResolvedOwnerNames(tasks: TaskV1[], enabled: boolean) {
 
   React.useEffect(() => {
     if (!enabled) {
-      setResolvedOwnerNames({});
+      setResolvedOwnerNames((prev) => (Object.keys(prev).length ? {} : prev));
       return;
     }
 
     const ownerIds = [...new Set(tasks.map((task) => task.ownerId?.trim() ?? "").filter(Boolean))];
     if (!ownerIds.length) {
-      setResolvedOwnerNames({});
+      setResolvedOwnerNames((prev) => (Object.keys(prev).length ? {} : prev));
       return;
     }
 

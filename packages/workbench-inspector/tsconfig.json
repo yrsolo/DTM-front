@@ -1,7 +1,6 @@
 {
   "compilerOptions": {
     "target": "ES2022",
-    "useDefineForClassFields": true,
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "module": "ESNext",
     "skipLibCheck": true,
@@ -10,13 +9,7 @@
     "isolatedModules": true,
     "noEmit": true,
     "jsx": "react-jsx",
-    "strict": true,
-    "types": ["vite/client"],
-    "baseUrl": ".",
-    "paths": {
-      "@dtm/schema/*": ["../../packages/schema/*"],
-      "@dtm/workbench-inspector": ["../../packages/workbench-inspector/src/public.ts"]
-    }
+    "strict": true
   },
   "include": ["src"]
 }

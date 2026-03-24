@@ -1,0 +1,539 @@
+:root {
+  color-scheme: light;
+  --panel: rgba(255, 255, 255, 0.92);
+  --panel-strong: rgba(255, 255, 255, 0.98);
+  --panel-border: rgba(186, 202, 226, 0.52);
+  --text: #10233f;
+  --muted: #6c7f9d;
+  --muted-strong: #495f82;
+  --accent: #0f6fe8;
+  --accent-2: #2e8fff;
+  --accent-3: #6d7dff;
+  --danger: #d94a63;
+  --warning: #d9991d;
+  --success: #169d72;
+  --shadow: 0 24px 60px rgba(69, 100, 150, 0.14);
+  --radius-xl: 34px;
+  --radius-lg: 24px;
+  --page-width: 1320px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+  font-family: "Segoe UI", "Inter", "Helvetica Neue", sans-serif;
+  background:
+    radial-gradient(circle at top left, rgba(68, 138, 255, 0.08), transparent 22%),
+    radial-gradient(circle at top right, rgba(165, 191, 255, 0.2), transparent 28%),
+    linear-gradient(180deg, #f7f9fe 0%, #eef3fb 100%);
+  color: var(--text);
+}
+
+body {
+  min-width: 320px;
+}
+
+.pageShell {
+  width: min(calc(100vw - 64px), var(--page-width));
+  margin: 0 auto;
+  padding: 40px 0 88px;
+}
+
+.demoHeader {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 40px;
+}
+
+.brandMark {
+  width: 56px;
+  height: 56px;
+  border-radius: 18px;
+  display: grid;
+  place-items: center;
+  background: #ffffff;
+  border: 1px solid rgba(199, 210, 229, 0.9);
+  color: #0f1726;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  box-shadow: var(--shadow);
+}
+
+.brandCopy {
+  display: grid;
+  gap: 4px;
+}
+
+.brandEyebrow,
+.sectionEyebrow,
+.insightTag,
+.slideIndex {
+  color: #6f86a9;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.demoMain {
+  display: grid;
+  gap: 34px;
+}
+
+.slideIntro {
+  display: grid;
+  grid-template-columns: 110px 1fr;
+  gap: 24px;
+  align-items: start;
+  padding: 18px 2px 2px;
+}
+
+.slideIntro h2 {
+  margin: 0 0 10px;
+  font-size: clamp(30px, 3.9vw, 46px);
+  line-height: 1.02;
+  letter-spacing: -0.04em;
+}
+
+.slideIntro p,
+.slideLayoutNote p,
+.heroNoteCard p {
+  margin: 0;
+  color: var(--muted-strong);
+  line-height: 1.72;
+}
+
+.heroCard,
+.panelCard,
+.insightCard,
+.taskUniverseCard,
+.journeyCard {
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--panel-border);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(245, 248, 253, 0.96));
+  box-shadow: var(--shadow);
+}
+
+.heroCard {
+  padding: 44px;
+  display: grid;
+  grid-template-columns: 1.02fr 0.98fr;
+  gap: 32px;
+  align-items: start;
+}
+
+.heroCopy {
+  display: grid;
+  gap: 18px;
+}
+
+.heroCopy h1 {
+  margin: 0;
+  font-size: clamp(38px, 5vw, 62px);
+  line-height: 0.98;
+  letter-spacing: -0.05em;
+}
+
+.heroLead {
+  margin: 0;
+  max-width: 64ch;
+  color: var(--muted-strong);
+  font-size: 18px;
+  line-height: 1.72;
+}
+
+.heroSummary,
+.kpiStack,
+.barChart,
+.funnelChart,
+.taskUniverseGrid,
+.journeySteps,
+.analysisGrid,
+.chartSection,
+.insightSection,
+.heroAside {
+  display: grid;
+  gap: 18px;
+}
+
+.heroAside,
+.analysisGrid,
+.chartSection,
+.insightSection,
+.taskUniverseGrid,
+.journeySteps {
+  gap: 28px;
+}
+
+.summaryItem,
+.metricCard,
+.miniMetric,
+.taskItem,
+.journeyStep,
+.slideLayoutNote,
+.heroNoteCard {
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(198, 209, 228, 0.78);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(245, 248, 252, 0.96));
+  box-shadow: 0 16px 36px rgba(78, 109, 158, 0.1);
+}
+
+.summaryItem,
+.miniMetric {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.summaryItem,
+.metricCard,
+.miniMetric,
+.taskItem,
+.journeyStep,
+.slideLayoutNote,
+.heroNoteCard {
+  padding: 22px 22px 24px;
+}
+
+.summaryText,
+.miniMetricCopy {
+  display: grid;
+  gap: 4px;
+}
+
+.summaryText strong {
+  font-size: 16px;
+}
+
+.summaryText span,
+.miniMetric span {
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.iconBadge {
+  width: 42px;
+  height: 42px;
+  flex: 0 0 42px;
+  display: grid;
+  place-items: center;
+  border-radius: 14px;
+  background: #f2f7ff;
+  border: 1px solid rgba(170, 197, 237, 0.56);
+}
+
+.iconBadge svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.9;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.iconAccent-blue { color: var(--accent); }
+.iconAccent-violet { color: var(--accent-3); }
+.iconAccent-green { color: var(--success); }
+.iconAccent-red { color: var(--danger); }
+.iconAccent-amber { color: var(--warning); }
+
+.heroStats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.metricCard {
+  min-height: 172px;
+}
+
+.metricLabel {
+  display: block;
+  margin-top: 14px;
+  min-height: 44px;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.metricValue,
+.miniMetric strong {
+  display: block;
+  margin-top: 8px;
+  color: var(--accent);
+  font-size: clamp(38px, 5vw, 68px);
+  line-height: 0.94;
+  letter-spacing: -0.05em;
+}
+
+.analysisGrid {
+  grid-template-columns: 1.12fr 0.88fr 0.88fr;
+}
+
+.chartSection {
+  grid-template-columns: 1fr 1fr;
+}
+
+.insightSection {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.panelCard,
+.insightCard,
+.taskUniverseCard,
+.journeyCard {
+  padding: 34px;
+}
+
+.panelHead {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+
+.panelHead h2,
+.insightCard h3,
+.taskItem h3,
+.journeyStep h3 {
+  margin: 0;
+  font-size: 24px;
+  line-height: 1.18;
+}
+
+.tableWrap {
+  overflow-x: auto;
+}
+
+.stageTable {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 640px;
+}
+
+.stageTable th,
+.stageTable td {
+  padding: 15px 14px;
+  text-align: left;
+  border-bottom: 1px solid rgba(202, 213, 233, 0.72);
+}
+
+.stageTable th {
+  color: var(--muted);
+  font-weight: 700;
+  font-size: 13px;
+}
+
+.stageTable td {
+  color: var(--text);
+  font-size: 15px;
+}
+
+.barRow {
+  display: grid;
+  grid-template-columns: 170px 1fr 56px;
+  align-items: center;
+  gap: 14px;
+}
+
+.barLabel {
+  color: var(--muted-strong);
+  font-size: 14px;
+}
+
+.barTrack {
+  position: relative;
+  height: 16px;
+  border-radius: 999px;
+  background: #e5edf8;
+  overflow: hidden;
+}
+
+.barFill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
+}
+
+.barValue {
+  text-align: right;
+  color: var(--text);
+  font-weight: 700;
+}
+
+.funnelRow {
+  display: grid;
+  gap: 8px;
+}
+
+.funnelLabel {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  color: var(--muted-strong);
+  font-size: 14px;
+}
+
+.funnelBar {
+  height: 42px;
+  margin: 0 auto;
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+  color: #ffffff;
+  font-weight: 700;
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18);
+}
+
+.insightCard {
+  display: grid;
+  gap: 14px;
+}
+
+.insightHead,
+.taskHeader,
+.journeyStepHead {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.insightCard p,
+.insightCard li,
+.taskItem li,
+.journeyStep li,
+.journeyStep p {
+  color: var(--muted-strong);
+  line-height: 1.72;
+}
+
+.insightCard ul,
+.taskItem ul,
+.journeyStep ul {
+  margin: 0;
+  padding-left: 18px;
+}
+
+.insightCardRisk {
+  grid-column: span 2;
+  background: linear-gradient(180deg, rgba(255, 245, 247, 0.98), rgba(255, 251, 252, 0.96));
+}
+
+.taskUniverseGrid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: start;
+}
+
+.taskItem,
+.journeyStep {
+  display: grid;
+  gap: 14px;
+}
+
+.taskNum,
+.journeyBadge {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(135deg, #dcecff, #edf3ff);
+  border: 1px solid rgba(172, 195, 234, 0.72);
+  color: var(--accent);
+  font-weight: 800;
+  flex: 0 0 34px;
+}
+
+.sectionCaption {
+  text-align: right;
+  color: #c44c60;
+  font-weight: 700;
+}
+
+.journeySteps {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.journeyStep {
+  position: relative;
+  min-height: 100%;
+}
+
+.journeyStep::after {
+  content: "";
+  position: absolute;
+  top: 34px;
+  right: -18px;
+  width: 12px;
+  height: 12px;
+  border-top: 2px solid rgba(46, 143, 255, 0.45);
+  border-right: 2px solid rgba(46, 143, 255, 0.45);
+  transform: rotate(45deg);
+}
+
+.journeyStep:nth-child(3)::after,
+.journeyStep:last-child::after {
+  display: none;
+}
+
+@media (max-width: 1180px) {
+  .heroCard,
+  .analysisGrid,
+  .chartSection,
+  .insightSection,
+  .journeySteps {
+    grid-template-columns: 1fr;
+  }
+
+  .heroStats,
+  .taskUniverseGrid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .insightCardRisk {
+    grid-column: auto;
+  }
+
+  .journeyStep::after {
+    display: none;
+  }
+}
+
+@media (max-width: 760px) {
+  .pageShell {
+    width: min(calc(100vw - 24px), var(--page-width));
+    padding: 18px 0 40px;
+  }
+
+  .heroCard,
+  .panelCard,
+  .insightCard,
+  .taskUniverseCard,
+  .journeyCard {
+    padding: 24px;
+    border-radius: 24px;
+  }
+
+  .slideIntro,
+  .heroStats,
+  .taskUniverseGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .barRow {
+    grid-template-columns: 1fr;
+  }
+
+  .barValue {
+    text-align: left;
+  }
+}

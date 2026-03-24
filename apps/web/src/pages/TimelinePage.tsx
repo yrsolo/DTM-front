@@ -555,31 +555,9 @@ export function TimelinePage() {
     return () => host.removeEventListener("wheel", onWheel, true);
   }, [snapshot, timelineHost.width, timelineHost.ref]);
 
-  if (!snapshot) {
-    return (
-      <div className="card" style={{ minHeight: 160 }}>
-        <h3 style={{ marginTop: 0, marginBottom: 8 }}>
-          {isLoading ? ui.common.loadingTitle : ui.common.noDataTitle}
-        </h3>
-        <p className="muted" style={{ marginTop: 0 }}>
-          {isLoading ? ui.common.loadingHint : ui.common.noDataHint}
-        </p>
-        {error ? (
-          <div className="muted" style={{ color: "#ffb8c8", marginBottom: 8 }}>
-            {String(error)}
-          </div>
-        ) : null}
-        <div className="row" style={{ marginTop: 10 }}>
-          <button onClick={() => { void syncFromApi(); }}>{ui.filters.updateFromApi}</button>
-          <button onClick={() => { void reloadLocal(); }}>{ui.filters.updateFromLocal}</button>
-        </div>
-      </div>
-    );
-  }
+  const statusLabels = snapshot?.enums?.status ?? {};
 
-  const statusLabels = snapshot.enums?.status ?? {};
-
-  const tasks = snapshot.tasks.filter((t) => {
+  const tasks = (snapshot?.tasks ?? []).filter((t) => {
     if (!canViewAllTasks && authSession.state.authenticated) {
       if (!taskMatchesCurrentPersonWithResolvedOwners(t, currentPersonLink, resolvedOwnerNames, peopleById)) return false;
     } else if (filters.ownerId && t.ownerId !== filters.ownerId) {
@@ -628,7 +606,7 @@ export function TimelinePage() {
   });
   const limitedTasks = tasksByFreshEnd.slice(0, safeLimit);
 
-  const selectedTask = selectedId ? snapshot.tasks.find((t) => t.id === selectedId) ?? null : null;
+  const selectedTask = selectedId && snapshot ? snapshot.tasks.find((t) => t.id === selectedId) ?? null : null;
 
   const onHover = (
     e: React.MouseEvent,
@@ -796,6 +774,28 @@ export function TimelinePage() {
     if (typeof window === "undefined") return;
     window.localStorage.setItem(DEV_AUTH_PERSONA_STORAGE_KEY, devSelectedPersonaId);
   }, [devSelectedPersonaId]);
+
+  if (!snapshot) {
+    return (
+      <div className="card" style={{ minHeight: 160 }}>
+        <h3 style={{ marginTop: 0, marginBottom: 8 }}>
+          {isLoading ? ui.common.loadingTitle : ui.common.noDataTitle}
+        </h3>
+        <p className="muted" style={{ marginTop: 0 }}>
+          {isLoading ? ui.common.loadingHint : ui.common.noDataHint}
+        </p>
+        {error ? (
+          <div className="muted" style={{ color: "#ffb8c8", marginBottom: 8 }}>
+            {String(error)}
+          </div>
+        ) : null}
+        <div className="row" style={{ marginTop: 10 }}>
+          <button onClick={() => { void syncFromApi(); }}>{ui.filters.updateFromApi}</button>
+          <button onClick={() => { void reloadLocal(); }}>{ui.filters.updateFromLocal}</button>
+        </div>
+      </div>
+    );
+  }
 
   const onDesignerCardHover = (e: React.MouseEvent, task: TaskV1) => {
     const manager = task.customer?.trim() || "-";
