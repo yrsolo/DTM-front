@@ -1,5 +1,6 @@
 import React from "react";
 import { GroupV1, PersonV1, TaskV1 } from "@dtm/schema/snapshot";
+import { InspectorNodeBoundary } from "@dtm/workbench-inspector";
 
 const MAX_DESIGNER_COLUMNS = 10;
 
@@ -87,6 +88,12 @@ export function DesignersBoard(props: {
   }, [props.tasks, peopleById, props.unassignedLabel]);
 
   return (
+    <InspectorNodeBoundary
+      label="Designers board"
+      kind="content"
+      semanticTargetId="app.designers.board"
+      sourcePath="apps/web/src/components/DesignersBoard.tsx"
+    >
     <div className="designersBoardScroll" data-inspector-target-id="app.designers.board">
       <div className="designersBoard" style={{ ["--designer-cols" as string]: String(Math.max(1, columns.length)) }}>
         {columns.map((column) => (
@@ -136,5 +143,6 @@ export function DesignersBoard(props: {
         ))}
       </div>
     </div>
+    </InspectorNodeBoundary>
   );
 }

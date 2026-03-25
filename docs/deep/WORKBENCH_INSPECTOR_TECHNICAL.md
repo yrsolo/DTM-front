@@ -1,6 +1,6 @@
 # Workbench Inspector Technical
 
-`Workbench Inspector` — это package-owned universal inspector для local dev, который строит дерево из live DOM, а затем при возможности обогащает узлы app-specific semantic данными.
+`Workbench Inspector` — это package-owned universal inspector для local dev, который строит дерево из runtime-структуры React, а затем при возможности обогащает узлы app-specific semantic данными.
 
 Этот документ описывает текущее состояние системы: как inspector включается, как собирает дерево, что показывает в разных режимах и где проходит граница между generic package и app bridge.
 
@@ -13,7 +13,7 @@ Inspector разделён на два слоя:
 
 Package владеет:
 
-- DOM-first scanning;
+- React-first runtime registry;
 - runtime tree model;
 - shell / launcher;
 - `Pick mode`;
@@ -61,28 +61,30 @@ Primary unit — это `InspectorNode`.
 - `id` — runtime node id;
 - `label` — отображаемое имя;
 - `kind` — `semantic | control | content | text | image | container | unknown`;
-- `tagName` — исходный DOM tag;
+- `componentName` — имя React-компонента или boundary;
+- `tagName` — DOM anchor tag, если он есть;
 - `path` — runtime path;
+- `ownerPath` — React ownership path;
 - `children` — дочерние узлы;
 - `bounds` — текущий прямоугольник на странице;
 - `isVisible`;
 - `isInteractive`;
 - `semanticTargetId` — optional enrichment anchor.
 
-Текущее дерево строится в [`packages/workbench-inspector/src/utils/domInspector.ts`](/n:/PROJECTS/DTM/DTM-front/packages/workbench-inspector/src/utils/domInspector.ts).
+Текущее дерево строится через runtime registry в [`packages/workbench-inspector/src/runtime/InspectorRuntimeRegistry.ts`](/n:/PROJECTS/DTM/DTM-front/packages/workbench-inspector/src/runtime/InspectorRuntimeRegistry.ts) и dev-only boundary layer в [`packages/workbench-inspector/src/runtime/InspectorNodeBoundary.tsx`](/n:/PROJECTS/DTM/DTM-front/packages/workbench-inspector/src/runtime/InspectorNodeBoundary.tsx).
 
-Важные свойства текущего сканера:
+Важные свойства текущей runtime-модели:
 
-- inspector идёт от live DOM, а не от React component tree;
-- scanner исключает собственную inspector-shell subtree;
-- scanner умеет проходить не только `HTMLElement`, но и более общий `Element`, поэтому в дерево попадают и SVG-backed ветки вроде timeline;
+- inspector идёт от React runtime graph, а не от обхода `document.body`;
+- boundary layer автоматически выдаёт technical runtime ids;
+- DOM используется как secondary anchor layer для highlight, pick mode и reveal-on-page;
 - `data-inspector-target-id` используется как optional semantic marker, а не как primary source of truth.
 
 Почему semantic registry не является primary tree:
 
-- inspector должен работать на любой странице, даже без специальной host-разметки;
+- inspector должен работать на любой странице, даже без полной ручной semantic-разметки;
 - app-side semantic mapping покрывает только важные продуктовые зоны;
-- generic DOM tree нужен как baseline navigation layer.
+- generic React tree нужен как baseline navigation layer.
 
 ## 4. Semantic enrichment
 
@@ -158,7 +160,7 @@ Inspector неактивен и не влияет на страницу.
 
 ### `All`
 
-Показывает все текущие узлы дерева.
+Показывает все текущие зарегистрированные React-узлы дерева.
 
 ### `Focus`
 
@@ -166,13 +168,13 @@ Inspector неактивен и не влияет на страницу.
 
 Это package-owned filtering, а не host-owned editor state.
 
-### `Smart DOM`
+### `Meaningful components`
 
-Пытается убрать часть runtime wrapper noise и оставить более meaningful DOM view.
+Пытается убрать часть runtime wrapper noise и оставить более meaningful React view.
 
-### `Raw DOM`
+### `All registered nodes`
 
-Показывает более полный runtime tree и полезен для глубокого анализа структуры страницы.
+Показывает более полный runtime graph зарегистрированных React-узлов.
 
 ## 6. Tree behavior
 
@@ -195,8 +197,8 @@ Search:
 
 SVG-backed nodes:
 
-- timeline и похожие графические subtree больше не обрываются на контейнере;
-- узлы внутри SVG могут попадать в inspector tree, потому что scanner работает по `Element`, а не только по `HTMLElement`.
+- timeline и похожие графические subtree больше не схлопывают дерево до внешнего контейнера;
+- highlight и pick mode продолжают работать по DOM anchors, даже если primary tree уже React-first.
 
 ## 7. Selection, hover и highlight flow
 
@@ -295,7 +297,7 @@ Inspector сейчас intentionally не делает следующее:
 
 Текущий фокус системы:
 
-- universal DOM-first navigation;
+- universal React-first navigation;
 - semantic enrichment поверх generic tree;
 - design-tuning workflows через selection, hover, focus set и workbench bridge.
 

@@ -16,6 +16,7 @@ import { readMaskingMode, writeMaskingMode } from "../auth/maskingMode";
 import { canUseLocalDevAuthUi } from "../config/localDevAuth";
 import { useElementWidth } from "../utils/useElementWidth";
 import { toShortPersonName } from "../utils/personName";
+import { InspectorNodeBoundary } from "@dtm/workbench-inspector";
 
 const ZOOM_PRESETS = [0.1, 0.2, 0.3, 0.4, 0.5, 0.75, 1, 1.25, 1.5, 2, 3, 4, 5, 6, 8, 10];
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -404,6 +405,7 @@ export function TimelinePage() {
     setFilters,
     snapshotState,
     design,
+    effectiveDesign,
     setDesign,
     ui,
     locale,
@@ -480,7 +482,8 @@ export function TimelinePage() {
       setViewMode("brand_designer_show");
     }
   }, [canUseDesignerGrouping, viewMode, setViewMode]);
-  const rowH = design.tableRowHeight;
+  const designState = effectiveDesign ?? design;
+  const rowH = designState.tableRowHeight;
   const peopleById = React.useMemo(() => {
     const map = new Map<string, string>();
     for (const p of snapshot?.people ?? []) map.set(p.id, p.name);
@@ -616,7 +619,7 @@ export function TimelinePage() {
     const manager = t.customer ?? "-";
     const history = (t.history ?? "").trim();
     const dateLabel = meta?.date ? formatDdMm(meta.date) : "-";
-    const bubbleScale = Math.max(0.6, design.tooltipBubbleScale ?? 1);
+    const bubbleScale = Math.max(0.6, designState.tooltipBubbleScale ?? 1);
     const bubbleStyle: React.CSSProperties = {
       fontSize: `${Math.round(11 * bubbleScale)}px`,
       padding: `${Math.round(3 * bubbleScale)}px ${Math.round(9 * bubbleScale)}px`,
@@ -851,10 +854,10 @@ export function TimelinePage() {
     });
   };
 
-  const timelineWidth = Math.max(timelineHost.width, design.timelineWidth);
-  const showMilestoneLabels = design.timelineShowMilestoneLabels >= 0.5;
-  const labelEveryDay = design.timelineLabelEveryDay >= 0.5;
-  const weekendFillMode = design.timelineWeekendFullDay >= 0.5 ? "full-day" : "legacy";
+  const timelineWidth = Math.max(timelineHost.width, designState.timelineWidth);
+  const showMilestoneLabels = designState.timelineShowMilestoneLabels >= 0.5;
+  const labelEveryDay = designState.timelineLabelEveryDay >= 0.5;
+  const weekendFillMode = designState.timelineWeekendFullDay >= 0.5 ? "full-day" : "legacy";
   const exactZoomPreset = ZOOM_PRESETS.find((z) => Math.abs(z - zoom) < 0.001);
   const zoomPresetValue = exactZoomPreset ? String(exactZoomPreset) : "__custom__";
 
@@ -877,24 +880,48 @@ export function TimelinePage() {
   };
 
   return (
+    <InspectorNodeBoundary label="Timeline page" kind="content" sourcePath="apps/web/src/pages/TimelinePage.tsx">
     <>
       {status === "stale_error" && error ? (
-        <ErrorBanner
-          compact
-          title={ui.timeline.staleTitle}
-          error={error}
-          onRetry={reloadLocal}
-        />
+        <InspectorNodeBoundary
+          label="Timeline error banner"
+          kind="content"
+          sourcePath="apps/web/src/pages/TimelinePage.tsx"
+        >
+          <ErrorBanner
+            compact
+            title={ui.timeline.staleTitle}
+            error={error}
+            onRetry={reloadLocal}
+          />
+        </InspectorNodeBoundary>
       ) : null}
 
+      <InspectorNodeBoundary
+        label="Timeline controls dock"
+        kind="content"
+        semanticTargetId="app.timeline.controls"
+        sourcePath="apps/web/src/pages/TimelinePage.tsx"
+      >
       <div
         className="timelineTopControlDock timelineTopControlDockExternal"
         data-inspector-target-id="app.timeline.controls"
         style={{
-          transform: `translate(${design.timelineTopControlDockOffsetX}px, ${design.timelineTopControlDockOffsetY}px)`,
+          transform: `translate(${designState.timelineTopControlDockOffsetX}px, ${designState.timelineTopControlDockOffsetY}px)`,
         }}
       >
+        <InspectorNodeBoundary
+          label="Timeline top controls row"
+          kind="control"
+          sourcePath="apps/web/src/pages/TimelinePage.tsx"
+        >
         <div className="timelineTopControlRow">
+          <InspectorNodeBoundary
+            label="Timeline page switch"
+            kind="control"
+            semanticTargetId="app.timeline.page-switch"
+            sourcePath="apps/web/src/pages/TimelinePage.tsx"
+          >
           <div className="pageSwitchCtl" data-inspector-target-id="app.timeline.page-switch">
             <button
               type="button"
@@ -913,8 +940,14 @@ export function TimelinePage() {
               </button>
             ) : null}
           </div>
+          </InspectorNodeBoundary>
           {pageView === "tasks" ? (
             <>
+              <InspectorNodeBoundary
+                label="Timeline zoom controls"
+                kind="control"
+                sourcePath="apps/web/src/pages/TimelinePage.tsx"
+              >
               <div className="timelineZoomCtl">
                 <button
                   type="button"
@@ -954,6 +987,12 @@ export function TimelinePage() {
                   +
                 </button>
               </div>
+              </InspectorNodeBoundary>
+              <InspectorNodeBoundary
+                label="Timeline today button"
+                kind="control"
+                sourcePath="apps/web/src/pages/TimelinePage.tsx"
+              >
               <button
                 type="button"
                 className="timelineTodayBtn"
@@ -961,6 +1000,7 @@ export function TimelinePage() {
               >
                 Сегодня
               </button>
+              </InspectorNodeBoundary>
             </>
           ) : null}
           <button
@@ -976,7 +1016,7 @@ export function TimelinePage() {
           </button>
           <button
             type="button"
-            className={`iconCtlBtn ${design.animEnabled >= 0.5 ? "active" : ""}`}
+            className={`iconCtlBtn ${designState.animEnabled >= 0.5 ? "active" : ""}`}
             onClick={() =>
               setDesign((prev) => ({
                 ...prev,
@@ -1055,6 +1095,11 @@ export function TimelinePage() {
           >
             <LockIcon />
           </button>
+          <InspectorNodeBoundary
+            label="Timeline auth controls"
+            kind="control"
+            sourcePath="apps/web/src/pages/TimelinePage.tsx"
+          >
           <div className="authMenuWrap" ref={authMenuRef}>
             <button
               type="button"
@@ -1239,9 +1284,17 @@ export function TimelinePage() {
               </div>
             ) : null}
           </div>
+          </InspectorNodeBoundary>
         </div>
+        </InspectorNodeBoundary>
         {isRefreshPanelOpen ? <FiltersBar /> : null}
         {isDateFilterPanelOpen ? (
+          <InspectorNodeBoundary
+            label="Timeline filters panel"
+            kind="content"
+            semanticTargetId="app.timeline.filters"
+            sourcePath="apps/web/src/pages/TimelinePage.tsx"
+          >
           <div className="timelineDateFilterPanel" data-inspector-target-id="app.timeline.filters">
             <div className="timelineDateFilterLayout">
               <div className="timelineDateFilterLeft">
@@ -1407,18 +1460,26 @@ export function TimelinePage() {
               </div>
             </div>
           </div>
+          </InspectorNodeBoundary>
         ) : null}
       </div>
+      </InspectorNodeBoundary>
 
       <div className="card">
       <div className="timelineFrame">
         {pageView === "tasks" ? (
+          <InspectorNodeBoundary
+            label="Timeline mode dock"
+            kind="control"
+            semanticTargetId="app.timeline.mode-dock"
+            sourcePath="apps/web/src/pages/TimelinePage.tsx"
+          >
           <div
             className="timelineModeDock"
             data-inspector-target-id="app.timeline.mode-dock"
             style={{
-              transform: `translate(${design.timelineModeDockOffsetX}px, ${design.timelineModeDockOffsetY}px)`,
-              ["--mode-scale" as string]: String(design.timelineModeDockScale),
+              transform: `translate(${designState.timelineModeDockOffsetX}px, ${designState.timelineModeDockOffsetY}px)`,
+              ["--mode-scale" as string]: String(designState.timelineModeDockScale),
             }}
           >
             {canUseDesignerGrouping ? (
@@ -1459,9 +1520,16 @@ export function TimelinePage() {
               {ui.modeFlatBrandShow}
             </button>
           </div>
+          </InspectorNodeBoundary>
         ) : null}
 
         {pageView === "tasks" ? (
+          <InspectorNodeBoundary
+            label="Timeline canvas"
+            kind="content"
+            semanticTargetId="app.timeline.canvas"
+            sourcePath="apps/web/src/pages/TimelinePage.tsx"
+          >
           <div
             className="card timelineScroll"
             data-inspector-target-id="app.timeline.canvas"
@@ -1511,119 +1579,132 @@ export function TimelinePage() {
               });
             }}
           >
-            <UnifiedTimeline
-              mode={viewMode}
-              sortMode={sortMode}
-              locale={locale}
-              people={snapshot.people}
-              groups={snapshot.groups}
-              tasks={limitedTasks}
-              statusLabels={statusLabels}
-              unassignedLabel={ui.common.unassigned}
-              width={timelineWidth}
-              viewportWidth={timelineHost.width}
-              leftPinOffset={timelineScrollLeft}
-              rowH={rowH}
-              labelW={Math.max(320, design.desktopLeftColWidth)}
-              topOffset={design.timelineTopOffset}
-              dateLabelY={design.timelineDateLabelY}
-              dateFontSize={design.timelineDateFontSize}
-              dateIdleOpacity={design.timelineDateIdleOpacity}
-              dateHoverOpacity={design.timelineDateHoverOpacity}
-              monthFontSize={design.timelineMonthFontSize}
-              monthOffsetY={design.timelineMonthOffsetY}
-              monthOffsetX={design.timelineMonthOffsetX}
-              todayLineOpacity={design.timelineTodayLineOpacity}
-              todayLineWidth={design.timelineTodayLineWidth}
-              cursorTrailDays={design.timelineCursorTrailDays}
-              cursorTrailOpacity={design.timelineCursorTrailOpacity}
-              holidayFillOpacity={design.timelineHolidayFillOpacity}
-              perfMinWeekPxDetailedX10={design.timelinePerfMinWeekPxDetailedX10}
-              leftOwnerFontSize={design.timelineLeftOwnerFontSize}
-              leftOwnerXOffset={design.timelineLeftOwnerXOffset}
-              leftOwnerTextOffsetY={design.timelineLeftOwnerTextOffsetY}
-              leftOwnerCropLeft={design.timelineLeftOwnerCropLeft}
-              leftTaskFontSize={design.timelineLeftTaskFontSize}
-              leftTaskXOffset={design.timelineLeftTaskXOffset}
-              leftTaskTextOffsetY={design.timelineLeftTaskTextOffsetY}
-              leftTaskCropLeft={design.timelineLeftTaskCropLeft}
-              leftMetaFontSize={design.timelineLeftMetaFontSize}
-              leftMetaTextOffsetY={design.timelineLeftMetaTextOffsetY}
-              leftPillOffsetY={design.timelineLeftPillOffsetY}
-              leftPillXOffset={design.timelineLeftPillXOffset}
-              leftPillWidth={design.timelineLeftPillWidth}
-              leftPillSizeScale={design.timelineLeftPillSizeScale}
-              leftGroupOffsetY={design.timelineLeftGroupOffsetY}
-              leftGroupXOffset={design.timelineLeftGroupXOffset}
-              leftGroupCropLeft={design.timelineLeftGroupCropLeft}
-              leftGroupFontSize={design.timelineLeftGroupFontSize}
-              badgeHeight={design.badgeHeight}
-              badgeFontSize={design.badgeFontSize}
-              textRenderingMode={design.textRenderingMode}
-              animEnabled={design.animEnabled >= 0.5}
-              reorderDurationMs={design.animReorderDurationMs}
-              reorderEasePreset={design.animReorderEasePreset}
-              reorderStaggerMs={design.animReorderStaggerMs}
-              reorderStaggerCapMs={design.animReorderStaggerCapMs}
-              reorderDistanceFactor={design.animReorderDistanceFactor}
-              reorderDistanceMaxExtraMs={design.animReorderDistanceMaxExtraMs}
-              reorderViewportOnly={design.animReorderViewportOnly >= 0.5}
-              reorderViewportBufferPx={design.animReorderViewportBufferPx}
-              reorderAutoDisableRows={design.animReorderAutoDisableRows}
-              viewportTop={timelineScrollTop}
-              viewportHeight={timelineViewportHeight}
-              disableReorderAnimation={isDraggingTimeline}
-              onScaleChange={({ rangeStartMs, pxPerDay, labelW }) => {
-                scaleInfoRef.current = { rangeStartMs, pxPerDay, labelW };
-                const host = timelineHost.ref.current;
-                if (!host) return;
+            <InspectorNodeBoundary
+              label="Timeline renderer"
+              kind="content"
+              sourcePath="apps/web/src/pages/TimelinePage.tsx"
+            >
+              <UnifiedTimeline
+                mode={viewMode}
+                sortMode={sortMode}
+                locale={locale}
+                people={snapshot.people}
+                groups={snapshot.groups}
+                tasks={limitedTasks}
+                statusLabels={statusLabels}
+                unassignedLabel={ui.common.unassigned}
+                width={timelineWidth}
+                viewportWidth={timelineHost.width}
+                leftPinOffset={timelineScrollLeft}
+                rowH={rowH}
+                labelW={Math.max(320, designState.desktopLeftColWidth)}
+                topOffset={designState.timelineTopOffset}
+                dateLabelY={designState.timelineDateLabelY}
+                dateFontSize={designState.timelineDateFontSize}
+                dateIdleOpacity={designState.timelineDateIdleOpacity}
+                dateHoverOpacity={designState.timelineDateHoverOpacity}
+                monthFontSize={designState.timelineMonthFontSize}
+                monthOffsetY={designState.timelineMonthOffsetY}
+                monthOffsetX={designState.timelineMonthOffsetX}
+                todayLineOpacity={designState.timelineTodayLineOpacity}
+                todayLineWidth={designState.timelineTodayLineWidth}
+                cursorTrailDays={designState.timelineCursorTrailDays}
+                cursorTrailOpacity={designState.timelineCursorTrailOpacity}
+                holidayFillOpacity={designState.timelineHolidayFillOpacity}
+                perfMinWeekPxDetailedX10={designState.timelinePerfMinWeekPxDetailedX10}
+                leftOwnerFontSize={designState.timelineLeftOwnerFontSize}
+                leftOwnerXOffset={designState.timelineLeftOwnerXOffset}
+                leftOwnerTextOffsetY={designState.timelineLeftOwnerTextOffsetY}
+                leftOwnerCropLeft={designState.timelineLeftOwnerCropLeft}
+                leftTaskFontSize={designState.timelineLeftTaskFontSize}
+                leftTaskXOffset={designState.timelineLeftTaskXOffset}
+                leftTaskTextOffsetY={designState.timelineLeftTaskTextOffsetY}
+                leftTaskCropLeft={designState.timelineLeftTaskCropLeft}
+                leftMetaFontSize={designState.timelineLeftMetaFontSize}
+                leftMetaTextOffsetY={designState.timelineLeftMetaTextOffsetY}
+                leftPillOffsetY={designState.timelineLeftPillOffsetY}
+                leftPillXOffset={designState.timelineLeftPillXOffset}
+                leftPillWidth={designState.timelineLeftPillWidth}
+                leftPillSizeScale={designState.timelineLeftPillSizeScale}
+                leftGroupOffsetY={designState.timelineLeftGroupOffsetY}
+                leftGroupXOffset={designState.timelineLeftGroupXOffset}
+                leftGroupCropLeft={designState.timelineLeftGroupCropLeft}
+                leftGroupFontSize={designState.timelineLeftGroupFontSize}
+                badgeHeight={designState.badgeHeight}
+                badgeFontSize={designState.badgeFontSize}
+                textRenderingMode={designState.textRenderingMode}
+                animEnabled={designState.animEnabled >= 0.5}
+                reorderDurationMs={designState.animReorderDurationMs}
+                reorderEasePreset={designState.animReorderEasePreset}
+                reorderStaggerMs={designState.animReorderStaggerMs}
+                reorderStaggerCapMs={designState.animReorderStaggerCapMs}
+                reorderDistanceFactor={designState.animReorderDistanceFactor}
+                reorderDistanceMaxExtraMs={designState.animReorderDistanceMaxExtraMs}
+                reorderViewportOnly={designState.animReorderViewportOnly >= 0.5}
+                reorderViewportBufferPx={designState.animReorderViewportBufferPx}
+                reorderAutoDisableRows={designState.animReorderAutoDisableRows}
+                viewportTop={timelineScrollTop}
+                viewportHeight={timelineViewportHeight}
+                disableReorderAnimation={isDraggingTimeline}
+                onScaleChange={({ rangeStartMs, pxPerDay, labelW }) => {
+                  scaleInfoRef.current = { rangeStartMs, pxPerDay, labelW };
+                  const host = timelineHost.ref.current;
+                  if (!host) return;
 
-                const zoomAnchor = pendingZoomAnchorRef.current;
-                if (zoomAnchor) {
-                  const x =
-                    labelW +
-                    ((zoomAnchor.dateMs - rangeStartMs) / DAY_MS) * pxPerDay -
-                    zoomAnchor.clientX;
-                  scrollTimelineToLeft(x, 0);
-                  pendingZoomAnchorRef.current = null;
-                  return;
-                }
+                  const zoomAnchor = pendingZoomAnchorRef.current;
+                  if (zoomAnchor) {
+                    const x =
+                      labelW +
+                      ((zoomAnchor.dateMs - rangeStartMs) / DAY_MS) * pxPerDay -
+                      zoomAnchor.clientX;
+                    scrollTimelineToLeft(x, 0);
+                    pendingZoomAnchorRef.current = null;
+                    return;
+                  }
 
-                const dateAnchor = pendingDateAnchorRef.current;
-                if (dateAnchor !== null) {
-                  const x =
-                    labelW +
-                    ((dateAnchor - rangeStartMs) / DAY_MS) * pxPerDay -
-                    host.clientWidth * 0.5;
-                  scrollTimelineToLeft(x, 0);
-                  pendingDateAnchorRef.current = null;
-                  return;
-                }
+                  const dateAnchor = pendingDateAnchorRef.current;
+                  if (dateAnchor !== null) {
+                    const x =
+                      labelW +
+                      ((dateAnchor - rangeStartMs) / DAY_MS) * pxPerDay -
+                      host.clientWidth * 0.5;
+                    scrollTimelineToLeft(x, 0);
+                    pendingDateAnchorRef.current = null;
+                    return;
+                  }
 
-                if (pageView === "tasks" && !didInitialTodayCenterRef.current) {
-                  didInitialTodayCenterRef.current = true;
-                  applyDateAnchor(todayAnchorMs(), 0);
-                }
-              }}
-              zoom={zoom}
-              stripeOpacity={design.timelineStripeOpacity}
-              gridOpacity={design.timelineGridOpacity}
-              gridLineWidth={design.timelineGridLineWidth}
-              barInsetY={design.barInsetY}
-              barRadius={design.barRadius}
-              labelEveryDay={labelEveryDay}
-              weekendFillMode={weekendFillMode}
-              weekendFillOpacity={design.timelineWeekendFillOpacity}
-              milestoneSizeScale={design.milestoneSizeScale}
-              milestoneOpacity={design.milestoneOpacity}
-              showMilestoneLabels={showMilestoneLabels}
-              taskColorMixPercent={design.taskColorMixPercent}
-              onHover={onHover}
-              onLeave={onLeave}
-              onClick={(t) => setSelectedId(t.id)}
-            />
+                  if (pageView === "tasks" && !didInitialTodayCenterRef.current) {
+                    didInitialTodayCenterRef.current = true;
+                    applyDateAnchor(todayAnchorMs(), 0);
+                  }
+                }}
+                zoom={zoom}
+                stripeOpacity={designState.timelineStripeOpacity}
+                gridOpacity={designState.timelineGridOpacity}
+                gridLineWidth={designState.timelineGridLineWidth}
+                barInsetY={designState.barInsetY}
+                barRadius={designState.barRadius}
+                labelEveryDay={labelEveryDay}
+                weekendFillMode={weekendFillMode}
+                weekendFillOpacity={designState.timelineWeekendFillOpacity}
+                milestoneSizeScale={designState.milestoneSizeScale}
+                milestoneOpacity={designState.milestoneOpacity}
+                showMilestoneLabels={showMilestoneLabels}
+                taskColorMixPercent={designState.taskColorMixPercent}
+                onHover={onHover}
+                onLeave={onLeave}
+                onClick={(t) => setSelectedId(t.id)}
+              />
+            </InspectorNodeBoundary>
           </div>
+          </InspectorNodeBoundary>
         ) : (
+          <InspectorNodeBoundary
+            label="Designers surface"
+            kind="content"
+            semanticTargetId="app.designers.surface"
+            sourcePath="apps/web/src/pages/TimelinePage.tsx"
+          >
           <div
             className="card timelineScroll"
             data-inspector-target-id="app.designers.surface"
@@ -1639,11 +1720,18 @@ export function TimelinePage() {
               onTaskLeave={onLeave}
             />
           </div>
+          </InspectorNodeBoundary>
         )}
       </div>
       </div>
 
-      <Tooltip state={tooltip} offsetX={design.tooltipOffsetX} offsetY={design.tooltipOffsetY} />
+      <InspectorNodeBoundary
+        label="Timeline tooltip"
+        kind="content"
+        sourcePath="apps/web/src/pages/TimelinePage.tsx"
+      >
+        <Tooltip state={tooltip} offsetX={designState.tooltipOffsetX} offsetY={designState.tooltipOffsetY} />
+      </InspectorNodeBoundary>
       <TaskDetailsDrawer
         task={selectedTask}
         people={snapshot.people}
@@ -1653,6 +1741,7 @@ export function TimelinePage() {
         onClose={() => setSelectedId(null)}
       />
     </>
+    </InspectorNodeBoundary>
   );
 }
 

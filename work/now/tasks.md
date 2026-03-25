@@ -76,3 +76,22 @@ See: `docs/deep/TROUBLESHOOTING.md`
 - [x] Inspector focus sets shipped as a dev-only package concern: targets can be marked from the tree or selected-target panel, focus mode hides unrelated branches, and local persistence survives reload.
 - [x] Inspector shell now has an always-visible draggable launcher for `?inspector=1`, can be expanded without prior selection, and collapses back into a narrow draggable button while preserving position.
 - [x] Inspector shell was rebuilt into a DOM-first Figma-like workspace: `react-arborist` tree on the left, mixed properties on the right, explicit pick-mode toggle with page shield, tree-hover page highlight, and semantic/workbench enrichment layered on top of universal node inspection.
+- [x] Workbench Authoring source-graph foundation moved past pure runtime parsing: source-analysis strategy and placement normalization policy are now documented, shared contracts now live in `packages/workbench-contracts`, node-side source analysis now lives in `packages/workbench-source-analysis`, and the AST probe now builds normalized source trees with collapsed enrichment wrappers and local-import traversal.
+- [x] Workbench Authoring source continuation now uses TypeScript checker-backed local symbol resolution for imports, emits canonical symbol ids in the probe, and keeps `scripts/workbench_source_identity_probe.mjs` as a thin runner over the node-side analysis package.
+- [x] Workbench Authoring baseline source-graph delivery is now wired end-to-end: node-side snapshot builder writes a page-scoped artifact for `TimelinePage`, the browser inspector adapter can supply a `SourceGraphSnapshot`, and inspector context prefers snapshot roots over runtime-only fallback trees.
+- [x] Workbench Authoring source/runtime binding foundation added: snapshot nodes now carry explicit `bindingKey`, inspector context builds a source-first binding table with `bound/multiple/unresolved` statuses, pick-mode reverse resolution goes through runtime projection bindings, and snapshot-based selection/highlight no longer depends on accidental id совпадения.
+- [x] Workbench Authoring live-preview foundation added: browser shell now owns persistent `DraftChange` entries keyed by `SourceNodeId`, reconciles them after source refresh, exposes draft scopes in the inspector UI, and calls a host preview bridge hook instead of mutating source or DOM directly.
+- [x] Workbench Authoring parameter-discovery foundation added: canonical parameter descriptors and effective preview values now flow through shared contracts, app-side discovery is projected from `WORKBENCH_LAYOUT`, and the inspector right panel is driven by descriptors/effective values instead of demo-only controls.
+- [x] Scoped host preview foundation added: host preview now uses layered `effectiveDesign` / `effectiveKeyColors` overlays instead of mutating canonical layout state, `TimelinePage` consumes effective preview values, and inspector scope actions are gated by honest host capabilities (`token` only for now).
+- [x] Authoring parameter semantics foundation added: descriptors now carry constraint semantics (`min/max/step/editorHint`), generic parse/validate/coerce runs before draft application, effective preview values expose state/normalized value/message, and invalid raw input no longer passes straight into host preview.
+- [x] Source graph interior decomposition broadened for meaningful JSX host elements: linked component internals now capture `button/select/span` controls and meaningful container nodes like `div.filters`, making trees deeper for components such as `FiltersBar` and `DesignersBoard` without falling back to raw DOM traversal.
+
+# Workbench Authoring
+
+- [x] CAM-WORKBENCH-AUTHORING-VISION - code-first authoring product direction fixed with extraction-first boundaries
+- [ ] CAM-WORKBENCH-SOURCE-GRAPH - make `SourceGraph` the primary tree and keep manual annotations fallback-only
+- [ ] CAM-WORKBENCH-AUTHORING-MODEL - define `AuthoringNode`, `AuthoringValue`, scopes, and value-source semantics
+- [ ] CAM-WORKBENCH-LIVE-PREVIEW - formalize draft-only live preview over the source graph
+- [ ] CAM-WORKBENCH-CONSOLIDATION - add explicit token/component/instance settlement before persistence
+- [ ] CAM-WORKBENCH-SOURCE-SYNC - generate safe source patches only after source graph and authoring model stabilize
+- [ ] CAM-WORKBENCH-HARDENING - extraction readiness, host portability, performance, and regression stabilization

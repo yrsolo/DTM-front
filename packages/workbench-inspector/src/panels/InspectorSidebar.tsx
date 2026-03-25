@@ -1,8 +1,9 @@
 import React from "react";
 import { Tree, type NodeApi, type NodeRendererProps } from "react-arborist";
 
-import type { InspectorNode, InspectorPropertiesSection, InspectorPropertyField } from "../contracts/types";
+import type { DraftChangeScope, InspectorNode, InspectorPropertiesSection, InspectorPropertyField } from "../contracts/types";
 import { useInspectorContext } from "../runtime/InspectorContext";
+import { resolveAuthoringInput } from "../utils/authoringValueSemantics";
 
 type DragState = {
   startClientX: number;
@@ -86,8 +87,13 @@ function getKindBadgeColor(kind: InspectorNode["kind"]): string {
 export function InspectorSidebar() {
   const {
     adapter,
+    debugEvents,
+    draftChanges,
+    clearDraftChangesForNode,
     getNodeById,
     getNodeElement,
+    getBindingDebug,
+    getNodeElementDebug,
     rootNodes,
     setFocusMode,
     setHierarchyQuery,
@@ -100,8 +106,11 @@ export function InspectorSidebar() {
     state,
     toggleNodeExpanded,
     toggleNodeMarked,
+    upsertDraftChange,
+    removeDraftChange,
   } = useInspectorContext();
   const [dragState, setDragState] = React.useState<DragState | null>(null);
+  const [parameterInputValues, setParameterInputValues] = React.useState<Record<string, string>>({});
 
   React.useEffect(() => {
     if (!dragState) return;
@@ -222,9 +231,47 @@ export function InspectorSidebar() {
   const filteredRootNodes = filterNodesForFocus(rootNodes, nodesById, markedNodeIds, state.hierarchy.focusMode);
   const selectedNode = getNodeById(state.selectedNodeId);
   const selectedElement = getNodeElement(state.selectedNodeId);
+  const selectedElementDebug = getNodeElementDebug(state.selectedNodeId);
+  const selectedBindingDebug = getBindingDebug(state.selectedNodeId);
   const enrichment = selectedNode ? adapter.enrichNode?.(selectedNode) ?? null : null;
+  const selectedDraftChanges = selectedNode
+    ? draftChanges.filter((entry) => entry.sourceNodeId === (selectedNode.sourceNodeId ?? selectedNode.id))
+    : [];
+  const parameterDescriptors = selectedNode ? adapter.getParameterDescriptors?.(selectedNode) ?? [] : [];
+  const effectivePreviewValues =
+    selectedNode ? adapter.getEffectivePreviewValues?.(selectedNode, draftChanges) ?? [] : [];
+  const previewCapabilities = adapter.getPreviewCapabilities?.(selectedNode ?? null) ?? {
+    token: false,
+    component: false,
+    placement: false,
+    "instance-preview": false,
+  };
   const canOpenInWorkbench = selectedNode ? (adapter.canOpenNodeInWorkbench?.(selectedNode) ?? false) : false;
   const mergedLabel = enrichment?.label ?? selectedNode?.label ?? "No node selected";
+
+  const createDraftChange = (scope: DraftChangeScope, parameterId?: string) => {
+    if (!selectedNode) return;
+    if (!previewCapabilities[scope]) return;
+    const sourceNodeId = selectedNode.sourceNodeId ?? selectedNode.id;
+    const descriptor = parameterId ? parameterDescriptors.find((item) => item.id === parameterId) ?? null : parameterDescriptors[0] ?? null;
+    const controlKey = String(descriptor?.meta?.controlKey ?? "demo");
+    const effective = descriptor ? effectivePreviewValues.find((item) => item.parameterId === descriptor.id) : null;
+    const rawInput = descriptor ? parameterInputValues[descriptor.id] ?? effective?.normalizedValue ?? effective?.value ?? "" : mergedLabel;
+    const resolution = descriptor ? resolveAuthoringInput(descriptor, rawInput) : { normalizedValue: rawInput, state: "valid" as const, message: null };
+    upsertDraftChange({
+      sourceNodeId,
+      scope,
+      group: descriptor?.group ?? (selectedNode.kind === "control" ? "controls" : "appearance"),
+      key: controlKey,
+      value: resolution.normalizedValue ?? rawInput,
+      status:
+        resolution.state === "invalid"
+          ? "invalid"
+          : resolution.state === "unresolved"
+            ? "unresolved"
+            : "active",
+    });
+  };
 
   const genericSections: InspectorPropertiesSection[] = selectedNode
     ? [
@@ -233,10 +280,22 @@ export function InspectorSidebar() {
           title: "Node",
           fields: [
             toField("label", "Label", mergedLabel),
-            toField("id", "Node id", selectedNode.id),
+            toField("componentName", "Component", selectedNode.componentName ?? null),
+            toField("sourceNodeId", "Source node", selectedNode.sourceNodeId ?? selectedNode.id),
+            toField("sourceCategory", "Source category", selectedNode.sourceCategory ?? null),
+            toField("bindingKey", "Binding key", selectedNode.bindingKey ?? null),
+            toField("bindingStatus", "Binding status", selectedNode.bindingStatus ?? null),
+            toField("runtimeProjectionCount", "Runtime projections", selectedNode.runtimeProjectionCount ?? 0),
+            toField("definitionId", "Definition", selectedNode.definitionId ?? null),
+            toField("placementId", "Placement", selectedNode.placementId ?? null),
+            toField("repeatedGroupId", "Repeated group", selectedNode.repeatedGroupId ?? null),
+            toField("runtimeId", "Runtime id", selectedNode.runtimeId ?? selectedNode.id),
             toField("kind", "Kind", selectedNode.kind),
-            toField("tag", "Tag", selectedNode.tagName),
+            toField("tag", "Anchor tag", selectedNode.tagName),
             toField("path", "Path", selectedNode.path),
+            toField("ownerPath", "Owner path", selectedNode.ownerPath ?? null),
+            toField("sourcePath", "Source path", selectedNode.sourcePath ?? null),
+            toField("sourceLocation", "Source location", selectedNode.sourceLocation ?? null),
           ],
         },
         {
@@ -253,6 +312,32 @@ export function InspectorSidebar() {
         },
       ]
     : [];
+
+  const authoringSections: InspectorPropertiesSection[] =
+    selectedNode
+      ? [
+          {
+            id: "authoring",
+            title: "Authoring",
+            fields: [
+              toField("authoringSourceNode", "Source node", enrichment?.authoringNode?.sourceNodeId ?? selectedNode.sourceNodeId ?? selectedNode.id),
+              toField("authoringLabel", "Authoring label", enrichment?.authoringNode?.label ?? mergedLabel),
+              toField("authoringTargetCategory", "Target category", enrichment?.authoringNode?.targetCategory ?? selectedNode.sourceCategory ?? null),
+              toField("authoringEditable", "Editable surface", enrichment?.authoringNode?.hasEditableSurface ?? false),
+              toField("authoringScopes", "Scopes", enrichment?.authoringNode?.scopes?.join(", ") ?? "instance"),
+              toField("authoringGroups", "Groups", enrichment?.authoringNode?.parameterGroups?.join(", ") ?? "appearance, layout"),
+              toField(
+                "previewCapabilities",
+                "Preview scopes",
+                Object.entries(previewCapabilities)
+                  .filter(([, enabled]) => enabled)
+                  .map(([scope]) => scope)
+                  .join(", ") || "none"
+              ),
+            ],
+          },
+        ]
+      : [];
 
   const semanticSection: InspectorPropertiesSection[] =
     selectedNode?.semanticTargetId || enrichment?.meta
@@ -279,11 +364,118 @@ export function InspectorSidebar() {
         ]
       : [];
 
+  const draftSections: InspectorPropertiesSection[] =
+    selectedNode
+      ? [
+          {
+            id: "draft",
+            title: "Draft preview",
+            fields: [
+              toField("draftCount", "Draft entries", selectedDraftChanges.length),
+              toField("parameterCount", "Parameters", parameterDescriptors.length),
+              toField(
+                "draftStatuses",
+                "Statuses",
+                selectedDraftChanges.length ? selectedDraftChanges.map((entry) => entry.status).join(", ") : "none"
+              ),
+              toField(
+                "draftScopes",
+                "Scopes",
+                selectedDraftChanges.length ? selectedDraftChanges.map((entry) => entry.scope).join(", ") : "none"
+              ),
+            ],
+          },
+        ]
+      : [];
+
+  const debugSections: InspectorPropertiesSection[] =
+    state.debug
+      ? [
+          {
+            id: "overlay-debug",
+            title: "Overlay debug",
+            fields: [
+              toField("overlay-selected-node", "Selected node", selectedNode?.id ?? "none"),
+              toField("overlay-binding-status", "Binding status", selectedNode?.bindingStatus ?? "none"),
+              toField("overlay-runtime-count", "Runtime projections", selectedNode?.runtimeProjectionCount ?? 0),
+              toField("overlay-element-found", "Element found", selectedElementDebug.found),
+              toField("overlay-element-mode", "Element mode", selectedElementDebug.mode),
+              toField("overlay-matched-node", "Matched node", selectedElementDebug.matchedNodeId ?? "-"),
+              toField("overlay-tag", "Element tag", selectedElementDebug.tagName ?? "-"),
+              toField("overlay-canonical-matches", "Canonical matches", selectedBindingDebug.canonicalMatches.join(", ") || "-"),
+              toField("overlay-owner-key", "Owner key", selectedBindingDebug.ownerComponentKey ?? "-"),
+              toField("overlay-owner-matches", "Owner matches", selectedBindingDebug.ownerMatches.join(", ") || "-"),
+              toField("overlay-component-name", "Component name", selectedBindingDebug.componentName ?? "-"),
+              toField("overlay-component-matches", "Component matches", selectedBindingDebug.componentMatches.join(", ") || "-"),
+              toField(
+                "overlay-rect",
+                "Element rect",
+                selectedElement
+                  ? `${Math.round(selectedElement.getBoundingClientRect().width)}x${Math.round(selectedElement.getBoundingClientRect().height)}`
+                  : "-"
+              ),
+            ],
+          },
+          {
+            id: "debug",
+            title: "Debug trace",
+            fields: debugEvents.slice(-12).map((entry, index) => toField(`debug-${index}`, `Event ${index + 1}`, entry)),
+          },
+        ]
+      : [];
+
+  const parameterSections: InspectorPropertiesSection[] =
+    selectedNode && parameterDescriptors.length
+      ? [
+          {
+            id: "parameters",
+            title: "Parameters",
+            fields: parameterDescriptors.map((descriptor) => {
+              const effective = effectivePreviewValues.find((item) => item.parameterId === descriptor.id);
+              return toField(
+                descriptor.id,
+                descriptor.label,
+                `${effective?.value ?? "-"} (${effective?.resolvedFrom ?? "base"})`
+              );
+            }),
+          },
+        ]
+      : [];
+
   const bridgeSections = enrichment?.propertySections ?? [];
-  const allSections = [...genericSections, ...semanticSection, ...ownershipSection, ...bridgeSections];
+  const allSections = [...genericSections, ...authoringSections, ...draftSections, ...parameterSections, ...semanticSection, ...ownershipSection, ...bridgeSections, ...debugSections];
 
   const treeHeight =
     typeof window !== "undefined" ? Math.max(360, Math.min(720, window.innerHeight - state.panelPosition.y - 160)) : 520;
+
+  React.useEffect(() => {
+    if (!selectedNode) return;
+    setParameterInputValues((current) => {
+      let changed = false;
+      const next = { ...current };
+      for (const descriptor of parameterDescriptors) {
+        if (next[descriptor.id] != null) continue;
+        const effective = effectivePreviewValues.find((item) => item.parameterId === descriptor.id);
+        next[descriptor.id] = effective?.value ?? "";
+        changed = true;
+      }
+      return changed ? next : current;
+    });
+  }, [effectivePreviewValues, parameterDescriptors, selectedNode]);
+
+  const handleRowSelect = React.useCallback(
+    (nodeId: string, hasChildren: boolean, toggle: () => void) => {
+      console.debug("[workbench-inspector] row click", { nodeId, hasChildren, selectedNodeId: state.selectedNodeId });
+      if (state.selectedNodeId === nodeId && hasChildren) {
+        toggle();
+        toggleNodeExpanded(nodeId);
+        return;
+      }
+      setSelectedNodeId(nodeId);
+      setHoveredNodeId(nodeId);
+    },
+    [setHoveredNodeId, setSelectedNodeId, state.selectedNodeId, toggleNodeExpanded]
+  );
 
   function TreeNode(props: NodeRendererProps<InspectorNode>) {
     const nodeData = props.node.data;
@@ -292,9 +484,12 @@ export function InspectorSidebar() {
     const isMarked = markedNodeIds.has(nodeData.id);
     const kindColor = getKindBadgeColor(nodeData.kind);
     const availability = nodeEnrichment?.meta?.availability;
+    const bindingStatus = nodeData.bindingStatus;
     const depth = props.node.level;
     const branchWidth = Math.max(0, depth * 18);
     const hasChildren = (nodeData.children?.length ?? 0) > 0;
+    const isSelected = state.selectedNodeId === nodeData.id;
+    const isHovered = state.hoveredNodeId === nodeData.id;
     return (
       <div
         ref={props.dragHandle}
@@ -307,10 +502,20 @@ export function InspectorSidebar() {
           padding: "0 10px 0 0",
           borderRadius: "10px",
           color: "#eff6ff",
-          background: props.node.isSelected ? "rgba(110, 168, 255, 0.14)" : "transparent",
+          background: isSelected
+            ? "rgba(110, 168, 255, 0.14)"
+            : isHovered
+              ? "rgba(255,255,255,0.05)"
+              : "transparent",
+          boxShadow: isSelected
+            ? "inset 0 0 0 1px rgba(110, 168, 255, 0.2)"
+            : isHovered
+              ? "inset 0 0 0 1px rgba(255,255,255,0.08)"
+              : "none",
           cursor: "pointer",
           overflow: "hidden",
         }}
+        onClick={() => handleRowSelect(nodeData.id, hasChildren, () => props.node.toggle())}
         onMouseEnter={() => setHoveredNodeId(nodeData.id)}
         onMouseLeave={() => setHoveredNodeId(null)}
       >
@@ -332,6 +537,8 @@ export function InspectorSidebar() {
           onClick={(event) => {
             event.stopPropagation();
             if (hasChildren) {
+              setSelectedNodeId(nodeData.id);
+              setHoveredNodeId(nodeData.id);
               props.node.toggle();
               toggleNodeExpanded(nodeData.id);
             }
@@ -351,18 +558,7 @@ export function InspectorSidebar() {
         >
           {hasChildren ? (props.node.isOpen ? "▾" : "▸") : ""}
         </button>
-        <div
-          style={{ flex: 1, minWidth: 0 }}
-          onClick={() => {
-            if (state.selectedNodeId === nodeData.id && hasChildren) {
-              props.node.toggle();
-              toggleNodeExpanded(nodeData.id);
-            } else {
-              setSelectedNodeId(nodeData.id);
-              setHoveredNodeId(nodeData.id);
-            }
-          }}
-        >
+        <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8, minWidth: 0 }}>
             <span
               style={{
@@ -398,6 +594,25 @@ export function InspectorSidebar() {
                 }}
               >
                 {String(availability)}
+              </span>
+            ) : null}
+            {bindingStatus ? (
+              <span
+                style={{
+                  fontSize: "9px",
+                  opacity: 0.72,
+                  padding: "1px 6px",
+                  borderRadius: "999px",
+                  border: "1px solid rgba(255,255,255,0.08)",
+                  background:
+                    bindingStatus === "bound"
+                      ? "rgba(124,247,198,0.1)"
+                      : bindingStatus === "multiple"
+                        ? "rgba(255,216,118,0.1)"
+                        : "rgba(255,255,255,0.04)",
+                }}
+              >
+                {bindingStatus}
               </span>
             ) : null}
           </div>
@@ -454,6 +669,20 @@ export function InspectorSidebar() {
           <strong style={{ fontSize: "15px" }}>{mergedLabel}</strong>
         </div>
         <div style={{ display: "flex", gap: 8, flexWrap: "wrap", justifyContent: "flex-end" }}>
+          {state.debug ? (
+            <span
+              style={{
+                borderRadius: "999px",
+                padding: "8px 12px",
+                background: "rgba(255, 209, 102, 0.16)",
+                color: "#ffd166",
+                fontSize: "12px",
+                fontWeight: 700,
+              }}
+            >
+              Debug on
+            </span>
+          ) : null}
           <button
             type="button"
             onClick={() => setFocusMode("all")}
@@ -508,7 +737,7 @@ export function InspectorSidebar() {
               cursor: "pointer",
             }}
           >
-            {state.hierarchy.treeFilterMode === "smart" ? "Smart DOM" : "Raw DOM"}
+            {state.hierarchy.treeFilterMode === "smart" ? "Meaningful components" : "All registered nodes"}
           </button>
           <button
             type="button"
@@ -546,14 +775,14 @@ export function InspectorSidebar() {
               </div>
             </div>
             <div style={{ fontSize: "11px", opacity: 0.55, alignSelf: "end" }}>
-              {state.hierarchy.treeFilterMode === "smart" ? "Smart DOM" : "Raw DOM"}
+              {state.hierarchy.treeFilterMode === "smart" ? "Meaningful components" : "All registered nodes"}
             </div>
           </div>
           <input
             type="text"
             value={state.hierarchy.query}
             onChange={(event) => setHierarchyQuery(event.target.value)}
-            placeholder="Search nodes"
+            placeholder="Search components"
             style={{
               width: "100%",
               boxSizing: "border-box",
@@ -582,13 +811,7 @@ export function InspectorSidebar() {
             }
             childrenAccessor="children"
             idAccessor="id"
-            selection={state.selectedNodeId ?? undefined}
             initialOpenState={Object.fromEntries(state.hierarchy.expandedNodeIds.map((id) => [id, true]))}
-            onActivate={(node) => setSelectedNodeId(node.id)}
-            onSelect={(nodes) => {
-              const first = nodes[0];
-              if (first) setSelectedNodeId(first.id);
-            }}
           >
             {TreeNode}
           </Tree>
@@ -708,6 +931,16 @@ export function InspectorSidebar() {
                           key={action.id}
                           type="button"
                           disabled={action.disabled}
+                          onClick={() => {
+                            if (action.disabled) return;
+                            if (action.id === "draft-token") createDraftChange("token");
+                            else if (action.id === "draft-component") createDraftChange("component");
+                            else if (action.id === "draft-placement") createDraftChange("placement");
+                            else if (action.id === "draft-instance") createDraftChange("instance-preview");
+                            else if (action.id === "draft-clear" && selectedNode) {
+                              clearDraftChangesForNode(selectedNode.sourceNodeId ?? selectedNode.id);
+                            }
+                          }}
                           style={{
                             border: "1px solid rgba(255,255,255,0.12)",
                             borderRadius: "10px",
@@ -722,12 +955,183 @@ export function InspectorSidebar() {
                       ))}
                     </div>
                   ) : null}
+                  {section.id === "parameters" && parameterDescriptors.length ? (
+                    <div style={{ display: "grid", gap: 8, marginTop: 12 }}>
+                      {parameterDescriptors.map((descriptor) => {
+                        const effective = effectivePreviewValues.find((item) => item.parameterId === descriptor.id);
+                        const draftsForParameter = selectedDraftChanges.filter(
+                          (entry) => entry.key === String(descriptor.meta?.controlKey ?? "")
+                        );
+                        const inputType =
+                          descriptor.valueKind === "number" || descriptor.valueKind === "length"
+                            ? "number"
+                            : descriptor.valueKind === "color"
+                              ? "color"
+                              : "text";
+                        const inputValue = parameterInputValues[descriptor.id] ?? effective?.value ?? "";
+                        return (
+                          <div
+                            key={descriptor.id}
+                            style={{
+                              display: "grid",
+                              gap: 8,
+                              borderRadius: "10px",
+                              padding: "10px",
+                              background: "rgba(255,255,255,0.04)",
+                              border: "1px solid rgba(255,255,255,0.06)",
+                            }}
+                          >
+                            <div style={{ display: "flex", justifyContent: "space-between", gap: 10, alignItems: "center" }}>
+                              <div style={{ minWidth: 0 }}>
+                                <div style={{ fontSize: "12px", fontWeight: 600 }}>{descriptor.label}</div>
+                                <div style={{ fontSize: "11px", opacity: 0.7 }}>
+                                  {descriptor.valueKind} / {effective?.resolvedFrom ?? "base"} / {effective?.value ?? "-"}
+                                </div>
+                              </div>
+                              <div style={{ fontSize: "11px", opacity: 0.65, textAlign: "right" }}>{descriptor.group}</div>
+                            </div>
+                            <div style={{ display: "flex", gap: 8, flexWrap: "wrap", fontSize: "11px", opacity: 0.72 }}>
+                              {typeof descriptor.min === "number" || typeof descriptor.max === "number" ? (
+                                <span>
+                                  range: {descriptor.min ?? "-"} .. {descriptor.max ?? "-"}
+                                </span>
+                              ) : null}
+                              {typeof descriptor.step === "number" ? <span>step: {descriptor.step}</span> : null}
+                              {descriptor.unit ? <span>unit: {descriptor.unit}</span> : null}
+                              <span>state: {effective?.state ?? "unresolved"}</span>
+                            </div>
+                            <input
+                              type={inputType}
+                              value={inputValue}
+                              onChange={(event) => {
+                                const nextValue = event.target.value;
+                                setParameterInputValues((current) => ({
+                                  ...current,
+                                  [descriptor.id]: nextValue,
+                                }));
+                              }}
+                              style={{
+                                width: "100%",
+                                boxSizing: "border-box",
+                                borderRadius: "8px",
+                                border: "1px solid rgba(255,255,255,0.12)",
+                                background: "rgba(7,10,16,0.56)",
+                                color: "inherit",
+                                padding: "8px 10px",
+                                fontSize: "12px",
+                              }}
+                            />
+                            {effective?.message ? (
+                              <div style={{ fontSize: "11px", opacity: 0.68 }}>{effective.message}</div>
+                            ) : null}
+                            <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                              <button
+                                type="button"
+                                disabled={!previewCapabilities.placement}
+                                onClick={() => createDraftChange("placement", descriptor.id)}
+                                style={{
+                                  border: "1px solid rgba(255,255,255,0.12)",
+                                  borderRadius: "8px",
+                                  padding: "6px 8px",
+                                  background: "transparent",
+                                  color: previewCapabilities.placement ? "inherit" : "rgba(239,246,255,0.5)",
+                                  cursor: previewCapabilities.placement ? "pointer" : "not-allowed",
+                                  fontSize: "11px",
+                                }}
+                              >
+                                Placement draft
+                              </button>
+                              <button
+                                type="button"
+                                disabled={!previewCapabilities.component}
+                                onClick={() => createDraftChange("component", descriptor.id)}
+                                style={{
+                                  border: "1px solid rgba(255,255,255,0.12)",
+                                  borderRadius: "8px",
+                                  padding: "6px 8px",
+                                  background: "transparent",
+                                  color: previewCapabilities.component ? "inherit" : "rgba(239,246,255,0.5)",
+                                  cursor: previewCapabilities.component ? "pointer" : "not-allowed",
+                                  fontSize: "11px",
+                                }}
+                              >
+                                Component draft
+                              </button>
+                              <button
+                                type="button"
+                                disabled={!previewCapabilities.token}
+                                onClick={() => createDraftChange("token", descriptor.id)}
+                                style={{
+                                  border: "1px solid rgba(255,255,255,0.12)",
+                                  borderRadius: "8px",
+                                  padding: "6px 8px",
+                                  background: "transparent",
+                                  color: previewCapabilities.token ? "inherit" : "rgba(239,246,255,0.5)",
+                                  cursor: previewCapabilities.token ? "pointer" : "not-allowed",
+                                  fontSize: "11px",
+                                }}
+                              >
+                                Token draft
+                              </button>
+                            </div>
+                            {draftsForParameter.length ? (
+                              <div style={{ fontSize: "11px", opacity: 0.68 }}>
+                                Drafts: {draftsForParameter.map((draft) => `${draft.scope}=${draft.value}`).join(" • ")}
+                              </div>
+                            ) : null}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ) : null}
+                  {section.id === "draft" && selectedDraftChanges.length ? (
+                    <div style={{ display: "grid", gap: 8, marginTop: 12 }}>
+                      {selectedDraftChanges.map((draft) => (
+                        <div
+                          key={draft.id}
+                          style={{
+                            display: "grid",
+                            gridTemplateColumns: "minmax(0, 1fr) auto",
+                            gap: 10,
+                            alignItems: "center",
+                            borderRadius: "10px",
+                            padding: "8px 10px",
+                            background: "rgba(255,255,255,0.04)",
+                            border: "1px solid rgba(255,255,255,0.06)",
+                          }}
+                        >
+                          <div style={{ minWidth: 0 }}>
+                            <div style={{ fontSize: "12px", fontWeight: 600 }}>
+                              {draft.scope} / {draft.group}.{draft.key}
+                            </div>
+                            <div style={{ fontSize: "11px", opacity: 0.7, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                              {draft.value} ({draft.status})
+                            </div>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => removeDraftChange(draft.id)}
+                            style={{
+                              border: "1px solid rgba(255,255,255,0.12)",
+                              borderRadius: "8px",
+                              padding: "6px 8px",
+                              background: "transparent",
+                              color: "inherit",
+                              cursor: "pointer",
+                            }}
+                          >
+                            Remove
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  ) : null}
                 </section>
               ))}
             </div>
           ) : (
             <div style={{ opacity: 0.72 }}>
-              Select a node from the tree or turn pick mode on and choose an element on the page.
+              Select a React node from the tree or turn pick mode on and choose an element on the page.
             </div>
           )}
         </section>

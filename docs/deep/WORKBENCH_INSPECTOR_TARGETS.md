@@ -1,15 +1,18 @@
 # Workbench Inspector Targets
 
+For the full runtime explanation of how these semantic targets interact with the React-first tree, see [WORKBENCH_INSPECTOR_TECHNICAL.md](WORKBENCH_INSPECTOR_TECHNICAL.md).
+
 ## Rule
 
-The inspector works on live DOM-derived nodes first, then enriches them with semantic targets when the host app can provide that mapping.
+The inspector works on runtime React nodes first, then enriches them with semantic targets when the host app can provide that mapping.
 
-DOM-first nodes are used by:
+React-first nodes are used by:
 
 - pick mode and canvas inspect
 - hierarchy navigation
 - focus-set marking
 - generic properties inspection
+- SVG-backed runtime surfaces such as timeline graphics through DOM anchors
 
 Semantic targets are used by:
 
@@ -81,4 +84,4 @@ Parent-child links stay explicit in the target registry.
 - `app.designers.surface` -> `app.designers.board`
 - `app.task.drawer` -> `app.task.attachments`
 
-The semantic registry is not the primary inspector tree anymore. It is an enrichment layer over the DOM-derived tree and should stay intentionally small, stable, and product-meaningful.
+The semantic registry is not the primary inspector tree anymore. It is an enrichment layer over the React-derived tree and should stay intentionally small, stable, and product-meaningful.

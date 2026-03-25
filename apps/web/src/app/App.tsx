@@ -1,5 +1,6 @@
 import React from "react";
 import { BrowserRouter, Navigate, Route, Routes, useLocation } from "react-router-dom";
+import { InspectorNodeBoundary } from "@dtm/workbench-inspector";
 
 import { Layout } from "../components/Layout";
 import { getFrontendBasePath } from "../config/runtimeContour";
@@ -51,7 +52,11 @@ function TimelineEntryPage() {
   if (shouldOpenMobileWeb()) {
     return <Navigate to={`/m${location.search}${location.hash}`} replace />;
   }
-  return <TimelinePage />;
+  return (
+    <InspectorNodeBoundary label="Timeline route" kind="content" sourcePath="apps/web/src/app/App.tsx">
+      <TimelinePage />
+    </InspectorNodeBoundary>
+  );
 }
 
 export function App() {
@@ -104,7 +109,14 @@ export function App() {
           <Route path="/app" element={<MiniAppPage />} />
           <Route path="/m" element={<MobileWebPage />} />
           <Route path="/mobile" element={<MobileWebPage />} />
-          <Route path="/admin" element={<AdminPage />} />
+          <Route
+            path="/admin"
+            element={
+              <InspectorNodeBoundary label="Admin route" kind="content" sourcePath="apps/web/src/app/App.tsx">
+                <AdminPage />
+              </InspectorNodeBoundary>
+            }
+          />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
         <WorkbenchInspectorMount />

@@ -15,7 +15,9 @@
     "baseUrl": ".",
     "paths": {
       "@dtm/schema/*": ["../../packages/schema/*"],
-      "@dtm/workbench-inspector": ["../../packages/workbench-inspector/src/public.ts"]
+      "@dtm/workbench-inspector": ["../../packages/workbench-inspector/src/public.ts"],
+      "@dtm/workbench-contracts": ["../../packages/workbench-contracts/src/index.ts"],
+      "@dtm/workbench-source-analysis": ["../../packages/workbench-source-analysis/src/public.ts"]
     }
   },
   "include": ["src"]

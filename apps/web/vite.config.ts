@@ -11,6 +11,8 @@ export default defineConfig(({ mode }) => {
     resolve: {
       alias: {
         "@dtm/workbench-inspector": path.resolve(__dirname, "../../packages/workbench-inspector/src/public.ts"),
+        "@dtm/workbench-contracts": path.resolve(__dirname, "../../packages/workbench-contracts/src/index.ts"),
+        "@dtm/workbench-source-analysis": path.resolve(__dirname, "../../packages/workbench-source-analysis/src/public.ts"),
       },
     },
     server: {

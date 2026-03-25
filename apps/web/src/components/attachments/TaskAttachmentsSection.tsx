@@ -1,5 +1,6 @@
 import React from "react";
 import { TaskAttachmentV1, TaskV1 } from "@dtm/schema/snapshot";
+import { InspectorNodeBoundary } from "@dtm/workbench-inspector";
 
 import {
   deleteTaskAttachment,
@@ -484,7 +485,12 @@ export function TaskAttachmentsSection(props: {
   }
 
   return (
-    <>
+    <InspectorNodeBoundary
+      label="Task attachments section"
+      kind="content"
+      semanticTargetId="app.task.attachments"
+      sourcePath="apps/web/src/components/attachments/TaskAttachmentsSection.tsx"
+    >
       <div
         className={`card drawerSection ${props.dragActive ? "attachmentDropZoneActive" : ""}`}
         data-inspector-target-id="app.task.attachments"
@@ -502,20 +508,31 @@ export function TaskAttachmentsSection(props: {
         </button>
 
         {expanded ? (
+          <InspectorNodeBoundary
+            label="Attachments panel body"
+            kind="content"
+            sourcePath="apps/web/src/components/attachments/TaskAttachmentsSection.tsx"
+          >
           <div className="attachmentPanelBody">
             {canUpload ? (
-              <div className={`attachmentUploadRow ${props.compact ? "isCompact" : ""}`}>
-                <input
-                  ref={inputRef}
-                  type="file"
-                  className="attachmentFileInput"
-                  accept=".doc,.docx,.pdf,image/jpeg,image/png,image/webp"
-                  onChange={handleFilePicked}
-                />
-                <button type="button" className="miniAppButton attachmentUploadButton" onClick={() => inputRef.current?.click()}>
-                  {ui.drawer.attachmentsUpload}
-                </button>
-              </div>
+              <InspectorNodeBoundary
+                label="Attachments upload row"
+                kind="control"
+                sourcePath="apps/web/src/components/attachments/TaskAttachmentsSection.tsx"
+              >
+                <div className={`attachmentUploadRow ${props.compact ? "isCompact" : ""}`}>
+                  <input
+                    ref={inputRef}
+                    type="file"
+                    className="attachmentFileInput"
+                    accept=".doc,.docx,.pdf,image/jpeg,image/png,image/webp"
+                    onChange={handleFilePicked}
+                  />
+                  <button type="button" className="miniAppButton attachmentUploadButton" onClick={() => inputRef.current?.click()}>
+                    {ui.drawer.attachmentsUpload}
+                  </button>
+                </div>
+              </InspectorNodeBoundary>
             ) : null}
 
             {uploadState.status !== "idle" ? (
@@ -526,6 +543,11 @@ export function TaskAttachmentsSection(props: {
 
             {attachments.length ? (
               <>
+                <InspectorNodeBoundary
+                  label="Attachments icon grid"
+                  kind="content"
+                  sourcePath="apps/web/src/components/attachments/TaskAttachmentsSection.tsx"
+                >
                 <div className={`attachmentIconGrid ${props.compact ? "isCompact" : ""}`}>
                   {attachments.map((attachment) => {
                     const uploadedAt = formatAttachmentUploadedAt(attachment.uploadedAt ?? null, locale);
@@ -573,8 +595,14 @@ export function TaskAttachmentsSection(props: {
                     );
                   })}
                 </div>
+                </InspectorNodeBoundary>
 
                 {selectedAttachment ? (
+                  <InspectorNodeBoundary
+                    label="Attachment inspector"
+                    kind="content"
+                    sourcePath="apps/web/src/components/attachments/TaskAttachmentsSection.tsx"
+                  >
                   <div className={`attachmentInspector ${props.compact ? "isCompact" : ""}`}>
                     <div className="attachmentInspectorMeta">
                       <button
@@ -635,6 +663,7 @@ export function TaskAttachmentsSection(props: {
                       ) : null}
                     </div>
                   </div>
+                  </InspectorNodeBoundary>
                 ) : null}
               </>
             ) : (
@@ -643,11 +672,12 @@ export function TaskAttachmentsSection(props: {
 
             {actionError ? <div className="attachmentInlineNotice isError">{actionError}</div> : null}
           </div>
+          </InspectorNodeBoundary>
         ) : null}
       </div>
 
       <Tooltip state={tooltipState} />
       <AttachmentPreviewModal state={previewState} />
-    </>
+    </InspectorNodeBoundary>
   );
 }

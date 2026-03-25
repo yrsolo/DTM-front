@@ -16,9 +16,11 @@
 
 Only `public.ts` is a public entrypoint.
 
+For current runtime behavior and user-visible modes, see [WORKBENCH_INSPECTOR_TECHNICAL.md](WORKBENCH_INSPECTOR_TECHNICAL.md). For the future product-center architecture, see [WORKBENCH_AUTHORING_VISION.md](WORKBENCH_AUTHORING_VISION.md). This page focuses on the current shell structure and ownership.
+
 ## Package model boundaries
 
-- `InspectorNode` is the primary package model and is derived from the live DOM, not from React internals
+- `InspectorNode` is the primary package model and is derived from runtime React ownership, not from DOM traversal
 - semantic target data is optional enrichment attached to a node when the host integration can provide it
 - `InspectorState` now includes package-owned shell and hierarchy state:
   - expanded node ids
@@ -30,6 +32,8 @@ Only `public.ts` is a public entrypoint.
   - shell open state and position
 - local persistence for hierarchy/focus state is package-local and dev-only
 - host metadata such as `availability`, `scope`, `designArea`, `ownerTab`, and `tuningPriority` stays in the app registry
+- DOM survives only as anchor/mapping information for highlight and pick mode
+- this runtime node model is current shell groundwork, not the future primary product model
 
 ## App structure
 
@@ -56,3 +60,12 @@ The rest of the app should treat this folder as the single entry to inspector in
 - the shell can collapse into a narrow draggable button and expand back without losing hierarchy state
 - hovering a tree row highlights the corresponding page element
 - the right panel mixes universal node properties with optional host-provided semantic and workbench sections
+- repeated click on an already selected expandable row toggles that branch
+
+## Transition note
+
+The current shell structure should not be mistaken for the final authoring-product architecture.
+
+- future primary tree: `SourceGraph`
+- current runtime tree: delivery-shell groundwork
+- current app integration: first host implementation, not permanent product coupling

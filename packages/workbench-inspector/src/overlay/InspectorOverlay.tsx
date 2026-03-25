@@ -18,7 +18,7 @@ function getUnderlyingElementAtPoint(clientX: number, clientY: number): Element 
 }
 
 export function InspectorOverlay() {
-  const { getNodeById, getNodeElement, refreshNodes, resolveNodeFromElement, setHoveredNodeId, setPanelOpen, setPickMode, setSelectedNodeId, state } =
+  const { getNodeById, getNodeElement, getNodeElementDebug, refreshNodes, resolveNodeFromElement, setHoveredNodeId, setPanelOpen, setPickMode, setSelectedNodeId, state } =
     useInspectorContext();
 
   React.useEffect(() => {
@@ -63,8 +63,64 @@ export function InspectorOverlay() {
   if (!state.enabled) return null;
 
   const activeNode = state.selectedNodeId ? getNodeById(state.selectedNodeId) : state.hoveredNodeId ? getNodeById(state.hoveredNodeId) : null;
-  const activeElement = activeNode ? getNodeElement(activeNode.id) : null;
+  const canHighlightActiveNode = Boolean(activeNode && activeNode.bindingStatus === "bound");
+  const activeElement = canHighlightActiveNode && activeNode ? getNodeElement(activeNode.id) : null;
+  const activeElementDebug = activeNode ? getNodeElementDebug(activeNode.id) : null;
   const rect = activeElement?.getBoundingClientRect() ?? null;
+
+  React.useEffect(() => {
+    if (!state.debug) return;
+    if (!activeNode) {
+      console.debug("[workbench-inspector] overlay", { reason: "no-active-node" });
+      return;
+    }
+    if (!canHighlightActiveNode) {
+      console.debug("[workbench-inspector] overlay", {
+        reason: "binding-not-bound",
+        nodeId: activeNode.id,
+        bindingStatus: activeNode.bindingStatus,
+      });
+      return;
+    }
+    if (!activeElement) {
+      console.debug("[workbench-inspector] overlay", {
+        reason: "no-element",
+        nodeId: activeNode.id,
+        bindingStatus: activeNode.bindingStatus,
+        runtimeProjectionCount: activeNode.runtimeProjectionCount,
+        elementDebug: activeElementDebug,
+      });
+      return;
+    }
+    if (!rect || rect.width <= 0 || rect.height <= 0) {
+      console.debug("[workbench-inspector] overlay", {
+        reason: "zero-rect",
+        nodeId: activeNode.id,
+        rect: rect
+          ? {
+              x: rect.x,
+              y: rect.y,
+              width: rect.width,
+              height: rect.height,
+            }
+          : null,
+      });
+      return;
+    }
+    console.debug("[workbench-inspector] overlay", {
+      reason: "rendering-highlight",
+      nodeId: activeNode.id,
+      mode: activeElementDebug?.mode,
+      matchedNodeId: activeElementDebug?.matchedNodeId,
+      tagName: activeElementDebug?.tagName,
+      rect: {
+        x: rect.x,
+        y: rect.y,
+        width: rect.width,
+        height: rect.height,
+      },
+    });
+  }, [activeElement, activeElementDebug, activeNode, canHighlightActiveNode, rect, state.debug]);
 
   return (
     <>

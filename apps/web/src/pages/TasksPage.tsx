@@ -24,9 +24,10 @@ export function TasksPage() {
   const timelineHost = useElementWidth<HTMLDivElement>();
 
   if (!ctx) return null;
-  const { filters, snapshotState, design, authSession } = ctx;
+  const { filters, snapshotState, design, effectiveDesign, authSession } = ctx;
   const { snapshot, isLoading, status, error, reloadLocal } = snapshotState;
-  const rowH = design.tableRowHeight;
+  const designState = effectiveDesign ?? design;
+  const rowH = designState.tableRowHeight;
   const currentPersonLink = selectCurrentPersonLink({
     authSession: authSession.state,
     snapshot,
@@ -77,10 +78,10 @@ export function TasksPage() {
   };
 
   const onLeave = () => setTooltip({ visible: false });
-  const timelineWidth = Math.max(timelineHost.width, design.timelineWidth);
-  const showMilestoneLabels = design.timelineShowMilestoneLabels >= 0.5;
-  const labelEveryDay = design.timelineLabelEveryDay >= 0.5;
-  const weekendFillMode = design.timelineWeekendFullDay >= 0.5 ? "full-day" : "legacy";
+  const timelineWidth = Math.max(timelineHost.width, designState.timelineWidth);
+  const showMilestoneLabels = designState.timelineShowMilestoneLabels >= 0.5;
+  const labelEveryDay = designState.timelineLabelEveryDay >= 0.5;
+  const weekendFillMode = designState.timelineWeekendFullDay >= 0.5 ? "full-day" : "legacy";
 
   return (
     <div className="card">
@@ -102,8 +103,8 @@ export function TasksPage() {
           <table className="table tableFixedRows">
             <thead>
               <tr>
-                <th style={{ width: `${design.tasksTitleCol}%` }}>Title</th>
-                <th style={{ width: `${design.tasksStatusCol}%` }}>Status</th>
+                <th style={{ width: `${designState.tasksTitleCol}%` }}>Title</th>
+                <th style={{ width: `${designState.tasksStatusCol}%` }}>Status</th>
               </tr>
             </thead>
             <tbody>
@@ -139,22 +140,22 @@ export function TasksPage() {
           <TasksTimeline
             tasks={tasks}
             width={timelineWidth}
-            minHeight={design.timelineMinHeight}
-            topOffset={design.timelineTopOffset}
-            dateLabelY={design.timelineDateLabelY}
+            minHeight={designState.timelineMinHeight}
+            topOffset={designState.timelineTopOffset}
+            dateLabelY={designState.timelineDateLabelY}
             zoom={zoom}
-            stripeOpacity={design.timelineStripeOpacity}
-            gridOpacity={design.timelineGridOpacity}
-            gridLineWidth={design.timelineGridLineWidth}
-            barInsetY={design.barInsetY}
-            barRadius={design.barRadius}
+            stripeOpacity={designState.timelineStripeOpacity}
+            gridOpacity={designState.timelineGridOpacity}
+            gridLineWidth={designState.timelineGridLineWidth}
+            barInsetY={designState.barInsetY}
+            barRadius={designState.barRadius}
             labelEveryDay={labelEveryDay}
             weekendFillMode={weekendFillMode}
-            weekendFillOpacity={design.timelineWeekendFillOpacity}
-            milestoneSizeScale={design.milestoneSizeScale}
-            milestoneOpacity={design.milestoneOpacity}
+            weekendFillOpacity={designState.timelineWeekendFillOpacity}
+            milestoneSizeScale={designState.milestoneSizeScale}
+            milestoneOpacity={designState.milestoneOpacity}
             showMilestoneLabels={showMilestoneLabels}
-            taskColorMixPercent={design.taskColorMixPercent}
+            taskColorMixPercent={designState.taskColorMixPercent}
             rowH={rowH}
             onHover={onHover}
             onLeave={onLeave}
