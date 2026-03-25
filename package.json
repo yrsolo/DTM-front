@@ -5,6 +5,8 @@
     "validate:schema": "node scripts/validate_schema.mjs",
     "check:mojibake": "node scripts/check_mojibake.mjs",
     "check:workbench": "node scripts/check_workbench_layout.mjs",
+    "workbench:source-probe": "node scripts/workbench_source_identity_probe.mjs",
+    "workbench:build-source-snapshot": "node scripts/build_workbench_source_graph_snapshot.mjs",
     "format-sort:build": "node scripts/build_format_sort_data.mjs --target prod",
     "web:dev:test-local-auth": "scripts\\dev_frontend_test_local_auth.cmd",
     "penpot:tools": "node scripts/penpot_cli.mjs tools:list",
