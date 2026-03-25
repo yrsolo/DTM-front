@@ -4,6 +4,7 @@ import { LayoutContext } from "../components/Layout";
 import { TaskDetailsDrawer } from "../components/TaskDetailsDrawer";
 import { MiniAppShell, MiniAppTab } from "../components/miniapp/MiniAppShell";
 import { MiniTaskListItem } from "../components/miniapp/MobileTaskList";
+import { ensureTelegramSdkLoaded } from "../config/telegramSdk";
 import { initTelegramMiniApp } from "../config/telegramRuntime";
 import { selectCurrentPersonLink } from "../data/selectors/sessionSelectors";
 import {
@@ -12,12 +13,15 @@ import {
   selectTaskById,
   sortTasksForMobile,
 } from "../data/selectors/taskSelectors";
+import { useResolvedOwnerNames } from "../data/useResolvedOwnerNames";
+import { resolveMilestoneTone } from "../utils/milestoneTone";
 import { MiniAppProfilePage } from "./MiniAppProfilePage";
 import { MiniAppTasksPage } from "./MiniAppTasksPage";
 import { MiniAppTimelinePage } from "./MiniAppTimelinePage";
-import { resolveMilestoneTone } from "../utils/milestoneTone";
 
 const MINI_APP_ADMIN_RETURN_KEY = "dtm-miniapp-admin-return-to";
+
+export type MobileSurfaceMode = "telegram" | "web";
 
 function formatDueLabel(rawDate: string | null): string {
   if (!rawDate) return "Без даты";
@@ -41,14 +45,31 @@ function resolveFinalMilestoneDate(task: {
   return finalMilestone?.actual ?? finalMilestone?.planned ?? task.nextDue ?? task.end ?? task.start ?? null;
 }
 
-export function MiniAppPage() {
+export function MobileAppPage(props: { mode: MobileSurfaceMode }) {
   const ctx = React.useContext(LayoutContext);
   const [currentTab, setCurrentTab] = React.useState<MiniAppTab>("tasks");
   const [selectedTaskId, setSelectedTaskId] = React.useState<string | null>(null);
+  const isTelegramMode = props.mode === "telegram";
 
   React.useEffect(() => {
-    initTelegramMiniApp();
-  }, []);
+    if (!isTelegramMode) return;
+    let cancelled = false;
+
+    void ensureTelegramSdkLoaded()
+      .then(async () => {
+        if (cancelled) return;
+        initTelegramMiniApp();
+        if (ctx?.authSession.state.authenticated) return;
+        await ctx?.authSession.startTelegramSession();
+      })
+      .catch(() => {
+        // Runtime diagnostics remain visible in the profile page if Telegram SDK is unreachable.
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [ctx, isTelegramMode]);
 
   if (!ctx) return null;
 
@@ -66,10 +87,15 @@ export function MiniAppPage() {
     () => new Map((snapshot?.people ?? []).map((person) => [person.id, person.name] as const)),
     [snapshot?.people]
   );
-  const canViewAllTasks = authSession.state.user?.role === "admin";
+  const canViewAllTasks =
+    authSession.state.user?.role === "admin" || Boolean(authSession.state.user?.canViewAllTasks);
+  const canUseDesignerGrouping =
+    authSession.state.user?.role === "admin" ||
+    Boolean(authSession.state.user?.canUseDesignerGrouping ?? authSession.state.user?.canViewAllTasks);
+  const resolvedOwnerNames = useResolvedOwnerNames(snapshot?.tasks ?? [], !canViewAllTasks && Boolean(currentPerson.personName));
   const scopedTasks = canViewAllTasks
     ? sortTasksForMobile(selectAllTasks(snapshot))
-    : sortTasksForMobile(selectMyTasks(snapshot, currentPerson.personId));
+    : sortTasksForMobile(selectMyTasks(snapshot, currentPerson, resolvedOwnerNames, peopleById));
   const taskItems = React.useMemo<MiniTaskListItem[]>(
     () =>
       scopedTasks.map((task) => ({
@@ -94,8 +120,10 @@ export function MiniAppPage() {
     body = (
       <MiniAppTasksPage
         items={taskItems}
+        surfaceMode={props.mode}
         canViewAllTasks={canViewAllTasks}
-        unresolvedPersonLink={!currentPerson.personId}
+        canUseDesignerGrouping={canUseDesignerGrouping}
+        unresolvedPersonLink={!currentPerson.personId && !currentPerson.personName}
         authState={authSession.state}
         onOpenTask={setSelectedTaskId}
       />
@@ -105,22 +133,28 @@ export function MiniAppPage() {
   } else {
     body = (
       <MiniAppProfilePage
+        surfaceMode={props.mode}
         authState={authSession.state}
-        onLogin={() => { void authSession.startLogin(); }}
-        onLogout={() => { void authSession.logout(); }}
+        onLogin={() => {
+          void authSession.startLogin();
+        }}
+        onLogout={() => {
+          void authSession.logout();
+        }}
         onReload={() => {
           void (async () => {
             await authSession.reload();
-            await authSession.startTelegramSession();
+            if (isTelegramMode) {
+              await authSession.startTelegramSession();
+            }
           })();
         }}
         onOpenAdmin={() => {
-          if (typeof window !== "undefined") {
-            const returnTo = `${window.location.pathname}${window.location.search}${window.location.hash}`;
-            window.sessionStorage.setItem(MINI_APP_ADMIN_RETURN_KEY, returnTo);
-            window.localStorage.setItem(MINI_APP_ADMIN_RETURN_KEY, returnTo);
-            window.location.assign(`${authSession.adminHref}?mini_app=1`);
-          }
+          if (typeof window === "undefined") return;
+          const returnTo = `${window.location.pathname}${window.location.search}${window.location.hash}`;
+          window.sessionStorage.setItem(MINI_APP_ADMIN_RETURN_KEY, returnTo);
+          window.localStorage.setItem(MINI_APP_ADMIN_RETURN_KEY, returnTo);
+          window.location.assign(`${authSession.adminHref}?mini_app=1`);
         }}
       />
     );
@@ -143,4 +177,12 @@ export function MiniAppPage() {
       />
     </>
   );
+}
+
+export function MiniAppPage() {
+  return <MobileAppPage mode="telegram" />;
+}
+
+export function MobileWebPage() {
+  return <MobileAppPage mode="web" />;
 }

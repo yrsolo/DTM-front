@@ -149,10 +149,10 @@ function normalizeCatalog(input: unknown): PresetCatalog {
   const record = input as Record<string, unknown>;
   const defaultsRecord =
     record.defaults && typeof record.defaults === "object" ? (record.defaults as Record<string, unknown>) : {};
-  const presets = Array.isArray(record.presets)
+  const presets: PresetCatalogEntry[] = Array.isArray(record.presets)
     ? record.presets
         .filter((item): item is Record<string, unknown> => Boolean(item && typeof item === "object"))
-        .map((item) => ({
+        .map((item): PresetCatalogEntry => ({
           id: String(item.id || randomUUID()),
           kind: item.kind === "color" ? "color" : "layout",
           name: String(item.name || "Untitled preset"),

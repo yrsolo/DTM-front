@@ -1,6 +1,7 @@
 import React from "react";
 import { createPortal } from "react-dom";
 import { GroupV1, PersonV1, TaskV1 } from "@dtm/schema/snapshot";
+import { InspectorNodeBoundary } from "@dtm/workbench-inspector";
 import { fetchRuHolidayAndTransferDaysInRange } from "../calendar/ruNonWorkingDays";
 import { fetchPersonNameByOwnerId } from "../data/api";
 import { getUiText } from "../i18n/uiText";
@@ -85,8 +86,9 @@ export function TaskDetailsDrawer(props: {
   const ctx = React.useContext(LayoutContext);
   const ui = ctx?.ui ?? getUiText("ru");
   const locale = ctx?.locale ?? "ru";
-  const drawerAnimEnabled = (ctx?.design?.animEnabled ?? 0) >= 0.5;
-  const drawerAnimDurationMs = Math.max(0, Math.round(ctx?.design?.animDrawerDurationMs ?? 220));
+  const design = ctx?.effectiveDesign ?? ctx?.design;
+  const drawerAnimEnabled = (design?.animEnabled ?? 0) >= 0.5;
+  const drawerAnimDurationMs = Math.max(0, Math.round(design?.animDrawerDurationMs ?? 220));
   const [renderedTask, setRenderedTask] = React.useState<TaskV1 | null>(props.task);
   const [animState, setAnimState] = React.useState<"hidden" | "entering" | "open" | "closing">(
     props.task ? (drawerAnimEnabled && drawerAnimDurationMs > 0 ? "entering" : "open") : "hidden"
@@ -302,7 +304,7 @@ export function TaskDetailsDrawer(props: {
       right: milestones.slice(half),
     };
   }, [milestones]);
-  const bubbleScale = Math.max(0.6, ctx?.design?.tooltipBubbleScale ?? 1);
+  const bubbleScale = Math.max(0.6, design?.tooltipBubbleScale ?? 1);
   const bubbleStyle: React.CSSProperties = {
     fontSize: `${Math.round(11 * bubbleScale)}px`,
     padding: `${Math.round(3 * bubbleScale)}px ${Math.round(9 * bubbleScale)}px`,
@@ -350,9 +352,16 @@ export function TaskDetailsDrawer(props: {
 
   const drawerNode = (
     <div className={`${backdropClassName} drawerAnim-${animState}`} onClick={props.onClose}>
+      <InspectorNodeBoundary
+        label="Task details drawer"
+        kind="content"
+        semanticTargetId="app.task.drawer"
+        sourcePath="apps/web/src/components/TaskDetailsDrawer.tsx"
+      >
       <div
         ref={drawerRef}
         className={`${drawerClassName} drawerAnim-${animState} ${attachmentDragActive ? "attachmentDrawerDropActive" : ""}`}
+        data-inspector-target-id="app.task.drawer"
         onClick={(e) => e.stopPropagation()}
         onWheel={(e) => e.stopPropagation()}
         onTouchMove={(e) => e.stopPropagation()}
@@ -412,6 +421,25 @@ export function TaskDetailsDrawer(props: {
           </div>
         ) : null}
 
+        <InspectorNodeBoundary
+          label="Drawer attachments block"
+          kind="content"
+          sourcePath="apps/web/src/components/TaskDetailsDrawer.tsx"
+        >
+          <TaskAttachmentsSection
+            task={t}
+            compact={presentation === "sheet"}
+            dragActive={attachmentDragActive}
+            droppedFile={pendingAttachmentFile}
+            onDroppedFileHandled={() => setPendingAttachmentFile(null)}
+          />
+        </InspectorNodeBoundary>
+
+        <InspectorNodeBoundary
+          label="Drawer timing section"
+          kind="content"
+          sourcePath="apps/web/src/components/TaskDetailsDrawer.tsx"
+        >
         <div className="card drawerSection">
           <div className="drawerSectionTitle">{ui.drawer.timing}</div>
           {milestones.length ? (
@@ -441,7 +469,13 @@ export function TaskDetailsDrawer(props: {
             <div className="muted">{ui.drawer.noMilestones}</div>
           )}
         </div>
+        </InspectorNodeBoundary>
 
+        <InspectorNodeBoundary
+          label="Drawer calendar section"
+          kind="content"
+          sourcePath="apps/web/src/components/TaskDetailsDrawer.tsx"
+        >
         <div className="card drawerSection">
           <div className="drawerSectionTitle">{ui.drawer.calendar}</div>
           <div className="drawerCalendarWeekdays">
@@ -528,48 +562,60 @@ export function TaskDetailsDrawer(props: {
             ))}
           </div>
         </div>
+        </InspectorNodeBoundary>
 
         {t.tags?.length ? (
-          <div className="card drawerSection">
-            <div className="drawerSectionTitle">{ui.drawer.tags}</div>
-            <div className="row" style={{ flexWrap: "wrap", marginTop: 8 }}>
-              {t.tags.map((tag) => (
-                <span key={tag} className="badge">
-                  {tag}
-                </span>
-              ))}
+          <InspectorNodeBoundary
+            label="Drawer tags section"
+            kind="content"
+            sourcePath="apps/web/src/components/TaskDetailsDrawer.tsx"
+          >
+            <div className="card drawerSection">
+              <div className="drawerSectionTitle">{ui.drawer.tags}</div>
+              <div className="row" style={{ flexWrap: "wrap", marginTop: 8 }}>
+                {t.tags.map((tag) => (
+                  <span key={tag} className="badge">
+                    {tag}
+                  </span>
+                ))}
+              </div>
             </div>
-          </div>
+          </InspectorNodeBoundary>
         ) : null}
 
-        <TaskAttachmentsSection
-          task={t}
-          compact={presentation === "sheet"}
-          dragActive={attachmentDragActive}
-          droppedFile={pendingAttachmentFile}
-          onDroppedFileHandled={() => setPendingAttachmentFile(null)}
-        />
-
         {t.notes ? (
-          <div className="card drawerSection">
-            <div className="drawerSectionTitle">{ui.drawer.notes}</div>
-            <div className="muted" style={{ marginTop: 8, whiteSpace: "pre-wrap" }}>
-              {t.notes}
+          <InspectorNodeBoundary
+            label="Drawer notes section"
+            kind="content"
+            sourcePath="apps/web/src/components/TaskDetailsDrawer.tsx"
+          >
+            <div className="card drawerSection">
+              <div className="drawerSectionTitle">{ui.drawer.notes}</div>
+              <div className="muted" style={{ marginTop: 8, whiteSpace: "pre-wrap" }}>
+                {t.notes}
+              </div>
             </div>
-          </div>
+          </InspectorNodeBoundary>
         ) : null}
 
         {t.links?.sheetRowUrl ? (
-          <div className="card drawerSection">
-            <div className="drawerSectionTitle">{ui.drawer.links}</div>
-            <div style={{ marginTop: 8 }}>
-              <a href={t.links.sheetRowUrl} target="_blank" rel="noreferrer">
-                {ui.drawer.openSheetRow}
-              </a>
+          <InspectorNodeBoundary
+            label="Drawer links section"
+            kind="content"
+            sourcePath="apps/web/src/components/TaskDetailsDrawer.tsx"
+          >
+            <div className="card drawerSection">
+              <div className="drawerSectionTitle">{ui.drawer.links}</div>
+              <div style={{ marginTop: 8 }}>
+                <a href={t.links.sheetRowUrl} target="_blank" rel="noreferrer">
+                  {ui.drawer.openSheetRow}
+                </a>
+              </div>
             </div>
-          </div>
+          </InspectorNodeBoundary>
         ) : null}
       </div>
+      </InspectorNodeBoundary>
       {calendarHint ? (
         <div className="tooltip" style={{ left: calendarHint.x, top: calendarHint.y, pointerEvents: "none", zIndex: 90 }}>
           <span className="badge" style={bubbleStyle}>{calendarHint.label}</span>

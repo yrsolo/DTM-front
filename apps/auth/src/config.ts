@@ -10,6 +10,7 @@ export type AuthRuntimeConfig = {
   yandexClientId: string;
   yandexClientSecret: string;
   telegramBotToken: string | null;
+  telegramSdkProxyUrl: string | null;
   sessionSigningSecret: string;
   sessionTtlSeconds: number;
   cookieName: string;
@@ -20,6 +21,8 @@ export type AuthRuntimeConfig = {
   ydbDatabase: string;
   browserAuthProxySecret: string;
   adminBootstrapUid: string | null;
+  localDevAuthEnabled: boolean;
+  localDevBootstrapToken: string | null;
   presetBucket: string;
   presetPublicBaseUrl: string;
   presetStorageEndpoint: string;
@@ -92,6 +95,7 @@ export function getAuthRuntimeConfig(): AuthRuntimeConfig {
     yandexClientId: readRequired(yandexClientIdVar),
     yandexClientSecret: readRequired(yandexClientSecretVar),
     telegramBotToken: readOptional("TG_TOKEN"),
+    telegramSdkProxyUrl: readOptional("PROXY_URL"),
     sessionSigningSecret: readRequired("SESSION_SIGNING_SECRET"),
     sessionTtlSeconds: readNumber("SESSION_TTL_SECONDS", 60 * 60 * 12),
     cookieName: deriveContourCookieName(readRequired("COOKIE_NAME"), contour),
@@ -103,6 +107,8 @@ export function getAuthRuntimeConfig(): AuthRuntimeConfig {
     ydbDatabase: readRequired("YDB_DATABASE"),
     browserAuthProxySecret: readRequired("BROWSER_AUTH_PROXY_SECRET"),
     adminBootstrapUid: readOptional("ADMIN_BOOTSTRAP_UID"),
+    localDevAuthEnabled: contour === "test" ? readBoolean("LOCAL_DEV_AUTH_ENABLED_TEST", false) : false,
+    localDevBootstrapToken: contour === "test" ? readOptional("LOCAL_DEV_AUTH_TOKEN") : null,
     presetBucket: process.env.PRESET_BUCKET?.trim() || "dtm-presets",
     presetPublicBaseUrl:
       process.env.PRESET_PUBLIC_BASE_URL?.trim().replace(/\/+$/, "") || "https://dtm-presets.website.yandexcloud.net",

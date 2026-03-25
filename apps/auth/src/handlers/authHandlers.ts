@@ -6,11 +6,13 @@ import { ensureOpenAccessRequest } from "../db/accessRequestsRepo";
 import { writeAuditLog } from "../db/auditRepo";
 import {
   createUserFromProfile,
+  createUserFromTelegram,
   getUserByEmail,
   getUserById,
   getUserByTelegramId,
   getUserByYandexUid,
   linkUserToPerson,
+  setUserAvatarUrl,
   setUserStatus,
   syncUserProfile,
   upsertRole,
@@ -252,29 +254,52 @@ export async function telegramSession(req: NormalizedRequest) {
     if (!linkedPerson) {
       return telegramSessionError(404, "telegram_person_not_found", telegramUser.id);
     }
-    if (!linkedPerson.email) {
-      return telegramSessionError(409, "telegram_person_missing_email", telegramUser.id);
+    if (linkedPerson.email) {
+      user = await getUserByEmail(linkedPerson.email);
     }
-
-    user = await getUserByEmail(linkedPerson.email);
-    if (!user) {
-      return telegramSessionError(404, "telegram_user_not_found_by_email", telegramUser.id);
+    if (user) {
+      await linkUserToPerson(user.id, linkedPerson);
+      user = await getUserById(user.id);
+    } else {
+      user = await createUserFromTelegram(telegramUser, linkedPerson);
     }
-
-    await linkUserToPerson(user.id, linkedPerson);
-    user = await getUserById(user.id);
+  } else if (!user.personId) {
+    const directory = await fetchPeopleDirectory();
+    const linkedPerson = findLinkedPersonByTelegramId(directory, telegramUser.id);
+    if (linkedPerson) {
+      await linkUserToPerson(user.id, linkedPerson);
+      user = await getUserById(user.id);
+    }
   }
 
   if (!user) {
     return telegramSessionError(404, "telegram_user_not_linked", telegramUser.id);
   }
+  let linkedUser = user;
 
-  const sessionCookie = buildSessionCookieForUser(user, "telegram");
-  user = await getUserById(user.id);
+  if (!linkedUser.avatarUrl && telegramUser.photoUrl) {
+    await setUserAvatarUrl(linkedUser.id, telegramUser.photoUrl);
+    linkedUser = (await getUserById(linkedUser.id)) ?? linkedUser;
+  }
+
+  if (linkedUser.status !== "approved") {
+    await setUserStatus(linkedUser.id, "approved");
+    linkedUser = (await getUserById(linkedUser.id)) ?? linkedUser;
+  }
+
+  const sessionCookie = buildSessionCookieForUser(linkedUser, "telegram");
+  const currentUser = (await getUserById(linkedUser.id)) ?? linkedUser;
   const result = json(200, {
     ok: true,
-    accessMode: getAccessMode(user),
-    user: buildMePayload(user).user,
+    accessMode: getAccessMode(currentUser),
+    user: buildMePayload({
+      ...currentUser,
+      sessionKind: "telegram",
+      expiresAt: null,
+      temporaryAccessLabel: null,
+      sourceAccessLinkId: null,
+      canUseDesignerGrouping: currentUser.role === "admin" || currentUser.canViewAllTasks,
+    }).user,
   });
   return appendSetCookie(result, sessionCookie);
 }

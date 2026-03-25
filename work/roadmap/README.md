@@ -11,3 +11,25 @@ Active campaign priorities are defined in `work/now/*`.
 
 ## Deferred
 - CDN/CI/layout campaigns are intentionally deprioritized for now.
+
+## Workbench Authoring direction
+
+Workbench work is being realigned from inspector-centric slices to a future standalone authoring product.
+
+Canonical journey:
+
+`Parse -> Enrich -> Inspect -> Tune -> Consolidate -> Persist`
+
+Canonical persistence identity is source-analysis-first. Runtime/fiber/DOM are projection and preview layers, not the basis for `Persist`.
+
+Authoring-product campaigns:
+
+- `CAM-WORKBENCH-AUTHORING-VISION`
+- `CAM-WORKBENCH-SOURCE-GRAPH`
+- `CAM-WORKBENCH-AUTHORING-MODEL`
+- `CAM-WORKBENCH-LIVE-PREVIEW`
+- `CAM-WORKBENCH-CONSOLIDATION`
+- `CAM-WORKBENCH-SOURCE-SYNC`
+- `CAM-WORKBENCH-HARDENING`
+
+Legacy `CAM-WORKBENCH-INSPECTOR-*` campaigns remain as groundwork for the shell, pick mode, tree UI, and host bridge, but they are no longer the product roadmap center.

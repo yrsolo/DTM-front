@@ -1,12 +1,22 @@
 import react from "@vitejs/plugin-react";
-import { defineConfig } from "vite";
+import path from "node:path";
+import { defineConfig, loadEnv } from "vite";
 
-const buildBase = process.env.DTM_WEB_BUILD_BASE?.trim() || "/";
-
-export default defineConfig({
-  base: buildBase,
-  plugins: [react()],
-  server: {
-    port: 5173
-  }
+export default defineConfig(({ mode }) => {
+  const env = loadEnv(mode, __dirname, "");
+  const buildBase = env.DTM_WEB_BUILD_BASE?.trim() || "/";
+  return {
+    base: buildBase,
+    plugins: [react()],
+    resolve: {
+      alias: {
+        "@dtm/workbench-inspector": path.resolve(__dirname, "../../packages/workbench-inspector/src/public.ts"),
+        "@dtm/workbench-contracts": path.resolve(__dirname, "../../packages/workbench-contracts/src/index.ts"),
+        "@dtm/workbench-source-analysis": path.resolve(__dirname, "../../packages/workbench-source-analysis/src/public.ts"),
+      },
+    },
+    server: {
+      port: 5173,
+    },
+  };
 });

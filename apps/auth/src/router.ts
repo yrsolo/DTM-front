@@ -5,6 +5,7 @@ import {
   approveUserHandler,
   listAdminData,
   makeAdminHandler,
+  setUserAllTasksHandler,
   refreshDesignersDirectoryHandler,
   rejectUserHandler,
   removeAdminHandler,
@@ -14,7 +15,9 @@ import {
 } from "./handlers/adminHandlers";
 import {
   accessLinkUsageHandler,
+  activateAccessLinkHandler,
   createAccessLinkHandler,
+  deleteAccessLinkHandler,
   listAccessLinksHandler,
   redeemAccessLinkHandler,
   revokeAccessLinkHandler,
@@ -28,6 +31,18 @@ import {
 } from "./handlers/attachmentProxy";
 import { callback, login, logout, me, telegramSession } from "./handlers/authHandlers";
 import { proxyApiRequest } from "./handlers/apiProxy";
+import { proxyTelegramSdk } from "./handlers/telegramSdkProxy";
+import {
+  createDeveloperTokenHandler,
+  deleteDeveloperTokenHandler,
+  developerTokenUsageHandler,
+  devSessionCatalogHandler,
+  devSessionImpersonateHandler,
+  devSessionLogoutHandler,
+  listDeveloperTokensHandler,
+  revokeDeveloperTokenHandler,
+  updateDeveloperTokenHandler,
+} from "./handlers/devLocalAuthHandlers";
 import {
   clonePresetHandler,
   createPresetHandler,
@@ -71,6 +86,18 @@ export async function routeRequest(req: NormalizedRequest): Promise<HttpResult> 
     if (req.method === "POST" && req.routePath === "/telegram/session") {
       return telegramSession(req);
     }
+    if ((req.method === "GET" || req.method === "HEAD") && req.routePath === "/telegram/sdk") {
+      return proxyTelegramSdk(req);
+    }
+    if (req.method === "POST" && req.routePath === "/dev/session/catalog") {
+      return devSessionCatalogHandler(req);
+    }
+    if (req.method === "POST" && req.routePath === "/dev/session/impersonate") {
+      return devSessionImpersonateHandler(req);
+    }
+    if (req.method === "POST" && req.routePath === "/dev/session/logout") {
+      return devSessionLogoutHandler(req);
+    }
     if (req.method === "GET" && req.routePath === "/admin/overview") {
       return listAdminData(req);
     }
@@ -85,6 +112,12 @@ export async function routeRequest(req: NormalizedRequest): Promise<HttpResult> 
     }
     if (req.method === "POST" && req.routePath === "/admin/access-links") {
       return createAccessLinkHandler(req);
+    }
+    if (req.method === "GET" && req.routePath === "/admin/developer-tokens") {
+      return listDeveloperTokensHandler(req);
+    }
+    if (req.method === "POST" && req.routePath === "/admin/developer-tokens") {
+      return createDeveloperTokenHandler(req);
     }
     if (req.method === "POST" && req.routePath === "/attachments/request-upload") {
       return proxyAttachmentAdminRequest(req, "request-upload");
@@ -143,6 +176,11 @@ export async function routeRequest(req: NormalizedRequest): Promise<HttpResult> 
       return removeAdminHandler(req, removeAdminMatch[1]);
     }
 
+    const allTasksMatch = req.routePath.match(/^\/admin\/users\/([^/]+)\/all-tasks$/);
+    if (req.method === "POST" && allTasksMatch) {
+      return setUserAllTasksHandler(req, allTasksMatch[1]);
+    }
+
     const accessLinkMatch = req.routePath.match(/^\/admin\/access-links\/([^/]+)$/);
     if (req.method === "PATCH" && accessLinkMatch) {
       return updateAccessLinkHandler(req, accessLinkMatch[1]);
@@ -153,9 +191,39 @@ export async function routeRequest(req: NormalizedRequest): Promise<HttpResult> 
       return revokeAccessLinkHandler(req, accessLinkRevokeMatch[1]);
     }
 
+    const accessLinkActivateMatch = req.routePath.match(/^\/admin\/access-links\/([^/]+)\/activate$/);
+    if (req.method === "POST" && accessLinkActivateMatch) {
+      return activateAccessLinkHandler(req, accessLinkActivateMatch[1]);
+    }
+
+    const accessLinkDeleteMatch = req.routePath.match(/^\/admin\/access-links\/([^/]+)\/delete$/);
+    if (req.method === "POST" && accessLinkDeleteMatch) {
+      return deleteAccessLinkHandler(req, accessLinkDeleteMatch[1]);
+    }
+
     const accessLinkUsageMatch = req.routePath.match(/^\/admin\/access-links\/([^/]+)\/usage$/);
     if (req.method === "GET" && accessLinkUsageMatch) {
       return accessLinkUsageHandler(req, accessLinkUsageMatch[1]);
+    }
+
+    const developerTokenMatch = req.routePath.match(/^\/admin\/developer-tokens\/([^/]+)$/);
+    if (req.method === "PATCH" && developerTokenMatch) {
+      return updateDeveloperTokenHandler(req, developerTokenMatch[1]);
+    }
+
+    const developerTokenRevokeMatch = req.routePath.match(/^\/admin\/developer-tokens\/([^/]+)\/revoke$/);
+    if (req.method === "POST" && developerTokenRevokeMatch) {
+      return revokeDeveloperTokenHandler(req, developerTokenRevokeMatch[1]);
+    }
+
+    const developerTokenDeleteMatch = req.routePath.match(/^\/admin\/developer-tokens\/([^/]+)\/delete$/);
+    if (req.method === "POST" && developerTokenDeleteMatch) {
+      return deleteDeveloperTokenHandler(req, developerTokenDeleteMatch[1]);
+    }
+
+    const developerTokenUsageMatch = req.routePath.match(/^\/admin\/developer-tokens\/([^/]+)\/usage$/);
+    if (req.method === "GET" && developerTokenUsageMatch) {
+      return developerTokenUsageHandler(req, developerTokenUsageMatch[1]);
     }
 
     const presetMatch = req.routePath.match(/^\/presets\/([^/]+)$/);

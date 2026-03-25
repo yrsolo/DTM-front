@@ -6,24 +6,32 @@ import {
   MiniTaskListItem,
   MobileTaskList,
 } from "../components/miniapp/MobileTaskList";
+import type { MobileSurfaceMode } from "./MiniAppPage";
 
-function unresolvedPersonMessage(authState: AuthSessionState): string {
-  if (authState.telegramBootstrapReason === "telegram_person_not_found") {
-    return "Не нашли ваш Telegram аккаунт в базе дизайнеров. Обратитесь к администратору.";
+function unresolvedPersonMessage(authState: AuthSessionState, surfaceMode: MobileSurfaceMode): string {
+  if (surfaceMode === "telegram") {
+    if (authState.telegramBootstrapReason === "telegram_person_not_found") {
+      return "Не нашли ваш Telegram-аккаунт в базе дизайнеров. Обратитесь к администратору.";
+    }
+    if (authState.telegramBootstrapReason === "telegram_person_missing_email") {
+      return "В базе дизайнеров для вашего Telegram-аккаунта не заполнен yandexEmail.";
+    }
+    if (authState.telegramBootstrapReason === "telegram_user_not_found_by_email") {
+      return "По yandexEmail из базы дизайнеров не найден пользователь в auth. Сначала войдите в DTM через веб.";
+    }
+    if (authState.telegramBootstrapReason === "telegram_user_not_linked") {
+      return "Telegram-аккаунт ещё не связан с пользователем DTM.";
+    }
+    if (authState.telegramBootstrap === "linking") {
+      return "Проверяем Telegram-вход и связь с дизайнером...";
+    }
+    return "Для списка задач пока нет подтверждённой связи с дизайнером.";
   }
-  if (authState.telegramBootstrapReason === "telegram_person_missing_email") {
-    return "В базе дизайнеров для вашего Telegram аккаунта не заполнен yandexEmail.";
+
+  if (!authState.authenticated) {
+    return "Войдите через Яндекс, чтобы увидеть свои задачи в мобильной версии.";
   }
-  if (authState.telegramBootstrapReason === "telegram_user_not_found_by_email") {
-    return "По yandexEmail из базы дизайнеров не найден пользователь в auth. Сначала войдите в DTM через веб.";
-  }
-  if (authState.telegramBootstrapReason === "telegram_user_not_linked") {
-    return "Telegram аккаунт ещё не связан с пользователем DTM.";
-  }
-  if (authState.telegramBootstrap === "linking") {
-    return "Проверяем Telegram-вход и связь с дизайнером...";
-  }
-  return "Для списка задач пока нет подтверждённой связи с дизайнером.";
+  return "Эта учётная запись пока не связана с дизайнером DTM. Обратитесь к администратору.";
 }
 
 const GROUPING_LABELS: Record<MiniTaskGroupingMode, string> = {
@@ -34,13 +42,25 @@ const GROUPING_LABELS: Record<MiniTaskGroupingMode, string> = {
 
 export function MiniAppTasksPage(props: {
   items: MiniTaskListItem[];
+  surfaceMode: MobileSurfaceMode;
   canViewAllTasks: boolean;
+  canUseDesignerGrouping: boolean;
   unresolvedPersonLink: boolean;
   authState: AuthSessionState;
   onOpenTask: (taskId: string) => void;
 }) {
-  const [groupingMode, setGroupingMode] = React.useState<MiniTaskGroupingMode>("designer");
+  const groupingOptions: MiniTaskGroupingMode[] = props.canUseDesignerGrouping ? ["designer", "brand", "show"] : ["brand", "show"];
+  const [groupingMode, setGroupingMode] = React.useState<MiniTaskGroupingMode>(
+    props.canUseDesignerGrouping ? "designer" : "brand"
+  );
   const [toggleAllToken, setToggleAllToken] = React.useState(0);
+
+  React.useEffect(() => {
+    if (props.canUseDesignerGrouping) return;
+    if (groupingMode === "designer") {
+      setGroupingMode("brand");
+    }
+  }, [props.canUseDesignerGrouping, groupingMode]);
 
   function handleGroupingClick(mode: MiniTaskGroupingMode) {
     if (groupingMode === mode) {
@@ -53,7 +73,7 @@ export function MiniAppTasksPage(props: {
   return (
     <div className="miniAppSection">
       <div className="miniAppSegmented">
-        {(["designer", "brand", "show"] as MiniTaskGroupingMode[]).map((mode) => (
+        {groupingOptions.map((mode) => (
           <button
             key={mode}
             type="button"
@@ -65,7 +85,7 @@ export function MiniAppTasksPage(props: {
         ))}
       </div>
       {props.unresolvedPersonLink && !props.canViewAllTasks ? (
-        <div className="miniAppNotice">{unresolvedPersonMessage(props.authState)}</div>
+        <div className="miniAppNotice">{unresolvedPersonMessage(props.authState, props.surfaceMode)}</div>
       ) : null}
       <MobileTaskList
         items={props.items}

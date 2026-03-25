@@ -5,6 +5,9 @@ import { LayoutContext } from "../components/Layout";
 import { LoadingState } from "../components/LoadingState";
 import { TaskDetailsDrawer } from "../components/TaskDetailsDrawer";
 import { Tooltip, TooltipState } from "../components/Tooltip";
+import { selectCurrentPersonLink } from "../data/selectors/sessionSelectors";
+import { taskMatchesCurrentPersonWithResolvedOwners } from "../data/selectors/taskSelectors";
+import { useResolvedOwnerNames } from "../data/useResolvedOwnerNames";
 import { DesignersTimeline } from "../gantt/DesignersTimeline";
 import { RenderTask } from "../gantt/types";
 import { useElementWidth } from "../utils/useElementWidth";
@@ -22,16 +25,31 @@ export function DesignersPage() {
   const timelineHost = useElementWidth<HTMLDivElement>();
 
   if (!ctx) return null;
-  const { filters, snapshotState, design } = ctx;
+  const { filters, snapshotState, design, effectiveDesign, authSession } = ctx;
   const { snapshot, isLoading, status, error, reloadLocal } = snapshotState;
-  const rowH = design.tableRowHeight;
+  const designState = effectiveDesign ?? design;
+  const rowH = designState.tableRowHeight;
+  const currentPersonLink = selectCurrentPersonLink({
+    authSession: authSession.state,
+    snapshot,
+  });
+  const canViewAllTasks =
+    authSession.state.user?.role === "admin" || Boolean(authSession.state.user?.canViewAllTasks);
+  const resolvedOwnerNames = useResolvedOwnerNames(snapshot?.tasks ?? [], !canViewAllTasks && authSession.state.authenticated);
+  const forcedOwnerId =
+    !canViewAllTasks && authSession.state.authenticated ? currentPersonLink.personId ?? "" : "";
 
   if (isLoading && !snapshot) return <LoadingState />;
   if (!snapshot && error) return <ErrorBanner error={error} onRetry={reloadLocal} />;
   if (!snapshot) return <EmptyState title="No data" description="Snapshot is empty." />;
+  const peopleById = new Map(snapshot.people.map((p) => [p.id, p.name]));
 
   const tasks = snapshot.tasks.filter((t) => {
-    if (filters.ownerId && t.ownerId !== filters.ownerId) return false;
+    if (!canViewAllTasks && authSession.state.authenticated) {
+      if (!taskMatchesCurrentPersonWithResolvedOwners(t, currentPersonLink, resolvedOwnerNames, peopleById)) return false;
+    } else if (filters.ownerId && t.ownerId !== filters.ownerId) {
+      return false;
+    }
     if (filters.status && t.status !== filters.status) return false;
     if (filters.search && !t.title.toLowerCase().includes(filters.search.toLowerCase())) return false;
     return true;
@@ -55,10 +73,10 @@ export function DesignersPage() {
   };
 
   const onLeave = () => setTooltip({ visible: false });
-  const timelineWidth = Math.max(timelineHost.width, design.timelineWidth);
-  const showMilestoneLabels = design.timelineShowMilestoneLabels >= 0.5;
-  const labelEveryDay = design.timelineLabelEveryDay >= 0.5;
-  const weekendFillMode = design.timelineWeekendFullDay >= 0.5 ? "full-day" : "legacy";
+  const timelineWidth = Math.max(timelineHost.width, designState.timelineWidth);
+  const showMilestoneLabels = designState.timelineShowMilestoneLabels >= 0.5;
+  const labelEveryDay = designState.timelineLabelEveryDay >= 0.5;
+  const weekendFillMode = designState.timelineWeekendFullDay >= 0.5 ? "full-day" : "legacy";
 
   return (
     <div className="card">
@@ -78,6 +96,7 @@ export function DesignersPage() {
       <div>
         <div
           className="card timelineScroll"
+          data-inspector-target-id="app.designers.timeline"
           ref={timelineHost.ref}
           onWheel={(e) => {
             e.preventDefault();
@@ -92,22 +111,22 @@ export function DesignersPage() {
             tasks={tasks}
             width={timelineWidth}
             rowH={rowH}
-            labelW={Math.max(320, design.desktopLeftColWidth)}
-            topOffset={design.timelineTopOffset}
-            dateLabelY={design.timelineDateLabelY}
+            labelW={Math.max(320, designState.desktopLeftColWidth)}
+            topOffset={designState.timelineTopOffset}
+            dateLabelY={designState.timelineDateLabelY}
             zoom={zoom}
-            stripeOpacity={design.timelineStripeOpacity}
-            gridOpacity={design.timelineGridOpacity}
-            gridLineWidth={design.timelineGridLineWidth}
-            barInsetY={design.barInsetY}
-            barRadius={design.barRadius}
+            stripeOpacity={designState.timelineStripeOpacity}
+            gridOpacity={designState.timelineGridOpacity}
+            gridLineWidth={designState.timelineGridLineWidth}
+            barInsetY={designState.barInsetY}
+            barRadius={designState.barRadius}
             labelEveryDay={labelEveryDay}
             weekendFillMode={weekendFillMode}
-            weekendFillOpacity={design.timelineWeekendFillOpacity}
-            milestoneSizeScale={design.milestoneSizeScale}
-            milestoneOpacity={design.milestoneOpacity}
+            weekendFillOpacity={designState.timelineWeekendFillOpacity}
+            milestoneSizeScale={designState.milestoneSizeScale}
+            milestoneOpacity={designState.milestoneOpacity}
             showMilestoneLabels={showMilestoneLabels}
-            taskColorMixPercent={design.taskColorMixPercent}
+            taskColorMixPercent={designState.taskColorMixPercent}
             onHover={onHover}
             onLeave={onLeave}
             onClick={(t) => setSelectedId(t.id)}

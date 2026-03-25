@@ -79,6 +79,13 @@ body,
   overflow-y: auto;
 }
 
+.appShell.promoShell {
+  height: auto;
+  min-height: 100dvh;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
 a {
   color: inherit;
 }
@@ -105,6 +112,13 @@ a {
 .container.miniAppContainer {
   padding-top: 12px;
   height: 100dvh;
+}
+
+.container.promoContainer {
+  min-height: 100dvh;
+  height: auto;
+  padding: 32px 24px 56px;
+  overflow: visible;
 }
 
 .container > .card {
@@ -1513,6 +1527,24 @@ button:hover {
   font-size: 11px;
 }
 
+.timelineTodayBtn {
+  min-height: 32px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(120, 222, 194, 0.34);
+  background: linear-gradient(145deg, rgba(25, 50, 48, 0.92), rgba(18, 34, 42, 0.9));
+  color: #dffcf4;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.timelineTodayBtn:hover,
+.timelineTodayBtn:focus-visible {
+  border-color: rgba(138, 239, 211, 0.5);
+  background: linear-gradient(145deg, rgba(30, 67, 61, 0.96), rgba(20, 44, 50, 0.94));
+}
+
 .limitCtl {
   display: inline-flex;
   align-items: center;
@@ -2442,6 +2474,580 @@ button:hover {
   overflow: hidden;
 }
 
+.promoPage {
+  width: min(1220px, 100%);
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 72px;
+  padding-bottom: 72px;
+}
+
+.promoHero {
+  display: grid;
+  grid-template-columns: minmax(0, 0.8fr) minmax(520px, 1.2fr);
+  gap: 42px;
+  padding: 24px 0 0;
+}
+
+.promoHeroCopy {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding-top: 24px;
+}
+
+.promoSectionKicker {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  padding: 0;
+  color: #95a9de;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.promoHero h1,
+.promoFinalCopy h2 {
+  margin: 0;
+  color: #f7f8fe;
+  line-height: 0.98;
+}
+
+.promoHero h1 {
+  font-size: clamp(54px, 7.2vw, 104px);
+  max-width: 7.2ch;
+  letter-spacing: -0.05em;
+}
+
+.promoLead,
+.promoFinalCopy p,
+.promoEditorialBody p,
+.promoShowcaseCopy p,
+.promoSummaryLead p,
+.promoVideoCopy p {
+  margin: 0;
+  color: #b6c1dd;
+  line-height: 1.8;
+  font-size: 17px;
+  max-width: 34rem;
+}
+
+.promoCtaRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  align-items: center;
+}
+
+.promoPrimaryCta,
+.promoSecondaryCta,
+.promoTextToggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 48px;
+  padding: 0 20px;
+  border-radius: 999px;
+  border: 1px solid rgba(175, 191, 255, 0.16);
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    transform 180ms ease,
+    border-color 180ms ease,
+    filter 180ms ease,
+    background 180ms ease;
+  font: inherit;
+}
+
+.promoPrimaryCta {
+  background: linear-gradient(140deg, rgba(255, 142, 201, 0.9), rgba(122, 147, 255, 0.92));
+  color: #09111f;
+  font-weight: 800;
+  box-shadow: 0 18px 32px rgba(60, 32, 80, 0.24);
+}
+
+.promoSecondaryCta {
+  background: transparent;
+  color: #dfe8ff;
+  font-weight: 700;
+}
+
+.promoPrimaryCta:hover,
+.promoSecondaryCta:hover,
+.promoTextToggle:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.05);
+}
+
+.promoTextToggle {
+  min-height: auto;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: #f08dca;
+  font-weight: 700;
+  justify-content: flex-start;
+}
+
+.promoTextToggleLight {
+  color: rgba(255, 255, 255, 0.84);
+}
+
+.promoStatList {
+  margin: 10px 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 12px;
+}
+
+.promoStatList li {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  color: #d7dff3;
+  line-height: 1.55;
+}
+
+.promoStatList li::before {
+  content: "";
+  width: 10px;
+  height: 10px;
+  margin-top: 8px;
+  border-radius: 999px;
+  flex: 0 0 10px;
+  background: linear-gradient(135deg, #ff93cf, #69f0d6);
+  box-shadow: 0 0 18px rgba(255, 147, 207, 0.45);
+}
+
+.promoHeroVisual {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.promoHeroVisual img {
+  width: 100%;
+  display: block;
+  border-radius: 28px;
+  border: 1px solid rgba(176, 192, 255, 0.1);
+  box-shadow:
+    0 34px 66px rgba(0, 0, 0, 0.32),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.promoHeroVisual figcaption,
+.promoSectionCaption {
+  color: #889cc9;
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.promoVideoStrip {
+  display: grid;
+  grid-template-columns: minmax(0, 0.75fr) minmax(360px, 0.95fr);
+  gap: 34px;
+  align-items: center;
+  padding: 8px 0 0;
+}
+
+.promoVideoCopy {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.promoVideoCopy h2,
+.promoEditorialBody h2,
+.promoShowcaseCopy h2,
+.promoSummaryLead h2 {
+  margin: 0;
+  color: #f4f7ff;
+  font-size: clamp(34px, 4.3vw, 56px);
+  line-height: 1.05;
+  letter-spacing: -0.04em;
+}
+
+.promoVideoCard {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.promoVideoFrame {
+  position: relative;
+  overflow: hidden;
+  border-radius: 24px;
+  border: 1px solid rgba(174, 191, 255, 0.14);
+  background:
+    radial-gradient(circle at 50% 15%, rgba(255, 145, 202, 0.1), transparent 36%),
+    linear-gradient(180deg, rgba(13, 18, 35, 0.92), rgba(8, 12, 22, 0.94));
+  aspect-ratio: 16 / 9;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.22);
+}
+
+.promoVideo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  background: #05070d;
+}
+
+.promoVideoOverlay {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  background:
+    linear-gradient(180deg, rgba(8, 12, 22, 0.16), rgba(8, 12, 22, 0.64)),
+    radial-gradient(circle at 50% 44%, rgba(255, 144, 206, 0.16), transparent 28%);
+  color: #f4f7ff;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 14px;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 700;
+}
+
+.promoVideoPlay {
+  width: 78px;
+  height: 78px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(140deg, rgba(255, 142, 201, 0.92), rgba(122, 147, 255, 0.92));
+  color: #08111d;
+  font-size: 30px;
+  box-shadow: 0 18px 36px rgba(43, 20, 63, 0.34);
+}
+
+.promoVideoFrame.isPlaying .promoVideoOverlay {
+  display: none;
+}
+
+.promoStorySection {
+  display: flex;
+  flex-direction: column;
+  gap: 76px;
+}
+
+.promoEditorialSection {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.promoEditorialBody {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  max-width: 760px;
+}
+
+.promoInlineActions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-top: 4px;
+}
+
+.promoShowcaseScene {
+  display: grid;
+  grid-template-columns: minmax(0, 0.78fr) minmax(380px, 1fr);
+  gap: 42px;
+  align-items: center;
+}
+
+.promoShowcaseScene.isReversed {
+  grid-template-columns: minmax(380px, 1fr) minmax(0, 0.78fr);
+}
+
+.promoShowcaseScene.isReversed .promoShowcaseCopy {
+  order: 2;
+}
+
+.promoShowcaseScene.isReversed .promoShowcaseVisual {
+  order: 1;
+}
+
+.promoShowcaseCopy {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.promoShowcaseVisual {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.promoShowcaseVisual img {
+  width: 100%;
+  display: block;
+  border-radius: 26px;
+  border: 1px solid rgba(178, 192, 255, 0.1);
+  box-shadow:
+    0 28px 58px rgba(0, 0, 0, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.promoShowcaseVisual.isMobile {
+  max-width: 360px;
+  justify-self: center;
+}
+
+.promoSummaryBand {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 26px 0 0;
+  border-top: 1px solid rgba(110, 127, 175, 0.18);
+}
+
+.promoSummaryBody {
+  display: flex;
+  gap: 32px;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.promoSummaryLead {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  max-width: 880px;
+}
+
+.promoFinalCta {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 42px 40px;
+  border-radius: 28px;
+  background: linear-gradient(135deg, rgba(255, 141, 201, 0.92), rgba(124, 143, 255, 0.92));
+  box-shadow: 0 28px 56px rgba(35, 20, 60, 0.24);
+}
+
+.promoFinalCopy {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  max-width: 780px;
+}
+
+.promoFinalCopy .promoSectionKicker,
+.promoFinalCopy h2,
+.promoFinalCopy p {
+  color: #091120;
+}
+
+.promoFinalGlow {
+  position: absolute;
+  inset: auto -80px -160px auto;
+  width: 360px;
+  height: 360px;
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.18), transparent 64%);
+  pointer-events: none;
+}
+
+.promoFooter {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 24px;
+  padding: 12px 0 0;
+  border-top: 1px solid rgba(107, 122, 166, 0.16);
+}
+
+.promoFooterBrand {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  color: #93a4cd;
+  font-size: 14px;
+}
+
+.promoFooterBrand strong {
+  color: #eef4ff;
+  font-size: 18px;
+  letter-spacing: 0.04em;
+}
+
+.promoFooterLinks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px;
+}
+
+.promoFooterLinks a {
+  color: #b7c6e7;
+  text-decoration: none;
+  font-size: 14px;
+}
+
+.promoSilhouette {
+  display: none;
+}
+
+@media (max-width: 1100px) {
+  .promoHero {
+    grid-template-columns: 1fr;
+  }
+
+  .promoVideoStrip,
+  .promoShowcaseScene,
+  .promoShowcaseScene.isReversed {
+    grid-template-columns: 1fr;
+  }
+
+  .promoShowcaseScene.isReversed .promoShowcaseCopy,
+  .promoShowcaseScene.isReversed .promoShowcaseVisual {
+    order: initial;
+  }
+
+  .promoHero h1 {
+    max-width: none;
+  }
+}
+
+@media (max-width: 760px) {
+  .container.promoContainer {
+    padding: 18px 14px 40px;
+  }
+
+  .promoPage {
+    gap: 56px;
+    padding-bottom: 56px;
+  }
+
+  .promoHero {
+    gap: 28px;
+    padding-top: 8px;
+  }
+
+  .promoVideoStrip,
+  .promoSummaryBody {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .promoPrimaryCta,
+  .promoSecondaryCta {
+    width: 100%;
+  }
+
+  .promoHero h1 {
+    font-size: clamp(42px, 16vw, 72px);
+  }
+
+  .promoShowcaseVisual.isMobile {
+    max-width: 100%;
+  }
+
+  .promoFinalCta {
+    padding: 32px 24px;
+  }
+
+  .promoFooter {
+    flex-direction: column;
+  }
+
+  .promoTextToggle,
+  .promoTextToggleLight {
+    width: 100%;
+    justify-content: flex-start;
+  }
+}
+
+.promoDraftIsolatedPage {
+  width: 100%;
+  margin: 0 auto;
+  padding: 20px 20px 72px;
+  display: grid;
+  gap: 16px;
+  justify-items: center;
+  overflow-x: clip;
+}
+
+.promoDraftStickyShell {
+  position: sticky;
+  top: 12px;
+  z-index: 40;
+  width: min(1920px, calc(100vw - 40px));
+  border-radius: 26px;
+  overflow: hidden;
+  background: rgba(10, 12, 18, 0.82);
+  box-shadow:
+    0 16px 44px rgba(0, 0, 0, 0.24),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(12px);
+}
+
+.promoDraftStickyFrame {
+  display: block;
+  width: 100%;
+  height: 108px;
+  border: 0;
+  background: #101013;
+  pointer-events: none;
+}
+
+.promoDraftCard {
+  width: min(1920px, calc(100vw - 40px));
+  margin: 0 auto;
+  border-radius: 30px;
+  overflow: hidden;
+  background: #101013;
+  border: 0;
+  box-shadow:
+    0 28px 80px rgba(0, 0, 0, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.promoDraftFrameEmbed {
+  display: block;
+  width: 100%;
+  min-height: calc(100vh - 32px);
+  border: 0;
+  background: #101013;
+}
+
+@media (max-width: 760px) {
+  .promoDraftIsolatedPage {
+    padding: 12px 12px 40px;
+  }
+
+  .promoDraftStickyShell,
+  .promoDraftCard {
+    width: calc(100vw - 24px);
+    border-radius: 20px;
+  }
+
+  .promoDraftStickyShell {
+    top: 8px;
+  }
+
+  .promoDraftFrameEmbed {
+    min-height: 100vh;
+  }
+}
+
 .attachmentPreviewHeader {
   display: flex;
   align-items: flex-start;
@@ -2527,6 +3133,63 @@ button:hover {
 .attachmentPreviewDocx h2:first-child,
 .attachmentPreviewDocx h3:first-child {
   margin-top: 0;
+}
+
+.attachmentPreviewPdf {
+  width: 100%;
+  display: grid;
+  gap: 18px;
+  justify-items: center;
+  transform-origin: 0 0;
+  transition: transform 90ms linear;
+}
+
+.attachmentPreviewPdfNotice {
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 1px dashed rgba(180, 196, 255, 0.22);
+  color: rgba(225, 234, 255, 0.76);
+  text-align: center;
+  max-width: 420px;
+}
+
+.attachmentPreviewPdfPage {
+  display: grid;
+  gap: 6px;
+  justify-items: center;
+}
+
+.attachmentPreviewPdfCanvas {
+  display: grid;
+  place-items: center;
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 8px;
+  box-shadow: 0 12px 28px rgba(5, 8, 20, 0.35);
+}
+
+.attachmentPreviewPdfCanvas canvas {
+  display: block;
+  width: min(100%, 860px);
+  height: auto;
+  border-radius: 8px;
+}
+
+.attachmentPreviewPdfPageLabel {
+  font-size: 12px;
+  color: rgba(210, 220, 245, 0.7);
+}
+
+.attachmentPreviewFrame {
+  width: 100%;
+  min-height: min(72vh, 820px);
+  border: 0;
+  border-radius: 14px;
+  background: #ffffff;
+}
+
+.attachmentPreviewPdfFrame {
+  background: #121826;
 }
 
 .drawerMilestoneList {
@@ -2873,9 +3536,17 @@ button:hover {
   grid-template-columns: 1fr;
   gap: 10px;
   min-height: 0;
+  min-width: 0;
   align-content: start;
-  justify-items: start;
+  justify-items: stretch;
   text-align: left;
+}
+
+.adminUserHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
 }
 
 .adminUserAvatar {
@@ -2911,7 +3582,6 @@ button:hover {
 }
 
 .adminUserRole {
-  margin-top: 4px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -2923,6 +3593,8 @@ button:hover {
   background: rgba(27, 36, 76, 0.7);
   font-size: 12px;
   color: #d7e5ff;
+  margin-left: auto;
+  flex: 0 0 auto;
 }
 
 .adminUserRole.isAdmin {
@@ -2956,15 +3628,58 @@ button:hover {
 }
 
 .adminUserActions {
-  display: flex;
-  flex-wrap: nowrap;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: 8px;
-  margin-top: 2px;
-  justify-content: flex-start;
+  margin-top: 4px;
+  align-items: stretch;
+}
+
+.adminUserToggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: #d7e5ff;
+  padding: 4px 6px;
+  border-radius: 10px;
+  border: 1px solid rgba(137, 164, 255, 0.22);
+  background: rgba(20, 26, 52, 0.6);
+  white-space: nowrap;
+  width: fit-content;
+}
+
+.adminUserToggle input {
+  accent-color: #8fd6ff;
+}
+
+.adminUserActions > :first-child {
+  grid-column: 1 / -1;
+  justify-self: start;
 }
 
 .adminUserActions > button {
   white-space: nowrap;
+  min-width: 0;
+  justify-content: center;
+}
+
+.adminUserActionsFitDelete {
+  grid-template-columns: max-content max-content;
+  justify-content: start;
+}
+
+.adminUserActionsFitDelete > button:first-of-type {
+  width: max-content;
+  justify-self: start;
+  padding-inline: 18px;
+}
+
+.adminUserActionsFitDelete > button:last-of-type {
+  width: max-content;
+  justify-self: start;
+  padding-inline: 16px;
+  font-size: 13px;
 }
 
 .adminPresetToolbar {
@@ -3032,6 +3747,355 @@ button:hover {
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
+}
+
+.adminUiToolbar {
+  display: grid;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+
+.adminUiToolbarPrimary {
+  display: flex;
+  gap: 14px;
+  align-items: end;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+.adminUiToolbarSecondary {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.adminUiGroupTabs {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.adminUiGroupTab {
+  min-height: 36px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(154, 174, 232, 0.18);
+  background: rgba(14, 18, 35, 0.56);
+  color: #d8e4ff;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.adminUiGroupTab.isActive {
+  border-color: rgba(102, 240, 214, 0.34);
+  background: linear-gradient(180deg, rgba(25, 57, 56, 0.92), rgba(14, 31, 34, 0.86));
+  color: #e5fff7;
+}
+
+.adminUiSearch {
+  display: grid;
+  gap: 6px;
+  min-width: min(440px, 100%);
+  max-width: 540px;
+}
+
+.adminUiSurfaceFilter {
+  min-width: 220px;
+}
+
+.adminUiSummaryRow {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.adminUiSplit {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(320px, 0.85fr);
+  gap: 16px;
+  align-items: start;
+}
+
+.adminUiRegistryPane {
+  min-width: 0;
+}
+
+.adminUiRegistryList {
+  display: grid;
+  gap: 10px;
+}
+
+.adminUiRow {
+  width: 100%;
+  min-width: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(250px, 320px) auto;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 14px;
+  text-align: left;
+  border-radius: 16px;
+  border: 1px solid rgba(157, 176, 236, 0.18);
+  background: linear-gradient(180deg, rgba(20, 28, 52, 0.82), rgba(12, 18, 36, 0.88));
+  color: #eff5ff;
+  box-shadow: 0 12px 24px rgba(7, 11, 24, 0.18);
+  cursor: pointer;
+}
+
+.adminUiRow.isActive {
+  border-color: rgba(102, 240, 214, 0.34);
+  box-shadow:
+    0 16px 28px rgba(7, 11, 24, 0.2),
+    0 0 0 1px rgba(102, 240, 214, 0.16);
+}
+
+.adminUiRowMain {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: minmax(160px, 0.9fr) minmax(220px, 1.1fr) minmax(180px, 0.9fr) minmax(150px, 0.8fr);
+  gap: 12px;
+  align-items: center;
+}
+
+.adminUiRowIdentity,
+.adminUiRowDescription,
+.adminUiRowUsage,
+.adminUiRowSource {
+  min-width: 0;
+}
+
+.adminUiRowTitle {
+  font-size: 15px;
+  font-weight: 800;
+  color: #f2f6ff;
+}
+
+.adminUiRowId {
+  margin-top: 2px;
+  font-size: 12px;
+  color: rgba(225, 234, 255, 0.64);
+  overflow-wrap: anywhere;
+}
+
+.adminUiRowDescription {
+  font-size: 13px;
+  line-height: 1.35;
+  color: rgba(225, 234, 255, 0.82);
+}
+
+.adminUiRowUsage {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.adminUiRowSource {
+  font-size: 12px;
+  line-height: 1.35;
+  color: rgba(225, 234, 255, 0.58);
+  word-break: break-word;
+}
+
+.adminUiCardStatus {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 28px;
+  padding: 0 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  border: 1px solid rgba(159, 177, 231, 0.18);
+  background: rgba(17, 23, 43, 0.6);
+  color: #edf4ff;
+}
+
+.adminUiCardStatus.isCandidate {
+  border-color: rgba(255, 196, 115, 0.34);
+  color: #ffdca1;
+}
+
+.adminUiCardStatus.isLegacy {
+  border-color: rgba(255, 142, 184, 0.32);
+  color: #ffc8df;
+}
+
+.adminUiRowPreview,
+.adminUiInspectorPreview {
+  min-width: 0;
+  padding: 10px 12px;
+  border-radius: 16px;
+  border: 1px solid rgba(157, 176, 236, 0.14);
+  background: rgba(9, 13, 25, 0.5);
+}
+
+.adminUiUsageList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.adminUiUsageList.isDetailed {
+  gap: 10px;
+}
+
+.adminUiUsagePill {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  padding: 0 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(157, 176, 236, 0.18);
+  background: rgba(18, 25, 47, 0.58);
+  color: #dfe9ff;
+  font-size: 12px;
+}
+
+.adminUiPreviewInline {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.adminUiPreviewInline.isMobile {
+  justify-content: flex-start;
+}
+
+.adminUiPreviewInline.isTabs {
+  gap: 2px;
+}
+
+.adminUiPreviewText {
+  display: grid;
+  gap: 4px;
+}
+
+.adminUiPreviewButton,
+.adminUiPreviewInline .adminTabButton {
+  display: inline-flex;
+  align-items: center;
+  min-height: 42px;
+  padding: 0 18px;
+  border-radius: 14px;
+  border: 1px solid rgba(102, 240, 214, 0.26);
+  color: #f6fbff;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.adminUiPreviewButton.isPrimary {
+  background: linear-gradient(135deg, rgba(114, 92, 255, 0.92), rgba(64, 196, 255, 0.9) 52%, rgba(102, 240, 214, 0.88));
+}
+
+.adminUiPreviewButton.isGhost {
+  background: rgba(17, 23, 43, 0.56);
+  border-color: rgba(157, 176, 236, 0.22);
+}
+
+.adminUiPreviewMiniGroup {
+  max-width: 260px;
+}
+
+.adminUiPreviewInline .adminTabButton {
+  min-height: 36px;
+  padding: 9px 14px;
+  font-size: 13px;
+}
+
+.adminUiPreviewSurface,
+.adminUiPreviewSurfaceButton {
+  width: min(100%, 280px);
+}
+
+.adminUiPreviewSurfaceButton {
+  text-align: left;
+}
+
+.adminUiPreviewWorkbench {
+  width: min(100%, 300px);
+  padding: 10px;
+  margin: 0;
+}
+
+.adminUiInspector {
+  display: grid;
+  gap: 14px;
+}
+
+.adminUiInspectorHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.adminUiInspectorEyebrow {
+  font-size: 12px;
+  font-weight: 800;
+  color: #84eed7;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.adminUiInspectorId {
+  overflow-wrap: anywhere;
+}
+
+.adminUiInspectorBlock {
+  display: grid;
+  gap: 8px;
+}
+
+.adminUiInspectorBlockTitle {
+  font-size: 13px;
+  font-weight: 800;
+  color: #eff5ff;
+}
+
+.adminUiPropsTable {
+  display: grid;
+  gap: 8px;
+}
+
+.adminUiPropRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(16, 22, 40, 0.6);
+  border: 1px solid rgba(157, 176, 236, 0.14);
+}
+
+.adminUiPropKey {
+  color: rgba(225, 234, 255, 0.72);
+  overflow-wrap: anywhere;
+}
+
+.adminUiPropValue {
+  color: #f5fbff;
+  font-weight: 700;
+}
+
+.adminUiInspectorPath {
+  word-break: break-word;
+}
+
+.adminUiEmptyState {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-height: 160px;
+  padding: 18px;
+  border-radius: 18px;
+  border: 1px dashed rgba(157, 176, 236, 0.18);
+  background: rgba(12, 18, 35, 0.38);
 }
 
 .adminPageRoot {
@@ -3177,6 +4241,10 @@ button:hover {
   align-items: center;
 }
 
+.adminLinkOptionToggle {
+  margin-bottom: 12px;
+}
+
 .adminLinkChecklist {
   display: grid;
   gap: 10px;
@@ -3263,6 +4331,7 @@ button:hover {
   margin-bottom: 10px;
 }
 
+
 .adminLinkDetails {
   border-top: 1px solid rgba(145, 169, 236, 0.12);
   padding-top: 10px;
@@ -3336,6 +4405,18 @@ button:hover {
   }
 
   .adminPresetSplit {
+    grid-template-columns: 1fr;
+  }
+
+  .adminUiSplit {
+    grid-template-columns: 1fr;
+  }
+
+  .adminUiRow {
+    grid-template-columns: 1fr;
+  }
+
+  .adminUiRowMain {
     grid-template-columns: 1fr;
   }
 

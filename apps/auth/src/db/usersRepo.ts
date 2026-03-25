@@ -1,8 +1,9 @@
 import { randomUUID } from "node:crypto";
 
 import type { AuthUser, LinkedPersonRecord, UserRole, UserStatus, YandexProfile } from "../types";
+import type { TelegramInitDataUser } from "../telegram/initData";
 import { AUTH_TABLES } from "./schema";
-import { executeQuery, executeVoid, int32, optionalTimestamp, optionalUtf8, timestamp, utf8 } from "./query";
+import { executeQuery, executeVoid, int32, optionalBool, optionalTimestamp, optionalUtf8, timestamp, utf8 } from "./query";
 import { normalizeEmail } from "./normalization";
 import { buildYandexAvatarUrl } from "../yandex/oauth";
 
@@ -16,6 +17,7 @@ type UserRow = {
   person_name: string | null;
   telegram_id: string | null;
   telegram_username: string | null;
+  can_view_all_tasks: boolean | null;
   status: UserStatus;
   role: UserRole;
   session_version: number;
@@ -34,6 +36,7 @@ function mapUser(row: UserRow): AuthUser {
     personName: row.person_name,
     telegramId: row.telegram_id,
     telegramUsername: row.telegram_username,
+    canViewAllTasks: Boolean(row.can_view_all_tasks),
     status: row.status,
     role: row.role,
     sessionVersion: Number(row.session_version ?? 1),
@@ -47,7 +50,7 @@ export async function getUserByYandexUid(yandexUid: string): Promise<AuthUser | 
   const rows = await executeQuery<UserRow>(
     `
       DECLARE $yandex_uid AS Utf8;
-      SELECT id, yandex_uid, email, display_name, avatar_url, person_id, person_name, telegram_id, telegram_username, status, role, session_version, created_at, last_login_at
+      SELECT id, yandex_uid, email, display_name, avatar_url, person_id, person_name, telegram_id, telegram_username, can_view_all_tasks, status, role, session_version, created_at, last_login_at
       FROM ${AUTH_TABLES.users}
       WHERE yandex_uid = $yandex_uid
       LIMIT 1;
@@ -61,7 +64,7 @@ export async function getUserById(userId: string): Promise<AuthUser | null> {
   const rows = await executeQuery<UserRow>(
     `
       DECLARE $id AS Utf8;
-      SELECT id, yandex_uid, email, display_name, avatar_url, person_id, person_name, telegram_id, telegram_username, status, role, session_version, created_at, last_login_at
+      SELECT id, yandex_uid, email, display_name, avatar_url, person_id, person_name, telegram_id, telegram_username, can_view_all_tasks, status, role, session_version, created_at, last_login_at
       FROM ${AUTH_TABLES.users}
       WHERE id = $id
       LIMIT 1;
@@ -77,7 +80,7 @@ export async function getUserByEmail(email: string): Promise<AuthUser | null> {
   const rows = await executeQuery<UserRow>(
     `
       DECLARE $email AS Utf8;
-      SELECT id, yandex_uid, email, display_name, avatar_url, person_id, person_name, telegram_id, telegram_username, status, role, session_version, created_at, last_login_at
+      SELECT id, yandex_uid, email, display_name, avatar_url, person_id, person_name, telegram_id, telegram_username, can_view_all_tasks, status, role, session_version, created_at, last_login_at
       FROM ${AUTH_TABLES.users}
       WHERE email = $email
       LIMIT 1;
@@ -93,7 +96,7 @@ export async function listUsersByStatus(status?: UserStatus): Promise<AuthUser[]
   const rows = await executeQuery<UserRow>(
     `
       ${status ? "DECLARE $status AS Utf8;" : ""}
-      SELECT id, yandex_uid, email, display_name, avatar_url, person_id, person_name, telegram_id, telegram_username, status, role, session_version, created_at, last_login_at
+      SELECT id, yandex_uid, email, display_name, avatar_url, person_id, person_name, telegram_id, telegram_username, can_view_all_tasks, status, role, session_version, created_at, last_login_at
       FROM ${AUTH_TABLES.users}
       ${predicate}
       ORDER BY created_at DESC;
@@ -124,6 +127,7 @@ export async function createUserFromProfile(
       DECLARE $person_name AS Optional<Utf8>;
       DECLARE $telegram_id AS Optional<Utf8>;
       DECLARE $telegram_username AS Optional<Utf8>;
+      DECLARE $can_view_all_tasks AS Optional<Bool>;
       DECLARE $status AS Utf8;
       DECLARE $role AS Utf8;
       DECLARE $session_version AS Int32;
@@ -131,9 +135,9 @@ export async function createUserFromProfile(
       DECLARE $last_login_at AS Optional<Timestamp>;
 
       UPSERT INTO ${AUTH_TABLES.users}
-      (id, yandex_uid, email, display_name, avatar_url, person_id, person_name, telegram_id, telegram_username, status, role, session_version, created_at, last_login_at)
+      (id, yandex_uid, email, display_name, avatar_url, person_id, person_name, telegram_id, telegram_username, can_view_all_tasks, status, role, session_version, created_at, last_login_at)
       VALUES
-      ($id, $yandex_uid, $email, $display_name, $avatar_url, $person_id, $person_name, $telegram_id, $telegram_username, $status, $role, $session_version, $created_at, $last_login_at);
+      ($id, $yandex_uid, $email, $display_name, $avatar_url, $person_id, $person_name, $telegram_id, $telegram_username, $can_view_all_tasks, $status, $role, $session_version, $created_at, $last_login_at);
     `,
     {
       $id: utf8(id),
@@ -145,6 +149,7 @@ export async function createUserFromProfile(
       $person_name: optionalUtf8(null),
       $telegram_id: optionalUtf8(null),
       $telegram_username: optionalUtf8(null),
+      $can_view_all_tasks: optionalBool(false),
       $status: utf8(status),
       $role: utf8(role),
       $session_version: int32(1),
@@ -157,13 +162,104 @@ export async function createUserFromProfile(
   return created;
 }
 
+export async function createUserFromTelegram(
+  telegramUser: TelegramInitDataUser,
+  linkedPerson: LinkedPersonRecord | null
+): Promise<AuthUser> {
+  const id = randomUUID();
+  const now = new Date();
+  const email = normalizeEmail(linkedPerson?.email ?? null);
+  const nameFromTelegram = [telegramUser.firstName, telegramUser.lastName].filter(Boolean).join(" ").trim();
+  const displayName =
+    linkedPerson?.personName ?? (nameFromTelegram ? nameFromTelegram : telegramUser.username ? `@${telegramUser.username}` : null);
+  const telegramUsername = telegramUser.username ?? linkedPerson?.telegramUsername ?? null;
+
+  await executeVoid(
+    `
+      DECLARE $id AS Utf8;
+      DECLARE $yandex_uid AS Utf8;
+      DECLARE $email AS Optional<Utf8>;
+      DECLARE $display_name AS Optional<Utf8>;
+      DECLARE $avatar_url AS Optional<Utf8>;
+      DECLARE $person_id AS Optional<Utf8>;
+      DECLARE $person_name AS Optional<Utf8>;
+      DECLARE $telegram_id AS Optional<Utf8>;
+      DECLARE $telegram_username AS Optional<Utf8>;
+      DECLARE $can_view_all_tasks AS Optional<Bool>;
+      DECLARE $status AS Utf8;
+      DECLARE $role AS Utf8;
+      DECLARE $session_version AS Int32;
+      DECLARE $created_at AS Timestamp;
+      DECLARE $last_login_at AS Optional<Timestamp>;
+
+      UPSERT INTO ${AUTH_TABLES.users}
+      (id, yandex_uid, email, display_name, avatar_url, person_id, person_name, telegram_id, telegram_username, can_view_all_tasks, status, role, session_version, created_at, last_login_at)
+      VALUES
+      ($id, $yandex_uid, $email, $display_name, $avatar_url, $person_id, $person_name, $telegram_id, $telegram_username, $can_view_all_tasks, $status, $role, $session_version, $created_at, $last_login_at);
+    `,
+    {
+      $id: utf8(id),
+      $yandex_uid: utf8(`tg:${telegramUser.id}`),
+      $email: optionalUtf8(email),
+      $display_name: optionalUtf8(displayName),
+      $avatar_url: optionalUtf8(telegramUser.photoUrl ?? null),
+      $person_id: optionalUtf8(linkedPerson?.personId ?? null),
+      $person_name: optionalUtf8(linkedPerson?.personName ?? null),
+      $telegram_id: optionalUtf8(telegramUser.id),
+      $telegram_username: optionalUtf8(telegramUsername),
+      $can_view_all_tasks: optionalBool(false),
+      $status: utf8("approved"),
+      $role: utf8("viewer"),
+      $session_version: int32(1),
+      $created_at: timestamp(now),
+      $last_login_at: optionalTimestamp(now),
+    }
+  );
+  const created = await getUserById(id);
+  if (!created) throw new Error("Telegram user create verification failed");
+  return created;
+}
+
+export async function setUserAvatarUrl(userId: string, avatarUrl: string | null): Promise<void> {
+  await executeVoid(
+    `
+      DECLARE $id AS Utf8;
+      DECLARE $avatar_url AS Optional<Utf8>;
+
+      UPSERT INTO ${AUTH_TABLES.users}
+      SELECT
+        id,
+        yandex_uid,
+        email,
+        display_name,
+        $avatar_url AS avatar_url,
+        person_id,
+        person_name,
+        telegram_id,
+        telegram_username,
+        can_view_all_tasks,
+        status,
+        role,
+        session_version,
+        created_at,
+        last_login_at
+      FROM ${AUTH_TABLES.users}
+      WHERE id = $id;
+    `,
+    {
+      $id: utf8(userId),
+      $avatar_url: optionalUtf8(avatarUrl),
+    }
+  );
+}
+
 export async function touchUserLogin(userId: string): Promise<void> {
   await executeVoid(
     `
       DECLARE $id AS Utf8;
       DECLARE $last_login_at AS Timestamp;
       UPSERT INTO ${AUTH_TABLES.users}
-      SELECT id, yandex_uid, email, display_name, avatar_url, status, role, session_version, created_at, $last_login_at AS last_login_at
+      SELECT id, yandex_uid, email, display_name, avatar_url, person_id, person_name, telegram_id, telegram_username, can_view_all_tasks, status, role, session_version, created_at, $last_login_at AS last_login_at
       FROM ${AUTH_TABLES.users}
       WHERE id = $id;
     `,
@@ -197,6 +293,7 @@ export async function syncUserProfile(userId: string, profile: YandexProfile): P
         person_name,
         telegram_id,
         telegram_username,
+        can_view_all_tasks,
         status,
         role,
         session_version,
@@ -232,6 +329,7 @@ export async function setUserStatus(userId: string, status: UserStatus): Promise
         person_name,
         telegram_id,
         telegram_username,
+        can_view_all_tasks,
         $status AS status,
         role,
         session_version,
@@ -270,6 +368,7 @@ export async function incrementSessionVersion(userId: string): Promise<void> {
         person_name,
         telegram_id,
         telegram_username,
+        can_view_all_tasks,
         status,
         role,
         $session_version AS session_version,
@@ -302,6 +401,7 @@ export async function upsertRole(userId: string, role: UserRole): Promise<void> 
         person_name,
         telegram_id,
         telegram_username,
+        can_view_all_tasks,
         status,
         $role AS role,
         session_version,
@@ -337,6 +437,7 @@ export async function linkUserToPerson(userId: string, linkedPerson: LinkedPerso
         $person_name AS person_name,
         $telegram_id AS telegram_id,
         $telegram_username AS telegram_username,
+        can_view_all_tasks,
         status,
         role,
         session_version,
@@ -359,7 +460,7 @@ export async function getUserByTelegramId(telegramId: string): Promise<AuthUser 
   const rows = await executeQuery<UserRow>(
     `
       DECLARE $telegram_id AS Utf8;
-      SELECT id, yandex_uid, email, display_name, avatar_url, person_id, person_name, telegram_id, telegram_username, status, role, session_version, created_at, last_login_at
+      SELECT id, yandex_uid, email, display_name, avatar_url, person_id, person_name, telegram_id, telegram_username, can_view_all_tasks, status, role, session_version, created_at, last_login_at
       FROM ${AUTH_TABLES.users}
       WHERE telegram_id = $telegram_id
       LIMIT 1;
@@ -367,4 +468,37 @@ export async function getUserByTelegramId(telegramId: string): Promise<AuthUser 
     { $telegram_id: utf8(telegramId) }
   );
   return rows[0] ? mapUser(rows[0]) : null;
+}
+
+export async function setUserCanViewAllTasks(userId: string, enabled: boolean): Promise<void> {
+  await executeVoid(
+    `
+      DECLARE $id AS Utf8;
+      DECLARE $can_view_all_tasks AS Optional<Bool>;
+
+      UPSERT INTO ${AUTH_TABLES.users}
+      SELECT
+        id,
+        yandex_uid,
+        email,
+        display_name,
+        avatar_url,
+        person_id,
+        person_name,
+        telegram_id,
+        telegram_username,
+        $can_view_all_tasks AS can_view_all_tasks,
+        status,
+        role,
+        session_version,
+        created_at,
+        last_login_at
+      FROM ${AUTH_TABLES.users}
+      WHERE id = $id;
+    `,
+    {
+      $id: utf8(userId),
+      $can_view_all_tasks: optionalBool(enabled),
+    }
+  );
 }

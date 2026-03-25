@@ -24,13 +24,16 @@ Source of truth:
 ### Prod
 - frontend: `https://dtm.solofarm.ru/`
 - mini app SPA: `https://dtm.solofarm.ru/app`
+- mobile web SPA: `https://dtm.solofarm.ru/m`
 - admin SPA: `https://dtm.solofarm.ru/admin`
 - auth endpoints: `https://dtm.solofarm.ru/ops/auth/*`
 - browser-facing API path: `https://dtm.solofarm.ru/ops/bff/*`
 
-Mini App routes:
+Mobile routes:
 - test: `https://dtm.solofarm.ru/test/app`
 - prod: `https://dtm.solofarm.ru/app`
+- test mobile web: `https://dtm.solofarm.ru/test/m`
+- prod mobile web: `https://dtm.solofarm.ru/m`
 
 ## Модель доступа
 
@@ -90,11 +93,19 @@ Telegram Mini App behavior:
 - auth contour валидирует `initData` через bot token и сначала ищет пользователя по сохранённому `telegram id`
 - если `telegram id` ещё не записан в auth runtime storage, auth делает auto-heal linkage:
   - ищет человека в backend people directory по `telegramId`
-  - берёт `yandexEmail` как основной email key (`contactEmail` остаётся fallback)
-  - ищет существующего auth user по email и записывает linkage в auth runtime storage
+  - если есть `yandexEmail`, пытается найти существующего auth user и записывает linkage
+  - если user по email не найден (или email отсутствует), создаёт auth user на базе Telegram + person linkage
 - при успехе Mini App получает обычную contour-specific session cookie
 - если linkage не удалось восстановить, frontend показывает явный Telegram unlinked state вместо тихого `guest`
 - это не создаёт отдельный data path: после выдачи cookie браузер/webview продолжает работать через те же `/ops/auth/*` и `/ops/bff/*`
+- пользователям, у которых `telegramId` есть в people directory, больше не требуется Yandex login для доступа к Mini App
+- если Telegram initData содержит `photo_url`, auth сохраняет его как `avatarUrl` для пользователя (для telegram-first логина)
+
+Mobile web behavior:
+- `/m` и `/test/m` используют тот же mobile shell, что и Telegram Mini App;
+- auth bootstrap там обычный web/Yandex, без `Telegram WebApp initData`;
+- task scoping uses the regular `authSession.user.personId`, not Telegram runtime linkage;
+- visual/design changes for mobile shell are shared between `/app` and `/m`.
 
 ## Admin surface
 
@@ -126,6 +137,7 @@ Session metadata:
   - `sessionKind`
   - `expiresAt`
   - `temporaryAccessLabel`
+- `user.canViewAllTasks` показывает, разрешён ли доступ ко всем задачам без owner-фильтра
 - current supported session sources:
   - `yandex`
   - `telegram`
@@ -141,6 +153,7 @@ Browser data request behavior:
 - temp-link session behaves like approved viewer:
   - full access
   - no admin rights
+  - first-entry bootstrap redeems the link before the initial snapshot fetch, so the user does not see a temporary masked payload flash
 - если approved/admin вручную включает маскирование в UI, frontend отправляет browser API requests без auth cookie
 - auth proxy на основе cookie сам выставляет upstream headers:
   - `x-dtm-access-mode`
@@ -200,6 +213,10 @@ Current admin IA:
 
 `Доступ -> Ссылки` is live runtime surface for temporary access links:
 - reusable viewer links are created under auth contour
+- browser URL is intentionally minimal:
+  - current copied format is ordinary SPA route (`/` or `/test/`) + query `?k=<12-char-code>`
+  - the recipient does not see verbose token naming in the URL
+- frontend still accepts legacy `access_link` query tokens for backward compatibility, but newly copied links use `k`
 - each link card shows:
   - label
   - status
@@ -219,6 +236,42 @@ Current admin IA:
   - never admin access
   - auth-panel countdown until expiry
   - every successful redemption increments usage stats and writes a usage event
+
+The same `Доступ -> Ссылки` surface now also contains `Локальные dev-токены`:
+- these tokens are **not** viewer URLs and are never passed via query string
+- they exist only for localhost development against the `test` contour
+- operator actions:
+  - create
+  - copy raw token
+  - edit label / expiry
+  - revoke
+  - delete
+  - inspect usage log
+- dev-tokens are consumed only by the localhost dev panel and exchange into an ordinary `test` session cookie
+
+Local developer auth lane:
+- session kind:
+  - `dev_local`
+- auth endpoints:
+  - `POST /dev/session/catalog`
+  - `POST /dev/session/impersonate`
+  - `POST /dev/session/logout`
+- admin endpoints:
+  - `GET /admin/developer-tokens`
+  - `POST /admin/developer-tokens`
+  - `PATCH /admin/developer-tokens/:id`
+  - `POST /admin/developer-tokens/:id/revoke`
+  - `POST /admin/developer-tokens/:id/delete`
+  - `GET /admin/developer-tokens/:id/usage`
+- scope / safety:
+  - localhost only
+  - test contour only
+  - requires either bootstrap token or admin-created dev-token
+- localhost dev panel can impersonate:
+  - real approved/admin users
+  - real pending users
+  - `guest`
+  - synthetic `blocked`
 
 `Стиль -> Пресеты` hosts the existing color/layout preset management without changing the current preset business logic.
 
@@ -240,8 +293,27 @@ Current admin IA:
 - source of truth для `currentPersonId` живёт в auth runtime storage, а не во frontend selectors
 - web login best-effort синхронизирует linkage по email с backend people source
 - admin action `Обновить базу дизайнеров` повторно синхронизирует linkage и `telegram id`
-- `POST /telegram/session` умеет on-demand восстанавливать linkage по цепочке `telegramId -> people directory -> yandexEmail -> auth user`
+- `POST /telegram/session` умеет on-demand восстанавливать linkage по цепочке `telegramId -> people directory -> (auth user by email) -> auth user`
+- если user по email не найден, auth создаёт telegram-based user и сразу выдаёт approved session
 - Mini App не запрашивает отдельный `my tasks` payload: frontend получает общий snapshot и затем делает client-side filtering `mine / all`
+
+## Local developer auth env
+
+Auth runtime:
+- `LOCAL_DEV_AUTH_ENABLED_TEST=1`
+- `LOCAL_DEV_AUTH_TOKEN=<bootstrap token>`
+
+Local frontend runtime:
+- `VITE_LOCAL_DEV_AUTH_TOKEN=<bootstrap token>`
+
+Convenience launch:
+- `npm run web:dev:test-local-auth`
+- or `scripts\dev_frontend_test_local_auth.cmd`
+
+Expected localhost behavior:
+- localhost still talks to public `test` auth / bff routes
+- Yandex / Telegram remain available as fallback
+- dev panel is shown only on localhost and never on deployed `/test/*`
 
 ## Подробнее
 

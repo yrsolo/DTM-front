@@ -58,6 +58,11 @@ normalize_target() {
   esac
 }
 
+find_html_aliases() {
+  local root_dir="$1"
+  find "$root_dir" -type f -name "index.html" ! -path "$root_dir/index.html"
+}
+
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 WEB_DIR="$REPO_ROOT/apps/web"
@@ -243,6 +248,24 @@ else
     --content-type "text/html; charset=utf-8" \
     --cache-control "no-cache"
 fi
+
+echo "Uploading static HTML aliases ..."
+while IFS= read -r alias_source; do
+  [[ -n "$alias_source" ]] || continue
+  alias_relative="${alias_source#"$DIST_DIR"/}"
+  alias_key="${alias_relative%/index.html}"
+
+  if [[ "$DRY_RUN" == "true" ]]; then
+    echo "[DRY-RUN] aws s3 cp \"$alias_source\" \"s3://$YC_BUCKET_NAME/$alias_key\" --endpoint-url \"$YC_ENDPOINT\" --content-type \"text/html; charset=utf-8\" --cache-control no-cache"
+  else
+    aws s3 cp \
+      "$alias_source" \
+      "s3://$YC_BUCKET_NAME/$alias_key" \
+      --endpoint-url "$YC_ENDPOINT" \
+      --content-type "text/html; charset=utf-8" \
+      --cache-control "no-cache"
+  fi
+done < <(find_html_aliases "$DIST_DIR")
 
 echo "Uploading release metadata ..."
 if [[ "$DRY_RUN" == "true" ]]; then

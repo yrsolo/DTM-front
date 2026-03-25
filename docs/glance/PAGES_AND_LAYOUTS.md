@@ -11,6 +11,7 @@ Source of truth в коде:
 - [TimelinePage.tsx](../../apps/web/src/pages/TimelinePage.tsx)
 - [MiniAppPage.tsx](../../apps/web/src/pages/MiniAppPage.tsx)
 - [AdminPage.tsx](../../apps/web/src/pages/AdminPage.tsx)
+- [PromoPage.tsx](../../apps/web/src/pages/PromoPage.tsx)
 - [UnifiedTimeline.tsx](../../apps/web/src/gantt/UnifiedTimeline.tsx)
 - [DesignersBoard.tsx](../../apps/web/src/components/DesignersBoard.tsx)
 - [TaskDetailsDrawer.tsx](../../apps/web/src/components/TaskDetailsDrawer.tsx)
@@ -42,6 +43,8 @@ Source of truth в коде:
 
 - горизонтальный drag и vertical drag работают в рамках timeline;
 - `Alt + колесо` меняет zoom;
+- при первом открытии desktop timeline центрируется на сегодняшней дате;
+- маленькая кнопка `Сегодня` в верхней control dock в любой момент возвращает viewport к текущему дню;
 - клик по строке заголовка или по задаче открывает drawer;
 - клик по пустой области не должен открывать карточку;
 - pinned-элементы ведут себя независимо от основной прокрутки.
@@ -86,11 +89,11 @@ Source of truth в коде:
 
 Tooltip может быть шире карточки, чтобы milestone labels помещались в одну-две строки.
 
-## Страница `Mini App`
+## Страница `Mini App / Mobile Web`
 
 ### Назначение слоя
 
-Дать mobile-first режим текущего frontend без второго SPA. Этот слой живёт на отдельном route `/app`, но использует тот же snapshot, ту же auth session и тот же detail layer.
+Дать mobile-first режим текущего frontend без второго SPA. Этот слой живёт на отдельных routes `/app` и `/m`, но использует тот же snapshot, ту же auth session и тот же detail layer.
 
 ### Основные визуальные объекты
 
@@ -102,7 +105,7 @@ Tooltip может быть шире карточки, чтобы milestone labe
 
 ### Композиция
 
-- Mini App не пытается повторить desktop SVG timeline;
+- mobile-first слой не пытается повторить desktop SVG timeline;
 - Mini App не показывает completed (`done`) tasks;
 - для admin по умолчанию показываются все активные задачи;
 - для обычного пользователя по умолчанию показываются только его активные задачи;
@@ -115,12 +118,28 @@ Tooltip может быть шире карточки, чтобы milestone labe
 - внутри дня milestones показываются строками `Майлстоун | Бренд | Формат | Шоу` со стандартным цветовым кодированием по milestone tone;
 - верхняя action button `Сегодня` остаётся постоянно доступной и прокручивает календарь к текущему дню;
 - `TaskDetailsDrawer` переиспользуется как mobile sheet, а не как вторая отдельная карточка задачи.
+- designer-grouping кнопки доступны только admin или пользователям с `canViewAllTasks`; у остальных скрыты.
+- `/app` остаётся Telegram Mini App режимом:
+  - Telegram runtime и `initData` bootstrap включены;
+  - профиль показывает Telegram diagnostics;
+  - пользователям с `telegramId` в people directory больше не нужен Yandex login для доступа;
+  - fallback-сообщения для отсутствующей связи остаются telegram-specific.
+- `/m` и `/mobile` открывают тот же mobile shell как обычный web mobile:
+  - авторизация идёт через Яндекс;
+  - Telegram runtime не требуется и не используется;
+  - список задач фильтруется по обычному `authSession.user.personId`, без Telegram-only bootstrap.
+- при заходе на обычный `/` с телефона frontend автоматически переводит пользователя в `/m`;
+  - планшеты и desktop остаются на стандартном timeline.
 - attachment panel по умолчанию свёрнута, но summary с количеством вложений виден сразу;
 - внутри раскрытой панели attachments показываются как compact file-icons;
 - desktop использует hover-tooltip для имени и даты загрузки attachment, Mini App — tap-friendly selection surface;
 - имя файла в раскрытой панели кликабельно и открывает preview; compact action buttons используют иконки, а preview modal сохраняет full-text buttons;
+- повторный клик по уже выбранной file-icon тоже открывает preview;
+- встроенный preview внутри сайта покрывает `docx`, изображения и `pdf`; PDF рендерится через PDF.js без зависимости от браузерного viewer; legacy `doc` пытается открыть PDF через `Accept: application/pdf`, иначе показывает download fallback;
 - upload control виден только admin и использует существующий backend upload contour без изменения snapshot contract;
+- при upload frontend нормализует MIME по расширению файла, если браузер или webview не прислал надёжный `File.type`; это покрывает `doc`, `docx`, `pdf` и текущие image-форматы;
 - desktop drawer принимает drag-and-drop upload по всей поверхности карточки задачи: при перетаскивании подсвечивается весь drawer, а drop в любое место карточки загружает файл в текущую задачу.
+- auto-refresh snapshot больше не идёт в “забытых” вкладках: polling работает только при активности пользователя, idle > 2 минут блокирует фоновые refresh.
 
 ## Страница `Админка`
 
@@ -138,6 +157,7 @@ Tooltip может быть шире карточки, чтобы milestone labe
   - `Ссылки`
 - `Стиль` пока содержит одну подвкладку:
   - `Пресеты`
+  - `UI`
 
 ### `Доступ -> Люди`
 
@@ -173,10 +193,102 @@ Runtime semantics:
 - import / export / delete / set default;
 - drag-order persistence.
 
+### `Стиль -> UI`
+
+Read-only inventory layer для унификации дизайн-системы:
+- code-owned registry, не связанный с preset catalog;
+- в реестр входят реальные элементы со всех surface layers:
+  - desktop pages;
+  - Mini App;
+  - task drawer;
+  - attachments;
+  - admin;
+  - workbench;
+- группы `Buttons`, `Bubbles`, `Labels`, `Panels`;
+- поиск по `id / title / description / usage / source path`;
+- compact surface filter по месту использования;
+- основной режим показа — узкие горизонтальные row-cards в одну строку:
+  - слева identity и описание;
+  - затем usage tags и source path;
+  - справа живой inline preview элемента;
+- порядок внутри группы курируется вручную по похожести, чтобы почти одинаковые элементы лежали рядом;
+- inspector остаётся secondary aid и показывает `sourcePath`, `similarityKey` и `propsSummary`;
+- runtime editing и normalization workflow пока не включены: слой нужен для visual audit и последующей ручной унификации.
+
 ### Переходы
 
 - если admin route открыт из Mini App profile, кнопка закрытия возвращает пользователя обратно в Mini App;
 - если admin route открыт как обычная desktop/admin поверхность, кнопка закрытия возвращает на основной timeline.
+
+## Страница `Промо`
+
+### Назначение слоя
+
+Публичный маркетинговый лендинг на route `/promo`, доступный без авторизации и не зависящий от product-shell.
+
+### Композиция
+
+- screenshot-led hero с крупным headline, коротким supporting copy и компактным CTA-row;
+- отдельный secondary media strip с ручным запуском видео, который больше не конкурирует с первым экраном;
+- длинная editorial-лента из narrative sections вместо набора одинаковых карточек;
+- showcase-секции с реальными product screenshots:
+  - desktop timeline;
+  - task drawer;
+  - mobile view;
+- summary-блок про security/analytics/technical discipline;
+- спокойный финальный CTA и простой footer.
+
+### Контент и поведение
+
+- runtime-контент живёт отдельно от кода в [promoContent.json](../../apps/web/src/content/promoContent.json);
+- screenshot-ассеты хранятся отдельно от layout-логики в [promoAssets.ts](../../apps/web/src/content/promoAssets.ts) и в `apps/web/public/promo/*`;
+- content shape для promo V2 использует секционные типы:
+  - `editorial`
+  - `showcase`
+  - `summary`
+  - `cta`;
+- reference pack для следующих promo-итераций зафиксирован в [agent/promo-reference](../../agent/promo-reference/reference-guide.md):
+  - `master.png`
+  - `01-hero`
+  - `02-story-a`
+  - `03-story-b`
+  - `04-proof-cta`
+  - `05-footer`;
+- baseline и текущая V2-сверка зафиксированы там же:
+  - [before-v2.png](../../agent/promo-reference/before-v2.png)
+  - [after-v2-final.png](../../agent/promo-reference/after-v2-final.png)
+  - [review-v2.md](../../agent/promo-reference/review-v2.md);
+- hero-video использует public asset из `dtm-presets`;
+- hero и product-секции используют реальные viewer-safe кадры DTM:
+  - desktop timeline;
+  - task drawer;
+  - mobile view;
+- editorial/showcase/summary блоки по умолчанию показывают короткую версию текста;
+- по клику `Подробнее` короткий текст заменяется на подробный прямо в том же narrative block, без accordion-heavy UI;
+- `/promo` не использует auth gate, masked/full access mode, workbench или mobile auto-redirect.
+- дальнейшие visual-итерации promo обязаны проходить post-change сверку по [comparison-checklist.md](../../agent/promo-reference/comparison-checklist.md), а не только по субъективному ощущению.
+
+## Страница `Format Sort Lab`
+
+### Назначение слоя
+
+Локальный standalone-инструмент на route `/format-sort` для нормализации сырых task `format_` значений и ручной разборки хвоста без привязки к admin shell.
+
+### Композиция
+
+- отдельная toolbar с ручной кнопкой `Скачать все задачи`;
+- одна большая панель `Несортированные`;
+- панели по нормализованным форматам;
+- raw formats показываются как маленькие draggable кирпичики с count badge;
+- hover по кирпичику показывает полный raw `format_` и sample task titles;
+- есть `поиск`, `лимит`, `Скрыть уже отсортированные`, `import/export config`, `экспорт слепка`.
+
+### Поведение
+
+- страница не использует обычный `useSnapshot` и не участвует в background polling;
+- repo-owned generated artifacts лежат в `apps/web/src/content/formatSort/*`;
+- ручная кнопка `Скачать все задачи` сама запускает full-dataset ingestion через windowed fetch и обновляет только локальный working dataset;
+- локальные правки config и dataset живут в browser storage, пока не экспортированы обратно в repo JSON.
 
 ## Источники управления
 
@@ -186,7 +298,7 @@ Runtime semantics:
 
 - `Задачи` остаются основным аналитическим экраном.
 - `Дизайнеры` — альтернативный обзор по исполнителям.
-- `Mini App` — мобильный режим того же frontend для Telegram/webview сценариев.
+- `Mini App / Mobile Web` — один и тот же мобильный режим frontend для Telegram и обычного mobile-web сценария.
 - Обе страницы работают на одном и том же snapshot и одном app shell.
 
 ## Подробнее

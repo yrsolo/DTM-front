@@ -1,0 +1,30 @@
+# CAM-WORKBENCH-SOURCE-GRAPH Evidence
+
+- Source-identity strategy fixed in `docs/deep/WORKBENCH_SOURCE_IDENTITY_STRATEGY.md`.
+- Placement normalization policy fixed in `docs/deep/PLACEMENT_NORMALIZATION_POLICY.md`.
+- Shared contracts extracted into `packages/workbench-contracts`.
+- Node-side source analysis extracted into `packages/workbench-source-analysis`.
+- Normalization helpers added:
+  - `normalizeParsedSourceTree`
+  - `projectNormalizedSourceTree`
+- AST probe `scripts/workbench_source_identity_probe.mjs` now:
+  - extracts nested raw component trees from TSX
+  - collapses `InspectorNodeBoundary` as enrichment wrapper
+  - emits normalized definition/placement structure
+  - follows locally imported component modules for broader source coverage
+  - resolves local component continuation through TypeScript checker-backed symbol identity instead of import text only
+  - emits canonical symbol ids for local component definitions and imported component targets
+- Baseline source-graph snapshot delivery added:
+  - `scripts/build_workbench_source_graph_snapshot.mjs`
+  - generated artifact `apps/web/src/generated/workbench-source-graph.timeline.json`
+  - browser adapter can supply `SourceGraphSnapshot`
+  - inspector context prefers snapshot roots when available
+- Source/runtime binding foundation added:
+  - snapshot nodes now include explicit `bindingKey`
+  - inspector context builds a binding table anchored on `SourceNodeId`
+  - binding statuses surface as `bound`, `multiple`, or `unresolved`
+  - runtime element resolution now goes through `runtime projection -> SourceNodeId` mapping instead of direct runtime-id guesses
+- Verified:
+  - `node scripts/workbench_source_identity_probe.mjs apps/web/src/pages/TimelinePage.tsx`
+  - `node scripts/build_workbench_source_graph_snapshot.mjs apps/web/src/pages/TimelinePage.tsx apps/web/src/generated/workbench-source-graph.timeline.json`
+  - `npm run build` in `apps/web`

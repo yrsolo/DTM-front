@@ -1,5 +1,6 @@
 import React from "react";
 import { TaskAttachmentV1, TaskV1 } from "@dtm/schema/snapshot";
+import { InspectorNodeBoundary } from "@dtm/workbench-inspector";
 
 import {
   deleteTaskAttachment,
@@ -18,8 +19,11 @@ import {
   attachmentToneClass,
   attachmentTypeLabel,
   formatAttachmentUploadedAt,
+  inferUploadMimeType,
   isDocxAttachment,
   isImageAttachment,
+  isLegacyWordAttachment,
+  isPdfAttachment,
 } from "../../utils/attachments";
 import { LayoutContext } from "../Layout";
 import { Tooltip, TooltipState } from "../Tooltip";
@@ -98,6 +102,27 @@ function formatUploadError(error: unknown, fallback: string): string {
   return fallback;
 }
 
+function isAttachmentsDebugEnabled(): boolean {
+  if (typeof window === "undefined") return false;
+  try {
+    const params = new URLSearchParams(window.location.search);
+    return params.has("attachmentsDebug") || params.get("attachmentsDebug") === "1";
+  } catch {
+    return false;
+  }
+}
+
+function formatDebugUrl(raw: string | null | undefined): string {
+  if (!raw) return "n/a";
+  try {
+    const parsed = new URL(raw, window.location.origin);
+    return `${parsed.origin}${parsed.pathname}`;
+  } catch {
+    const withoutQuery = raw.split("?")[0];
+    return withoutQuery || "n/a";
+  }
+}
+
 export function TaskAttachmentsSection(props: {
   task: TaskV1;
   compact?: boolean;
@@ -120,6 +145,7 @@ export function TaskAttachmentsSection(props: {
   const [tooltipState, setTooltipState] = React.useState<TooltipState>({ visible: false });
   const [previewState, setPreviewState] = React.useState<AttachmentPreviewState>({ open: false });
   const inputRef = React.useRef<HTMLInputElement | null>(null);
+  const debugEnabled = isAttachmentsDebugEnabled();
 
   async function refetchUntilAttachmentVisible(expectedAttachmentId: string): Promise<boolean> {
     if (!ctx?.snapshotState.syncFromApi) return false;
@@ -180,12 +206,29 @@ export function TaskAttachmentsSection(props: {
 
     const browserViewUrl = getBrowserAttachmentUrl(viewUrl);
     const browserDownloadUrl = attachment.links?.download ? getBrowserAttachmentUrl(attachment.links.download) : null;
+    const lowerViewUrl = browserViewUrl.toLowerCase();
+    const lowerDownloadUrl = browserDownloadUrl?.toLowerCase() ?? "";
+    const isPdfByUrl =
+      lowerViewUrl.includes(".pdf") ||
+      lowerDownloadUrl.includes(".pdf") ||
+      lowerViewUrl.includes("application/pdf") ||
+      lowerDownloadUrl.includes("application/pdf");
     const subtitleParts = [
       attachmentTypeLabel(attachment),
       formatBytes(attachment.sizeBytes),
       formatAttachmentUploadedAt(attachment.uploadedAt ?? null, locale),
     ].filter(Boolean);
     const subtitle = subtitleParts.join(" | ");
+    const baseDebugInfo = debugEnabled
+      ? [
+          `debug=attachments`,
+          `name=${attachment.name}`,
+          `mime=${attachment.mime}`,
+          `kind=${attachment.kind}`,
+          `view=${formatDebugUrl(browserViewUrl)}`,
+          `download=${formatDebugUrl(browserDownloadUrl)}`,
+        ].join("\n")
+      : null;
 
     if (isDocxAttachment(attachment)) {
       setPreviewState({
@@ -193,6 +236,7 @@ export function TaskAttachmentsSection(props: {
         title: attachment.name,
         subtitle,
         mode: "loading",
+        debugInfo: baseDebugInfo ? `${baseDebugInfo}\nmode=docx` : null,
         closeLabel: ui.drawer.close,
         downloadLabel: ui.drawer.attachmentsDownload,
         unavailableLabel: ui.drawer.attachmentsUnavailable,
@@ -206,13 +250,14 @@ export function TaskAttachmentsSection(props: {
         const result = await mammoth.convertToHtml({ arrayBuffer });
         setPreviewState({
           open: true,
-          title: attachment.name,
-          subtitle,
-          mode: "docx",
-          html: result.value,
-          closeLabel: ui.drawer.close,
-          downloadLabel: ui.drawer.attachmentsDownload,
-          unavailableLabel: ui.drawer.attachmentsUnavailable,
+        title: attachment.name,
+        subtitle,
+        mode: "docx",
+        html: result.value,
+        debugInfo: baseDebugInfo ? `${baseDebugInfo}\nmode=docx` : null,
+        closeLabel: ui.drawer.close,
+        downloadLabel: ui.drawer.attachmentsDownload,
+        unavailableLabel: ui.drawer.attachmentsUnavailable,
           downloadUrl: browserDownloadUrl,
           onClose: () => setPreviewState({ open: false }),
         });
@@ -220,12 +265,13 @@ export function TaskAttachmentsSection(props: {
         setPreviewState({
           open: true,
           title: attachment.name,
-          subtitle,
-          mode: "error",
-          error: ui.drawer.attachmentsPreviewFailed,
-          closeLabel: ui.drawer.close,
-          downloadLabel: ui.drawer.attachmentsDownload,
-          unavailableLabel: ui.drawer.attachmentsUnavailable,
+        subtitle,
+        mode: "error",
+        error: ui.drawer.attachmentsPreviewFailed,
+        debugInfo: baseDebugInfo ? `${baseDebugInfo}\nmode=docx\nerror=convert_failed` : null,
+        closeLabel: ui.drawer.close,
+        downloadLabel: ui.drawer.attachmentsDownload,
+        unavailableLabel: ui.drawer.attachmentsUnavailable,
           downloadUrl: browserDownloadUrl,
           onClose: () => setPreviewState({ open: false }),
         });
@@ -240,6 +286,7 @@ export function TaskAttachmentsSection(props: {
         subtitle,
         mode: "image",
         src: browserViewUrl,
+        debugInfo: baseDebugInfo ? `${baseDebugInfo}\nmode=image` : null,
         closeLabel: ui.drawer.close,
         downloadLabel: ui.drawer.attachmentsDownload,
         unavailableLabel: ui.drawer.attachmentsUnavailable,
@@ -249,9 +296,98 @@ export function TaskAttachmentsSection(props: {
       return;
     }
 
-    if (!openInNewWindow(browserViewUrl)) {
-      setActionError(ui.drawer.attachmentsActionFailed);
+    if (isPdfAttachment(attachment) || isPdfByUrl) {
+      setPreviewState({
+        open: true,
+        title: attachment.name,
+        subtitle,
+        mode: "pdf",
+        src: browserViewUrl,
+        debugInfo: baseDebugInfo ? `${baseDebugInfo}\nmode=pdf` : null,
+        closeLabel: ui.drawer.close,
+        downloadLabel: ui.drawer.attachmentsDownload,
+        unavailableLabel: ui.drawer.attachmentsUnavailable,
+        downloadUrl: browserDownloadUrl,
+        onClose: () => setPreviewState({ open: false }),
+      });
+      return;
     }
+
+    if (isLegacyWordAttachment(attachment)) {
+      setPreviewState({
+        open: true,
+        title: attachment.name,
+        subtitle,
+        mode: "pdf",
+        src: browserViewUrl,
+        pdfRequestHeaders: { accept: "application/pdf" },
+        debugInfo: baseDebugInfo ? `${baseDebugInfo}\nmode=pdf\naccept=application/pdf\nlegacy=doc` : null,
+        closeLabel: ui.drawer.close,
+        downloadLabel: ui.drawer.attachmentsDownload,
+        unavailableLabel: ui.drawer.attachmentsUnavailable,
+        downloadUrl: browserDownloadUrl,
+        onClose: () => setPreviewState({ open: false }),
+      });
+      return;
+    }
+
+    // Try to resolve unknown attachments as PDF by inspecting headers.
+    try {
+      setPreviewState({
+        open: true,
+        title: attachment.name,
+        subtitle,
+        mode: "loading",
+        debugInfo: baseDebugInfo ? `${baseDebugInfo}\nmode=probe` : null,
+        closeLabel: ui.drawer.close,
+        downloadLabel: ui.drawer.attachmentsDownload,
+        unavailableLabel: ui.drawer.attachmentsUnavailable,
+        downloadUrl: browserDownloadUrl,
+        onClose: () => setPreviewState({ open: false }),
+      });
+      const res = await fetch(browserViewUrl, {
+        method: "HEAD",
+        credentials: "include",
+        redirect: "follow",
+        cache: "no-store",
+      });
+      const contentType = res.headers.get("content-type")?.toLowerCase() ?? "";
+      const debugInfo = baseDebugInfo
+        ? `${baseDebugInfo}\nmode=probe\nhead_status=${res.status}\nhead_type=${contentType || "n/a"}`
+        : null;
+      if (contentType.includes("application/pdf")) {
+        setPreviewState({
+          open: true,
+          title: attachment.name,
+          subtitle,
+          mode: "pdf",
+          src: browserViewUrl,
+          debugInfo,
+          closeLabel: ui.drawer.close,
+          downloadLabel: ui.drawer.attachmentsDownload,
+          unavailableLabel: ui.drawer.attachmentsUnavailable,
+          downloadUrl: browserDownloadUrl,
+          onClose: () => setPreviewState({ open: false }),
+        });
+        return;
+      }
+    } catch {
+      // fall through to browser handling
+    }
+
+    setPreviewState({
+      open: true,
+      title: attachment.name,
+      subtitle,
+      mode: "pdf",
+      src: browserViewUrl,
+      debugInfo: baseDebugInfo ? `${baseDebugInfo}\nmode=pdf\nfallback=force` : null,
+      closeLabel: ui.drawer.close,
+      downloadLabel: ui.drawer.attachmentsDownload,
+      unavailableLabel: ui.drawer.attachmentsUnavailable,
+      downloadUrl: browserDownloadUrl,
+      onClose: () => setPreviewState({ open: false }),
+    });
   }
 
   function handleDownload(attachment: TaskAttachmentV1) {
@@ -285,7 +421,7 @@ export function TaskAttachmentsSection(props: {
       const contract = await requestTaskAttachmentUpload({
         taskId: props.task.id,
         filename: file.name,
-        mime: file.type || "application/octet-stream",
+        mime: inferUploadMimeType(file),
         size: file.size,
         uploadedBy: userId,
       });
@@ -349,9 +485,15 @@ export function TaskAttachmentsSection(props: {
   }
 
   return (
-    <>
+    <InspectorNodeBoundary
+      label="Task attachments section"
+      kind="content"
+      semanticTargetId="app.task.attachments"
+      sourcePath="apps/web/src/components/attachments/TaskAttachmentsSection.tsx"
+    >
       <div
         className={`card drawerSection ${props.dragActive ? "attachmentDropZoneActive" : ""}`}
+        data-inspector-target-id="app.task.attachments"
       >
         <button
           type="button"
@@ -366,19 +508,31 @@ export function TaskAttachmentsSection(props: {
         </button>
 
         {expanded ? (
+          <InspectorNodeBoundary
+            label="Attachments panel body"
+            kind="content"
+            sourcePath="apps/web/src/components/attachments/TaskAttachmentsSection.tsx"
+          >
           <div className="attachmentPanelBody">
             {canUpload ? (
-              <div className={`attachmentUploadRow ${props.compact ? "isCompact" : ""}`}>
-                <input
-                  ref={inputRef}
-                  type="file"
-                  className="attachmentFileInput"
-                  onChange={handleFilePicked}
-                />
-                <button type="button" className="miniAppButton attachmentUploadButton" onClick={() => inputRef.current?.click()}>
-                  {ui.drawer.attachmentsUpload}
-                </button>
-              </div>
+              <InspectorNodeBoundary
+                label="Attachments upload row"
+                kind="control"
+                sourcePath="apps/web/src/components/attachments/TaskAttachmentsSection.tsx"
+              >
+                <div className={`attachmentUploadRow ${props.compact ? "isCompact" : ""}`}>
+                  <input
+                    ref={inputRef}
+                    type="file"
+                    className="attachmentFileInput"
+                    accept=".doc,.docx,.pdf,image/jpeg,image/png,image/webp"
+                    onChange={handleFilePicked}
+                  />
+                  <button type="button" className="miniAppButton attachmentUploadButton" onClick={() => inputRef.current?.click()}>
+                    {ui.drawer.attachmentsUpload}
+                  </button>
+                </div>
+              </InspectorNodeBoundary>
             ) : null}
 
             {uploadState.status !== "idle" ? (
@@ -389,6 +543,11 @@ export function TaskAttachmentsSection(props: {
 
             {attachments.length ? (
               <>
+                <InspectorNodeBoundary
+                  label="Attachments icon grid"
+                  kind="content"
+                  sourcePath="apps/web/src/components/attachments/TaskAttachmentsSection.tsx"
+                >
                 <div className={`attachmentIconGrid ${props.compact ? "isCompact" : ""}`}>
                   {attachments.map((attachment) => {
                     const uploadedAt = formatAttachmentUploadedAt(attachment.uploadedAt ?? null, locale);
@@ -397,7 +556,13 @@ export function TaskAttachmentsSection(props: {
                         key={attachment.id}
                         type="button"
                         className={`attachmentIconTile ${attachmentToneClass(attachment)} ${selectedAttachment?.id === attachment.id ? "isActive" : ""}`}
-                        onClick={() => setSelectedId(attachment.id)}
+                        onClick={() => {
+                          if (selectedAttachment?.id === attachment.id) {
+                            void handlePreview(attachment);
+                            return;
+                          }
+                          setSelectedId(attachment.id);
+                        }}
                         onDoubleClick={() => {
                           void handlePreview(attachment);
                         }}
@@ -430,8 +595,14 @@ export function TaskAttachmentsSection(props: {
                     );
                   })}
                 </div>
+                </InspectorNodeBoundary>
 
                 {selectedAttachment ? (
+                  <InspectorNodeBoundary
+                    label="Attachment inspector"
+                    kind="content"
+                    sourcePath="apps/web/src/components/attachments/TaskAttachmentsSection.tsx"
+                  >
                   <div className={`attachmentInspector ${props.compact ? "isCompact" : ""}`}>
                     <div className="attachmentInspectorMeta">
                       <button
@@ -492,6 +663,7 @@ export function TaskAttachmentsSection(props: {
                       ) : null}
                     </div>
                   </div>
+                  </InspectorNodeBoundary>
                 ) : null}
               </>
             ) : (
@@ -500,11 +672,12 @@ export function TaskAttachmentsSection(props: {
 
             {actionError ? <div className="attachmentInlineNotice isError">{actionError}</div> : null}
           </div>
+          </InspectorNodeBoundary>
         ) : null}
       </div>
 
       <Tooltip state={tooltipState} />
       <AttachmentPreviewModal state={previewState} />
-    </>
+    </InspectorNodeBoundary>
   );
 }

@@ -170,6 +170,15 @@ jobs:
           EOF
           cp "$RELEASE_DIR/release.json" "$RELEASE_DIR/latest.json"
 
+          ALIAS_DIR=".deploy/html-aliases"
+          mkdir -p "$ALIAS_DIR"
+          find "$SITE_DIR" -type f -name "index.html" ! -path "$SITE_DIR/index.html" | while read -r html_file; do
+            rel_path="${html_file#"$SITE_DIR"/}"
+            alias_key="${rel_path%/index.html}"
+            mkdir -p "$ALIAS_DIR/$(dirname "$alias_key")"
+            cp "$html_file" "$ALIAS_DIR/$alias_key"
+          done
+
       - name: Dry-run summary
         if: ${{ steps.vars.outputs.dry_run == 'true' }}
         shell: bash
@@ -236,6 +245,18 @@ jobs:
             --endpoint-url "$YC_ENDPOINT" \
             --content-type "text/html; charset=utf-8" \
             --cache-control "no-cache"
+
+          if [ -d ".deploy/html-aliases" ]; then
+            find ".deploy/html-aliases" -type f | while read -r alias_file; do
+              alias_key="${alias_file#".deploy/html-aliases/"}"
+              aws s3 cp \
+                "$alias_file" \
+                "s3://${{ steps.vars.outputs.bucket_name }}/${alias_key}" \
+                --endpoint-url "$YC_ENDPOINT" \
+                --content-type "text/html; charset=utf-8" \
+                --cache-control "no-cache"
+            done
+          fi
 
       - name: Upload release metadata
         if: ${{ steps.vars.outputs.dry_run != 'true' }}

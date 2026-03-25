@@ -7,11 +7,16 @@ import { FiltersBar } from "../components/FiltersBar";
 import { LayoutContext } from "../components/Layout";
 import { TaskDetailsDrawer } from "../components/TaskDetailsDrawer";
 import { Tooltip, TooltipState } from "../components/Tooltip";
+import { selectCurrentPersonLink } from "../data/selectors/sessionSelectors";
+import { taskMatchesCurrentPersonWithResolvedOwners } from "../data/selectors/taskSelectors";
+import { useResolvedOwnerNames } from "../data/useResolvedOwnerNames";
 import { UnifiedTimeline } from "../gantt/UnifiedTimeline";
 import { RenderTask } from "../gantt/types";
 import { readMaskingMode, writeMaskingMode } from "../auth/maskingMode";
+import { canUseLocalDevAuthUi } from "../config/localDevAuth";
 import { useElementWidth } from "../utils/useElementWidth";
 import { toShortPersonName } from "../utils/personName";
+import { InspectorNodeBoundary } from "@dtm/workbench-inspector";
 
 const ZOOM_PRESETS = [0.1, 0.2, 0.3, 0.4, 0.5, 0.75, 1, 1.25, 1.5, 2, 3, 4, 5, 6, 8, 10];
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -20,6 +25,8 @@ const MAX_ZOOM = 10;
 const TIMELINE_PAGE_VIEW_KEY = "dtm.timeline.pageView.v1";
 const PAGE_LABEL_TASKS = "\u0417\u0430\u0434\u0430\u0447\u0438";
 const PAGE_LABEL_DESIGNERS = "\u0414\u0438\u0437\u0430\u0439\u043d\u0435\u0440\u044b";
+const DEV_AUTH_TOKEN_STORAGE_KEY = "dtm.devAuth.token.v1";
+const DEV_AUTH_PERSONA_STORAGE_KEY = "dtm.devAuth.persona.v1";
 
 type AuthPanelContent = {
   title: string;
@@ -89,7 +96,7 @@ function buildAuthPanelContent(params: {
     role: "admin" | "viewer";
     status: "pending" | "approved" | "blocked";
   } | null;
-  sessionKind: "yandex" | "telegram" | "temp_link" | null;
+  sessionKind: "yandex" | "telegram" | "temp_link" | "dev_local" | null;
   expiresAt: string | null;
   temporaryAccessLabel: string | null;
   maskingForced: boolean;
@@ -167,6 +174,32 @@ function buildAuthPanelContent(params: {
       maskingHint: maskingLockedByAccess
         ? (locale === "ru" ? "Маскирование определяется уровнем доступа." : "Masking is defined by access level.")
         : (locale === "ru" ? "Во включённом режиме запросы к API отправляются без auth cookie." : "When enabled, API requests are sent without the auth cookie."),
+    };
+  }
+
+  if (user.status === "blocked") {
+    return {
+      title: user.displayName || user.email || (locale === "ru" ? "Доступ заблокирован" : "Blocked"),
+      statusLabel: locale === "ru" ? "Заблокирован" : "Blocked",
+      accessBadge: locale === "ru" ? "Маскирование включено" : "Masking enabled",
+      helpText:
+        sessionKind === "dev_local"
+          ? locale === "ru"
+            ? "Это synthetic blocked persona для локальной проверки UX."
+            : "This is a synthetic blocked persona for local UX checks."
+          : locale === "ru"
+            ? "Администратор заблокировал доступ этой учётной записи."
+            : "An administrator blocked access for this account.",
+      detailText:
+        locale === "ru"
+          ? "Полные данные недоступны. Используйте другой локальный persona switch, чтобы продолжить проверку."
+          : "Full data is unavailable. Switch to another local persona to continue testing.",
+      adminHint: locale === "ru" ? "Заблокированный пользователь не может открыть админку." : "Blocked users cannot open admin.",
+      primaryActionLabel: locale === "ru" ? "Выйти" : "Sign out",
+      canOpenAdmin: false,
+      canToggleMasking: false,
+      maskingTitle: locale === "ru" ? "Маскирование определяется уровнем доступа" : "Masking is defined by access level",
+      maskingHint: locale === "ru" ? "Для blocked persona всегда доступен только masked mode." : "Blocked personas always stay in masked mode.",
     };
   }
 
@@ -272,15 +305,62 @@ export function TimelinePage() {
   const scaleInfoRef = React.useRef<{ rangeStartMs: number; pxPerDay: number; labelW: number } | null>(null);
   const pendingZoomAnchorRef = React.useRef<{ dateMs: number; clientX: number } | null>(null);
   const pendingDateAnchorRef = React.useRef<number | null>(null);
+  const didInitialTodayCenterRef = React.useRef(false);
+  const scrollAnimationFrameRef = React.useRef<number | null>(null);
   const authMenuRef = React.useRef<HTMLDivElement | null>(null);
   const timelineHost = useElementWidth<HTMLDivElement>();
 
-  const applyDateAnchor = (dateMs: number) => {
+  const stopTimelineScrollAnimation = () => {
+    if (scrollAnimationFrameRef.current !== null) {
+      cancelAnimationFrame(scrollAnimationFrameRef.current);
+      scrollAnimationFrameRef.current = null;
+    }
+  };
+
+  const scrollTimelineToLeft = (left: number, durationMs = 0) => {
+    const host = timelineHost.ref.current;
+    if (!host) return;
+    const targetLeft = Math.max(0, left);
+    stopTimelineScrollAnimation();
+
+    if (durationMs <= 0) {
+      host.scrollLeft = targetLeft;
+      return;
+    }
+
+    const startLeft = host.scrollLeft;
+    const distance = targetLeft - startLeft;
+    const startAt = performance.now();
+
+    const step = (now: number) => {
+      const progress = Math.min(1, (now - startAt) / durationMs);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      host.scrollLeft = startLeft + distance * eased;
+      if (progress < 1) {
+        scrollAnimationFrameRef.current = requestAnimationFrame(step);
+      } else {
+        scrollAnimationFrameRef.current = null;
+      }
+    };
+
+    scrollAnimationFrameRef.current = requestAnimationFrame(step);
+  };
+
+  const applyDateAnchor = (dateMs: number, durationMs = 0) => {
     const host = timelineHost.ref.current;
     const scale = scaleInfoRef.current;
     if (!host || !scale) return;
     const x = scale.labelW + ((dateMs - scale.rangeStartMs) / DAY_MS) * scale.pxPerDay - host.clientWidth * 0.5;
-    host.scrollLeft = Math.max(0, x);
+    scrollTimelineToLeft(x, durationMs);
+  };
+
+  const todayAnchorMs = () => {
+    const now = new Date();
+    return Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate());
+  };
+
+  const centerTimelineOnToday = (durationMs = 500) => {
+    applyDateAnchor(todayAnchorMs(), durationMs);
   };
 
   const schedulePendingDateAnchorApply = () => {
@@ -293,14 +373,6 @@ export function TimelinePage() {
       });
     });
   };
-
-  React.useEffect(() => {
-    try {
-      localStorage.setItem(TIMELINE_PAGE_VIEW_KEY, pageView);
-    } catch {
-      // ignore
-    }
-  }, [pageView]);
 
   React.useEffect(() => {
     if (!isAuthPanelOpen) return;
@@ -333,6 +405,7 @@ export function TimelinePage() {
     setFilters,
     snapshotState,
     design,
+    effectiveDesign,
     setDesign,
     ui,
     locale,
@@ -360,7 +433,57 @@ export function TimelinePage() {
     statusFilter,
     setStatusFilter,
   } = snapshotState;
-  const rowH = design.tableRowHeight;
+  const currentPersonLink = selectCurrentPersonLink({
+    authSession: authSession.state,
+    snapshot,
+  });
+  const [devCatalogLoading, setDevCatalogLoading] = React.useState(false);
+  const [devCatalogError, setDevCatalogError] = React.useState<string | null>(null);
+  const [devCatalog, setDevCatalog] = React.useState<import("../auth/useAuthSession").DevLocalPersona[]>([]);
+  const [devTokenInput, setDevTokenInput] = React.useState("");
+  const [devSelectedPersonaId, setDevSelectedPersonaId] = React.useState("guest");
+  const canViewAllTasks =
+    authSession.state.user?.role === "admin" || Boolean(authSession.state.user?.canViewAllTasks);
+  const canUseDesignerGrouping =
+    authSession.state.user?.role === "admin" ||
+    Boolean(authSession.state.user?.canUseDesignerGrouping ?? authSession.state.user?.canViewAllTasks);
+  const resolvedOwnerNames = useResolvedOwnerNames(snapshot?.tasks ?? [], !canViewAllTasks && authSession.state.authenticated);
+  const forcedOwnerId =
+    !canViewAllTasks && authSession.state.authenticated ? currentPersonLink.personId ?? "" : "";
+
+  React.useEffect(() => {
+    const bootstrapToken = authSession.localDevBootstrapToken || "";
+    const storedToken =
+      typeof window === "undefined" ? "" : window.localStorage.getItem(DEV_AUTH_TOKEN_STORAGE_KEY) || "";
+    const nextToken = storedToken || bootstrapToken;
+    setDevTokenInput((prev) => (prev ? prev : nextToken));
+    const storedPersonaId =
+      typeof window === "undefined" ? "guest" : window.localStorage.getItem(DEV_AUTH_PERSONA_STORAGE_KEY) || "guest";
+    setDevSelectedPersonaId((prev) => (prev && prev !== "guest" ? prev : storedPersonaId));
+  }, [authSession.localDevBootstrapToken]);
+
+  React.useEffect(() => {
+    try {
+      localStorage.setItem(TIMELINE_PAGE_VIEW_KEY, pageView);
+    } catch {
+      // ignore
+    }
+  }, [pageView]);
+
+  React.useEffect(() => {
+    if (pageView === "designers" && !canUseDesignerGrouping) {
+      setPageView("tasks");
+    }
+  }, [pageView, canUseDesignerGrouping]);
+
+  React.useEffect(() => {
+    if (canUseDesignerGrouping) return;
+    if (viewMode === "designer_brand_show") {
+      setViewMode("brand_designer_show");
+    }
+  }, [canUseDesignerGrouping, viewMode, setViewMode]);
+  const designState = effectiveDesign ?? design;
+  const rowH = designState.tableRowHeight;
   const peopleById = React.useMemo(() => {
     const map = new Map<string, string>();
     for (const p of snapshot?.people ?? []) map.set(p.id, p.name);
@@ -380,6 +503,8 @@ export function TimelinePage() {
     }, 30000);
     return () => window.clearInterval(timer);
   }, [authSession.state.expiresAt, authSession.state.sessionKind]);
+
+  React.useEffect(() => () => stopTimelineScrollAnimation(), []);
 
   React.useEffect(() => {
     const onMove = (e: MouseEvent) => {
@@ -433,32 +558,14 @@ export function TimelinePage() {
     return () => host.removeEventListener("wheel", onWheel, true);
   }, [snapshot, timelineHost.width, timelineHost.ref]);
 
-  if (!snapshot) {
-    return (
-      <div className="card" style={{ minHeight: 160 }}>
-        <h3 style={{ marginTop: 0, marginBottom: 8 }}>
-          {isLoading ? ui.common.loadingTitle : ui.common.noDataTitle}
-        </h3>
-        <p className="muted" style={{ marginTop: 0 }}>
-          {isLoading ? ui.common.loadingHint : ui.common.noDataHint}
-        </p>
-        {error ? (
-          <div className="muted" style={{ color: "#ffb8c8", marginBottom: 8 }}>
-            {String(error)}
-          </div>
-        ) : null}
-        <div className="row" style={{ marginTop: 10 }}>
-          <button onClick={() => { void syncFromApi(); }}>{ui.filters.updateFromApi}</button>
-          <button onClick={() => { void reloadLocal(); }}>{ui.filters.updateFromLocal}</button>
-        </div>
-      </div>
-    );
-  }
+  const statusLabels = snapshot?.enums?.status ?? {};
 
-  const statusLabels = snapshot.enums?.status ?? {};
-
-  const tasks = snapshot.tasks.filter((t) => {
-    if (filters.ownerId && t.ownerId !== filters.ownerId) return false;
+  const tasks = (snapshot?.tasks ?? []).filter((t) => {
+    if (!canViewAllTasks && authSession.state.authenticated) {
+      if (!taskMatchesCurrentPersonWithResolvedOwners(t, currentPersonLink, resolvedOwnerNames, peopleById)) return false;
+    } else if (filters.ownerId && t.ownerId !== filters.ownerId) {
+      return false;
+    }
     if (filters.status && t.status !== filters.status) return false;
     if (filters.search && !t.title.toLowerCase().includes(filters.search.toLowerCase())) return false;
     return true;
@@ -502,7 +609,7 @@ export function TimelinePage() {
   });
   const limitedTasks = tasksByFreshEnd.slice(0, safeLimit);
 
-  const selectedTask = selectedId ? snapshot.tasks.find((t) => t.id === selectedId) ?? null : null;
+  const selectedTask = selectedId && snapshot ? snapshot.tasks.find((t) => t.id === selectedId) ?? null : null;
 
   const onHover = (
     e: React.MouseEvent,
@@ -512,7 +619,7 @@ export function TimelinePage() {
     const manager = t.customer ?? "-";
     const history = (t.history ?? "").trim();
     const dateLabel = meta?.date ? formatDdMm(meta.date) : "-";
-    const bubbleScale = Math.max(0.6, design.tooltipBubbleScale ?? 1);
+    const bubbleScale = Math.max(0.6, designState.tooltipBubbleScale ?? 1);
     const bubbleStyle: React.CSSProperties = {
       fontSize: `${Math.round(11 * bubbleScale)}px`,
       padding: `${Math.round(3 * bubbleScale)}px ${Math.round(9 * bubbleScale)}px`,
@@ -579,6 +686,7 @@ export function TimelinePage() {
     maskingForced,
     maskingLockedByAccess,
   });
+  const localDevUiEnabled = canUseLocalDevAuthUi();
 
   const handleMaskToggle = () => {
     if (maskingLockedByAccess) return;
@@ -603,6 +711,94 @@ export function TimelinePage() {
     }
     void authSession.logout();
   };
+
+  const handleLoadDevCatalog = React.useCallback(async () => {
+    const trimmedToken = devTokenInput.trim();
+    if (!trimmedToken) {
+      setDevCatalogError(locale === "ru" ? "Нужен bootstrap или dev-token." : "A bootstrap or dev token is required.");
+      return;
+    }
+    setDevCatalogLoading(true);
+    setDevCatalogError(null);
+    try {
+      const result = await authSession.loadDevCatalog(trimmedToken);
+      setDevCatalog(result.personas);
+      const nextPersonaId =
+        result.personas.find((persona) => persona.id === devSelectedPersonaId)?.id ??
+        result.personas[0]?.id ??
+        "guest";
+      setDevSelectedPersonaId(nextPersonaId);
+      if (typeof window !== "undefined") {
+        window.localStorage.setItem(DEV_AUTH_TOKEN_STORAGE_KEY, trimmedToken);
+        window.localStorage.setItem(DEV_AUTH_PERSONA_STORAGE_KEY, nextPersonaId);
+      }
+    } catch (error) {
+      setDevCatalog([]);
+      setDevCatalogError(error instanceof Error ? error.message : locale === "ru" ? "Не удалось загрузить catalog." : "Failed to load catalog.");
+    } finally {
+      setDevCatalogLoading(false);
+    }
+  }, [authSession, devSelectedPersonaId, devTokenInput, locale]);
+
+  const handleDevPersonaSwitch = React.useCallback(async () => {
+    const trimmedToken = devTokenInput.trim();
+    if (!trimmedToken || !devSelectedPersonaId) {
+      setDevCatalogError(locale === "ru" ? "Сначала загрузи catalog и выбери persona." : "Load the catalog and choose a persona first.");
+      return;
+    }
+    setDevCatalogLoading(true);
+    setDevCatalogError(null);
+    try {
+      await authSession.impersonateDevPersona(trimmedToken, devSelectedPersonaId);
+      if (typeof window !== "undefined") {
+        window.localStorage.setItem(DEV_AUTH_TOKEN_STORAGE_KEY, trimmedToken);
+        window.localStorage.setItem(DEV_AUTH_PERSONA_STORAGE_KEY, devSelectedPersonaId);
+      }
+    } catch (error) {
+      setDevCatalogError(error instanceof Error ? error.message : locale === "ru" ? "Не удалось переключить persona." : "Failed to switch persona.");
+    } finally {
+      setDevCatalogLoading(false);
+    }
+  }, [authSession, devSelectedPersonaId, devTokenInput, locale]);
+
+  const handleDevLogout = React.useCallback(async () => {
+    setDevCatalogLoading(true);
+    setDevCatalogError(null);
+    try {
+      await authSession.logoutDevSession();
+    } catch (error) {
+      setDevCatalogError(error instanceof Error ? error.message : locale === "ru" ? "Не удалось очистить локальную dev-сессию." : "Failed to clear local dev session.");
+    } finally {
+      setDevCatalogLoading(false);
+    }
+  }, [authSession, locale]);
+
+  React.useEffect(() => {
+    if (typeof window === "undefined") return;
+    window.localStorage.setItem(DEV_AUTH_PERSONA_STORAGE_KEY, devSelectedPersonaId);
+  }, [devSelectedPersonaId]);
+
+  if (!snapshot) {
+    return (
+      <div className="card" style={{ minHeight: 160 }}>
+        <h3 style={{ marginTop: 0, marginBottom: 8 }}>
+          {isLoading ? ui.common.loadingTitle : ui.common.noDataTitle}
+        </h3>
+        <p className="muted" style={{ marginTop: 0 }}>
+          {isLoading ? ui.common.loadingHint : ui.common.noDataHint}
+        </p>
+        {error ? (
+          <div className="muted" style={{ color: "#ffb8c8", marginBottom: 8 }}>
+            {String(error)}
+          </div>
+        ) : null}
+        <div className="row" style={{ marginTop: 10 }}>
+          <button onClick={() => { void syncFromApi(); }}>{ui.filters.updateFromApi}</button>
+          <button onClick={() => { void reloadLocal(); }}>{ui.filters.updateFromLocal}</button>
+        </div>
+      </div>
+    );
+  }
 
   const onDesignerCardHover = (e: React.MouseEvent, task: TaskV1) => {
     const manager = task.customer?.trim() || "-";
@@ -658,10 +854,10 @@ export function TimelinePage() {
     });
   };
 
-  const timelineWidth = Math.max(timelineHost.width, design.timelineWidth);
-  const showMilestoneLabels = design.timelineShowMilestoneLabels >= 0.5;
-  const labelEveryDay = design.timelineLabelEveryDay >= 0.5;
-  const weekendFillMode = design.timelineWeekendFullDay >= 0.5 ? "full-day" : "legacy";
+  const timelineWidth = Math.max(timelineHost.width, designState.timelineWidth);
+  const showMilestoneLabels = designState.timelineShowMilestoneLabels >= 0.5;
+  const labelEveryDay = designState.timelineLabelEveryDay >= 0.5;
+  const weekendFillMode = designState.timelineWeekendFullDay >= 0.5 ? "full-day" : "legacy";
   const exactZoomPreset = ZOOM_PRESETS.find((z) => Math.abs(z - zoom) < 0.001);
   const zoomPresetValue = exactZoomPreset ? String(exactZoomPreset) : "__custom__";
 
@@ -684,24 +880,49 @@ export function TimelinePage() {
   };
 
   return (
+    <InspectorNodeBoundary label="Timeline page" kind="content" sourcePath="apps/web/src/pages/TimelinePage.tsx">
     <>
       {status === "stale_error" && error ? (
-        <ErrorBanner
-          compact
-          title={ui.timeline.staleTitle}
-          error={error}
-          onRetry={reloadLocal}
-        />
+        <InspectorNodeBoundary
+          label="Timeline error banner"
+          kind="content"
+          sourcePath="apps/web/src/pages/TimelinePage.tsx"
+        >
+          <ErrorBanner
+            compact
+            title={ui.timeline.staleTitle}
+            error={error}
+            onRetry={reloadLocal}
+          />
+        </InspectorNodeBoundary>
       ) : null}
 
+      <InspectorNodeBoundary
+        label="Timeline controls dock"
+        kind="content"
+        semanticTargetId="app.timeline.controls"
+        sourcePath="apps/web/src/pages/TimelinePage.tsx"
+      >
       <div
         className="timelineTopControlDock timelineTopControlDockExternal"
+        data-inspector-target-id="app.timeline.controls"
         style={{
-          transform: `translate(${design.timelineTopControlDockOffsetX}px, ${design.timelineTopControlDockOffsetY}px)`,
+          transform: `translate(${designState.timelineTopControlDockOffsetX}px, ${designState.timelineTopControlDockOffsetY}px)`,
         }}
       >
+        <InspectorNodeBoundary
+          label="Timeline top controls row"
+          kind="control"
+          sourcePath="apps/web/src/pages/TimelinePage.tsx"
+        >
         <div className="timelineTopControlRow">
-          <div className="pageSwitchCtl">
+          <InspectorNodeBoundary
+            label="Timeline page switch"
+            kind="control"
+            semanticTargetId="app.timeline.page-switch"
+            sourcePath="apps/web/src/pages/TimelinePage.tsx"
+          >
+          <div className="pageSwitchCtl" data-inspector-target-id="app.timeline.page-switch">
             <button
               type="button"
               className={`modeMiniBtn ${pageView === "tasks" ? "active" : ""}`}
@@ -709,54 +930,78 @@ export function TimelinePage() {
             >
               {PAGE_LABEL_TASKS}
             </button>
-            <button
-              type="button"
-              className={`modeMiniBtn ${pageView === "designers" ? "active" : ""}`}
-              onClick={() => setPageView("designers")}
-            >
-              {PAGE_LABEL_DESIGNERS}
-            </button>
+            {canUseDesignerGrouping ? (
+              <button
+                type="button"
+                className={`modeMiniBtn ${pageView === "designers" ? "active" : ""}`}
+                onClick={() => setPageView("designers")}
+              >
+                {PAGE_LABEL_DESIGNERS}
+              </button>
+            ) : null}
           </div>
+          </InspectorNodeBoundary>
           {pageView === "tasks" ? (
-          <div className="timelineZoomCtl">
-            <button
-              type="button"
-              onClick={() => {
-                const idx = ZOOM_PRESETS.findIndex((v) => Math.abs(v - zoom) < 0.001);
-                const nextIdx = idx <= 0 ? 0 : idx - 1;
-                setZoom(ZOOM_PRESETS[nextIdx]);
-              }}
-            >
-              -
-            </button>
-            <select
-              value={zoomPresetValue}
-              onChange={(e) => {
-                if (e.target.value === "__custom__") return;
-                setZoom(clamp(Number(e.target.value), MIN_ZOOM, MAX_ZOOM));
-              }}
-              aria-label={ui.timeline.zoomAria}
-            >
-              {zoomPresetValue === "__custom__" ? (
-                <option value="__custom__">{Math.round(zoom * 100)}%</option>
-              ) : null}
-              {ZOOM_PRESETS.map((z) => (
-                <option key={z} value={String(z)}>
-                  {Math.round(z * 100)}%
-                </option>
-              ))}
-            </select>
-            <button
-              type="button"
-              onClick={() => {
-                const idx = ZOOM_PRESETS.findIndex((v) => Math.abs(v - zoom) < 0.001);
-                const nextIdx = idx < 0 ? 2 : Math.min(ZOOM_PRESETS.length - 1, idx + 1);
-                setZoom(ZOOM_PRESETS[nextIdx]);
-              }}
-            >
-              +
-            </button>
-          </div>
+            <>
+              <InspectorNodeBoundary
+                label="Timeline zoom controls"
+                kind="control"
+                sourcePath="apps/web/src/pages/TimelinePage.tsx"
+              >
+              <div className="timelineZoomCtl">
+                <button
+                  type="button"
+                  onClick={() => {
+                    const idx = ZOOM_PRESETS.findIndex((v) => Math.abs(v - zoom) < 0.001);
+                    const nextIdx = idx <= 0 ? 0 : idx - 1;
+                    setZoom(ZOOM_PRESETS[nextIdx]);
+                  }}
+                >
+                  -
+                </button>
+                <select
+                  value={zoomPresetValue}
+                  onChange={(e) => {
+                    if (e.target.value === "__custom__") return;
+                    setZoom(clamp(Number(e.target.value), MIN_ZOOM, MAX_ZOOM));
+                  }}
+                  aria-label={ui.timeline.zoomAria}
+                >
+                  {zoomPresetValue === "__custom__" ? (
+                    <option value="__custom__">{Math.round(zoom * 100)}%</option>
+                  ) : null}
+                  {ZOOM_PRESETS.map((z) => (
+                    <option key={z} value={String(z)}>
+                      {Math.round(z * 100)}%
+                    </option>
+                  ))}
+                </select>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const idx = ZOOM_PRESETS.findIndex((v) => Math.abs(v - zoom) < 0.001);
+                    const nextIdx = idx < 0 ? 2 : Math.min(ZOOM_PRESETS.length - 1, idx + 1);
+                    setZoom(ZOOM_PRESETS[nextIdx]);
+                  }}
+                >
+                  +
+                </button>
+              </div>
+              </InspectorNodeBoundary>
+              <InspectorNodeBoundary
+                label="Timeline today button"
+                kind="control"
+                sourcePath="apps/web/src/pages/TimelinePage.tsx"
+              >
+              <button
+                type="button"
+                className="timelineTodayBtn"
+                onClick={() => centerTimelineOnToday(500)}
+              >
+                Сегодня
+              </button>
+              </InspectorNodeBoundary>
+            </>
           ) : null}
           <button
             type="button"
@@ -771,7 +1016,7 @@ export function TimelinePage() {
           </button>
           <button
             type="button"
-            className={`iconCtlBtn ${design.animEnabled >= 0.5 ? "active" : ""}`}
+            className={`iconCtlBtn ${designState.animEnabled >= 0.5 ? "active" : ""}`}
             onClick={() =>
               setDesign((prev) => ({
                 ...prev,
@@ -850,6 +1095,11 @@ export function TimelinePage() {
           >
             <LockIcon />
           </button>
+          <InspectorNodeBoundary
+            label="Timeline auth controls"
+            kind="control"
+            sourcePath="apps/web/src/pages/TimelinePage.tsx"
+          >
           <div className="authMenuWrap" ref={authMenuRef}>
             <button
               type="button"
@@ -941,6 +1191,87 @@ export function TimelinePage() {
                   </div>
                 ) : null}
 
+                {localDevUiEnabled ? (
+                  <div className="authPanelSection">
+                    <div className="authPanelLabel">{locale === "ru" ? "Local dev auth" : "Local dev auth"}</div>
+                    <div className="authPanelHint">
+                      {locale === "ru"
+                        ? "Работает только на localhost и только поверх test-контура."
+                        : "Works only on localhost and only against the test contour."}
+                    </div>
+                    <div style={{ display: "grid", gap: 8 }}>
+                      <input
+                        className="input"
+                        value={devTokenInput}
+                        onChange={(event) => setDevTokenInput(event.target.value)}
+                        placeholder={locale === "ru" ? "Bootstrap или dev-token" : "Bootstrap or dev token"}
+                        spellCheck={false}
+                        autoCapitalize="off"
+                        autoCorrect="off"
+                      />
+                      <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                        <button
+                          type="button"
+                          className="btn btnGhost authMenuAction"
+                          onClick={() => void handleLoadDevCatalog()}
+                          disabled={devCatalogLoading}
+                        >
+                          {devCatalogLoading
+                            ? locale === "ru"
+                              ? "Загружаем..."
+                              : "Loading..."
+                            : locale === "ru"
+                              ? "Загрузить catalog"
+                              : "Load catalog"}
+                        </button>
+                        {authSession.localDevBootstrapToken ? (
+                          <button
+                            type="button"
+                            className="btn btnGhost authMenuAction"
+                            onClick={() => setDevTokenInput(authSession.localDevBootstrapToken ?? "")}
+                          >
+                            {locale === "ru" ? "Подставить bootstrap token" : "Use bootstrap token"}
+                          </button>
+                        ) : null}
+                      </div>
+                      <select
+                        className="input"
+                        value={devSelectedPersonaId}
+                        onChange={(event) => setDevSelectedPersonaId(event.target.value)}
+                        disabled={!devCatalog.length}
+                      >
+                        {!devCatalog.length ? (
+                          <option value="guest">{locale === "ru" ? "Сначала загрузи catalog" : "Load catalog first"}</option>
+                        ) : null}
+                        {devCatalog.map((persona) => (
+                          <option key={persona.id} value={persona.id}>
+                            {persona.label} {persona.role ? `| ${persona.role}` : ""} | {persona.status}
+                          </option>
+                        ))}
+                      </select>
+                      <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                        <button
+                          type="button"
+                          className="btn authMenuAction"
+                          onClick={() => void handleDevPersonaSwitch()}
+                          disabled={devCatalogLoading || !devCatalog.length}
+                        >
+                          {locale === "ru" ? "Войти как persona" : "Impersonate persona"}
+                        </button>
+                        <button
+                          type="button"
+                          className="btn btnGhost authMenuAction"
+                          onClick={() => void handleDevLogout()}
+                          disabled={devCatalogLoading}
+                        >
+                          {locale === "ru" ? "Очистить dev-сессию" : "Clear dev session"}
+                        </button>
+                      </div>
+                      {devCatalogError ? <div className="authPanelHint" style={{ color: "#ffb0b0" }}>{devCatalogError}</div> : null}
+                    </div>
+                  </div>
+                ) : null}
+
                 <div className="authPanelSection">
                   <button
                     type="button"
@@ -953,10 +1284,18 @@ export function TimelinePage() {
               </div>
             ) : null}
           </div>
+          </InspectorNodeBoundary>
         </div>
+        </InspectorNodeBoundary>
         {isRefreshPanelOpen ? <FiltersBar /> : null}
         {isDateFilterPanelOpen ? (
-          <div className="timelineDateFilterPanel">
+          <InspectorNodeBoundary
+            label="Timeline filters panel"
+            kind="content"
+            semanticTargetId="app.timeline.filters"
+            sourcePath="apps/web/src/pages/TimelinePage.tsx"
+          >
+          <div className="timelineDateFilterPanel" data-inspector-target-id="app.timeline.filters">
             <div className="timelineDateFilterLayout">
               <div className="timelineDateFilterLeft">
                 <div className="timelineDateFilterRow">
@@ -1121,26 +1460,37 @@ export function TimelinePage() {
               </div>
             </div>
           </div>
+          </InspectorNodeBoundary>
         ) : null}
       </div>
+      </InspectorNodeBoundary>
 
       <div className="card">
       <div className="timelineFrame">
         {pageView === "tasks" ? (
+          <InspectorNodeBoundary
+            label="Timeline mode dock"
+            kind="control"
+            semanticTargetId="app.timeline.mode-dock"
+            sourcePath="apps/web/src/pages/TimelinePage.tsx"
+          >
           <div
             className="timelineModeDock"
+            data-inspector-target-id="app.timeline.mode-dock"
             style={{
-              transform: `translate(${design.timelineModeDockOffsetX}px, ${design.timelineModeDockOffsetY}px)`,
-              ["--mode-scale" as string]: String(design.timelineModeDockScale),
+              transform: `translate(${designState.timelineModeDockOffsetX}px, ${designState.timelineModeDockOffsetY}px)`,
+              ["--mode-scale" as string]: String(designState.timelineModeDockScale),
             }}
           >
-            <button
-              type="button"
-              className={`modeMiniBtn ${viewMode === "designer_brand_show" ? "active" : ""}`}
-              onClick={() => setViewMode("designer_brand_show")}
-            >
-              {ui.modeByDesignerBrandShow}
-            </button>
+            {canUseDesignerGrouping ? (
+              <button
+                type="button"
+                className={`modeMiniBtn ${viewMode === "designer_brand_show" ? "active" : ""}`}
+                onClick={() => setViewMode("designer_brand_show")}
+              >
+                {ui.modeByDesignerBrandShow}
+              </button>
+            ) : null}
             <button
               type="button"
               className={`modeMiniBtn ${viewMode === "brand_designer_show" ? "active" : ""}`}
@@ -1170,11 +1520,19 @@ export function TimelinePage() {
               {ui.modeFlatBrandShow}
             </button>
           </div>
+          </InspectorNodeBoundary>
         ) : null}
 
         {pageView === "tasks" ? (
+          <InspectorNodeBoundary
+            label="Timeline canvas"
+            kind="content"
+            semanticTargetId="app.timeline.canvas"
+            sourcePath="apps/web/src/pages/TimelinePage.tsx"
+          >
           <div
             className="card timelineScroll"
+            data-inspector-target-id="app.timeline.canvas"
             ref={timelineHost.ref}
             style={{
               overflow: "auto",
@@ -1221,113 +1579,137 @@ export function TimelinePage() {
               });
             }}
           >
-            <UnifiedTimeline
-              mode={viewMode}
-              sortMode={sortMode}
-              locale={locale}
-              people={snapshot.people}
-              groups={snapshot.groups}
-              tasks={limitedTasks}
-              statusLabels={statusLabels}
-              unassignedLabel={ui.common.unassigned}
-              width={timelineWidth}
-              viewportWidth={timelineHost.width}
-              leftPinOffset={timelineScrollLeft}
-              rowH={rowH}
-              labelW={Math.max(320, design.desktopLeftColWidth)}
-              topOffset={design.timelineTopOffset}
-              dateLabelY={design.timelineDateLabelY}
-              dateFontSize={design.timelineDateFontSize}
-              dateIdleOpacity={design.timelineDateIdleOpacity}
-              dateHoverOpacity={design.timelineDateHoverOpacity}
-              monthFontSize={design.timelineMonthFontSize}
-              monthOffsetY={design.timelineMonthOffsetY}
-              monthOffsetX={design.timelineMonthOffsetX}
-              todayLineOpacity={design.timelineTodayLineOpacity}
-              todayLineWidth={design.timelineTodayLineWidth}
-              cursorTrailDays={design.timelineCursorTrailDays}
-              cursorTrailOpacity={design.timelineCursorTrailOpacity}
-              holidayFillOpacity={design.timelineHolidayFillOpacity}
-              perfMinWeekPxDetailedX10={design.timelinePerfMinWeekPxDetailedX10}
-              leftOwnerFontSize={design.timelineLeftOwnerFontSize}
-              leftOwnerXOffset={design.timelineLeftOwnerXOffset}
-              leftOwnerTextOffsetY={design.timelineLeftOwnerTextOffsetY}
-              leftOwnerCropLeft={design.timelineLeftOwnerCropLeft}
-              leftTaskFontSize={design.timelineLeftTaskFontSize}
-              leftTaskXOffset={design.timelineLeftTaskXOffset}
-              leftTaskTextOffsetY={design.timelineLeftTaskTextOffsetY}
-              leftTaskCropLeft={design.timelineLeftTaskCropLeft}
-              leftMetaFontSize={design.timelineLeftMetaFontSize}
-              leftMetaTextOffsetY={design.timelineLeftMetaTextOffsetY}
-              leftPillOffsetY={design.timelineLeftPillOffsetY}
-              leftPillXOffset={design.timelineLeftPillXOffset}
-              leftPillWidth={design.timelineLeftPillWidth}
-              leftPillSizeScale={design.timelineLeftPillSizeScale}
-              leftGroupOffsetY={design.timelineLeftGroupOffsetY}
-              leftGroupXOffset={design.timelineLeftGroupXOffset}
-              leftGroupCropLeft={design.timelineLeftGroupCropLeft}
-              leftGroupFontSize={design.timelineLeftGroupFontSize}
-              badgeHeight={design.badgeHeight}
-              badgeFontSize={design.badgeFontSize}
-              textRenderingMode={design.textRenderingMode}
-              animEnabled={design.animEnabled >= 0.5}
-              reorderDurationMs={design.animReorderDurationMs}
-              reorderEasePreset={design.animReorderEasePreset}
-              reorderStaggerMs={design.animReorderStaggerMs}
-              reorderStaggerCapMs={design.animReorderStaggerCapMs}
-              reorderDistanceFactor={design.animReorderDistanceFactor}
-              reorderDistanceMaxExtraMs={design.animReorderDistanceMaxExtraMs}
-              reorderViewportOnly={design.animReorderViewportOnly >= 0.5}
-              reorderViewportBufferPx={design.animReorderViewportBufferPx}
-              reorderAutoDisableRows={design.animReorderAutoDisableRows}
-              viewportTop={timelineScrollTop}
-              viewportHeight={timelineViewportHeight}
-              disableReorderAnimation={isDraggingTimeline}
-              onScaleChange={({ rangeStartMs, pxPerDay, labelW }) => {
-                scaleInfoRef.current = { rangeStartMs, pxPerDay, labelW };
-                const host = timelineHost.ref.current;
-                if (!host) return;
+            <InspectorNodeBoundary
+              label="Timeline renderer"
+              kind="content"
+              sourcePath="apps/web/src/pages/TimelinePage.tsx"
+            >
+              <UnifiedTimeline
+                mode={viewMode}
+                sortMode={sortMode}
+                locale={locale}
+                people={snapshot.people}
+                groups={snapshot.groups}
+                tasks={limitedTasks}
+                statusLabels={statusLabels}
+                unassignedLabel={ui.common.unassigned}
+                width={timelineWidth}
+                viewportWidth={timelineHost.width}
+                leftPinOffset={timelineScrollLeft}
+                rowH={rowH}
+                labelW={Math.max(320, designState.desktopLeftColWidth)}
+                topOffset={designState.timelineTopOffset}
+                dateLabelY={designState.timelineDateLabelY}
+                dateFontSize={designState.timelineDateFontSize}
+                dateIdleOpacity={designState.timelineDateIdleOpacity}
+                dateHoverOpacity={designState.timelineDateHoverOpacity}
+                monthFontSize={designState.timelineMonthFontSize}
+                monthOffsetY={designState.timelineMonthOffsetY}
+                monthOffsetX={designState.timelineMonthOffsetX}
+                todayLineOpacity={designState.timelineTodayLineOpacity}
+                todayLineWidth={designState.timelineTodayLineWidth}
+                cursorTrailDays={designState.timelineCursorTrailDays}
+                cursorTrailOpacity={designState.timelineCursorTrailOpacity}
+                holidayFillOpacity={designState.timelineHolidayFillOpacity}
+                perfMinWeekPxDetailedX10={designState.timelinePerfMinWeekPxDetailedX10}
+                leftOwnerFontSize={designState.timelineLeftOwnerFontSize}
+                leftOwnerXOffset={designState.timelineLeftOwnerXOffset}
+                leftOwnerTextOffsetY={designState.timelineLeftOwnerTextOffsetY}
+                leftOwnerCropLeft={designState.timelineLeftOwnerCropLeft}
+                leftTaskFontSize={designState.timelineLeftTaskFontSize}
+                leftTaskXOffset={designState.timelineLeftTaskXOffset}
+                leftTaskTextOffsetY={designState.timelineLeftTaskTextOffsetY}
+                leftTaskCropLeft={designState.timelineLeftTaskCropLeft}
+                leftMetaFontSize={designState.timelineLeftMetaFontSize}
+                leftMetaTextOffsetY={designState.timelineLeftMetaTextOffsetY}
+                leftPillOffsetY={designState.timelineLeftPillOffsetY}
+                leftPillXOffset={designState.timelineLeftPillXOffset}
+                leftPillWidth={designState.timelineLeftPillWidth}
+                leftPillSizeScale={designState.timelineLeftPillSizeScale}
+                leftGroupOffsetY={designState.timelineLeftGroupOffsetY}
+                leftGroupXOffset={designState.timelineLeftGroupXOffset}
+                leftGroupCropLeft={designState.timelineLeftGroupCropLeft}
+                leftGroupFontSize={designState.timelineLeftGroupFontSize}
+                badgeHeight={designState.badgeHeight}
+                badgeFontSize={designState.badgeFontSize}
+                textRenderingMode={designState.textRenderingMode}
+                animEnabled={designState.animEnabled >= 0.5}
+                reorderDurationMs={designState.animReorderDurationMs}
+                reorderEasePreset={designState.animReorderEasePreset}
+                reorderStaggerMs={designState.animReorderStaggerMs}
+                reorderStaggerCapMs={designState.animReorderStaggerCapMs}
+                reorderDistanceFactor={designState.animReorderDistanceFactor}
+                reorderDistanceMaxExtraMs={designState.animReorderDistanceMaxExtraMs}
+                reorderViewportOnly={designState.animReorderViewportOnly >= 0.5}
+                reorderViewportBufferPx={designState.animReorderViewportBufferPx}
+                reorderAutoDisableRows={designState.animReorderAutoDisableRows}
+                viewportTop={timelineScrollTop}
+                viewportHeight={timelineViewportHeight}
+                disableReorderAnimation={isDraggingTimeline}
+                onScaleChange={({ rangeStartMs, pxPerDay, labelW }) => {
+                  scaleInfoRef.current = { rangeStartMs, pxPerDay, labelW };
+                  const host = timelineHost.ref.current;
+                  if (!host) return;
 
-                const zoomAnchor = pendingZoomAnchorRef.current;
-                if (zoomAnchor) {
-                  const x =
-                    labelW +
-                    ((zoomAnchor.dateMs - rangeStartMs) / DAY_MS) * pxPerDay -
-                    zoomAnchor.clientX;
-                  host.scrollLeft = Math.max(0, x);
-                  pendingZoomAnchorRef.current = null;
-                }
+                  const zoomAnchor = pendingZoomAnchorRef.current;
+                  if (zoomAnchor) {
+                    const x =
+                      labelW +
+                      ((zoomAnchor.dateMs - rangeStartMs) / DAY_MS) * pxPerDay -
+                      zoomAnchor.clientX;
+                    scrollTimelineToLeft(x, 0);
+                    pendingZoomAnchorRef.current = null;
+                    return;
+                  }
 
-                const dateAnchor = pendingDateAnchorRef.current;
-                if (dateAnchor !== null) {
-                  const x =
-                    labelW +
-                    ((dateAnchor - rangeStartMs) / DAY_MS) * pxPerDay -
-                    host.clientWidth * 0.5;
-                  host.scrollLeft = Math.max(0, x);
-                  pendingDateAnchorRef.current = null;
-                }
-              }}
-              zoom={zoom}
-              stripeOpacity={design.timelineStripeOpacity}
-              gridOpacity={design.timelineGridOpacity}
-              gridLineWidth={design.timelineGridLineWidth}
-              barInsetY={design.barInsetY}
-              barRadius={design.barRadius}
-              labelEveryDay={labelEveryDay}
-              weekendFillMode={weekendFillMode}
-              weekendFillOpacity={design.timelineWeekendFillOpacity}
-              milestoneSizeScale={design.milestoneSizeScale}
-              milestoneOpacity={design.milestoneOpacity}
-              showMilestoneLabels={showMilestoneLabels}
-              taskColorMixPercent={design.taskColorMixPercent}
-              onHover={onHover}
-              onLeave={onLeave}
-              onClick={(t) => setSelectedId(t.id)}
-            />
+                  const dateAnchor = pendingDateAnchorRef.current;
+                  if (dateAnchor !== null) {
+                    const x =
+                      labelW +
+                      ((dateAnchor - rangeStartMs) / DAY_MS) * pxPerDay -
+                      host.clientWidth * 0.5;
+                    scrollTimelineToLeft(x, 0);
+                    pendingDateAnchorRef.current = null;
+                    return;
+                  }
+
+                  if (pageView === "tasks" && !didInitialTodayCenterRef.current) {
+                    didInitialTodayCenterRef.current = true;
+                    applyDateAnchor(todayAnchorMs(), 0);
+                  }
+                }}
+                zoom={zoom}
+                stripeOpacity={designState.timelineStripeOpacity}
+                gridOpacity={designState.timelineGridOpacity}
+                gridLineWidth={designState.timelineGridLineWidth}
+                barInsetY={designState.barInsetY}
+                barRadius={designState.barRadius}
+                labelEveryDay={labelEveryDay}
+                weekendFillMode={weekendFillMode}
+                weekendFillOpacity={designState.timelineWeekendFillOpacity}
+                milestoneSizeScale={designState.milestoneSizeScale}
+                milestoneOpacity={designState.milestoneOpacity}
+                showMilestoneLabels={showMilestoneLabels}
+                taskColorMixPercent={designState.taskColorMixPercent}
+                onHover={onHover}
+                onLeave={onLeave}
+                onClick={(t) => setSelectedId(t.id)}
+              />
+            </InspectorNodeBoundary>
           </div>
+          </InspectorNodeBoundary>
         ) : (
-          <div className="card timelineScroll" style={{ overflow: "auto", paddingTop: 56 }}>
+          <InspectorNodeBoundary
+            label="Designers surface"
+            kind="content"
+            semanticTargetId="app.designers.surface"
+            sourcePath="apps/web/src/pages/TimelinePage.tsx"
+          >
+          <div
+            className="card timelineScroll"
+            data-inspector-target-id="app.designers.surface"
+            style={{ overflow: "auto", paddingTop: 56 }}
+          >
             <DesignersBoard
               tasks={limitedTasks}
               people={snapshot.people}
@@ -1338,11 +1720,18 @@ export function TimelinePage() {
               onTaskLeave={onLeave}
             />
           </div>
+          </InspectorNodeBoundary>
         )}
       </div>
       </div>
 
-      <Tooltip state={tooltip} offsetX={design.tooltipOffsetX} offsetY={design.tooltipOffsetY} />
+      <InspectorNodeBoundary
+        label="Timeline tooltip"
+        kind="content"
+        sourcePath="apps/web/src/pages/TimelinePage.tsx"
+      >
+        <Tooltip state={tooltip} offsetX={designState.tooltipOffsetX} offsetY={designState.tooltipOffsetY} />
+      </InspectorNodeBoundary>
       <TaskDetailsDrawer
         task={selectedTask}
         people={snapshot.people}
@@ -1352,6 +1741,7 @@ export function TimelinePage() {
         onClose={() => setSelectedId(null)}
       />
     </>
+    </InspectorNodeBoundary>
   );
 }
 

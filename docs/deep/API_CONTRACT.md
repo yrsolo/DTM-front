@@ -157,6 +157,17 @@ Upload request body:
 - `size`
 - `uploaded_by`
 
+Frontend upload MIME normalization:
+- if browser `File.type` is empty or falls back to `application/octet-stream`, frontend derives a canonical MIME from the filename extension before calling `request-upload`;
+- currently normalized extensions:
+  - `.doc` -> `application/msword`
+  - `.docx` -> `application/vnd.openxmlformats-officedocument.wordprocessingml.document`
+  - `.pdf` -> `application/pdf`
+  - `.jpg` / `.jpeg` -> `image/jpeg`
+  - `.png` -> `image/png`
+  - `.webp` -> `image/webp`
+- this keeps browser uploads compatible with backend MIME allowlists even when the browser/webview does not provide a reliable `File.type`.
+
 Finalize body:
 - `task_id`
 - `attachment_id`

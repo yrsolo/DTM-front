@@ -17,6 +17,7 @@ import { CSS } from "@dnd-kit/utilities";
 
 import { LayoutContext } from "../components/Layout";
 import { getAuthRequestBase, getTasksRoute } from "../config/runtimeContour";
+import { UI_STYLE_GROUP_LABELS, UI_STYLE_REGISTRY, type UIStyleEntry, type UIStyleGroup } from "../design/uiRegistry";
 
 const MINI_APP_ADMIN_RETURN_KEY = "dtm-miniapp-admin-return-to";
 const ADMIN_TOP_TAB_KEY = "dtm-admin-top-tab";
@@ -36,6 +37,7 @@ type AdminUserCard = {
   personName: string | null;
   telegramId: string | null;
   telegramUsername: string | null;
+  canViewAllTasks: boolean;
   status: string;
   role: string;
   requestedAt: string;
@@ -74,10 +76,37 @@ type AccessLinkCard = {
   createdBy: string | null;
   lastUsedAt: string | null;
   useCount: number;
+  showDesignerGrouping: boolean;
   usageEvents: AccessLinkUsageEvent[];
 };
 
 type AccessLinkDraft = {
+  label: string;
+  expiresAt: string;
+  showDesignerGrouping: boolean;
+};
+
+type DeveloperTokenUsageEvent = {
+  id: string;
+  usedAt: string;
+  ip: string | null;
+  city: string | null;
+  clientSummary: string | null;
+};
+
+type DeveloperTokenCard = {
+  id: string;
+  label: string;
+  status: "active" | "expired" | "revoked";
+  expiresAt: string | null;
+  createdAt: string;
+  createdBy: string | null;
+  lastUsedAt: string | null;
+  useCount: number;
+  usageEvents: DeveloperTokenUsageEvent[];
+};
+
+type DeveloperTokenDraft = {
   label: string;
   expiresAt: string;
 };
@@ -85,7 +114,7 @@ type AccessLinkDraft = {
 type DragListKey = "pendingUsers" | "approvedUsers" | "colorPresets" | "layoutPresets";
 type AdminTopTab = "access" | "style";
 type AdminAccessTab = "people" | "links";
-type AdminStyleTab = "presets";
+type AdminStyleTab = "presets" | "ui";
 
 type AdminOverview = {
   pendingUsers: AdminUserCard[];
@@ -118,6 +147,8 @@ type SortableCardProps = {
   className: string;
 };
 
+const UI_GROUP_ORDER: UIStyleGroup[] = ["button", "bubble", "label", "panel"];
+
 function buildAuthUrl(path: string): string {
   return `${getAuthRequestBase()}${path}`;
 }
@@ -131,14 +162,27 @@ function goToTimeline(): void {
       window.sessionStorage.getItem(MINI_APP_ADMIN_RETURN_KEY)?.trim() ||
       window.localStorage.getItem(MINI_APP_ADMIN_RETURN_KEY)?.trim() ||
       "";
-    if (returnTo === "/app" || returnTo.startsWith("/app?") || returnTo === "/test/app" || returnTo.startsWith("/test/app?")) {
+    const isMobileReturn =
+      returnTo === "/app" ||
+      returnTo.startsWith("/app?") ||
+      returnTo === "/test/app" ||
+      returnTo.startsWith("/test/app?") ||
+      returnTo === "/m" ||
+      returnTo.startsWith("/m?") ||
+      returnTo === "/test/m" ||
+      returnTo.startsWith("/test/m?") ||
+      returnTo === "/mobile" ||
+      returnTo.startsWith("/mobile?") ||
+      returnTo === "/test/mobile" ||
+      returnTo.startsWith("/test/mobile?");
+    if (isMobileReturn) {
       window.sessionStorage.removeItem(MINI_APP_ADMIN_RETURN_KEY);
       window.localStorage.removeItem(MINI_APP_ADMIN_RETURN_KEY);
       window.location.assign(returnTo);
       return;
     }
     if (miniAppRequested) {
-      const fallbackMiniAppRoute = window.location.pathname.startsWith("/test/") ? "/test/app" : "/app";
+      const fallbackMiniAppRoute = window.location.pathname.startsWith("/test/") ? "/test/m" : "/m";
       window.location.assign(fallbackMiniAppRoute);
       return;
     }
@@ -303,11 +347,15 @@ function UserCardContent(props: {
   user: AdminUserCard;
   roleText?: string;
   roleClassName?: string;
+  actionClassName?: string;
   actions: React.ReactNode;
 }) {
   return (
     <>
-      <UserAvatar name={props.user.displayName} email={props.user.email} avatarUrl={props.user.avatarUrl} />
+      <div className="adminUserHeader">
+        <UserAvatar name={props.user.displayName} email={props.user.email} avatarUrl={props.user.avatarUrl} />
+        {props.roleText ? <div className={`adminUserRole ${props.roleClassName ?? ""}`}>{props.roleText}</div> : null}
+      </div>
       <div className="adminUserBody">
         <div className="adminUserName">{props.user.displayName || props.user.email || props.user.id}</div>
         <div className="muted">{props.user.email || "Email не указан"}</div>
@@ -315,9 +363,8 @@ function UserCardContent(props: {
         {props.user.telegramId ? <div className="muted">Telegram ID: {props.user.telegramId}</div> : null}
         {props.user.telegramUsername ? <div className="muted">Telegram: @{props.user.telegramUsername}</div> : null}
         <div className="muted">Заявка: {formatDateTime(props.user.requestedAt)}</div>
-        {props.roleText ? <div className={`adminUserRole ${props.roleClassName ?? ""}`}>{props.roleText}</div> : null}
       </div>
-      <div className="adminUserActions">{props.actions}</div>
+      <div className={`adminUserActions ${props.actionClassName ?? ""}`.trim()}>{props.actions}</div>
     </>
   );
 }
@@ -356,6 +403,282 @@ function AdminTabButton(props: { active: boolean; onClick: () => void; children:
   );
 }
 
+function uiStatusLabel(entry: UIStyleEntry): string {
+  return entry.deprecated ? "Legacy" : "Active";
+}
+
+function UIPreviewActionIcon(props: { kind: "preview" | "download" | "delete" }) {
+  if (props.kind === "preview") {
+    return (
+      <svg viewBox="0 0 24 24" aria-hidden="true" className="attachmentActionIconSvg">
+        <path
+          d="M2.5 12s3.8-6.5 9.5-6.5S21.5 12 21.5 12s-3.8 6.5-9.5 6.5S2.5 12 2.5 12Z"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <circle cx="12" cy="12" r="3.2" fill="none" stroke="currentColor" strokeWidth="1.8" />
+      </svg>
+    );
+  }
+
+  if (props.kind === "download") {
+    return (
+      <svg viewBox="0 0 24 24" aria-hidden="true" className="attachmentActionIconSvg">
+        <path
+          d="M12 4.5v9.5m0 0 3.6-3.6M12 14l-3.6-3.6M5 18.5h14"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+    );
+  }
+
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" className="attachmentActionIconSvg">
+      <path
+        d="M6.5 6.5 17.5 17.5M17.5 6.5l-11 11"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.9"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
+function UIStylePreview(props: { entry: UIStyleEntry }) {
+  switch (props.entry.previewKind) {
+    case "button-primary":
+      return (
+        <div className="adminUiPreviewInline">
+          <button type="button" className="btn">Открыть</button>
+          <button type="button" className="btn btnGhost">Черновик</button>
+        </div>
+      );
+    case "button-ghost":
+      return (
+        <div className="adminUiPreviewInline">
+          <button type="button" className="btn btnGhost">Подробнее</button>
+          <button type="button" className="btn btnGhost" disabled>Недоступно</button>
+        </div>
+      );
+    case "miniapp-primary":
+      return (
+        <div className="adminUiPreviewInline isMobile">
+          <button type="button" className="miniAppButton">Войти</button>
+          <button type="button" className="miniAppButton miniAppButtonGhost">Обновить</button>
+        </div>
+      );
+    case "miniapp-group-toggle":
+      return (
+        <div className="adminUiPreviewMiniGroup">
+          <button type="button" className="miniAppTaskGroupToggle isOpen">
+            <span className="miniAppTaskGroupLabel">Бренд</span>
+            <span className="miniAppTaskGroupCount">8</span>
+          </button>
+        </div>
+      );
+    case "attachment-actions":
+      return (
+        <div className="adminUiPreviewInline">
+          <button type="button" className="miniAppButton miniAppButtonGhost attachmentActionIconButton isPreview" aria-label="Просмотр">
+            <UIPreviewActionIcon kind="preview" />
+          </button>
+          <button type="button" className="miniAppButton miniAppButtonGhost attachmentActionIconButton isDownload" aria-label="Скачать">
+            <UIPreviewActionIcon kind="download" />
+          </button>
+          <button type="button" className="miniAppButton miniAppButtonGhost attachmentActionIconButton isDelete" aria-label="Удалить">
+            <UIPreviewActionIcon kind="delete" />
+          </button>
+        </div>
+      );
+    case "admin-tab":
+      return (
+        <div className="adminUiPreviewInline isTabs">
+          <span className="adminTabButton isActive">Доступ</span>
+          <span className="adminTabButton">Стиль</span>
+        </div>
+      );
+    case "badge-default":
+      return (
+        <div className="adminUiPreviewInline">
+          <span className="badge">В работе</span>
+          <span className="badge">13.04</span>
+        </div>
+      );
+    case "badge-date":
+      return (
+        <div className="adminUiPreviewInline">
+          <span className="badge drawerDateBadge">21.04</span>
+          <span className="badge drawerDateBadge">25.04</span>
+        </div>
+      );
+    case "admin-count":
+      return (
+        <div className="adminUiPreviewInline">
+          <span className="adminCountBadge">24</span>
+          <span className="adminCountBadge">128</span>
+        </div>
+      );
+    case "admin-link-status":
+      return (
+        <div className="adminUiPreviewInline">
+          <span className="adminLinkStatusBadge isActive">Активна</span>
+          <span className="adminLinkStatusBadge isRevoked">Отозвана</span>
+        </div>
+      );
+    case "miniapp-due":
+      return (
+        <div className="adminUiPreviewInline isMobile">
+          <span className="miniAppTaskDueBubble">сегодня</span>
+          <span className="miniAppTaskDueBubble">27.03</span>
+        </div>
+      );
+    case "attachment-count":
+      return (
+        <div className="adminUiPreviewInline">
+          <span className="badge attachmentCountBadge">3</span>
+          <span className="badge attachmentCountBadge">12</span>
+        </div>
+      );
+    case "label-title":
+      return (
+        <div className="adminUiPreviewText">
+          <div className="pageTitle" style={{ fontSize: 20 }}>Панель доступа</div>
+          <div className="muted">Крупный заголовок раздела</div>
+        </div>
+      );
+    case "label-muted":
+      return (
+        <div className="adminUiPreviewText">
+          <div className="muted">Служебная подпись для описаний, статуса и help-copy.</div>
+        </div>
+      );
+    case "label-miniapp-title":
+      return (
+        <div className="adminUiPreviewText">
+          <div className="miniAppTaskTitle">Собрать титры для эфира</div>
+          <div className="miniAppProfileMeta">Мобильный strong label</div>
+        </div>
+      );
+    case "label-drawer-section":
+      return (
+        <div className="adminUiPreviewText">
+          <div className="drawerSectionTitle">Вложения</div>
+          <div className="muted">Заголовок вложенного блока</div>
+        </div>
+      );
+    case "label-designer-name":
+      return (
+        <div className="adminUiPreviewText">
+          <div className="designerColumnName">
+            <span className="designerColumnNameLine">Иванов</span>
+            <span className="designerColumnNameLine">Марк</span>
+          </div>
+        </div>
+      );
+    case "panel-card":
+      return (
+        <div className="card adminUiPreviewSurface">
+          <div className="pageTitle" style={{ fontSize: 16 }}>Glass card</div>
+          <div className="muted">Базовая surface проекта</div>
+        </div>
+      );
+    case "panel-drawer":
+      return (
+        <div className="card drawerSection adminUiPreviewSurface">
+          <div className="drawerSectionTitle">Календарь</div>
+          <div className="muted">Вложенная секция drawer</div>
+        </div>
+      );
+    case "panel-designer-task":
+      return (
+        <button type="button" className="designerTaskCard adminUiPreviewSurfaceButton" title="Карточка дизайнера">
+          <div className="designerTaskBrand">Luxe</div>
+          <div className="designerTaskMeta">
+            <span className="badge">KV</span>
+            <span className="designerTaskShow">Весна</span>
+          </div>
+        </button>
+      );
+    case "panel-miniapp-task":
+      return (
+        <button type="button" className="miniAppTaskCard miniAppTaskCardCompact adminUiPreviewSurfaceButton" title="Mini App card">
+          <div className="miniAppTaskRowMain">
+            <div className="miniAppTaskRowFields">Лента | Анна | KV</div>
+            <span className="miniAppTaskDueBubble">25.03</span>
+          </div>
+        </button>
+      );
+    case "panel-admin-link":
+      return (
+        <div className="adminAccessLinkCard adminUiPreviewSurface">
+          <div className="adminAccessLinkHeader">
+            <div className="adminUserName">Весенний viewer</div>
+            <div className="adminLinkStatusBadge isActive">Активна</div>
+          </div>
+          <div className="adminAccessLinkMeta">
+            <span>Осталось: 3 д 5 ч</span>
+          </div>
+        </div>
+      );
+    case "panel-workbench":
+      return (
+        <div className="workbenchBody adminUiPreviewWorkbench">
+          <div className="wbToolbar">
+            <span className="muted">Workbench surface</span>
+          </div>
+          <div className="wbGroup">
+            <h4>Buttons</h4>
+          </div>
+        </div>
+      );
+    default:
+      return <div className="adminUiPreviewText"><div className="muted">Preview not configured</div></div>;
+  }
+}
+
+function UIStyleRow(props: { entry: UIStyleEntry; active: boolean; onSelect: () => void }) {
+  return (
+    <div
+      className={`adminUiRow ${props.active ? "isActive" : ""}`}
+      role="button"
+      tabIndex={0}
+      onClick={props.onSelect}
+      onKeyDown={(event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          props.onSelect();
+        }
+      }}
+    >
+      <div className="adminUiRowMain">
+        <div className="adminUiRowIdentity">
+          <div className="adminUiRowTitle">{props.entry.title}</div>
+          <div className="adminUiRowId">{props.entry.id}</div>
+        </div>
+        <div className="adminUiRowDescription">{props.entry.description}</div>
+        <div className="adminUiRowUsage">
+          {props.entry.usedIn.map((usage) => (
+            <span key={usage} className="adminUiUsagePill">{usage}</span>
+          ))}
+        </div>
+        <div className="adminUiRowSource">{props.entry.sourcePath.replace("apps/web/src/", "")}</div>
+      </div>
+      <div className="adminUiRowPreview">
+        <UIStylePreview entry={props.entry} />
+      </div>
+      <div className={`adminUiCardStatus ${props.entry.deprecated ? "isLegacy" : ""}`}>{uiStatusLabel(props.entry)}</div>
+    </div>
+  );
+}
+
 export function AdminPage() {
   const ctx = React.useContext(LayoutContext);
   const [overview, setOverview] = React.useState<AdminOverview | null>(null);
@@ -372,10 +695,20 @@ export function AdminPage() {
   const [activeDrag, setActiveDrag] = React.useState<ActiveDrag | null>(null);
   const [topTab, setTopTab] = React.useState<AdminTopTab>(() => readStoredTab(ADMIN_TOP_TAB_KEY, ["access", "style"], "access"));
   const [accessTab, setAccessTab] = React.useState<AdminAccessTab>(() => readStoredTab(ADMIN_ACCESS_TAB_KEY, ["people", "links"], "people"));
-  const [styleTab, setStyleTab] = React.useState<AdminStyleTab>(() => readStoredTab(ADMIN_STYLE_TAB_KEY, ["presets"], "presets"));
+  const [styleTab, setStyleTab] = React.useState<AdminStyleTab>(() => readStoredTab(ADMIN_STYLE_TAB_KEY, ["presets", "ui"], "presets"));
+  const [uiGroup, setUiGroup] = React.useState<UIStyleGroup>("button");
+  const [uiSurfaceFilter, setUiSurfaceFilter] = React.useState<string>("all");
+  const [uiSearch, setUiSearch] = React.useState("");
+  const [selectedUiId, setSelectedUiId] = React.useState<string>(() => UI_STYLE_REGISTRY[0]?.id ?? "");
   const [draftLinkLabel, setDraftLinkLabel] = React.useState("");
   const [draftLinkExpiryHours, setDraftLinkExpiryHours] = React.useState("72");
+  const [draftLinkShowDesignerGrouping, setDraftLinkShowDesignerGrouping] = React.useState(false);
   const [linkDrafts, setLinkDrafts] = React.useState<Record<string, AccessLinkDraft>>({});
+  const [developerTokens, setDeveloperTokens] = React.useState<DeveloperTokenCard[]>([]);
+  const [draftDeveloperTokenLabel, setDraftDeveloperTokenLabel] = React.useState("");
+  const [draftDeveloperTokenExpiryHours, setDraftDeveloperTokenExpiryHours] = React.useState("168");
+  const [developerTokenDrafts, setDeveloperTokenDrafts] = React.useState<Record<string, DeveloperTokenDraft>>({});
+  const [developerTokenSecrets, setDeveloperTokenSecrets] = React.useState<Record<string, string>>({});
   const [, setLinksClock] = React.useState(() => Date.now());
   const importRef = React.useRef<HTMLInputElement | null>(null);
   const dragSnapshotRef = React.useRef<{ list: DragListKey; ids: string[] } | null>(null);
@@ -417,9 +750,25 @@ export function AdminPage() {
     }
   }, []);
 
+  const loadDeveloperTokens = React.useCallback(async () => {
+    try {
+      const res = await fetch(buildAuthUrl("/admin/developer-tokens"), {
+        credentials: "include",
+        headers: { accept: "application/json" },
+        cache: "no-store",
+      });
+      await expectOk(res, "Не удалось загрузить локальные dev-токены");
+      const payload = (await res.json()) as { tokens?: DeveloperTokenCard[] };
+      setDeveloperTokens(Array.isArray(payload.tokens) ? payload.tokens : []);
+    } catch (err) {
+      setActionError(err instanceof Error ? err.message : "Не удалось загрузить локальные dev-токены");
+    }
+  }, []);
+
   React.useEffect(() => {
     void loadOverview();
-  }, [loadOverview]);
+    void loadDeveloperTokens();
+  }, [loadDeveloperTokens, loadOverview]);
 
   React.useEffect(() => {
     setOrderedPendingUsers(overview?.pendingUsers ?? []);
@@ -433,6 +782,7 @@ export function AdminPage() {
           {
             label: link.label,
             expiresAt: toDateTimeInputValue(link.expiresAt),
+            showDesignerGrouping: Boolean(link.showDesignerGrouping),
           },
         ])
       )
@@ -440,11 +790,53 @@ export function AdminPage() {
   }, [overview]);
 
   React.useEffect(() => {
+    setDeveloperTokenDrafts(
+      Object.fromEntries(
+        developerTokens.map((token) => [
+          token.id,
+          {
+            label: token.label,
+            expiresAt: toDateTimeInputValue(token.expiresAt),
+          },
+        ])
+      )
+    );
+  }, [developerTokens]);
+
+  React.useEffect(() => {
     const timer = window.setInterval(() => {
       setLinksClock(Date.now());
     }, 30000);
     return () => window.clearInterval(timer);
   }, []);
+
+  const availableUiSurfaces = React.useMemo(() => {
+    return Array.from(new Set(UI_STYLE_REGISTRY.flatMap((entry) => entry.usedIn))).sort((left, right) =>
+      left.localeCompare(right, "ru")
+    );
+  }, []);
+
+  const filteredUiEntries = React.useMemo(() => {
+    const query = uiSearch.trim().toLowerCase();
+    return UI_STYLE_REGISTRY.filter((entry) => {
+      if (entry.group !== uiGroup) return false;
+      if (uiSurfaceFilter !== "all" && !entry.usedIn.includes(uiSurfaceFilter)) return false;
+      if (!query) return true;
+      const haystack = [entry.id, entry.title, entry.description, entry.sourcePath, entry.similarityKey, ...entry.usedIn].join(" ").toLowerCase();
+      return haystack.includes(query);
+    });
+  }, [uiGroup, uiSearch, uiSurfaceFilter]);
+
+  const selectedUiEntry = React.useMemo(() => {
+    const direct = filteredUiEntries.find((entry) => entry.id === selectedUiId);
+    if (direct) return direct;
+    return filteredUiEntries[0] ?? null;
+  }, [filteredUiEntries, selectedUiId]);
+
+  React.useEffect(() => {
+    if (filteredUiEntries.some((entry) => entry.id === selectedUiId)) return;
+    setSelectedUiId(filteredUiEntries[0]?.id ?? "");
+  }, [filteredUiEntries, selectedUiId]);
 
   const getListItems = React.useCallback(
     (list: DragListKey) => {
@@ -661,6 +1053,21 @@ export function AdminPage() {
     [authSession, loadOverview]
   );
 
+  const setAllTasks = React.useCallback(
+    async (userId: string, enabled: boolean) => {
+      const res = await fetch(buildAuthUrl(`/admin/users/${encodeURIComponent(userId)}/all-tasks`), {
+        method: "POST",
+        credentials: "include",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ enabled }),
+      });
+      await expectOk(res, "Не удалось обновить доступ к задачам");
+      await loadOverview();
+      await authSession?.reload();
+    },
+    [authSession, loadOverview]
+  );
+
   const addAllowlistEmail = React.useCallback(async () => {
     if (!newEmail.trim()) return;
     const res = await fetch(buildAuthUrl("/admin/allowlist"), {
@@ -795,18 +1202,19 @@ export function AdminPage() {
       method: "POST",
       credentials: "include",
       headers: { "content-type": "application/json", accept: "application/json" },
-      body: JSON.stringify({ label, expiresInHours }),
+      body: JSON.stringify({ label, expiresInHours, showDesignerGrouping: draftLinkShowDesignerGrouping }),
     });
     await expectOk(res, "Не удалось создать временную ссылку");
     const payload = (await res.json()) as { link?: AccessLinkCard | null };
     setDraftLinkLabel("");
     setDraftLinkExpiryHours("72");
+    setDraftLinkShowDesignerGrouping(false);
     if (payload.link?.browserUrl) {
       await copyBrowserLink(payload.link.browserUrl);
       setActionNotice("Ссылка создана и скопирована");
     }
     await loadOverview();
-  }, [copyBrowserLink, draftLinkExpiryHours, draftLinkLabel, loadOverview]);
+  }, [copyBrowserLink, draftLinkExpiryHours, draftLinkLabel, draftLinkShowDesignerGrouping, loadOverview]);
 
   const updateAccessLinkDraft = React.useCallback((linkId: string, patch: Partial<AccessLinkDraft>) => {
     setLinkDrafts((prev) => ({
@@ -814,6 +1222,7 @@ export function AdminPage() {
       [linkId]: {
         label: prev[linkId]?.label ?? "",
         expiresAt: prev[linkId]?.expiresAt ?? "",
+        showDesignerGrouping: prev[linkId]?.showDesignerGrouping ?? false,
         ...patch,
       },
     }));
@@ -836,7 +1245,11 @@ export function AdminPage() {
         method: "PATCH",
         credentials: "include",
         headers: { "content-type": "application/json", accept: "application/json" },
-        body: JSON.stringify({ label: draft.label.trim(), expiresAt: expiresAt.toISOString() }),
+        body: JSON.stringify({
+          label: draft.label.trim(),
+          expiresAt: expiresAt.toISOString(),
+          showDesignerGrouping: Boolean(draft.showDesignerGrouping),
+        }),
       });
       await expectOk(res, "Не удалось обновить временную ссылку");
       await loadOverview();
@@ -854,6 +1267,122 @@ export function AdminPage() {
       await loadOverview();
     },
     [loadOverview]
+  );
+
+  const activateAccessLink = React.useCallback(
+    async (linkId: string) => {
+      const res = await fetch(buildAuthUrl(`/admin/access-links/${encodeURIComponent(linkId)}/activate`), {
+        method: "POST",
+        credentials: "include",
+      });
+      await expectOk(res, "Не удалось вернуть ссылку в активные");
+      await loadOverview();
+    },
+    [loadOverview]
+  );
+
+  const copyDeveloperToken = React.useCallback(async (tokenValue: string | null | undefined) => {
+    if (!tokenValue) {
+      throw new Error("Сырой токен доступен только сразу после создания.");
+    }
+    await navigator.clipboard.writeText(tokenValue);
+  }, []);
+
+  const createDeveloperToken = React.useCallback(async () => {
+    const label = draftDeveloperTokenLabel.trim();
+    const expiresInHours = Number(draftDeveloperTokenExpiryHours);
+    if (!label) {
+      throw new Error("Нужно указать название dev-токена.");
+    }
+    if (!Number.isFinite(expiresInHours) || expiresInHours <= 0) {
+      throw new Error("Срок действия должен быть положительным числом часов.");
+    }
+    const res = await fetch(buildAuthUrl("/admin/developer-tokens"), {
+      method: "POST",
+      credentials: "include",
+      headers: { "content-type": "application/json", accept: "application/json" },
+      body: JSON.stringify({ label, expiresInHours }),
+    });
+    await expectOk(res, "Не удалось создать локальный dev-токен");
+    const payload = (await res.json()) as { token?: (DeveloperTokenCard & { rawToken?: string | null }) | null };
+    const createdToken = payload.token;
+    if (createdToken) {
+      const { rawToken, ...tokenCard } = createdToken;
+      setDeveloperTokens((prev) => [tokenCard, ...prev.filter((item) => item.id !== tokenCard.id)]);
+      if (rawToken) {
+        setDeveloperTokenSecrets((prev) => ({ ...prev, [tokenCard.id]: rawToken }));
+        await copyDeveloperToken(rawToken);
+        setActionNotice("Dev-токен создан и скопирован");
+      }
+    }
+    setDraftDeveloperTokenLabel("");
+    setDraftDeveloperTokenExpiryHours("168");
+    await loadDeveloperTokens();
+  }, [copyDeveloperToken, draftDeveloperTokenExpiryHours, draftDeveloperTokenLabel, loadDeveloperTokens]);
+
+  const updateDeveloperTokenDraft = React.useCallback((tokenId: string, patch: Partial<DeveloperTokenDraft>) => {
+    setDeveloperTokenDrafts((prev) => ({
+      ...prev,
+      [tokenId]: {
+        label: prev[tokenId]?.label ?? "",
+        expiresAt: prev[tokenId]?.expiresAt ?? "",
+        ...patch,
+      },
+    }));
+  }, []);
+
+  const saveDeveloperToken = React.useCallback(
+    async (tokenId: string) => {
+      const draft = developerTokenDrafts[tokenId];
+      if (!draft?.label.trim()) {
+        throw new Error("Название dev-токена не может быть пустым.");
+      }
+      if (!draft.expiresAt) {
+        throw new Error("Укажите дату окончания dev-токена.");
+      }
+      const expiresAt = new Date(draft.expiresAt);
+      if (!Number.isFinite(expiresAt.getTime())) {
+        throw new Error("Некорректная дата окончания dev-токена.");
+      }
+      const res = await fetch(buildAuthUrl(`/admin/developer-tokens/${encodeURIComponent(tokenId)}`), {
+        method: "PATCH",
+        credentials: "include",
+        headers: { "content-type": "application/json", accept: "application/json" },
+        body: JSON.stringify({ label: draft.label.trim(), expiresAt: expiresAt.toISOString() }),
+      });
+      await expectOk(res, "Не удалось обновить локальный dev-токен");
+      await loadDeveloperTokens();
+    },
+    [developerTokenDrafts, loadDeveloperTokens]
+  );
+
+  const revokeDeveloperToken = React.useCallback(
+    async (tokenId: string) => {
+      const res = await fetch(buildAuthUrl(`/admin/developer-tokens/${encodeURIComponent(tokenId)}/revoke`), {
+        method: "POST",
+        credentials: "include",
+      });
+      await expectOk(res, "Не удалось отозвать локальный dev-токен");
+      await loadDeveloperTokens();
+    },
+    [loadDeveloperTokens]
+  );
+
+  const deleteDeveloperTokenAction = React.useCallback(
+    async (tokenId: string) => {
+      const res = await fetch(buildAuthUrl(`/admin/developer-tokens/${encodeURIComponent(tokenId)}/delete`), {
+        method: "POST",
+        credentials: "include",
+      });
+      await expectOk(res, "Не удалось удалить локальный dev-токен");
+      setDeveloperTokenSecrets((prev) => {
+        const next = { ...prev };
+        delete next[tokenId];
+        return next;
+      });
+      await loadDeveloperTokens();
+    },
+    [loadDeveloperTokens]
   );
 
   const handlePeopleDragEnd = React.useCallback(
@@ -1022,8 +1551,23 @@ export function AdminPage() {
                                   user={user}
                                   roleText={isAdmin ? "Администратор" : "Пользователь"}
                                   roleClassName={isAdmin ? "isAdmin" : ""}
+                                  actionClassName="adminUserActionsFitDelete"
                                   actions={
                                     <>
+                                      <label className="adminUserToggle">
+                                        <input
+                                          type="checkbox"
+                                          checked={Boolean(user.canViewAllTasks)}
+                                          onChange={(event) =>
+                                            void runAdminAction(
+                                              () => setAllTasks(user.id, event.target.checked),
+                                              event.target.checked ? "Включён доступ ко всем задачам" : "Доступ к задачам ограничен"
+                                            )
+                                          }
+                                          disabled={isSelf}
+                                        />
+                                        <span>Все задачи</span>
+                                      </label>
                                       <button type="button" className="btn btnGhost" onClick={() => void runAdminAction(() => revoke(user.id), "Пользователь удален из одобренных")} disabled={isSelf}>Удалить</button>
                                       <button type="button" className={`btn ${isAdmin ? "btnGhost" : ""}`} onClick={() => void runAdminAction(() => toggleAdminRole(user), isAdmin ? "Admin-роль снята" : "Admin-роль назначена")} disabled={isSelf}>
                                         {isAdmin ? "Убрать из админов" : "Сделать админом"}
@@ -1088,6 +1632,14 @@ export function AdminPage() {
                       <input className="input" type="number" min={1} step={1} value={draftLinkExpiryHours} onChange={(event) => setDraftLinkExpiryHours(event.target.value)} />
                     </label>
                   </div>
+                  <label className="adminUserToggle adminLinkOptionToggle">
+                    <input
+                      type="checkbox"
+                      checked={draftLinkShowDesignerGrouping}
+                      onChange={(event) => setDraftLinkShowDesignerGrouping(event.target.checked)}
+                    />
+                    <span>Показывать группировку по дизайнерам</span>
+                  </label>
                   <div className="adminLinkDraftActions">
                     <button type="button" onClick={() => void runAdminAction(createAccessLink, "Ссылка создана")}>Создать ссылку</button>
                     <div className="muted">После создания ссылка сразу копируется в буфер обмена.</div>
@@ -1133,6 +1685,7 @@ export function AdminPage() {
                           <span>Осталось: {formatRemainingTime(link.expiresAt)}</span>
                           <span>Использований: {link.useCount}</span>
                           <span>Последний вход: {formatDateTime(link.lastUsedAt)}</span>
+                          <span>Группировка по дизайнерам: {(linkDrafts[link.id]?.showDesignerGrouping ?? link.showDesignerGrouping) ? "вкл" : "выкл"}</span>
                         </div>
                         <div className="adminLinkDraftGrid">
                           <label className="adminFieldStack">
@@ -1153,10 +1706,47 @@ export function AdminPage() {
                             />
                           </label>
                         </div>
+                        <label className="adminUserToggle adminLinkOptionToggle">
+                          <input
+                            type="checkbox"
+                            checked={Boolean(linkDrafts[link.id]?.showDesignerGrouping ?? link.showDesignerGrouping)}
+                            onChange={(event) => updateAccessLinkDraft(link.id, { showDesignerGrouping: event.target.checked })}
+                          />
+                          <span>Показывать группировку по дизайнерам</span>
+                        </label>
                         <div className="adminAccessLinkActions">
+                          <button
+                            type="button"
+                            className="btn btnGhost"
+                            onClick={() =>
+                              void runAdminAction(
+                                () => (link.status === "revoked" ? activateAccessLink(link.id) : revokeAccessLink(link.id)),
+                                link.status === "revoked" ? "Ссылка снова активна" : "Ссылка отозвана"
+                              )
+                            }
+                          >
+                            {link.status === "revoked" ? "Вернуть" : "Отозвать"}
+                          </button>
                           <button type="button" onClick={() => void runAdminAction(() => copyBrowserLink(link.browserUrl), "Ссылка скопирована")} disabled={!link.browserUrl}>Копировать</button>
                           <button type="button" className="btn btnGhost" onClick={() => void runAdminAction(() => saveAccessLink(link.id), "Ссылка обновлена")}>Сохранить</button>
-                          <button type="button" className="btn btnGhost" onClick={() => void runAdminAction(() => revokeAccessLink(link.id), "Ссылка отозвана")} disabled={link.status === "revoked"}>Отозвать</button>
+                          <button
+                            type="button"
+                            className="btn btnGhost"
+                            onClick={() =>
+                              void runAdminAction(
+                                async () => {
+                                  await fetch(buildAuthUrl(`/admin/access-links/${encodeURIComponent(link.id)}/delete`), {
+                                    method: "POST",
+                                    credentials: "include",
+                                  }).then((res) => expectOk(res, "Не удалось удалить временную ссылку"));
+                                  await loadOverview();
+                                },
+                                "Ссылка удалена"
+                              )
+                            }
+                          >
+                            Удалить
+                          </button>
                         </div>
                         <details className="adminLinkDetails">
                           <summary>Статистика и журнал</summary>
@@ -1188,6 +1778,142 @@ export function AdminPage() {
                   </div>
                 )}
               </div>
+
+              <div className="card adminSectionCard" style={{ marginTop: 16 }}>
+                <div className="adminSectionLead compact">
+                  <div>
+                    <h4 className="pageTitle adminSectionTitle">Локальные dev-токены</h4>
+                    <div className="muted">Токены для localhost-разработки поверх test auth contour. Не являются viewer-ссылками и не работают через URL.</div>
+                  </div>
+                  <div className="adminLinksSummary">
+                    <span className="adminCountBadge">{developerTokens.length}</span>
+                    <span className="muted">всего dev-токенов</span>
+                  </div>
+                </div>
+
+                <div className="card adminSectionCard" style={{ marginBottom: 16 }}>
+                  <h4 className="pageTitle" style={{ fontSize: 22 }}>Создание dev-токена</h4>
+                  <div className="adminLinkDraftGrid">
+                    <label className="adminFieldStack">
+                      <span className="muted">Название / оператор</span>
+                      <input
+                        className="input"
+                        value={draftDeveloperTokenLabel}
+                        onChange={(event) => setDraftDeveloperTokenLabel(event.target.value)}
+                        placeholder="Например, локальный дизайн-спринт"
+                      />
+                    </label>
+                    <label className="adminFieldStack">
+                      <span className="muted">Срок действия, часы</span>
+                      <input
+                        className="input"
+                        type="number"
+                        min={1}
+                        step={1}
+                        value={draftDeveloperTokenExpiryHours}
+                        onChange={(event) => setDraftDeveloperTokenExpiryHours(event.target.value)}
+                      />
+                    </label>
+                  </div>
+                  <div className="adminLinkDraftActions">
+                    <button type="button" onClick={() => void runAdminAction(createDeveloperToken, "Dev-токен создан")}>Создать dev-токен</button>
+                    <div className="muted">Сырой токен можно скопировать только сразу после создания или пока страница не перезагружена.</div>
+                  </div>
+                </div>
+
+                {developerTokens.length ? (
+                  <div className="adminAccessLinkList">
+                    {developerTokens.map((token) => (
+                      <div key={token.id} className="adminAccessLinkCard">
+                        <div className="adminAccessLinkHeader">
+                          <div>
+                            <div className="adminUserName">{token.label}</div>
+                            <div className="muted">Создан: {formatDateTime(token.createdAt)}{token.createdBy ? ` • ${token.createdBy}` : ""}</div>
+                          </div>
+                          <div className={`adminLinkStatusBadge is${token.status[0].toUpperCase()}${token.status.slice(1)}`}>{statusLabel(token.status)}</div>
+                        </div>
+                        <div className="adminAccessLinkMeta">
+                          <span>Истекает: {formatDateTime(token.expiresAt)}</span>
+                          <span>Осталось: {formatRemainingTime(token.expiresAt)}</span>
+                          <span>Использований: {token.useCount}</span>
+                          <span>Последний вход: {formatDateTime(token.lastUsedAt)}</span>
+                        </div>
+                        <div className="adminLinkDraftGrid">
+                          <label className="adminFieldStack">
+                            <span className="muted">Название</span>
+                            <input
+                              className="input"
+                              value={developerTokenDrafts[token.id]?.label ?? token.label}
+                              onChange={(event) => updateDeveloperTokenDraft(token.id, { label: event.target.value })}
+                            />
+                          </label>
+                          <label className="adminFieldStack">
+                            <span className="muted">Действует до</span>
+                            <input
+                              className="input"
+                              type="datetime-local"
+                              value={developerTokenDrafts[token.id]?.expiresAt ?? toDateTimeInputValue(token.expiresAt)}
+                              onChange={(event) => updateDeveloperTokenDraft(token.id, { expiresAt: event.target.value })}
+                            />
+                          </label>
+                        </div>
+                        <div className="adminAccessLinkActions">
+                          <button
+                            type="button"
+                            className="btn btnGhost"
+                            onClick={() => void runAdminAction(() => revokeDeveloperToken(token.id), "Dev-токен отозван")}
+                            disabled={token.status === "revoked"}
+                          >
+                            Отозвать
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => void runAdminAction(() => copyDeveloperToken(developerTokenSecrets[token.id]), "Dev-токен скопирован")}
+                          >
+                            Копировать токен
+                          </button>
+                          <button type="button" className="btn btnGhost" onClick={() => void runAdminAction(() => saveDeveloperToken(token.id), "Dev-токен обновлён")}>Сохранить</button>
+                          <button
+                            type="button"
+                            className="btn btnGhost"
+                            onClick={() => void runAdminAction(() => deleteDeveloperTokenAction(token.id), "Dev-токен удалён")}
+                          >
+                            Удалить
+                          </button>
+                        </div>
+                        {!developerTokenSecrets[token.id] ? (
+                          <div className="muted" style={{ marginTop: 8 }}>Сырой токен недоступен после перезагрузки страницы. Для нового копирования создай новый dev-токен.</div>
+                        ) : null}
+                        <details className="adminLinkDetails">
+                          <summary>Статистика и журнал</summary>
+                          {token.usageEvents.length ? (
+                            <div className="adminAccessLinkEvents">
+                              {token.usageEvents.map((event) => (
+                                <div key={event.id} className="tableRowGhost">
+                                  <div><strong>{formatDateTime(event.usedAt)}</strong></div>
+                                  <div className="muted">IP: {event.ip || "-"}</div>
+                                  <div className="muted">Город: {event.city || "-"}</div>
+                                  <div className="muted">{event.clientSummary || "Client summary появится из backend best-effort metadata."}</div>
+                                </div>
+                              ))}
+                            </div>
+                          ) : (
+                            <div className="muted">Пока нет usage events по этому dev-токену.</div>
+                          )}
+                        </details>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="adminStubEmptyState">
+                    <div className="adminStubEmptyIcon" aria-hidden="true">⌁</div>
+                    <div>
+                      <div className="adminUserName">Локальные dev-токены ещё не заведены</div>
+                      <div className="muted">Создай первый dev-токен выше, чтобы localhost мог входить в test-контур без Yandex и Telegram.</div>
+                    </div>
+                  </div>
+                )}
+              </div>
               </>
             )}
           </div>
@@ -1196,84 +1922,210 @@ export function AdminPage() {
         <div className="adminSubtabPanel">
           <div className="adminTabsRow isSubtabs">
             <AdminTabButton active={styleTab === "presets"} onClick={() => setStyleTab("presets")}>Пресеты</AdminTabButton>
+            <AdminTabButton active={styleTab === "ui"} onClick={() => setStyleTab("ui")}>UI</AdminTabButton>
           </div>
 
           <div className="adminSubtabBody">
-            <div className="adminSectionLead">
-              <div className="muted">Первая подвкладка хранит color/layout presets без изменения текущей бизнес-логики.</div>
-            </div>
+            {styleTab === "presets" ? (
+              <div className="card adminSectionCard">
+                <div className="pageHeader" style={{ marginBottom: 12 }}>
+                  <h4 className="pageTitle" style={{ fontSize: 22 }}>Пресеты</h4>
+                </div>
+                <div className="adminPresetToolbar">
+                  <button type="button" className="btn btnGhost" onClick={() => { setPendingImportKind("color"); importRef.current?.click(); }}>Импортировать color preset</button>
+                  <button type="button" className="btn btnGhost" onClick={() => { setPendingImportKind("layout"); importRef.current?.click(); }}>Импортировать layout preset</button>
+                </div>
+                <div className="grid2 adminPresetSplit" style={{ alignItems: "start" }}>
+                  <div className="card adminPresetColumn">
+                    <h4 className="pageTitle" style={{ fontSize: 20 }}>Цветовые пресеты</h4>
+                    <DndContext sensors={sensors} collisionDetection={closestCenter} onDragStart={(event) => handleDragStart("colorPresets", event)} onDragOver={(event) => handleDragOver("colorPresets", event)} onDragEnd={(event) => void handleDragEnd("colorPresets", event)} onDragCancel={handleDragCancel}>
+                      <SortableContext items={orderedColorPresets.map((preset) => preset.id)} strategy={rectSortingStrategy}>
+                        <div className="adminUserGrid adminPresetGrid">
+                          {orderedColorPresets.map((preset) => (
+                            <SortableCard key={preset.id} id={preset.id} className="adminUserCard adminUserBrick adminPresetBrick">
+                              <PresetCardContent
+                                preset={preset}
+                                actions={
+                                  <>
+                                    <button type="button" onClick={() => void runAdminAction(() => setDefaultPreset(preset), "Preset по умолчанию обновлён")}>Сделать default</button>
+                                    <button type="button" className="btn btnGhost" onClick={() => void runAdminAction(() => exportPreset(preset), "Preset экспортирован")}>Экспорт</button>
+                                    <button type="button" className="btn btnGhost" onClick={() => void runAdminAction(() => deletePreset(preset.id), "Preset удалён")}>Удалить</button>
+                                  </>
+                                }
+                              />
+                            </SortableCard>
+                          ))}
+                          {!orderedColorPresets.length ? <div className="muted">Пока нет color preset-ов.</div> : null}
+                        </div>
+                      </SortableContext>
+                    </DndContext>
+                  </div>
 
-            <div className="card adminSectionCard">
-              <div className="pageHeader" style={{ marginBottom: 12 }}>
-                <h4 className="pageTitle" style={{ fontSize: 22 }}>Пресеты</h4>
-              </div>
-              <div className="adminPresetToolbar">
-                <button type="button" className="btn btnGhost" onClick={() => { setPendingImportKind("color"); importRef.current?.click(); }}>Импортировать color preset</button>
-                <button type="button" className="btn btnGhost" onClick={() => { setPendingImportKind("layout"); importRef.current?.click(); }}>Импортировать layout preset</button>
-              </div>
-              <div className="grid2 adminPresetSplit" style={{ alignItems: "start" }}>
-                <div className="card adminPresetColumn">
-                  <h4 className="pageTitle" style={{ fontSize: 20 }}>Цветовые пресеты</h4>
-                  <DndContext sensors={sensors} collisionDetection={closestCenter} onDragStart={(event) => handleDragStart("colorPresets", event)} onDragOver={(event) => handleDragOver("colorPresets", event)} onDragEnd={(event) => void handleDragEnd("colorPresets", event)} onDragCancel={handleDragCancel}>
-                    <SortableContext items={orderedColorPresets.map((preset) => preset.id)} strategy={rectSortingStrategy}>
-                      <div className="adminUserGrid adminPresetGrid">
-                        {orderedColorPresets.map((preset) => (
-                          <SortableCard key={preset.id} id={preset.id} className="adminUserCard adminUserBrick adminPresetBrick">
-                            <PresetCardContent
-                              preset={preset}
-                              actions={
-                                <>
-                                  <button type="button" onClick={() => void runAdminAction(() => setDefaultPreset(preset), "Preset по умолчанию обновлен")}>Сделать default</button>
-                                  <button type="button" className="btn btnGhost" onClick={() => void runAdminAction(() => exportPreset(preset), "Preset экспортирован")}>Экспорт</button>
-                                  <button type="button" className="btn btnGhost" onClick={() => void runAdminAction(() => deletePreset(preset.id), "Preset удален")}>Удалить</button>
-                                </>
-                              }
-                            />
-                          </SortableCard>
-                        ))}
-                        {!orderedColorPresets.length ? <div className="muted">Пока нет preset-ов этого типа.</div> : null}
-                      </div>
-                    </SortableContext>
-                  </DndContext>
+                  <div className="card adminPresetColumn">
+                    <h4 className="pageTitle" style={{ fontSize: 20 }}>UI / Layout пресеты</h4>
+                    <DndContext sensors={sensors} collisionDetection={closestCenter} onDragStart={(event) => handleDragStart("layoutPresets", event)} onDragOver={(event) => handleDragOver("layoutPresets", event)} onDragEnd={(event) => void handleDragEnd("layoutPresets", event)} onDragCancel={handleDragCancel}>
+                      <SortableContext items={orderedLayoutPresets.map((preset) => preset.id)} strategy={rectSortingStrategy}>
+                        <div className="adminUserGrid adminPresetGrid">
+                          {orderedLayoutPresets.map((preset) => (
+                            <SortableCard key={preset.id} id={preset.id} className="adminUserCard adminUserBrick adminPresetBrick">
+                              <PresetCardContent
+                                preset={preset}
+                                actions={
+                                  <>
+                                    <button type="button" onClick={() => void runAdminAction(() => setDefaultPreset(preset), "Preset по умолчанию обновлён")}>Сделать default</button>
+                                    <button type="button" className="btn btnGhost" onClick={() => void runAdminAction(() => exportPreset(preset), "Preset экспортирован")}>Экспорт</button>
+                                    <button type="button" className="btn btnGhost" onClick={() => void runAdminAction(() => deletePreset(preset.id), "Preset удалён")}>Удалить</button>
+                                  </>
+                                }
+                              />
+                            </SortableCard>
+                          ))}
+                          {!orderedLayoutPresets.length ? <div className="muted">Пока нет layout preset-ов.</div> : null}
+                        </div>
+                      </SortableContext>
+                    </DndContext>
+                  </div>
                 </div>
 
-                <div className="card adminPresetColumn">
-                  <h4 className="pageTitle" style={{ fontSize: 20 }}>UI / Layout пресеты</h4>
-                  <DndContext sensors={sensors} collisionDetection={closestCenter} onDragStart={(event) => handleDragStart("layoutPresets", event)} onDragOver={(event) => handleDragOver("layoutPresets", event)} onDragEnd={(event) => void handleDragEnd("layoutPresets", event)} onDragCancel={handleDragCancel}>
-                    <SortableContext items={orderedLayoutPresets.map((preset) => preset.id)} strategy={rectSortingStrategy}>
-                      <div className="adminUserGrid adminPresetGrid">
-                        {orderedLayoutPresets.map((preset) => (
-                          <SortableCard key={preset.id} id={preset.id} className="adminUserCard adminUserBrick adminPresetBrick">
-                            <PresetCardContent
-                              preset={preset}
-                              actions={
-                                <>
-                                  <button type="button" onClick={() => void runAdminAction(() => setDefaultPreset(preset), "Preset по умолчанию обновлен")}>Сделать default</button>
-                                  <button type="button" className="btn btnGhost" onClick={() => void runAdminAction(() => exportPreset(preset), "Preset экспортирован")}>Экспорт</button>
-                                  <button type="button" className="btn btnGhost" onClick={() => void runAdminAction(() => deletePreset(preset.id), "Preset удален")}>Удалить</button>
-                                </>
-                              }
-                            />
-                          </SortableCard>
+                <input ref={importRef} type="file" accept=".json,application/json" style={{ display: "none" }} onChange={(event) => {
+                  const file = event.target.files?.[0];
+                  if (!file) return;
+                  void runAdminAction(() => importPreset(file, pendingImportKind), "Preset импортирован");
+                  event.target.value = "";
+                }} />
+              </div>
+            ) : (
+              <div className="card adminSectionCard">
+                <div className="adminSectionLead">
+                  <div className="muted">
+                    Реестр собирает реальные элементы проекта из desktop, Mini App, drawer, attachments, admin и workbench.
+                    Список нужен для visual-аудита и последующей унификации похожих паттернов.
+                  </div>
+                </div>
+                <div className="adminUiToolbar">
+                  <div className="adminUiToolbarPrimary">
+                    <div className="adminUiGroupTabs">
+                      {UI_GROUP_ORDER.map((group) => (
+                        <button key={group} type="button" className={`adminUiGroupTab ${uiGroup === group ? "isActive" : ""}`} onClick={() => setUiGroup(group)}>
+                          {UI_STYLE_GROUP_LABELS[group]}
+                        </button>
+                      ))}
+                    </div>
+                    <label className="adminUiSearch">
+                      <span className="muted">Поиск по id, названию, описанию, usage и source path</span>
+                      <input className="input" value={uiSearch} onChange={(event) => setUiSearch(event.target.value)} placeholder="drawer, miniapp, badge, AdminPage.tsx" />
+                    </label>
+                  </div>
+                  <div className="adminUiToolbarSecondary">
+                    <label className="adminFieldStack adminUiSurfaceFilter">
+                      <span className="muted">Поверхность</span>
+                      <select value={uiSurfaceFilter} onChange={(event) => setUiSurfaceFilter(event.target.value)}>
+                        <option value="all">Все поверхности</option>
+                        {availableUiSurfaces.map((surface) => (
+                          <option key={surface} value={surface}>
+                            {surface}
+                          </option>
                         ))}
-                        {!orderedLayoutPresets.length ? <div className="muted">Пока нет preset-ов этого типа.</div> : null}
+                      </select>
+                    </label>
+                  </div>
+                </div>
+                <div className="adminUiSummaryRow">
+                  <div className="muted">
+                    Это read-only inventory: здесь показываются реальные элементы проекта в порядке похожести, без runtime overrides и без генератора.
+                  </div>
+                  <div className="adminLinksSummary">
+                    <span className="adminCountBadge">{filteredUiEntries.length}</span>
+                    <span className="muted">элементов</span>
+                  </div>
+                </div>
+                <div className="adminUiSplit">
+                  <div className="adminUiRegistryPane">
+                    <div className="adminUiRegistryList">
+                      {filteredUiEntries.map((entry) => (
+                        <UIStyleRow key={entry.id} entry={entry} active={selectedUiEntry?.id === entry.id} onSelect={() => setSelectedUiId(entry.id)} />
+                      ))}
+                      {!filteredUiEntries.length ? (
+                        <div className="adminUiEmptyState">
+                          <div className="adminStubEmptyIcon" aria-hidden="true">⌕</div>
+                          <div>
+                            <div className="adminUserName">Ничего не найдено</div>
+                            <div className="muted">Смени группу, поверхность или поисковый запрос, чтобы увидеть другие UI-элементы.</div>
+                          </div>
+                        </div>
+                      ) : null}
+                    </div>
+                  </div>
+                  <div className="card adminUiInspector">
+                    {selectedUiEntry ? (
+                      <>
+                        <div className="adminUiInspectorHeader">
+                          <div>
+                            <div className="adminUiInspectorEyebrow">{UI_STYLE_GROUP_LABELS[selectedUiEntry.group]}</div>
+                            <h4 className="pageTitle" style={{ fontSize: 22 }}>{selectedUiEntry.title}</h4>
+                            <div className="muted adminUiInspectorId">{selectedUiEntry.id}</div>
+                          </div>
+                          <div className={`adminUiCardStatus ${selectedUiEntry.deprecated ? "isLegacy" : ""}`}>
+                            {uiStatusLabel(selectedUiEntry)}
+                          </div>
+                        </div>
+                        <div className="adminUiInspectorPreview">
+                          <UIStylePreview entry={selectedUiEntry} />
+                        </div>
+                        <div className="adminUiInspectorBlock">
+                          <div className="adminUiInspectorBlockTitle">Описание</div>
+                          <div className="muted">{selectedUiEntry.description}</div>
+                        </div>
+                        <div className="adminUiInspectorBlock">
+                          <div className="adminUiInspectorBlockTitle">Где используется</div>
+                          <div className="adminUiUsageList isDetailed">
+                            {selectedUiEntry.usedIn.map((usage) => (
+                              <span key={usage} className="adminUiUsagePill">{usage}</span>
+                            ))}
+                          </div>
+                        </div>
+                        <div className="adminUiInspectorBlock">
+                          <div className="adminUiInspectorBlockTitle">Source path</div>
+                          <div className="muted adminUiInspectorPath">{selectedUiEntry.sourcePath}</div>
+                        </div>
+                        <div className="adminUiInspectorBlock">
+                          <div className="adminUiInspectorBlockTitle">Similarity key</div>
+                          <div className="muted">{selectedUiEntry.similarityKey}</div>
+                        </div>
+                        <div className="adminUiInspectorBlock">
+                          <div className="adminUiInspectorBlockTitle">Ключевые props</div>
+                          <div className="adminUiPropsTable">
+                            {Object.entries(selectedUiEntry.propsSummary).map(([key, value]) => (
+                              <div key={key} className="adminUiPropRow">
+                                <span className="adminUiPropKey">{key}</span>
+                                <span className="adminUiPropValue">{String(value)}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                        <div className="adminUiInspectorBlock">
+                          <div className="adminUiInspectorBlockTitle">Контекст унификации</div>
+                          <div className="muted">
+                            Порядок внутри группы курируется вручную по похожести, чтобы рядом лежали почти одинаковые паттерны и их было легче сливать в следующей волне.
+                          </div>
+                        </div>
+                      </>
+                    ) : (
+                      <div className="adminUiEmptyState">
+                        <div className="adminStubEmptyIcon" aria-hidden="true">⌕</div>
+                        <div>
+                          <div className="adminUserName">Выбери UI-элемент</div>
+                          <div className="muted">Inspector покажет source path, usage, similarity key и ключевые props выбранного элемента.</div>
+                        </div>
                       </div>
-                    </SortableContext>
-                  </DndContext>
+                    )}
+                  </div>
                 </div>
               </div>
-
-              <input ref={importRef} type="file" accept=".json,application/json" style={{ display: "none" }} onChange={(event) => {
-                const file = event.target.files?.[0];
-                if (!file) return;
-                void runAdminAction(() => importPreset(file, pendingImportKind), "Preset импортирован");
-                event.target.value = "";
-              }} />
-            </div>
+            )}
           </div>
         </div>
       )}
-
       {typeof document !== "undefined"
         ? createPortal(
             <DragOverlay>

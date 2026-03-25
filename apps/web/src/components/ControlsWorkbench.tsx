@@ -247,6 +247,20 @@ export function ControlsWorkbench() {
     }
   }, []);
 
+  React.useEffect(() => {
+    const onFocusRequest = (event: Event) => {
+      const detail = (event as CustomEvent<{ tabId?: WorkbenchTabId }>).detail;
+      if (!detail?.tabId) return;
+      setWorkbenchPanelEnabled(true);
+      setWorkbenchOpen(true);
+      setFavoritesOpen(false);
+      setTab(detail.tabId);
+    };
+
+    window.addEventListener("dtm:workbench-focus", onFocusRequest as EventListener);
+    return () => window.removeEventListener("dtm:workbench-focus", onFocusRequest as EventListener);
+  }, [setFavoritesOpen, setWorkbenchOpen, setWorkbenchPanelEnabled]);
+
   const resolveControl = React.useCallback(
     (ref: WorkbenchControlRef): ResolvedControl | null => {
       if (ref.kind === "range") {

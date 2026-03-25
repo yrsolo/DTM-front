@@ -155,6 +155,7 @@ Contour-specific OAuth credentials считаются canonical:
 Также нужны:
 - `SESSION_SIGNING_SECRET`
 - `TG_TOKEN` for Mini App session bootstrap via `POST /telegram/session`
+- `PROXY_URL` for server-side Telegram SDK proxy via `GET /ops/auth/telegram/sdk`
 - `PEOPLE_SYNC_PATH` if backend people directory lives outside the default auth-side path (`/v2/people`)
 - `COOKIE_NAME`
 - `COOKIE_PATH`
@@ -162,6 +163,7 @@ Contour-specific OAuth credentials считаются canonical:
 - `COOKIE_SECURE`
 - `SESSION_TTL_SECONDS`
 - `BROWSER_AUTH_PROXY_SECRET`
+- `PROXY_URL`
 
 Cookie behavior:
 - runtime автоматически делает session cookie contour-specific, добавляя suffix `_test` или `_prod` к `COOKIE_NAME`

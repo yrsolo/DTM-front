@@ -29,6 +29,7 @@ type PersistedMeta = {
 const LOCAL_RAW_SNAPSHOT_STORAGE_KEY = "dtm.web.localSnapshotRaw.v1";
 const PERSISTED_SNAPSHOT_STORAGE_KEY = "dtm.snapshot.v1";
 const PERSISTED_META_STORAGE_KEY = "dtm.snapshot.meta";
+const IDLE_REFRESH_THRESHOLD_MS = 2 * 60 * 1000;
 let memorySnapshot: SnapshotV1 | null = null;
 let memoryMeta: PersistedMeta | null = null;
 
@@ -89,16 +90,22 @@ function readStatusFilterOverride(): ApiStatusFilter {
   return defaultStatusFilter();
 }
 
-export function useSnapshot(initialRuntimeDefaults?: Partial<RuntimeDefaults>) {
+export function useSnapshot(
+  initialRuntimeDefaults?: Partial<RuntimeDefaults>,
+  options?: {
+    enabled?: boolean;
+  }
+) {
   const runtimeDefaultsRef = React.useRef<RuntimeDefaults>(
     normalizeRuntimeDefaults(initialRuntimeDefaults ?? DEFAULT_RUNTIME_DEFAULTS)
   );
   const runtimeDefaults = runtimeDefaultsRef.current;
-  const initialSnapshot = memorySnapshot;
-  const initialMeta = memoryMeta;
+  const enabled = options?.enabled ?? true;
+  const initialSnapshot = enabled ? memorySnapshot : null;
+  const initialMeta = enabled ? memoryMeta : null;
 
   const [snapshot, setSnapshot] = React.useState<SnapshotV1 | null>(initialSnapshot);
-  const [status, setStatus] = React.useState<SnapshotStatus>(initialSnapshot ? "ready" : "cold_loading");
+  const [status, setStatus] = React.useState<SnapshotStatus>(enabled && initialSnapshot ? "ready" : "cold_loading");
   const [lastUpdatedAt, setLastUpdatedAt] = React.useState<string | null>(
     initialMeta?.savedAt ?? initialSnapshot?.meta.generatedAt ?? null
   );
@@ -123,6 +130,11 @@ export function useSnapshot(initialRuntimeDefaults?: Partial<RuntimeDefaults>) {
     wait: runtimeDefaults.statusWait,
   }));
   const [useTestApi, setUseTestApiState] = React.useState<boolean>(false);
+  const lastActiveAtRef = React.useRef<number>(Date.now());
+  const isActiveRef = React.useRef<boolean>(true);
+  const bumpActivity = React.useCallback(() => {
+    lastActiveAtRef.current = Date.now();
+  }, []);
 
   const snapshotRef = React.useRef<SnapshotV1 | null>(snapshot);
   React.useEffect(() => {
@@ -341,7 +353,16 @@ export function useSnapshot(initialRuntimeDefaults?: Partial<RuntimeDefaults>) {
   }, [demoMode, loadDemo, setDemoMode]);
 
   React.useEffect(() => {
+    if (!enabled) {
+      setSnapshot(null);
+      setStatus("cold_loading");
+      setLastError(null);
+      return;
+    }
+
     let active = true;
+    lastActiveAtRef.current = Date.now();
+    isActiveRef.current = true;
 
     void (async () => {
       const cfg = await loadPublicConfig();
@@ -402,17 +423,58 @@ export function useSnapshot(initialRuntimeDefaults?: Partial<RuntimeDefaults>) {
     return () => {
       active = false;
     };
-  }, []);
+  }, [enabled]);
 
   React.useEffect(() => {
     if (demoMode || refreshIntervalMs <= 0) return;
 
+    const handleVisibility = () => {
+      if (document.hidden) {
+        isActiveRef.current = false;
+        return;
+      }
+      isActiveRef.current = true;
+      bumpActivity();
+    };
+
+    const handleFocus = () => {
+      isActiveRef.current = true;
+      bumpActivity();
+    };
+
+    const handleBlur = () => {
+      isActiveRef.current = false;
+    };
+
+    const handleUserInput = () => {
+      isActiveRef.current = true;
+      bumpActivity();
+    };
+
+    window.addEventListener("focus", handleFocus);
+    window.addEventListener("blur", handleBlur);
+    document.addEventListener("visibilitychange", handleVisibility);
+    window.addEventListener("pointerdown", handleUserInput);
+    window.addEventListener("keydown", handleUserInput);
+    window.addEventListener("touchstart", handleUserInput);
+
     const timer = window.setInterval(() => {
+      if (document.hidden) return;
+      const idleFor = Date.now() - lastActiveAtRef.current;
+      if (!isActiveRef.current || idleFor >= IDLE_REFRESH_THRESHOLD_MS) {
+        return;
+      }
       void refreshFromApi({ manual: false });
     }, refreshIntervalMs);
 
     return () => {
       window.clearInterval(timer);
+      window.removeEventListener("focus", handleFocus);
+      window.removeEventListener("blur", handleBlur);
+      document.removeEventListener("visibilitychange", handleVisibility);
+      window.removeEventListener("pointerdown", handleUserInput);
+      window.removeEventListener("keydown", handleUserInput);
+      window.removeEventListener("touchstart", handleUserInput);
     };
   }, [refreshIntervalMs, refreshFromApi, demoMode]);
 

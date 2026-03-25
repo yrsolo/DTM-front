@@ -134,6 +134,7 @@ async function main() {
         new Column("person_name", optional(Types.UTF8)),
         new Column("telegram_id", optional(Types.UTF8)),
         new Column("telegram_username", optional(Types.UTF8)),
+        new Column("can_view_all_tasks", optional(Types.BOOL)),
         new Column("status", Types.UTF8),
         new Column("role", Types.UTF8),
         new Column("session_version", Types.INT32),
@@ -196,6 +197,7 @@ async function main() {
         new Column("created_by", optional(Types.UTF8)),
         new Column("last_used_at", optional(Types.TIMESTAMP)),
         new Column("use_count", Types.INT32),
+        new Column("show_designer_grouping", optional(Types.BOOL)),
       );
 
     const accessLinkUsage = new TableDescription()
@@ -209,6 +211,31 @@ async function main() {
         new Column("client_summary", optional(Types.UTF8)),
       );
 
+    const developerTokens = new TableDescription()
+      .withPrimaryKey("id")
+      .withColumns(
+        new Column("id", Types.UTF8),
+        new Column("label", Types.UTF8),
+        new Column("token_hash", Types.UTF8),
+        new Column("status", Types.UTF8),
+        new Column("expires_at", Types.TIMESTAMP),
+        new Column("created_at", Types.TIMESTAMP),
+        new Column("created_by", optional(Types.UTF8)),
+        new Column("last_used_at", optional(Types.TIMESTAMP)),
+        new Column("use_count", Types.INT32),
+      );
+
+    const developerTokenUsage = new TableDescription()
+      .withPrimaryKey("id")
+      .withColumns(
+        new Column("id", Types.UTF8),
+        new Column("developer_token_id", Types.UTF8),
+        new Column("used_at", Types.TIMESTAMP),
+        new Column("ip", optional(Types.UTF8)),
+        new Column("city", optional(Types.UTF8)),
+        new Column("client_summary", optional(Types.UTF8)),
+      );
+
     await ensureTable(driver, "users", users);
     await ensureTable(driver, "allowlist_emails", allowlist);
     await ensureTable(driver, "access_requests", accessRequests);
@@ -216,12 +243,18 @@ async function main() {
     await ensureTable(driver, "admin_layout_prefs", adminLayoutPrefs);
     await ensureTable(driver, "access_links", accessLinks);
     await ensureTable(driver, "access_link_usage", accessLinkUsage);
+    await ensureTable(driver, "developer_tokens", developerTokens);
+    await ensureTable(driver, "developer_token_usage", developerTokenUsage);
     await ensureOptionalColumns(driver, "users", [
       new Column("avatar_url", optional(Types.UTF8)),
       new Column("person_id", optional(Types.UTF8)),
       new Column("person_name", optional(Types.UTF8)),
       new Column("telegram_id", optional(Types.UTF8)),
       new Column("telegram_username", optional(Types.UTF8)),
+      new Column("can_view_all_tasks", optional(Types.BOOL)),
+    ]);
+    await ensureOptionalColumns(driver, "access_links", [
+      new Column("show_designer_grouping", optional(Types.BOOL)),
     ]);
 
     console.log(`Auth YDB migration completed for ${target}`);

@@ -1,0 +1,447 @@
+.analyticsPage {
+  min-height: 100dvh;
+}
+
+.analyticsShell {
+  display: grid;
+  gap: 16px;
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 20px;
+}
+
+.analyticsHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.analyticsEyebrow {
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(206, 219, 255, 0.62);
+}
+
+.analyticsTitle {
+  margin: 8px 0 10px;
+  font-size: 34px;
+}
+
+.analyticsHeaderMeta {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.analyticsMetaBadge {
+  padding: 8px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(170, 132, 255, 0.35);
+  background: linear-gradient(180deg, rgba(38, 44, 82, 0.92), rgba(26, 22, 50, 0.94));
+  color: #eef3ff;
+  font-size: 13px;
+}
+
+.analyticsToolbar,
+.analyticsToolbarPrimary,
+.analyticsToolbarSecondary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: flex-end;
+}
+
+.analyticsToolbar {
+  display: grid;
+  gap: 14px;
+}
+
+.analyticsField {
+  display: grid;
+  gap: 6px;
+  min-width: 160px;
+}
+
+.analyticsFieldSmall {
+  min-width: 130px;
+  width: 130px;
+}
+
+.analyticsField span {
+  font-size: 12px;
+  color: rgba(210, 220, 255, 0.68);
+}
+
+.analyticsCheckbox {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 42px;
+  padding: 0 4px;
+  color: #f2f5ff;
+}
+
+.analyticsNotice,
+.analyticsError,
+.analyticsEmpty {
+  padding: 12px 14px;
+  border-radius: 16px;
+  font-size: 14px;
+}
+
+.analyticsNotice {
+  border: 1px solid rgba(116, 239, 214, 0.28);
+  background: rgba(34, 74, 67, 0.42);
+  color: #dffef6;
+}
+
+.analyticsError {
+  border: 1px solid rgba(255, 133, 178, 0.35);
+  background: rgba(90, 34, 56, 0.48);
+  color: #ffe3ef;
+}
+
+.analyticsEmpty {
+  border: 1px solid rgba(130, 143, 214, 0.22);
+  background: rgba(20, 24, 48, 0.82);
+  color: rgba(214, 223, 255, 0.82);
+}
+
+.analyticsStats {
+  font-size: 13px;
+}
+
+.analyticsSummaryGrid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.analyticsSummaryCard {
+  padding: 14px 16px;
+  border-radius: 18px;
+  border: 1px solid rgba(130, 143, 214, 0.22);
+  background: linear-gradient(180deg, rgba(24, 31, 58, 0.96), rgba(14, 18, 38, 0.98));
+}
+
+.analyticsSummaryLabel {
+  color: rgba(214, 223, 255, 0.68);
+  font-size: 12px;
+}
+
+.analyticsSummaryValue {
+  margin-top: 8px;
+  font-size: 28px;
+  font-weight: 700;
+}
+
+.analyticsTopFormats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+.analyticsTopFormatsLabel {
+  color: rgba(214, 223, 255, 0.72);
+  font-size: 13px;
+}
+
+.analyticsTabs {
+  display: flex;
+  gap: 10px;
+}
+
+.analyticsFormatsView,
+.analyticsProductivityView {
+  display: grid;
+  gap: 16px;
+}
+
+.analyticsPeriodToolbar {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+}
+
+.analyticsPeriodModeTabs,
+.analyticsPeriodStepper,
+.analyticsPeriodCustomFields {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+.analyticsPeriodStepper {
+  padding: 6px;
+  border: 1px solid rgba(130, 143, 214, 0.2);
+  border-radius: 16px;
+  background: rgba(14, 18, 38, 0.82);
+}
+
+.analyticsPeriodStepperLabel {
+  min-width: 140px;
+  text-align: center;
+  font-weight: 600;
+  color: #eef3ff;
+}
+
+.analyticsFieldDate {
+  min-width: 150px;
+}
+
+.analyticsPriceTableWrap,
+.analyticsTableScroll,
+.analyticsProductivityTableWrap,
+.analyticsChartScroll {
+  overflow: auto;
+}
+
+.analyticsPriceTable,
+.analyticsTable,
+.analyticsProductivityTable {
+  width: max-content;
+  min-width: 100%;
+  border-collapse: collapse;
+}
+
+.analyticsPriceTable th,
+.analyticsPriceTable td,
+.analyticsTable th,
+.analyticsTable td,
+.analyticsProductivityTable th,
+.analyticsProductivityTable td {
+  padding: 10px 12px;
+  border: 1px solid rgba(130, 143, 214, 0.18);
+  background: rgba(15, 19, 37, 0.92);
+  vertical-align: top;
+}
+
+.analyticsPriceTable th,
+.analyticsTable th,
+.analyticsProductivityTable th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: rgba(25, 30, 56, 0.98);
+  text-align: left;
+  white-space: nowrap;
+}
+
+.analyticsPriceInput {
+  min-width: 70px;
+  width: 70px;
+}
+
+.analyticsPriceHint {
+  color: rgba(214, 223, 255, 0.72);
+  white-space: nowrap;
+}
+
+.analyticsTable td,
+.analyticsProductivityTable td {
+  text-align: center;
+}
+
+.analyticsTable td:first-child,
+.analyticsProductivityTable td:first-child {
+  text-align: left;
+  white-space: nowrap;
+}
+
+.analyticsTable td:nth-last-child(4),
+.analyticsTable td:nth-last-child(3),
+.analyticsTable td:nth-last-child(2),
+.analyticsTable td:nth-last-child(1) {
+  font-weight: 600;
+}
+
+.analyticsChart {
+  display: block;
+  width: 100%;
+  min-width: 840px;
+  height: 340px;
+}
+
+.analyticsChartGrid {
+  stroke: rgba(149, 165, 236, 0.2);
+  stroke-dasharray: 4 8;
+}
+
+.analyticsChartBarCapacity {
+  fill: rgba(137, 211, 147, 0.65);
+}
+
+.analyticsChartBarLoad {
+  fill: rgba(255, 121, 121, 0.72);
+}
+
+.analyticsChartLineCapacity {
+  stroke: #91f2a6;
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.analyticsChartLineLoad {
+  stroke: #ff6b6b;
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.analyticsChartLabel {
+  fill: rgba(214, 223, 255, 0.72);
+  font-size: 11px;
+}
+
+.analyticsDonutLayout {
+  display: grid;
+  grid-template-columns: minmax(320px, 460px) minmax(260px, 1fr);
+  gap: 18px;
+  align-items: start;
+}
+
+.analyticsDonutWrap,
+.analyticsDonutLegend {
+  padding: 16px;
+  border-radius: 22px;
+  border: 1px solid rgba(130, 143, 214, 0.2);
+  background: linear-gradient(180deg, rgba(22, 28, 54, 0.96), rgba(13, 17, 34, 0.98));
+}
+
+.analyticsDonutChart {
+  display: block;
+  width: 100%;
+  max-width: 420px;
+  margin: 0 auto;
+}
+
+.analyticsDonutBase {
+  fill: rgba(46, 57, 98, 0.5);
+}
+
+.analyticsDonutEmptyRing {
+  fill: rgba(78, 90, 144, 0.4);
+}
+
+.analyticsDonutHole {
+  fill: rgba(11, 14, 28, 0.98);
+}
+
+.analyticsDonutSlice {
+  cursor: pointer;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.analyticsDonutSlice:hover {
+  opacity: 0.92;
+}
+
+.analyticsDonutCenter {
+  display: grid;
+  gap: 4px;
+  width: 100%;
+  height: 100%;
+  align-content: center;
+  justify-items: center;
+  text-align: center;
+}
+
+.analyticsDonutCenterLabel {
+  color: rgba(214, 223, 255, 0.7);
+  font-size: 12px;
+}
+
+.analyticsDonutCenterValue {
+  color: #f7f8ff;
+  font-size: 26px;
+  font-weight: 700;
+}
+
+.analyticsDonutCenterSubvalue {
+  color: rgba(214, 223, 255, 0.75);
+  font-size: 13px;
+}
+
+.analyticsDonutLegend {
+  display: grid;
+  gap: 10px;
+  align-content: start;
+  max-height: 420px;
+  overflow: auto;
+}
+
+.analyticsDonutLegendRow {
+  display: grid;
+  grid-template-columns: 12px 1fr;
+  gap: 12px;
+  align-items: start;
+}
+
+.analyticsDonutLegendSwatch {
+  width: 12px;
+  height: 12px;
+  border-radius: 999px;
+  margin-top: 5px;
+}
+
+.analyticsDonutLegendBody {
+  display: grid;
+  gap: 4px;
+}
+
+.analyticsDonutLegendTitle {
+  color: #f3f5ff;
+  font-weight: 600;
+}
+
+.analyticsDonutLegendMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  color: rgba(214, 223, 255, 0.72);
+  font-size: 13px;
+}
+
+.analyticsTooltipContent {
+  display: grid;
+  gap: 4px;
+  max-width: 360px;
+  max-height: 260px;
+  overflow: auto;
+}
+
+@media (max-width: 900px) {
+  .analyticsHeader {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .analyticsHeaderMeta {
+    justify-content: flex-start;
+  }
+
+  .analyticsShell {
+    padding: 18px;
+  }
+
+  .analyticsTitle {
+    font-size: 28px;
+  }
+
+  .analyticsDonutLayout {
+    grid-template-columns: 1fr;
+  }
+
+  .analyticsPeriodStepperLabel {
+    min-width: 110px;
+  }
+}

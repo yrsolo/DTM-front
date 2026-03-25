@@ -2,7 +2,7 @@ import { randomUUID } from "node:crypto";
 
 import type { AccessLinkRecord, AccessLinkStatus, AccessLinkUsageRecord } from "../types";
 import { AUTH_TABLES } from "./schema";
-import { executeQuery, executeVoid, int32, optionalTimestamp, optionalUtf8, timestamp, utf8 } from "./query";
+import { executeQuery, executeVoid, int32, optionalBool, optionalTimestamp, optionalUtf8, timestamp, utf8 } from "./query";
 
 type AccessLinkRow = {
   id: string;
@@ -14,6 +14,7 @@ type AccessLinkRow = {
   created_by: string | null;
   last_used_at: Date | null;
   use_count: number;
+  show_designer_grouping: boolean | null;
 };
 
 type AccessLinkUsageRow = {
@@ -36,6 +37,7 @@ function mapAccessLink(row: AccessLinkRow): AccessLinkRecord {
     createdBy: row.created_by,
     lastUsedAt: row.last_used_at instanceof Date ? row.last_used_at.toISOString() : row.last_used_at ? String(row.last_used_at) : null,
     useCount: Number(row.use_count ?? 0),
+    showDesignerGrouping: Boolean(row.show_designer_grouping),
   };
 }
 
@@ -56,6 +58,7 @@ export async function createAccessLink(args: {
   tokenHash: string;
   expiresAt: Date;
   createdBy: string | null;
+  showDesignerGrouping: boolean;
 }): Promise<AccessLinkRecord> {
   const id = args.id ?? randomUUID();
   const now = new Date();
@@ -70,11 +73,12 @@ export async function createAccessLink(args: {
       DECLARE $created_by AS Optional<Utf8>;
       DECLARE $last_used_at AS Optional<Timestamp>;
       DECLARE $use_count AS Int32;
+      DECLARE $show_designer_grouping AS Optional<Bool>;
 
       UPSERT INTO ${AUTH_TABLES.accessLinks}
-      (id, label, token_hash, status, expires_at, created_at, created_by, last_used_at, use_count)
+      (id, label, token_hash, status, expires_at, created_at, created_by, last_used_at, use_count, show_designer_grouping)
       VALUES
-      ($id, $label, $token_hash, $status, $expires_at, $created_at, $created_by, $last_used_at, $use_count);
+      ($id, $label, $token_hash, $status, $expires_at, $created_at, $created_by, $last_used_at, $use_count, $show_designer_grouping);
     `,
     {
       $id: utf8(id),
@@ -86,6 +90,7 @@ export async function createAccessLink(args: {
       $created_by: optionalUtf8(args.createdBy),
       $last_used_at: optionalTimestamp(null),
       $use_count: int32(0),
+      $show_designer_grouping: optionalBool(args.showDesignerGrouping),
     }
   );
   const created = await getAccessLinkById(id);
@@ -99,6 +104,7 @@ export async function listAccessLinks(): Promise<AccessLinkRecord[]> {
   const rows = await executeQuery<AccessLinkRow>(
     `
       SELECT id, label, token_hash, status, expires_at, created_at, created_by, last_used_at, use_count
+      , show_designer_grouping
       FROM ${AUTH_TABLES.accessLinks}
       ORDER BY created_at DESC;
     `
@@ -110,7 +116,7 @@ export async function getAccessLinkById(id: string): Promise<AccessLinkRecord | 
   const rows = await executeQuery<AccessLinkRow>(
     `
       DECLARE $id AS Utf8;
-      SELECT id, label, token_hash, status, expires_at, created_at, created_by, last_used_at, use_count
+      SELECT id, label, token_hash, status, expires_at, created_at, created_by, last_used_at, use_count, show_designer_grouping
       FROM ${AUTH_TABLES.accessLinks}
       WHERE id = $id
       LIMIT 1;
@@ -124,7 +130,7 @@ export async function getAccessLinkByTokenHash(tokenHash: string): Promise<Acces
   const rows = await executeQuery<AccessLinkRow>(
     `
       DECLARE $token_hash AS Utf8;
-      SELECT id, label, token_hash, status, expires_at, created_at, created_by, last_used_at, use_count
+      SELECT id, label, token_hash, status, expires_at, created_at, created_by, last_used_at, use_count, show_designer_grouping
       FROM ${AUTH_TABLES.accessLinks}
       WHERE token_hash = $token_hash
       LIMIT 1;
@@ -139,6 +145,7 @@ export async function updateAccessLink(args: {
   label: string;
   expiresAt: Date;
   status: AccessLinkStatus;
+  showDesignerGrouping: boolean;
 }): Promise<void> {
   await executeVoid(
     `
@@ -146,6 +153,7 @@ export async function updateAccessLink(args: {
       DECLARE $label AS Utf8;
       DECLARE $status AS Utf8;
       DECLARE $expires_at AS Timestamp;
+      DECLARE $show_designer_grouping AS Optional<Bool>;
 
       UPSERT INTO ${AUTH_TABLES.accessLinks}
       SELECT
@@ -157,7 +165,8 @@ export async function updateAccessLink(args: {
         created_at,
         created_by,
         last_used_at,
-        use_count
+        use_count,
+        $show_designer_grouping AS show_designer_grouping
       FROM ${AUTH_TABLES.accessLinks}
       WHERE id = $id;
     `,
@@ -166,6 +175,7 @@ export async function updateAccessLink(args: {
       $label: utf8(args.label),
       $status: utf8(args.status),
       $expires_at: timestamp(args.expiresAt),
+      $show_designer_grouping: optionalBool(args.showDesignerGrouping),
     }
   );
 }
@@ -178,7 +188,32 @@ export async function revokeAccessLink(id: string): Promise<void> {
     label: link.label,
     expiresAt: new Date(link.expiresAt),
     status: "revoked",
+    showDesignerGrouping: link.showDesignerGrouping,
   });
+}
+
+export async function deleteAccessLink(id: string): Promise<void> {
+  await executeVoid(
+    `
+      DECLARE $id AS Utf8;
+      DELETE FROM ${AUTH_TABLES.accessLinks}
+      WHERE id = $id;
+    `,
+    {
+      $id: utf8(id),
+    }
+  );
+
+  await executeVoid(
+    `
+      DECLARE $link_id AS Utf8;
+      DELETE FROM ${AUTH_TABLES.accessLinkUsage}
+      WHERE link_id = $link_id;
+    `,
+    {
+      $link_id: utf8(id),
+    }
+  );
 }
 
 export async function touchAccessLinkUsage(args: {
@@ -231,7 +266,8 @@ export async function touchAccessLinkUsage(args: {
         created_at,
         created_by,
         $last_used_at AS last_used_at,
-        $use_count AS use_count
+        $use_count AS use_count,
+        show_designer_grouping
       FROM ${AUTH_TABLES.accessLinks}
       WHERE id = $id;
     `,

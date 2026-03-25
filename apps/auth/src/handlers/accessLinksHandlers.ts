@@ -3,6 +3,7 @@ import { createHash, createHmac, randomUUID } from "node:crypto";
 import { getAuthRuntimeConfig } from "../config";
 import {
   createAccessLink,
+  deleteAccessLink,
   getAccessLinkById,
   listAccessLinkUsage,
   listAccessLinks,
@@ -26,6 +27,7 @@ type AccessLinkCardPayload = {
   createdBy: string | null;
   lastUsedAt: string | null;
   useCount: number;
+  showDesignerGrouping: boolean;
   usageEvents: Array<{
     id: string;
     usedAt: string;
@@ -66,6 +68,14 @@ function makeAccessLinkToken(linkId: string): string {
   return `${linkId}.${signLinkId(linkId)}`;
 }
 
+function makeShortAccessLinkCode(linkId: string): string {
+  const cfg = getAuthRuntimeConfig();
+  return createHmac("sha256", cfg.sessionSigningSecret)
+    .update(`access-link-short:${linkId}`)
+    .digest("base64url")
+    .slice(0, 12);
+}
+
 function readAccessLinkToken(token: string): { linkId: string; signature: string } | null {
   const [linkId, signature] = token.split(".");
   if (!linkId || !signature) return null;
@@ -81,7 +91,7 @@ function buildBrowserUrl(token: string): string {
   const cfg = getAuthRuntimeConfig();
   const base = cfg.baseUrl.replace(/\/+$/, "");
   const url = new URL(`${base}${getTimelinePath()}`);
-  url.searchParams.set("access_link", token);
+  url.searchParams.set("k", token);
   return url.toString();
 }
 
@@ -118,6 +128,16 @@ function computeExpiresAt(body: Record<string, unknown>): Date | null {
   return null;
 }
 
+function parseShowDesignerGrouping(rawValue: unknown, fallback = false): boolean {
+  if (typeof rawValue === "boolean") return rawValue;
+  if (typeof rawValue === "string") {
+    const normalized = rawValue.trim().toLowerCase();
+    if (normalized === "true" || normalized === "1" || normalized === "yes" || normalized === "on") return true;
+    if (normalized === "false" || normalized === "0" || normalized === "no" || normalized === "off") return false;
+  }
+  return fallback;
+}
+
 function effectiveLinkStatus(link: Pick<AccessLinkRecord, "status" | "expiresAt">): AccessLinkStatus {
   if (link.status === "revoked") return "revoked";
   const expiresAtMs = Date.parse(link.expiresAt);
@@ -133,6 +153,7 @@ async function ensureStoredStatus(link: AccessLinkRecord): Promise<AccessLinkRec
       label: link.label,
       expiresAt: new Date(link.expiresAt),
       status: nextStatus,
+      showDesignerGrouping: link.showDesignerGrouping,
     });
     const refreshed = await getAccessLinkById(link.id);
     return refreshed ?? { ...link, status: nextStatus };
@@ -173,6 +194,7 @@ async function toAccessLinkCard(link: AccessLinkRecord): Promise<AccessLinkCardP
     createdBy: normalized.createdBy,
     lastUsedAt: normalized.lastUsedAt,
     useCount: normalized.useCount,
+    showDesignerGrouping: normalized.showDesignerGrouping,
     usageEvents,
   };
 }
@@ -212,15 +234,17 @@ export async function createAccessLinkHandler(req: NormalizedRequest) {
   if (!expiresAt || expiresAt.getTime() <= Date.now()) {
     return badRequest("A future expiresAt or expiryHours is required");
   }
+  const showDesignerGrouping = parseShowDesignerGrouping(body.showDesignerGrouping, false);
 
   const linkId = randomUUID();
-  const rawToken = makeAccessLinkToken(linkId);
+  const rawToken = makeShortAccessLinkCode(linkId);
   const created = await createAccessLink({
     id: linkId,
     label,
     tokenHash: hashToken(rawToken),
     expiresAt,
     createdBy: auth.user.displayName || auth.user.email || auth.user.id,
+    showDesignerGrouping,
   });
   const card = await toAccessLinkCard(created);
   await writeAuditLog({
@@ -252,6 +276,7 @@ export async function updateAccessLinkHandler(req: NormalizedRequest, linkId: st
 
   const label = typeof body.label === "string" && body.label.trim() ? body.label.trim() : existing.label;
   const expiresAt = computeExpiresAt(body) ?? new Date(existing.expiresAt);
+  const showDesignerGrouping = parseShowDesignerGrouping(body.showDesignerGrouping, existing.showDesignerGrouping);
   if (expiresAt.getTime() <= Date.now() && existing.status !== "revoked") {
     return badRequest("expiresAt must be in the future");
   }
@@ -266,6 +291,7 @@ export async function updateAccessLinkHandler(req: NormalizedRequest, linkId: st
     label,
     expiresAt,
     status: nextStatus,
+    showDesignerGrouping,
   });
   const updated = await getAccessLinkById(existing.id);
   if (!updated) {
@@ -298,6 +324,52 @@ export async function revokeAccessLinkHandler(req: NormalizedRequest, linkId: st
   return json(200, { link: revoked ? await toAccessLinkCard(revoked) : null });
 }
 
+export async function activateAccessLinkHandler(req: NormalizedRequest, linkId: string) {
+  const auth = await requireAdmin(req);
+  if (auth.error) return auth.error;
+  const existing = await getAccessLinkById(linkId);
+  if (!existing) {
+    return notFound("Access link not found");
+  }
+  const expiresAt = new Date(existing.expiresAt);
+  if (!Number.isFinite(expiresAt.getTime()) || expiresAt.getTime() <= Date.now()) {
+    return badRequest("Нельзя активировать ссылку с истекшим сроком. Сначала продлите дату окончания.");
+  }
+  await updateAccessLink({
+    id: linkId,
+    label: existing.label,
+    expiresAt,
+    status: "active",
+    showDesignerGrouping: existing.showDesignerGrouping,
+  });
+  const activated = await getAccessLinkById(linkId);
+  await writeAuditLog({
+    actorUserId: auth.user.id,
+    targetUserId: null,
+    action: "admin.access_link_activate",
+    payloadJson: JSON.stringify({ accessLinkId: linkId }),
+  });
+  return json(200, { link: activated ? await toAccessLinkCard(activated) : null });
+}
+
+export async function deleteAccessLinkHandler(req: NormalizedRequest, linkId: string) {
+  const auth = await requireAdmin(req);
+  if (auth.error) return auth.error;
+  const existing = await getAccessLinkById(linkId);
+  if (!existing) {
+    return notFound("Access link not found");
+  }
+  await revokeAccessLink(linkId);
+  await deleteAccessLink(linkId);
+  await writeAuditLog({
+    actorUserId: auth.user.id,
+    targetUserId: null,
+    action: "admin.access_link_delete",
+    payloadJson: JSON.stringify({ accessLinkId: linkId }),
+  });
+  return json(200, { ok: true, deleted: true, id: linkId });
+}
+
 export async function accessLinkUsageHandler(req: NormalizedRequest, linkId: string) {
   const auth = await requireAdmin(req);
   if (auth.error) return auth.error;
@@ -319,15 +391,29 @@ export async function redeemAccessLinkHandler(req: NormalizedRequest) {
   if (!rawToken) {
     return badRequest("token is required");
   }
+  let existing = null as AccessLinkRecord | null;
   const parsed = readAccessLinkToken(rawToken);
-  if (!parsed || parsed.signature !== signLinkId(parsed.linkId)) {
-    return notFound("Access link not found");
+  if (parsed && parsed.signature === signLinkId(parsed.linkId)) {
+    existing = await getAccessLinkById(parsed.linkId);
+    if (!existing || existing.tokenHash !== hashToken(rawToken)) {
+      existing = null;
+    }
   }
-  const existing = await getAccessLinkById(parsed.linkId);
+  if (!existing && rawToken.length === 12) {
+    const candidates = await listAccessLinks();
+    existing =
+      candidates.find((link) => makeShortAccessLinkCode(link.id) === rawToken) ??
+      null;
+    if (existing) {
+      const legacyToken = makeAccessLinkToken(existing.id);
+      const matchesShort = existing.tokenHash === hashToken(rawToken);
+      const matchesLegacy = existing.tokenHash === hashToken(legacyToken);
+      if (!matchesShort && !matchesLegacy) {
+        existing = null;
+      }
+    }
+  }
   if (!existing) {
-    return notFound("Access link not found");
-  }
-  if (existing.tokenHash !== hashToken(rawToken)) {
     return notFound("Access link not found");
   }
   const link = await ensureStoredStatus(existing);
@@ -369,6 +455,6 @@ export async function buildAccessLinkCards(): Promise<AccessLinkCardPayload[]> {
   const cards = await Promise.all(links.map(toAccessLinkCard));
   return cards.map((card) => ({
     ...card,
-    browserUrl: buildBrowserUrl(makeAccessLinkToken(card.id)),
+    browserUrl: buildBrowserUrl(makeShortAccessLinkCode(card.id)),
   }));
 }

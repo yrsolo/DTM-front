@@ -1,5 +1,6 @@
 import React from "react";
 import { useLocation } from "react-router-dom";
+import { InspectorNodeBoundary } from "@dtm/workbench-inspector";
 import { useSnapshot } from "../data/useSnapshot";
 import { resolvePublicAssetUrl } from "../config/publicPaths";
 import { AppLocale, getUiText, UiText } from "../i18n/uiText";
@@ -29,6 +30,16 @@ import {
 } from "../data/runtimeDefaults";
 import { useAuthSession } from "../auth/useAuthSession";
 
+type PreviewCapabilities = {
+  token: boolean;
+  component: boolean;
+  placement: boolean;
+  "instance-preview": boolean;
+};
+
+type DesignPreviewOverlay = Partial<DesignControls>;
+type KeyColorPreviewOverlay = Partial<KeyColors>;
+
 const DEPLOY_COLOR_PRESET_PATH = resolvePublicAssetUrl("config/UI/colors/deploy.json");
 const DEPLOY_LAYOUT_PRESET_PATH = resolvePublicAssetUrl("config/UI/layouts/deploy.json");
 
@@ -55,12 +66,14 @@ export type LayoutContextValue = {
   setRuntimeDefaults: React.Dispatch<React.SetStateAction<RuntimeDefaults>>;
   snapshotState: ReturnType<typeof useSnapshot>;
   design: DesignControls;
+  effectiveDesign: DesignControls;
   setDesign: React.Dispatch<React.SetStateAction<DesignControls>>;
   saveDesign: () => void;
   loadDesign: () => void;
   loadDeployDesign: () => Promise<void>;
   resetDesign: () => void;
   keyColors: KeyColors;
+  effectiveKeyColors: KeyColors;
   setKeyColors: React.Dispatch<React.SetStateAction<KeyColors>>;
   saveKeyColors: () => void;
   loadKeyColors: () => void;
@@ -73,6 +86,9 @@ export type LayoutContextValue = {
   setFavoritesOpen: React.Dispatch<React.SetStateAction<boolean>>;
   canUseWorkbench: boolean;
   authSession: ReturnType<typeof useAuthSession>;
+  previewCapabilities: PreviewCapabilities;
+  setDesignPreviewOverlay: React.Dispatch<React.SetStateAction<DesignPreviewOverlay>>;
+  setKeyColorPreviewOverlay: React.Dispatch<React.SetStateAction<KeyColorPreviewOverlay>>;
 };
 
 export const LayoutContext = React.createContext<LayoutContextValue | null>(null);
@@ -166,10 +182,19 @@ export function Layout(props: { children: React.ReactNode }) {
     displayLimit: runtimeDefaults.displayLimit,
     loadLimit: runtimeDefaults.loadLimit,
   }));
-  const snapshotState = useSnapshot(runtimeDefaults);
   const authSession = useAuthSession();
+  const isPromoRoute = location.pathname === "/promo" || location.pathname === "/promo-draft";
+  const isFormatSortRoute =
+    location.pathname === "/format-sort" ||
+    location.pathname === "/designer-sort" ||
+    location.pathname === "/analytics";
+  const snapshotState = useSnapshot(runtimeDefaults, {
+    enabled: !authSession.blockInitialDataLoad && !isPromoRoute && !isFormatSortRoute,
+  });
   const [design, setDesign] = React.useState<DesignControls>(() => readStoredLayoutDraft());
   const [keyColors, setKeyColors] = React.useState<KeyColors>(() => readStoredColorDraft());
+  const [designPreviewOverlay, setDesignPreviewOverlay] = React.useState<DesignPreviewOverlay>({});
+  const [keyColorPreviewOverlay, setKeyColorPreviewOverlay] = React.useState<KeyColorPreviewOverlay>({});
   const [workbenchPanelEnabled, setWorkbenchPanelEnabled] = React.useState(false);
   const [workbenchOpen, setWorkbenchOpen] = React.useState(false);
   const [favoritesOpen, setFavoritesOpen] = React.useState(false);
@@ -177,14 +202,14 @@ export function Layout(props: { children: React.ReactNode }) {
   const [introOverlayActive, setIntroOverlayActive] = React.useState(false);
   const introVideoRef = React.useRef<HTMLVideoElement | null>(null);
   const textRenderingValue = React.useMemo(() => {
-    const mode = Math.round(design.textRenderingMode);
+    const mode = Math.round(({ ...design, ...designPreviewOverlay }).textRenderingMode);
     if (mode === 1) return "optimizeLegibility";
     if (mode === 2) return "geometricPrecision";
     if (mode === 3) return "optimizeSpeed";
     return "auto";
-  }, [design.textRenderingMode]);
+  }, [design, designPreviewOverlay]);
   const smoothingValue = React.useMemo(() => {
-    const mode = Math.round(design.textSmoothingMode);
+    const mode = Math.round(({ ...design, ...designPreviewOverlay }).textSmoothingMode);
     if (mode === 0) {
       return {
         webkit: "auto",
@@ -201,7 +226,24 @@ export function Layout(props: { children: React.ReactNode }) {
       webkit: "antialiased",
       moz: "grayscale",
     };
-  }, [design.textSmoothingMode]);
+  }, [design, designPreviewOverlay]);
+  const effectiveDesign = React.useMemo(
+    () => normalizeDesignControls({ ...design, ...designPreviewOverlay }),
+    [design, designPreviewOverlay]
+  );
+  const effectiveKeyColors = React.useMemo(
+    () => normalizeKeyColors({ ...keyColors, ...keyColorPreviewOverlay }),
+    [keyColors, keyColorPreviewOverlay]
+  );
+  const previewCapabilities = React.useMemo<PreviewCapabilities>(
+    () => ({
+      token: true,
+      component: false,
+      placement: false,
+      "instance-preview": false,
+    }),
+    []
+  );
 
   const loadDeployDesign = React.useCallback(async () => {
     try {
@@ -432,142 +474,142 @@ export function Layout(props: { children: React.ReactNode }) {
   const layoutVarsStyle = React.useMemo(
     () =>
       ({
-        "--left-col-width": `${design.desktopLeftColWidth}px`,
-        "--table-row-h": `${design.tableRowHeight}px`,
-        "--table-cell-px": `${design.tableCellPadX}px`,
-        "--table-cell-py": `${design.tableCellPadY}px`,
-        "--badge-h": `${design.badgeHeight}px`,
-        "--badge-fs": `${design.badgeFontSize}px`,
-        "--card-p": `${design.cardPadding}px`,
-        "--mat-bg-pink-a": String(design.matBgPinkOpacity),
-        "--mat-bg-blue-a": String(design.matBgBlueOpacity),
-        "--mat-bg-mint-a": String(design.matBgMintOpacity),
-        "--scene-dim-a": String(design.sceneDimOpacity),
-        "--mat-card-border-a": String(design.matCardBorderOpacity),
-        "--mat-card-shadow-a": String(design.matCardShadowStrength),
-        "--mat-card-inset-a": String(design.matCardInsetStrength),
-        "--mat-topbar-border-a": String(design.matTopbarBorderOpacity),
-        "--topbar-glow-a": String(design.topbarGlowOpacity),
-        "--topbar-bg-a": String(design.topbarBgOpacity),
-        "--mat-active-glow-a": String(design.matActiveGlowStrength),
-        "--mat-button-glow-a": String(design.matButtonGlowStrength),
-        "--mat-badge-glow-a": String(design.matBadgeGlowStrength),
-        "--mat-row-hover-a": String(design.matRowHoverStrength),
-        "--mat-scrollbar-glow-a": String(design.matScrollbarGlowStrength),
-        "--designers-card-tint-a": String(design.designersCardTintStrength),
-        "--drawer-width": `${design.drawerWidth}px`,
-        "--drawer-padding": `${design.drawerPadding}px`,
-        "--drawer-title-size": `${design.drawerTitleSize}px`,
-        "--drawer-meta-gap": `${design.drawerMetaGap}px`,
-        "--drawer-section-gap": `${design.drawerSectionGap}px`,
-        "--drawer-mini-dates-fs": `${design.drawerMiniDatesFontSize}px`,
-        "--drawer-milestone-date-fs": `${design.drawerMilestoneDateFontSize}px`,
-        "--drawer-milestone-row-gap": `${design.drawerMilestoneRowGap}px`,
-        "--drawer-calendar-cell-h": `${design.drawerCalendarCellHeight}px`,
-        "--drawer-calendar-day-fs": `${design.drawerCalendarDayFontSize}px`,
-        "--drawer-calendar-radius": `${design.drawerCalendarRadius}px`,
-        "--drawer-calendar-month-tint-a": String(design.drawerCalendarMonthTintOpacity),
-        "--drawer-calendar-weekend-tint-a": String(design.drawerCalendarWeekendTintOpacity),
-        "--drawer-calendar-holiday-tint-a": String(design.drawerCalendarHolidayTintOpacity),
-        "--drawer-milestone-cell-glow-a": String(design.drawerMilestoneCellGlowOpacity),
-        "--drawer-milestone-cell-shadow-a": String(design.drawerMilestoneCellShadowOpacity),
-        "--drawer-milestone-dot-size": `${design.drawerMilestoneDotSize}px`,
-        "--drawer-milestone-label-fs": `${design.drawerMilestoneLabelFontSize}px`,
-        "--drawer-milestone-label-maxw": `${design.drawerMilestoneLabelMaxWidth}px`,
-        "--drawer-month-label-fs": `${design.drawerMonthLabelFontSize}px`,
-        "--drawer-milestone-day-shadow-a": String(design.drawerMilestoneDayShadowOpacity),
-        "--drawer-milestone-cell-dark-shadow-a": String(design.drawerMilestoneCellDarkShadowOpacity),
-        "--drawer-milestone-cell-dark-shadow-blur": `${design.drawerMilestoneCellDarkShadowBlur}px`,
-        "--drawer-panel-border-a": String(design.drawerPanelBorderOpacity),
-        "--drawer-panel-shadow-a": String(design.drawerPanelShadowStrength),
-        "--drawer-panel-inset-a": String(design.drawerPanelInsetStrength),
-        "--drawer-panel-glow-a": String(design.drawerPanelGlowOpacity),
-        "--anim-enabled": String(design.animEnabled >= 0.5 ? 1 : 0),
-        "--anim-drawer-duration-ms": `${Math.max(0, design.animDrawerDurationMs)}ms`,
-        "--anim-reorder-duration-ms": `${Math.max(0, design.animReorderDurationMs)}ms`,
-        "--anim-drawer-ease": animationEaseByPreset(design.animDrawerEasePreset),
-        "--anim-reorder-ease": animationEaseByPreset(design.animReorderEasePreset),
-        "--wb-dock-left": `${design.workbenchDockLeft}px`,
-        "--wb-dock-right": `${design.workbenchDockRight}px`,
-        "--wb-dock-bottom": `${design.workbenchDockBottom}px`,
-        "--wb-width-max": `${design.workbenchWidthMax}px`,
-        "--wb-viewport-margin": `${design.workbenchViewportMargin}px`,
-        "--wb-body-max-h-vh": `${design.workbenchBodyMaxHeightVh}vh`,
-        "--wb-body-padding": `${design.workbenchBodyPadding}px`,
-        "--wb-main-gap": `${design.workbenchMainGap}px`,
-        "--wb-tabs-gap": `${design.workbenchTabsGap}px`,
-        "--wb-tab-fs": `${design.workbenchTabFontSize}px`,
-        "--wb-tab-py": `${design.workbenchTabPadY}px`,
-        "--wb-tab-px": `${design.workbenchTabPadX}px`,
-        "--wb-side-w": `${design.workbenchSideWidth}px`,
-        "--wb-grid-min-col": `${design.workbenchGridMinCol}px`,
-        "--wb-grid-gap": `${design.workbenchGridGap}px`,
-        "--wb-group-padding": `${design.workbenchGroupPadding}px`,
-        "--wb-control-gap": `${design.workbenchControlGap}px`,
-        "--wb-action-btn-fs": `${design.workbenchActionBtnFontSize}px`,
-        "--wb-action-btn-py": `${design.workbenchActionBtnPadY}px`,
-        "--wb-action-btn-px": `${design.workbenchActionBtnPadX}px`,
-        "--wb-slider-w": `${design.workbenchSliderWidth}px`,
-        "--wb-number-w": `${design.workbenchNumberWidth}px`,
-        "--wb-label-min": `${design.workbenchLabelMinWidth}px`,
-        "--wb-color-text-w": `${design.workbenchColorTextWidth}px`,
-        "--wb-label-fs": `${design.workbenchControlLabelFontSize}px`,
-        "--wb-input-fs": `${design.workbenchControlInputFontSize}px`,
-        "--key-pink": keyColors.keyPink,
-        "--key-blue": keyColors.keyBlue,
-        "--key-mint": keyColors.keyMint,
-        "--key-violet": keyColors.keyViolet,
-        "--key-milestone": keyColors.keyMilestone,
-        "--key-cursor-trail": keyColors.keyCursorTrail,
-        "--key-left-pill-text": keyColors.keyLeftPillText,
-        "--key-surface-top": keyColors.keySurfaceTop,
-        "--key-surface-bottom": keyColors.keySurfaceBottom,
-        "--key-surface-alt": keyColors.keySurfaceAlt,
-        "--key-drawer-surface-top": keyColors.keyDrawerSurfaceTop,
-        "--key-drawer-surface-bottom": keyColors.keyDrawerSurfaceBottom,
-        "--key-drawer-surface-alt": keyColors.keyDrawerSurfaceAlt,
-        "--key-text": keyColors.keyText,
-        "--key-btn-grad-from": keyColors.keyBtnGradFrom,
-        "--key-btn-grad-to": keyColors.keyBtnGradTo,
-        "--key-btn-hover-from": keyColors.keyBtnHoverFrom,
-        "--key-btn-hover-to": keyColors.keyBtnHoverTo,
-        "--key-nav-btn-from": keyColors.keyNavBtnFrom,
-        "--key-nav-btn-to": keyColors.keyNavBtnTo,
-        "--key-nav-active-from": keyColors.keyNavActiveFrom,
-        "--key-nav-active-to": keyColors.keyNavActiveTo,
-        "--key-backdrop-left": keyColors.keyBackdropLeft,
-        "--key-backdrop-right": keyColors.keyBackdropRight,
-        "--key-backdrop-bottom": keyColors.keyBackdropBottom,
-        "--key-app-bg-top": keyColors.keyAppBgTop,
-        "--key-app-bg-mid": keyColors.keyAppBgMid,
-        "--key-app-bg-bottom": keyColors.keyAppBgBottom,
-        "--key-app-bg-base": keyColors.keyAppBgBase,
-        "--key-topbar-glow": keyColors.keyTopbarGlow,
-        "--key-drawer-panel-glow-left": keyColors.keyDrawerPanelGlowLeft,
-        "--key-drawer-panel-glow-right": keyColors.keyDrawerPanelGlowRight,
-        "--key-drawer-panel-glow-bottom": keyColors.keyDrawerPanelGlowBottom,
-        "--key-drawer-ms-storyboard": keyColors.keyDrawerMsStoryboard,
-        "--key-drawer-ms-animatic": keyColors.keyDrawerMsAnimatic,
-        "--key-drawer-ms-feedback": keyColors.keyDrawerMsFeedback,
-        "--key-drawer-ms-prefinal": keyColors.keyDrawerMsPrefinal,
-        "--key-drawer-ms-final": keyColors.keyDrawerMsFinal,
-        "--key-drawer-ms-master": keyColors.keyDrawerMsMaster,
-        "--key-drawer-ms-onair": keyColors.keyDrawerMsOnair,
-        "--key-drawer-ms-start": keyColors.keyDrawerMsStart,
-        "--key-drawer-ms-default": keyColors.keyDrawerMsDefault,
-        "--task-color-1": keyColors.taskColor1,
-        "--task-color-2": keyColors.taskColor2,
-        "--task-color-3": keyColors.taskColor3,
-        "--task-color-4": keyColors.taskColor4,
-        "--task-color-5": keyColors.taskColor5,
-        "--task-color-6": keyColors.taskColor6,
-        "--task-color-7": keyColors.taskColor7,
-        "--task-color-8": keyColors.taskColor8,
+        "--left-col-width": `${effectiveDesign.desktopLeftColWidth}px`,
+        "--table-row-h": `${effectiveDesign.tableRowHeight}px`,
+        "--table-cell-px": `${effectiveDesign.tableCellPadX}px`,
+        "--table-cell-py": `${effectiveDesign.tableCellPadY}px`,
+        "--badge-h": `${effectiveDesign.badgeHeight}px`,
+        "--badge-fs": `${effectiveDesign.badgeFontSize}px`,
+        "--card-p": `${effectiveDesign.cardPadding}px`,
+        "--mat-bg-pink-a": String(effectiveDesign.matBgPinkOpacity),
+        "--mat-bg-blue-a": String(effectiveDesign.matBgBlueOpacity),
+        "--mat-bg-mint-a": String(effectiveDesign.matBgMintOpacity),
+        "--scene-dim-a": String(effectiveDesign.sceneDimOpacity),
+        "--mat-card-border-a": String(effectiveDesign.matCardBorderOpacity),
+        "--mat-card-shadow-a": String(effectiveDesign.matCardShadowStrength),
+        "--mat-card-inset-a": String(effectiveDesign.matCardInsetStrength),
+        "--mat-topbar-border-a": String(effectiveDesign.matTopbarBorderOpacity),
+        "--topbar-glow-a": String(effectiveDesign.topbarGlowOpacity),
+        "--topbar-bg-a": String(effectiveDesign.topbarBgOpacity),
+        "--mat-active-glow-a": String(effectiveDesign.matActiveGlowStrength),
+        "--mat-button-glow-a": String(effectiveDesign.matButtonGlowStrength),
+        "--mat-badge-glow-a": String(effectiveDesign.matBadgeGlowStrength),
+        "--mat-row-hover-a": String(effectiveDesign.matRowHoverStrength),
+        "--mat-scrollbar-glow-a": String(effectiveDesign.matScrollbarGlowStrength),
+        "--designers-card-tint-a": String(effectiveDesign.designersCardTintStrength),
+        "--drawer-width": `${effectiveDesign.drawerWidth}px`,
+        "--drawer-padding": `${effectiveDesign.drawerPadding}px`,
+        "--drawer-title-size": `${effectiveDesign.drawerTitleSize}px`,
+        "--drawer-meta-gap": `${effectiveDesign.drawerMetaGap}px`,
+        "--drawer-section-gap": `${effectiveDesign.drawerSectionGap}px`,
+        "--drawer-mini-dates-fs": `${effectiveDesign.drawerMiniDatesFontSize}px`,
+        "--drawer-milestone-date-fs": `${effectiveDesign.drawerMilestoneDateFontSize}px`,
+        "--drawer-milestone-row-gap": `${effectiveDesign.drawerMilestoneRowGap}px`,
+        "--drawer-calendar-cell-h": `${effectiveDesign.drawerCalendarCellHeight}px`,
+        "--drawer-calendar-day-fs": `${effectiveDesign.drawerCalendarDayFontSize}px`,
+        "--drawer-calendar-radius": `${effectiveDesign.drawerCalendarRadius}px`,
+        "--drawer-calendar-month-tint-a": String(effectiveDesign.drawerCalendarMonthTintOpacity),
+        "--drawer-calendar-weekend-tint-a": String(effectiveDesign.drawerCalendarWeekendTintOpacity),
+        "--drawer-calendar-holiday-tint-a": String(effectiveDesign.drawerCalendarHolidayTintOpacity),
+        "--drawer-milestone-cell-glow-a": String(effectiveDesign.drawerMilestoneCellGlowOpacity),
+        "--drawer-milestone-cell-shadow-a": String(effectiveDesign.drawerMilestoneCellShadowOpacity),
+        "--drawer-milestone-dot-size": `${effectiveDesign.drawerMilestoneDotSize}px`,
+        "--drawer-milestone-label-fs": `${effectiveDesign.drawerMilestoneLabelFontSize}px`,
+        "--drawer-milestone-label-maxw": `${effectiveDesign.drawerMilestoneLabelMaxWidth}px`,
+        "--drawer-month-label-fs": `${effectiveDesign.drawerMonthLabelFontSize}px`,
+        "--drawer-milestone-day-shadow-a": String(effectiveDesign.drawerMilestoneDayShadowOpacity),
+        "--drawer-milestone-cell-dark-shadow-a": String(effectiveDesign.drawerMilestoneCellDarkShadowOpacity),
+        "--drawer-milestone-cell-dark-shadow-blur": `${effectiveDesign.drawerMilestoneCellDarkShadowBlur}px`,
+        "--drawer-panel-border-a": String(effectiveDesign.drawerPanelBorderOpacity),
+        "--drawer-panel-shadow-a": String(effectiveDesign.drawerPanelShadowStrength),
+        "--drawer-panel-inset-a": String(effectiveDesign.drawerPanelInsetStrength),
+        "--drawer-panel-glow-a": String(effectiveDesign.drawerPanelGlowOpacity),
+        "--anim-enabled": String(effectiveDesign.animEnabled >= 0.5 ? 1 : 0),
+        "--anim-drawer-duration-ms": `${Math.max(0, effectiveDesign.animDrawerDurationMs)}ms`,
+        "--anim-reorder-duration-ms": `${Math.max(0, effectiveDesign.animReorderDurationMs)}ms`,
+        "--anim-drawer-ease": animationEaseByPreset(effectiveDesign.animDrawerEasePreset),
+        "--anim-reorder-ease": animationEaseByPreset(effectiveDesign.animReorderEasePreset),
+        "--wb-dock-left": `${effectiveDesign.workbenchDockLeft}px`,
+        "--wb-dock-right": `${effectiveDesign.workbenchDockRight}px`,
+        "--wb-dock-bottom": `${effectiveDesign.workbenchDockBottom}px`,
+        "--wb-width-max": `${effectiveDesign.workbenchWidthMax}px`,
+        "--wb-viewport-margin": `${effectiveDesign.workbenchViewportMargin}px`,
+        "--wb-body-max-h-vh": `${effectiveDesign.workbenchBodyMaxHeightVh}vh`,
+        "--wb-body-padding": `${effectiveDesign.workbenchBodyPadding}px`,
+        "--wb-main-gap": `${effectiveDesign.workbenchMainGap}px`,
+        "--wb-tabs-gap": `${effectiveDesign.workbenchTabsGap}px`,
+        "--wb-tab-fs": `${effectiveDesign.workbenchTabFontSize}px`,
+        "--wb-tab-py": `${effectiveDesign.workbenchTabPadY}px`,
+        "--wb-tab-px": `${effectiveDesign.workbenchTabPadX}px`,
+        "--wb-side-w": `${effectiveDesign.workbenchSideWidth}px`,
+        "--wb-grid-min-col": `${effectiveDesign.workbenchGridMinCol}px`,
+        "--wb-grid-gap": `${effectiveDesign.workbenchGridGap}px`,
+        "--wb-group-padding": `${effectiveDesign.workbenchGroupPadding}px`,
+        "--wb-control-gap": `${effectiveDesign.workbenchControlGap}px`,
+        "--wb-action-btn-fs": `${effectiveDesign.workbenchActionBtnFontSize}px`,
+        "--wb-action-btn-py": `${effectiveDesign.workbenchActionBtnPadY}px`,
+        "--wb-action-btn-px": `${effectiveDesign.workbenchActionBtnPadX}px`,
+        "--wb-slider-w": `${effectiveDesign.workbenchSliderWidth}px`,
+        "--wb-number-w": `${effectiveDesign.workbenchNumberWidth}px`,
+        "--wb-label-min": `${effectiveDesign.workbenchLabelMinWidth}px`,
+        "--wb-color-text-w": `${effectiveDesign.workbenchColorTextWidth}px`,
+        "--wb-label-fs": `${effectiveDesign.workbenchControlLabelFontSize}px`,
+        "--wb-input-fs": `${effectiveDesign.workbenchControlInputFontSize}px`,
+        "--key-pink": effectiveKeyColors.keyPink,
+        "--key-blue": effectiveKeyColors.keyBlue,
+        "--key-mint": effectiveKeyColors.keyMint,
+        "--key-violet": effectiveKeyColors.keyViolet,
+        "--key-milestone": effectiveKeyColors.keyMilestone,
+        "--key-cursor-trail": effectiveKeyColors.keyCursorTrail,
+        "--key-left-pill-text": effectiveKeyColors.keyLeftPillText,
+        "--key-surface-top": effectiveKeyColors.keySurfaceTop,
+        "--key-surface-bottom": effectiveKeyColors.keySurfaceBottom,
+        "--key-surface-alt": effectiveKeyColors.keySurfaceAlt,
+        "--key-drawer-surface-top": effectiveKeyColors.keyDrawerSurfaceTop,
+        "--key-drawer-surface-bottom": effectiveKeyColors.keyDrawerSurfaceBottom,
+        "--key-drawer-surface-alt": effectiveKeyColors.keyDrawerSurfaceAlt,
+        "--key-text": effectiveKeyColors.keyText,
+        "--key-btn-grad-from": effectiveKeyColors.keyBtnGradFrom,
+        "--key-btn-grad-to": effectiveKeyColors.keyBtnGradTo,
+        "--key-btn-hover-from": effectiveKeyColors.keyBtnHoverFrom,
+        "--key-btn-hover-to": effectiveKeyColors.keyBtnHoverTo,
+        "--key-nav-btn-from": effectiveKeyColors.keyNavBtnFrom,
+        "--key-nav-btn-to": effectiveKeyColors.keyNavBtnTo,
+        "--key-nav-active-from": effectiveKeyColors.keyNavActiveFrom,
+        "--key-nav-active-to": effectiveKeyColors.keyNavActiveTo,
+        "--key-backdrop-left": effectiveKeyColors.keyBackdropLeft,
+        "--key-backdrop-right": effectiveKeyColors.keyBackdropRight,
+        "--key-backdrop-bottom": effectiveKeyColors.keyBackdropBottom,
+        "--key-app-bg-top": effectiveKeyColors.keyAppBgTop,
+        "--key-app-bg-mid": effectiveKeyColors.keyAppBgMid,
+        "--key-app-bg-bottom": effectiveKeyColors.keyAppBgBottom,
+        "--key-app-bg-base": effectiveKeyColors.keyAppBgBase,
+        "--key-topbar-glow": effectiveKeyColors.keyTopbarGlow,
+        "--key-drawer-panel-glow-left": effectiveKeyColors.keyDrawerPanelGlowLeft,
+        "--key-drawer-panel-glow-right": effectiveKeyColors.keyDrawerPanelGlowRight,
+        "--key-drawer-panel-glow-bottom": effectiveKeyColors.keyDrawerPanelGlowBottom,
+        "--key-drawer-ms-storyboard": effectiveKeyColors.keyDrawerMsStoryboard,
+        "--key-drawer-ms-animatic": effectiveKeyColors.keyDrawerMsAnimatic,
+        "--key-drawer-ms-feedback": effectiveKeyColors.keyDrawerMsFeedback,
+        "--key-drawer-ms-prefinal": effectiveKeyColors.keyDrawerMsPrefinal,
+        "--key-drawer-ms-final": effectiveKeyColors.keyDrawerMsFinal,
+        "--key-drawer-ms-master": effectiveKeyColors.keyDrawerMsMaster,
+        "--key-drawer-ms-onair": effectiveKeyColors.keyDrawerMsOnair,
+        "--key-drawer-ms-start": effectiveKeyColors.keyDrawerMsStart,
+        "--key-drawer-ms-default": effectiveKeyColors.keyDrawerMsDefault,
+        "--task-color-1": effectiveKeyColors.taskColor1,
+        "--task-color-2": effectiveKeyColors.taskColor2,
+        "--task-color-3": effectiveKeyColors.taskColor3,
+        "--task-color-4": effectiveKeyColors.taskColor4,
+        "--task-color-5": effectiveKeyColors.taskColor5,
+        "--task-color-6": effectiveKeyColors.taskColor6,
+        "--task-color-7": effectiveKeyColors.taskColor7,
+        "--task-color-8": effectiveKeyColors.taskColor8,
         textRendering: textRenderingValue,
         WebkitFontSmoothing: smoothingValue.webkit,
         MozOsxFontSmoothing: smoothingValue.moz,
       }) as React.CSSProperties,
-    [design, keyColors, smoothingValue, textRenderingValue]
+    [effectiveDesign, effectiveKeyColors, smoothingValue, textRenderingValue]
   );
 
   React.useEffect(() => {
@@ -593,9 +635,28 @@ export function Layout(props: { children: React.ReactNode }) {
   }, [layoutVarsStyle]);
 
   const isAdminRoute = location.pathname === "/admin";
-  const isMiniAppRoute = location.pathname === "/app";
-  const appShellClassName = isAdminRoute ? "appShell adminShell" : "appShell";
-  const containerClassName = `${isAdminRoute ? "container adminContainer" : "container"}${isMiniAppRoute ? " miniAppContainer" : ""}`;
+  const isMiniAppRoute =
+    location.pathname === "/app" || location.pathname === "/m" || location.pathname === "/mobile";
+
+  React.useEffect(() => {
+    if (typeof document === "undefined") return;
+    const { body, documentElement } = document;
+    const prevBodyOverflow = body.style.overflow;
+    const prevHtmlOverflow = documentElement.style.overflow;
+
+    if (isPromoRoute || isFormatSortRoute) {
+      body.style.overflow = "auto";
+      documentElement.style.overflow = "auto";
+    }
+
+    return () => {
+      body.style.overflow = prevBodyOverflow;
+      documentElement.style.overflow = prevHtmlOverflow;
+    };
+  }, [isFormatSortRoute, isPromoRoute]);
+
+  const appShellClassName = `appShell${isAdminRoute ? " adminShell" : ""}${isPromoRoute || isFormatSortRoute ? " promoShell" : ""}`;
+  const containerClassName = `${isAdminRoute ? "container adminContainer" : "container"}${isMiniAppRoute ? " miniAppContainer" : ""}${isPromoRoute || isFormatSortRoute ? " promoContainer" : ""}`;
 
   return (
     <LayoutContext.Provider
@@ -613,12 +674,14 @@ export function Layout(props: { children: React.ReactNode }) {
         setRuntimeDefaults,
         snapshotState,
         design,
+        effectiveDesign,
         setDesign,
         saveDesign,
         loadDesign,
         loadDeployDesign,
         resetDesign,
         keyColors,
+        effectiveKeyColors,
         setKeyColors,
         saveKeyColors,
         loadKeyColors,
@@ -631,11 +694,21 @@ export function Layout(props: { children: React.ReactNode }) {
         setFavoritesOpen,
         canUseWorkbench,
         authSession,
+        previewCapabilities,
+        setDesignPreviewOverlay,
+        setKeyColorPreviewOverlay,
       }}
     >
+      <InspectorNodeBoundary label="App shell" kind="content" sourcePath="apps/web/src/components/Layout.tsx">
       <div className={appShellClassName} style={layoutVarsStyle}>
-        {!isMiniAppRoute ? (
-          <div className="topbar">
+        {!isMiniAppRoute && !isPromoRoute && !isFormatSortRoute ? (
+          <InspectorNodeBoundary
+            label="App topbar"
+            kind="content"
+            semanticTargetId="app.chrome.topbar"
+            sourcePath="apps/web/src/components/Layout.tsx"
+          >
+          <div className="topbar" data-inspector-target-id="app.chrome.topbar">
             <div className="nav">
               <div className="brand">
                 <button
@@ -653,8 +726,11 @@ export function Layout(props: { children: React.ReactNode }) {
               </div>
             </div>
           </div>
+          </InspectorNodeBoundary>
         ) : null}
-        <div className={containerClassName}>{props.children}</div>
+        <InspectorNodeBoundary label="App content" kind="content" sourcePath="apps/web/src/components/Layout.tsx">
+          <div className={containerClassName}>{props.children}</div>
+        </InspectorNodeBoundary>
         {introState !== "idle" ? (
           <div
             className={`logoIntroOverlay ${introState === "exit" ? "isExit" : introOverlayActive ? "isActive" : ""}`}
@@ -672,10 +748,20 @@ export function Layout(props: { children: React.ReactNode }) {
             />
           </div>
         ) : null}
-        <div className="controlDock">
-          <ControlsWorkbench />
-        </div>
+        {!isPromoRoute && !isFormatSortRoute ? (
+          <InspectorNodeBoundary
+            label="Workbench dock"
+            kind="content"
+            semanticTargetId="app.workbench.dock"
+            sourcePath="apps/web/src/components/Layout.tsx"
+          >
+            <div className="controlDock" data-inspector-target-id="app.workbench.dock">
+              <ControlsWorkbench />
+            </div>
+          </InspectorNodeBoundary>
+        ) : null}
       </div>
+      </InspectorNodeBoundary>
     </LayoutContext.Provider>
   );
 }

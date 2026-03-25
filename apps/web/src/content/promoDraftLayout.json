@@ -1,0 +1,1992 @@
+{
+  "board": {
+    "name": "PROMO",
+    "width": 1920,
+    "height": 13056
+  },
+  "sceneHeight": 1080,
+  "scenes": [
+    {
+      "id": "scene-01",
+      "y": 0,
+      "height": 1080
+    },
+    {
+      "id": "scene-02",
+      "y": 1080,
+      "height": 1080
+    },
+    {
+      "id": "scene-03",
+      "y": 2160,
+      "height": 1080
+    },
+    {
+      "id": "scene-04",
+      "y": 3240,
+      "height": 1080
+    },
+    {
+      "id": "scene-05",
+      "y": 4320,
+      "height": 1080
+    },
+    {
+      "id": "scene-06",
+      "y": 5400,
+      "height": 1080
+    },
+    {
+      "id": "scene-07",
+      "y": 6480,
+      "height": 1080
+    },
+    {
+      "id": "scene-08",
+      "y": 7560,
+      "height": 1080
+    },
+    {
+      "id": "scene-09",
+      "y": 8640,
+      "height": 1080
+    },
+    {
+      "id": "scene-10",
+      "y": 9720,
+      "height": 1080
+    },
+    {
+      "id": "scene-11",
+      "y": 10800,
+      "height": 1080
+    },
+    {
+      "id": "scene-12",
+      "y": 11880,
+      "height": 1080
+    },
+    {
+      "id": "scene-13",
+      "y": 12960,
+      "height": 96
+    }
+  ],
+  "nodes": [
+    {
+      "id": "fdb99022-94ba-80ca-8007-b9a8d031d2e6",
+      "kind": "shape",
+      "name": "Ellipse",
+      "x": 494,
+      "y": -439,
+      "width": 1053,
+      "height": 883,
+      "rotation": 0,
+      "opacity": 1,
+      "blendMode": "normal",
+      "zIndex": 0,
+      "visible": true,
+      "shapeType": "ellipse",
+      "fills": [
+        {
+          "color": "#B1B2B5",
+          "opacity": 0.1,
+          "gradient": null
+        }
+      ],
+      "strokes": [],
+      "cornerRadius": null,
+      "blur": 150
+    },
+    {
+      "id": "c7342233-b819-80da-8007-bbbe7fddf0be",
+      "kind": "shape",
+      "name": "Ellipse",
+      "x": 457,
+      "y": 660,
+      "width": 1519.0000000000005,
+      "height": 1387,
+      "rotation": 0,
+      "opacity": 0.15,
+      "blendMode": "normal",
+      "zIndex": 1,
+      "visible": true,
+      "shapeType": "ellipse",
+      "fills": [
+        {
+          "color": null,
+          "opacity": null,
+          "gradient": {
+            "type": "radial",
+            "startX": 0.5,
+            "startY": 0.5,
+            "endX": 0.5,
+            "endY": 1,
+            "width": 0.9925444556060564,
+            "stops": [
+              {
+                "color": "#B1B2B5",
+                "opacity": 1,
+                "offset": 0
+              },
+              {
+                "color": "#5881ff",
+                "opacity": 0,
+                "offset": 1
+              }
+            ]
+          }
+        }
+      ],
+      "strokes": [],
+      "cornerRadius": null,
+      "blur": null
+    },
+    {
+      "id": "c7342233-b819-80da-8007-bbc8bbab353b",
+      "kind": "shape",
+      "name": "Ellipse",
+      "x": 717,
+      "y": 2041,
+      "width": 1519,
+      "height": 1387,
+      "rotation": 0,
+      "opacity": 0.1,
+      "blendMode": "normal",
+      "zIndex": 2,
+      "visible": true,
+      "shapeType": "ellipse",
+      "fills": [
+        {
+          "color": null,
+          "opacity": null,
+          "gradient": {
+            "type": "radial",
+            "startX": 0.5,
+            "startY": 0.5,
+            "endX": 0.5,
+            "endY": 1,
+            "width": 0.9925444556060564,
+            "stops": [
+              {
+                "color": "#ffdbea",
+                "opacity": 1,
+                "offset": 0.11
+              },
+              {
+                "color": "#5881ff",
+                "opacity": 0,
+                "offset": 1
+              }
+            ]
+          }
+        }
+      ],
+      "strokes": [],
+      "cornerRadius": null,
+      "blur": null
+    },
+    {
+      "id": "c7342233-b819-80da-8007-bbcc9297cb28",
+      "kind": "shape",
+      "name": "Ellipse",
+      "x": -245,
+      "y": 10316,
+      "width": 1519,
+      "height": 1387,
+      "rotation": 0,
+      "opacity": 0.1,
+      "blendMode": "normal",
+      "zIndex": 3,
+      "visible": true,
+      "shapeType": "ellipse",
+      "fills": [
+        {
+          "color": null,
+          "opacity": null,
+          "gradient": {
+            "type": "radial",
+            "startX": 0.5,
+            "startY": 0.5,
+            "endX": 0.5,
+            "endY": 1,
+            "width": 0.9925444556060564,
+            "stops": [
+              {
+                "color": "#ffdbea",
+                "opacity": 1,
+                "offset": 0.11
+              },
+              {
+                "color": "#5881ff",
+                "opacity": 0,
+                "offset": 1
+              }
+            ]
+          }
+        }
+      ],
+      "strokes": [],
+      "cornerRadius": null,
+      "blur": null
+    },
+    {
+      "id": "c7342233-b819-80da-8007-bbccabc5adcf",
+      "kind": "shape",
+      "name": "Ellipse",
+      "x": 904,
+      "y": 11072,
+      "width": 1519,
+      "height": 1387,
+      "rotation": 0,
+      "opacity": 0.1,
+      "blendMode": "normal",
+      "zIndex": 4,
+      "visible": true,
+      "shapeType": "ellipse",
+      "fills": [
+        {
+          "color": null,
+          "opacity": null,
+          "gradient": {
+            "type": "radial",
+            "startX": 0.5,
+            "startY": 0.5,
+            "endX": 0.5,
+            "endY": 1,
+            "width": 0.9925444556060564,
+            "stops": [
+              {
+                "color": "#ffdbea",
+                "opacity": 1,
+                "offset": 0.11
+              },
+              {
+                "color": "#5881ff",
+                "opacity": 0,
+                "offset": 1
+              }
+            ]
+          }
+        }
+      ],
+      "strokes": [],
+      "cornerRadius": null,
+      "blur": null
+    },
+    {
+      "id": "c7342233-b819-80da-8007-bbccb19a21ff",
+      "kind": "shape",
+      "name": "Ellipse",
+      "x": -223,
+      "y": 12229,
+      "width": 1519,
+      "height": 1387,
+      "rotation": 0,
+      "opacity": 0.1,
+      "blendMode": "normal",
+      "zIndex": 5,
+      "visible": true,
+      "shapeType": "ellipse",
+      "fills": [
+        {
+          "color": null,
+          "opacity": null,
+          "gradient": {
+            "type": "radial",
+            "startX": 0.5,
+            "startY": 0.5,
+            "endX": 0.5,
+            "endY": 1,
+            "width": 0.9925444556060564,
+            "stops": [
+              {
+                "color": "#ffdbea",
+                "opacity": 1,
+                "offset": 0.11
+              },
+              {
+                "color": "#5881ff",
+                "opacity": 0,
+                "offset": 1
+              }
+            ]
+          }
+        }
+      ],
+      "strokes": [],
+      "cornerRadius": null,
+      "blur": null
+    },
+    {
+      "id": "c7342233-b819-80da-8007-bbc690e6822c",
+      "kind": "shape",
+      "name": "svg-rect",
+      "x": 90,
+      "y": 106.00000000000023,
+      "width": 1743,
+      "height": 14211,
+      "rotation": 0,
+      "opacity": 1,
+      "blendMode": "overlay",
+      "zIndex": 6,
+      "visible": true,
+      "shapeType": "rect",
+      "fills": [],
+      "strokes": [],
+      "cornerRadius": 0,
+      "blur": null
+    },
+    {
+      "id": "fdb99022-94ba-80ca-8007-b9a86a12ef29",
+      "kind": "image",
+      "name": "pl 01sh",
+      "x": 339,
+      "y": -108,
+      "width": 1820,
+      "height": 1296.9999999999998,
+      "rotation": 0,
+      "opacity": 1,
+      "blendMode": "normal",
+      "zIndex": 7,
+      "visible": true,
+      "assetSourceName": "pl 01sh",
+      "assetSourceId": "fdb99022-94ba-80ca-8007-b9a86a12ef29",
+      "assetKey": "heroGlow"
+    },
+    {
+      "id": "fdb99022-94ba-80ca-8007-b9a97126ca9f",
+      "kind": "text",
+      "name": "Таблица на входе.\nПорядок на выходе.",
+      "x": 173,
+      "y": 239,
+      "width": 746,
+      "height": 170,
+      "rotation": 0,
+      "opacity": 1,
+      "blendMode": "normal",
+      "zIndex": 8,
+      "visible": true,
+      "text": "Таблица на входе.\nПорядок на выходе.",
+      "fontFamily": "Roboto",
+      "fontSize": 77,
+      "fontWeight": "400",
+      "lineHeight": "1",
+      "letterSpacing": "0",
+      "textTransform": "none",
+      "textAlign": "left",
+      "fills": [
+        {
+          "color": "#e1ddd8",
+          "opacity": 1,
+          "gradient": null
+        }
+      ]
+    },
+    {
+      "id": "fdb99022-94ba-80ca-8007-b9a9e594988d",
+      "kind": "text",
+      "name": "МЕНЕДЖЕР ЗАДАЧ ДЛЯ ДИЗАЙН-КОМАНД",
+      "x": 173,
+      "y": 198,
+      "width": 682.9999999999999,
+      "height": 42,
+      "rotation": 0,
+      "opacity": 1,
+      "blendMode": "normal",
+      "zIndex": 9,
+      "visible": true,
+      "text": "МЕНЕДЖЕР ЗАДАЧ ДЛЯ ДИЗАЙН-КОМАНД",
+      "fontFamily": "Roboto",
+      "fontSize": 20,
+      "fontWeight": "400",
+      "lineHeight": "1",
+      "letterSpacing": "0",
+      "textTransform": "none",
+      "textAlign": "left",
+      "fills": [
+        {
+          "color": "#646467",
+          "opacity": 1,
+          "gradient": null
+        }
+      ]
+    },
+    {
+      "id": "fdb99022-94ba-80ca-8007-b9aa21201f38",
+      "kind": "text",
+      "name": "DTM превращает привычную рабочую таблицу в быстрый, живой и удобный инструмент для дизайн-команды. \nБез боли, лишних ритуалов и ощущения, что трекер задач снова победил человека.",
+      "x": 173.00000000000023,
+      "y": 420,
+      "width": 595.9999999999999,
+      "height": 188,
+      "rotation": 0,
+      "opacity": 1,
+      "blendMode": "normal",
+      "zIndex": 10,
+      "visible": true,
+      "text": "DTM превращает привычную рабочую таблицу в быстрый, живой и удобный инструмент для дизайн-команды. \nБез боли, лишних ритуалов и ощущения, что трекер задач снова победил человека.",
+      "fontFamily": "Roboto",
+      "fontSize": 21,
+      "fontWeight": "400",
+      "lineHeight": "1.2",
+      "letterSpacing": "0",
+      "textTransform": "none",
+      "textAlign": "left",
+      "fills": [
+        {
+          "color": "#898a8a",
+          "opacity": 1,
+          "gradient": null
+        }
+      ]
+    },
+    {
+      "id": "fdb99022-94ba-80ca-8007-b9ab47c9072d",
+      "kind": "shape",
+      "name": "Dark / Button / Destructive / Icon + Text / Active",
+      "x": 173,
+      "y": 565,
+      "width": 192,
+      "height": 57,
+      "rotation": 0,
+      "opacity": 1,
+      "blendMode": "normal",
+      "zIndex": 11,
+      "visible": true,
+      "shapeType": "board",
+      "fills": [
+        {
+          "color": "#3c2557",
+          "opacity": 1,
+          "gradient": null
+        }
+      ],
+      "strokes": [
+        {
+          "color": "#6911d4",
+          "opacity": 1,
+          "width": 1
+        }
+      ],
+      "cornerRadius": 30,
+      "blur": null
+    },
+    {
+      "id": "fdb99022-94ba-80ca-8007-b9ab47c9072e",
+      "kind": "shape",
+      "name": "_Utilities / Text / White",
+      "x": 258,
+      "y": 585.5,
+      "width": 42,
+      "height": 16,
+      "rotation": 0,
+      "opacity": 1,
+      "blendMode": "normal",
+      "zIndex": 12,
+      "visible": true,
+      "shapeType": "board",
+      "fills": [],
+      "strokes": [],
+      "cornerRadius": null,
+      "blur": null
+    },
+    {
+      "id": "fdb99022-94ba-80ca-8007-b9ab47c9072f",
+      "kind": "text",
+      "name": "Input",
+      "x": 260,
+      "y": 586,
+      "width": 38,
+      "height": 15,
+      "rotation": 0,
+      "opacity": 1,
+      "blendMode": "normal",
+      "zIndex": 13,
+      "visible": true,
+      "text": "Label",
+      "fontFamily": "Work Sans",
+      "fontSize": 12,
+      "fontWeight": "500",
+      "lineHeight": "1.2",
+      "letterSpacing": "0",
+      "textTransform": "uppercase",
+      "textAlign": "center",
+      "fills": [
+        {
+          "color": "#ffffff",
+          "opacity": 1,
+          "gradient": null
+        }
+      ]
+    },
+    {
+      "id": "fdb99022-94ba-80ca-8007-b9ab47c90730",
+      "kind": "shape",
+      "name": "Icons / Tools + Layers / M / Effects M",
+      "x": 238,
+      "y": 585.5,
+      "width": 16,
+      "height": 16,
+      "rotation": 0,
+      "opacity": 1,
+      "blendMode": "normal",
+      "zIndex": 14,
+      "visible": true,
+      "shapeType": "board",
+      "fills": [],
+      "strokes": [],
+      "cornerRadius": 0,
+      "blur": null
+    },
+    {
+      "id": "fdb99022-94ba-80ca-8007-b9ab47c90731",
+      "kind": "path",
+      "name": "svg-path",
+      "x": 240,
+      "y": 586.1700000000001,
+      "width": 12,
+      "height": 14.659999999999854,
+      "rotation": 0,
+      "opacity": 1,
+      "blendMode": "normal",
+      "zIndex": 15,
+      "visible": true,
+      "path": "M-1349,-278.83001708984375C-1349,-274.78167724609375,-1350.949951171875,-271.49993896484375,-1355,-271.49993896484375C-1350.949951171875,-271.49993896484375,-1349,-268.21820068359375,-1349,-264.16986083984375C-1349,-268.21820068359375,-1347.050048828125,-271.49993896484375,-1343,-271.49993896484375C-1347.050048828125,-271.49993896484375,-1349,-274.78167724609375,-1349,-278.83001708984375Z",
+      "fills": [],
+      "strokes": [
+        {
+          "color": "#ffffff",
+          "opacity": 1,
+          "width": 1
+        }
+      ]
+    },
+    {
+      "id": "fdb99022-94ba-80ca-8007-b9ab71643aae",
+      "kind": "shape",
+      "name": "Dark / Button / Destructive / Icon + Text / Disabled",
+      "x": 382,
+      "y": 565,
+      "width": 209,
+      "height": 56,
+      "rotation": 0,
+      "opacity": 1,
+      "blendMode": "normal",
+      "zIndex": 16,
+      "visible": true,
+      "shapeType": "board",
+      "fills": [
+        {
+          "color": "#201d24",
+          "opacity": 1,
+          "gradient": null
+        }
+      ],
+      "strokes": [
+        {
+          "color": "#5e4081",
+          "opacity": 1,
+          "width": 1
+        }
+      ],
+      "cornerRadius": 30,
+      "blur": null
+    },
+    {
+      "id": "fdb99022-94ba-80ca-8007-b9ab7d128963",
+      "kind": "shape",
+      "name": "_Utilities / Text / White",
+      "x": 475.5,
+      "y": 585,
+      "width": 42,
+      "height": 16,
+      "rotation": 0,
+      "opacity": 1,
+      "blendMode": "normal",
+      "zIndex": 17,
+      "visible": true,
+      "shapeType": "board",
+      "fills": [],
+      "strokes": [],
+      "cornerRadius": null,
+      "blur": null
+    },
+    {
+      "id": "fdb99022-94ba-80ca-8007-b9ab7d128964",
+      "kind": "text",
+      "name": "Input",
+      "x": 477.5,
+      "y": 585.5,
+      "width": 38,
+      "height": 15,
+      "rotation": 0,
+      "opacity": 1,
+      "blendMode": "normal",
+      "zIndex": 18,
+      "visible": true,
+      "text": "Label",
+      "fontFamily": "Work Sans",
+      "fontSize": 12,
+      "fontWeight": "500",
+      "lineHeight": "1.2",
+      "letterSpacing": "0",
+      "textTransform": "uppercase",
+      "textAlign": "center",
+      "fills": [
+        {
+          "color": "#6911d4",
+          "opacity": 1,
+          "gradient": null
+        }
+      ]
+    },
+    {
+      "id": "fdb99022-94ba-80ca-8007-b9ab7d128965",
+      "kind": "shape",
+      "name": "Icons / Tools + Layers / M / Effects M",
+      "x": 455.5,
+      "y": 585,
+      "width": 16,
+      "height": 16,
+      "rotation": 0,
+      "opacity": 1,
+      "blendMode": "normal",
+      "zIndex": 19,
+      "visible": true,
+      "shapeType": "board",
+      "fills": [],
+      "strokes": [],
+      "cornerRadius": 0,
+      "blur": null
+    },
+    {
+      "id": "fdb99022-94ba-80ca-8007-b9ab7d128966",
+      "kind": "path",
+      "name": "svg-path",
+      "x": 457.5,
+      "y": 585.6700000000001,
+      "width": 12,
+      "height": 14.659999999999854,
+      "rotation": 0,
+      "opacity": 1,
+      "blendMode": "normal",
+      "zIndex": 20,
+      "visible": true,
+      "path": "M-1131.5,-279.33001708984375C-1131.5,-275.28167724609375,-1133.449951171875,-271.99993896484375,-1137.5,-271.99993896484375C-1133.449951171875,-271.99993896484375,-1131.5,-268.71820068359375,-1131.5,-264.66986083984375C-1131.5,-268.71820068359375,-1129.550048828125,-271.99993896484375,-1125.5,-271.99993896484375C-1129.550048828125,-271.99993896484375,-1131.5,-275.28167724609375,-1131.5,-279.33001708984375Z",
+      "fills": [],
+      "strokes": [
+        {
+          "color": "#495e74",
+          "opacity": 1,
+          "width": 1
+        }
+      ]
+    },
+    {
+      "id": "c7342233-b819-80da-8007-bbc75e78a5c4",
+      "kind": "shape",
+      "name": "Rectangle",
+      "x": -330,
+      "y": 3372,
+      "width": 2602,
+      "height": 884,
+      "rotation": 0,
+      "opacity": 1,
+      "blendMode": "normal",
+      "zIndex": 21,
+      "visible": true,
+      "shapeType": "rect",
+      "fills": [
+        {
+          "color": null,
+          "opacity": null,
+          "gradient": {
+            "type": "linear",
+            "startX": 0.5,
+            "startY": 0,
+            "endX": 0.5,
+            "endY": 1,
+            "width": 1,
+            "stops": [
+              {
+                "color": "#b1b2b5",
+                "opacity": 0,
+                "offset": 0
+              },
+              {
+                "color": "#b1b2b5",
+                "opacity": 1,
+                "offset": 0.14
+              },
+              {
+                "color": "#b1b2b5",
+                "opacity": 1,
+                "offset": 0.81
+              },
+              {
+                "color": "#b1b2b5",
+                "opacity": 0,
+                "offset": 1
+              }
+            ]
+          }
+        }
+      ],
+      "strokes": [],
+      "cornerRadius": 0,
+      "blur": null
+    },
+    {
+      "id": "c7342233-b819-80da-8007-bb936ff24503",
+      "kind": "image",
+      "name": "hf_20260317_192815_b610f131-2d6a-42ec-ad75-91680ffaaccd",
+      "x": -19,
+      "y": 3312.000000000001,
+      "width": 1922,
+      "height": 1079.9999999999982,
+      "rotation": 0,
+      "opacity": 1,
+      "blendMode": "normal",
+      "zIndex": 22,
+      "visible": true,
+      "assetSourceName": "hf_20260317_192815_b610f131-2d6a-42ec-ad75-91680ffaaccd",
+      "assetSourceId": "c7342233-b819-80da-8007-bb936ff24503",
+      "assetKey": "scene192815"
+    },
+    {
+      "id": "c7342233-b819-80da-8007-bbc9123f3f11",
+      "kind": "shape",
+      "name": "Rectangle",
+      "x": -330,
+      "y": 1602,
+      "width": 2602,
+      "height": 884,
+      "rotation": 0,
+      "opacity": 1,
+      "blendMode": "normal",
+      "zIndex": 23,
+      "visible": true,
+      "shapeType": "rect",
+      "fills": [
+        {
+          "color": null,
+          "opacity": null,
+          "gradient": {
+            "type": "linear",
+            "startX": 0.5,
+            "startY": 0,
+            "endX": 0.5,
+            "endY": 1,
+            "width": 1,
+            "stops": [
+              {
+                "color": "#b1b2b5",
+                "opacity": 0,
+                "offset": 0
+              },
+              {
+                "color": "#b1b2b5",
+                "opacity": 1,
+                "offset": 0.14
+              },
+              {
+                "color": "#b1b2b5",
+                "opacity": 1,
+                "offset": 0.81
+              },
+              {
+                "color": "#b1b2b5",
+                "opacity": 0,
+                "offset": 1
+              }
+            ]
+          }
+        }
+      ],
+      "strokes": [],
+      "cornerRadius": 0,
+      "blur": null
+    },
+    {
+      "id": "c7342233-b819-80da-8007-bbc9123f3f12",
+      "kind": "image",
+      "name": "hf_20260317_192939_d92165da-8558-4c87-9074-f0c0ede19a38",
+      "x": -25,
+      "y": 1486.9999999999995,
+      "width": 1935,
+      "height": 1080.000000000001,
+      "rotation": 0,
+      "opacity": 1,
+      "blendMode": "normal",
+      "zIndex": 24,
+      "visible": true,
+      "assetSourceName": "hf_20260317_192939_d92165da-8558-4c87-9074-f0c0ede19a38",
+      "assetSourceId": "c7342233-b819-80da-8007-bbc9123f3f12",
+      "assetKey": "systemScene"
+    },
+    {
+      "id": "c7342233-b819-80da-8007-bb8dc670948d",
+      "kind": "image",
+      "name": "hf_20260317_192947_02ff1162-ebe4-4107-9357-045f42fd8841",
+      "x": -4491,
+      "y": 1954,
+      "width": 1935,
+      "height": 1080,
+      "rotation": 0,
+      "opacity": 1,
+      "blendMode": "normal",
+      "zIndex": 25,
+      "visible": true,
+      "assetSourceName": "hf_20260317_192947_02ff1162-ebe4-4107-9357-045f42fd8841",
+      "assetSourceId": "c7342233-b819-80da-8007-bb8dc670948d",
+      "assetKey": "scene192947"
+    },
+    {
+      "id": "c7342233-b819-80da-8007-bb923c730d6a",
+      "kind": "image",
+      "name": "hf_20260317_192933_fb330689-1f22-49c3-8642-37fe97297435",
+      "x": -4592,
+      "y": 4804,
+      "width": 1935,
+      "height": 1080,
+      "rotation": 0,
+      "opacity": 1,
+      "blendMode": "normal",
+      "zIndex": 26,
+      "visible": true,
+      "assetSourceName": "hf_20260317_192933_fb330689-1f22-49c3-8642-37fe97297435",
+      "assetSourceId": "c7342233-b819-80da-8007-bb923c730d6a",
+      "assetKey": "scene192933"
+    },
+    {
+      "id": "c7342233-b819-80da-8007-bb92c442029a",
+      "kind": "masked-image",
+      "name": "Mask",
+      "x": 1242,
+      "y": 2560,
+      "width": 389,
+      "height": 833,
+      "rotation": 0,
+      "opacity": 1,
+      "blendMode": "normal",
+      "zIndex": 27,
+      "visible": true,
+      "assetSourceName": "hf_20260317_192941_0eb5f40f-1a12-4982-a0e8-d174fbd1c462",
+      "assetSourceId": "c7342233-b819-80da-8007-bb92ad2158cf",
+      "maskPath": "M-284,2510L-353,2385L-287,1750L-43,1695L36,1743L-11,2514L-118,2528L-284,2510",
+      "maskPathBounds": {
+        "x": 1242,
+        "y": 2560,
+        "width": 389,
+        "height": 833
+      },
+      "imageRect": {
+        "x": 3,
+        "y": 2428,
+        "width": 1935.000000000001,
+        "height": 1080
+      },
+      "assetKey": "mobileScene"
+    },
+    {
+      "id": "c7342233-b819-80da-8007-bb92f267aec4",
+      "kind": "masked-image",
+      "name": "Mask",
+      "x": -100,
+      "y": 757,
+      "width": 2085,
+      "height": 573,
+      "rotation": 0,
+      "opacity": 1,
+      "blendMode": "normal",
+      "zIndex": 28,
+      "visible": true,
+      "assetSourceName": "hf_20260317_192813_d73583d4-31d6-4fc1-b9fc-23789543eba1",
+      "assetSourceId": "c7342233-b819-80da-8007-bb92d3185aed",
+      "maskPath": "M-1608,-108C-1597,-105,-1386,-67,-1386,-67L-817,54L-289,190L33,221C33,221,192,190,205,190C218,190,387,148,387,148L390,465L-1695,460L-1608,-108",
+      "maskPathBounds": {
+        "x": -100,
+        "y": 757,
+        "width": 2085,
+        "height": 573
+      },
+      "imageRect": {
+        "x": 7,
+        "y": 168,
+        "width": 1922,
+        "height": 1080
+      },
+      "assetKey": "problemScene"
+    },
+    {
+      "id": "c7342233-b819-80da-8007-bb963bc7a90c",
+      "kind": "image",
+      "name": "image",
+      "x": 0,
+      "y": -6,
+      "width": 2006,
+      "height": 112,
+      "rotation": 0,
+      "opacity": 1,
+      "blendMode": "normal",
+      "zIndex": 29,
+      "visible": true,
+      "assetSourceName": "image",
+      "assetSourceId": "c7342233-b819-80da-8007-bb963bc7a90c",
+      "assetKey": "topStrip"
+    },
+    {
+      "id": "c7342233-b819-80da-8007-bb96494c6e30",
+      "kind": "image",
+      "name": "dtm_ico_256x256",
+      "x": 150,
+      "y": 7,
+      "width": 84,
+      "height": 84,
+      "rotation": 0,
+      "opacity": 1,
+      "blendMode": "normal",
+      "zIndex": 30,
+      "visible": true,
+      "assetSourceName": "dtm_ico_256x256",
+      "assetSourceId": "c7342233-b819-80da-8007-bb96494c6e30",
+      "assetKey": "dtmLogo"
+    },
+    {
+      "id": "c7342233-b819-80da-8007-bb97c53f7d92",
+      "kind": "text",
+      "name": "Таблица на входе.\nПорядок на выходе.",
+      "x": 173,
+      "y": 2755,
+      "width": 746,
+      "height": 170,
+      "rotation": 0,
+      "opacity": 1,
+      "blendMode": "normal",
+      "zIndex": 31,
+      "visible": true,
+      "text": "Таблица на входе.\nПорядок на выходе.",
+      "fontFamily": "Roboto",
+      "fontSize": 77,
+      "fontWeight": "400",
+      "lineHeight": "1",
+      "letterSpacing": "0",
+      "textTransform": "none",
+      "textAlign": "left",
+      "fills": [
+        {
+          "color": "#e1ddd8",
+          "opacity": 1,
+          "gradient": null
+        }
+      ]
+    },
+    {
+      "id": "c7342233-b819-80da-8007-bb97c53f7d93",
+      "kind": "text",
+      "name": "МЕНЕДЖЕР ЗАДАЧ ДЛЯ ДИЗАЙН-КОМАНД",
+      "x": 173,
+      "y": 2714,
+      "width": 682.9999999999999,
+      "height": 42,
+      "rotation": 0,
+      "opacity": 1,
+      "blendMode": "normal",
+      "zIndex": 32,
+      "visible": true,
+      "text": "МЕНЕДЖЕР ЗАДАЧ ДЛЯ ДИЗАЙН-КОМАНД",
+      "fontFamily": "Roboto",
+      "fontSize": 20,
+      "fontWeight": "400",
+      "lineHeight": "1",
+      "letterSpacing": "0",
+      "textTransform": "none",
+      "textAlign": "left",
+      "fills": [
+        {
+          "color": "#646467",
+          "opacity": 1,
+          "gradient": null
+        }
+      ]
+    },
+    {
+      "id": "c7342233-b819-80da-8007-bb97c53f7d94",
+      "kind": "text",
+      "name": "DTM превращает привычную рабочую таблицу в быстрый, живой и удобный инструмент для дизайн-команды. Без боли, лишних ритуалов и ощущения, что трекер задач снова победил человека.",
+      "x": 173.00000000000023,
+      "y": 2936,
+      "width": 595.9999999999999,
+      "height": 188,
+      "rotation": 0,
+      "opacity": 1,
+      "blendMode": "normal",
+      "zIndex": 33,
+      "visible": true,
+      "text": "DTM превращает привычную рабочую таблицу в быстрый, живой и удобный инструмент для дизайн-команды. Без боли, лишних ритуалов и ощущения, что трекер задач снова победил человека.",
+      "fontFamily": "Roboto",
+      "fontSize": 21,
+      "fontWeight": "400",
+      "lineHeight": "1.2",
+      "letterSpacing": "0",
+      "textTransform": "none",
+      "textAlign": "left",
+      "fills": [
+        {
+          "color": "#898a8a",
+          "opacity": 1,
+          "gradient": null
+        }
+      ]
+    },
+    {
+      "id": "c7342233-b819-80da-8007-bb920a0345af",
+      "kind": "masked-image",
+      "name": "Mask",
+      "x": -1872,
+      "y": 7128,
+      "width": 403,
+      "height": 604,
+      "rotation": 0,
+      "opacity": 1,
+      "blendMode": "normal",
+      "zIndex": 34,
+      "visible": true,
+      "assetSourceName": "hf_20260317_031324_f832d7bf-5a55-4dbb-8b3e-cd2b9c6d7734",
+      "assetSourceId": "c7342233-b819-80da-8007-bb91e7107158",
+      "maskPath": "M-3195,6867L-3364,6807L-3364,6679L-3467,6637L-3467,6373L-3368,6395L-3360,6324L-3231,6263L-3064,6320L-3072,6810L-3195,6867",
+      "maskPathBounds": {
+        "x": -1872,
+        "y": 7128,
+        "width": 403,
+        "height": 604
+      },
+      "imageRect": {
+        "x": -3213,
+        "y": 6764,
+        "width": 1935,
+        "height": 1080
+      },
+      "assetKey": "scene031324"
+    },
+    {
+      "id": "c7342233-b819-80da-8007-bb98e3c3f461",
+      "kind": "masked-image",
+      "name": "Mask",
+      "x": 228,
+      "y": 10855,
+      "width": 593,
+      "height": 889,
+      "rotation": 0,
+      "opacity": 1,
+      "blendMode": "normal",
+      "zIndex": 35,
+      "visible": true,
+      "assetSourceName": "hf_20260317_031324_f832d7bf-5a55-4dbb-8b3e-cd2b9c6d7734",
+      "assetSourceId": "c7342233-b819-80da-8007-bb98e3c3f463",
+      "maskPath": "M-966.7617797851562,10879L-1215.439208984375,10790.6884765625L-1215.439208984375,10602.291015625L-1367,10540.4736328125L-1367,10151.904296875L-1221.3250732421875,10184.28515625L-1209.5533447265625,10079.783203125L-1019.7344970703125,9990L-774,10073.8955078125L-785.771728515625,10795.1044921875L-966.7617797851562,10879",
+      "maskPathBounds": {
+        "x": 228,
+        "y": 10855,
+        "width": 593,
+        "height": 889
+      },
+      "imageRect": {
+        "x": -1745.2332506203475,
+        "y": 10319.245033112582,
+        "width": 2847.282878411911,
+        "height": 1589.6026490066233
+      },
+      "assetKey": "scene031324"
+    },
+    {
+      "id": "c7342233-b819-80da-8007-bb936b61363c",
+      "kind": "image",
+      "name": "hf_20260317_192812_8d370bb5-0550-4073-8990-5b0741229e98",
+      "x": 4564,
+      "y": 1277,
+      "width": 1922,
+      "height": 1080,
+      "rotation": 0,
+      "opacity": 1,
+      "blendMode": "normal",
+      "zIndex": 36,
+      "visible": true,
+      "assetSourceName": "hf_20260317_192812_8d370bb5-0550-4073-8990-5b0741229e98",
+      "assetSourceId": "c7342233-b819-80da-8007-bb936b61363c",
+      "assetKey": "scene192812"
+    },
+    {
+      "id": "c7342233-b819-80da-8007-bb979b8c9a45",
+      "kind": "shape",
+      "name": "Ellipse",
+      "x": 1270,
+      "y": 3206,
+      "width": 1053,
+      "height": 883,
+      "rotation": 0,
+      "opacity": 1,
+      "blendMode": "normal",
+      "zIndex": 37,
+      "visible": true,
+      "shapeType": "ellipse",
+      "fills": [
+        {
+          "color": "#B1B2B5",
+          "opacity": 0.1,
+          "gradient": null
+        }
+      ],
+      "strokes": [],
+      "cornerRadius": null,
+      "blur": 150
+    },
+    {
+      "id": "c7342233-b819-80da-8007-bb979f8b6fbb",
+      "kind": "shape",
+      "name": "Ellipse",
+      "x": -676,
+      "y": 3262,
+      "width": 1130,
+      "height": 1419,
+      "rotation": 0,
+      "opacity": 1,
+      "blendMode": "normal",
+      "zIndex": 38,
+      "visible": true,
+      "shapeType": "ellipse",
+      "fills": [
+        {
+          "color": "#B1B2B5",
+          "opacity": 0.1,
+          "gradient": null
+        }
+      ],
+      "strokes": [],
+      "cornerRadius": null,
+      "blur": 150
+    },
+    {
+      "id": "c7342233-b819-80da-8007-bba488eeedc2",
+      "kind": "image",
+      "name": "image",
+      "x": 490,
+      "y": 996,
+      "width": 928.9999999999999,
+      "height": 523,
+      "rotation": 0,
+      "opacity": 1,
+      "blendMode": "normal",
+      "zIndex": 39,
+      "visible": true,
+      "assetSourceName": "image",
+      "assetSourceId": "c7342233-b819-80da-8007-bba488eeedc2",
+      "assetKey": "videoFrame"
+    },
+    {
+      "id": "c7342233-b819-80da-8007-bbc9480b4a2a",
+      "kind": "text",
+      "name": "Таблица на входе.\nПорядок на выходе.",
+      "x": 997,
+      "y": 11040,
+      "width": 746,
+      "height": 170,
+      "rotation": 0,
+      "opacity": 1,
+      "blendMode": "normal",
+      "zIndex": 40,
+      "visible": true,
+      "text": "Таблица на входе.\nПорядок на выходе.",
+      "fontFamily": "Roboto",
+      "fontSize": 77,
+      "fontWeight": "400",
+      "lineHeight": "1",
+      "letterSpacing": "0",
+      "textTransform": "none",
+      "textAlign": "left",
+      "fills": [
+        {
+          "color": "#e1ddd8",
+          "opacity": 1,
+          "gradient": null
+        }
+      ]
+    },
+    {
+      "id": "c7342233-b819-80da-8007-bbc9480b4a2b",
+      "kind": "text",
+      "name": "МЕНЕДЖЕР ЗАДАЧ ДЛЯ ДИЗАЙН-КОМАНД",
+      "x": 997,
+      "y": 10999,
+      "width": 683,
+      "height": 42,
+      "rotation": 0,
+      "opacity": 1,
+      "blendMode": "normal",
+      "zIndex": 41,
+      "visible": true,
+      "text": "МЕНЕДЖЕР ЗАДАЧ ДЛЯ ДИЗАЙН-КОМАНД",
+      "fontFamily": "Roboto",
+      "fontSize": 20,
+      "fontWeight": "400",
+      "lineHeight": "1",
+      "letterSpacing": "0",
+      "textTransform": "none",
+      "textAlign": "left",
+      "fills": [
+        {
+          "color": "#646467",
+          "opacity": 1,
+          "gradient": null
+        }
+      ]
+    },
+    {
+      "id": "c7342233-b819-80da-8007-bbc9480b4a2c",
+      "kind": "text",
+      "name": "DTM превращает привычную рабочую таблицу в быстрый, живой и удобный инструмент для дизайн-команды. \nБез боли, лишних ритуалов и ощущения, что трекер задач снова победил человека.",
+      "x": 997.0000000000002,
+      "y": 11221,
+      "width": 595.9999999999998,
+      "height": 188,
+      "rotation": 0,
+      "opacity": 1,
+      "blendMode": "normal",
+      "zIndex": 42,
+      "visible": true,
+      "text": "DTM превращает привычную рабочую таблицу в быстрый, живой и удобный инструмент для дизайн-команды. \nБез боли, лишних ритуалов и ощущения, что трекер задач снова победил человека.",
+      "fontFamily": "Roboto",
+      "fontSize": 21,
+      "fontWeight": "400",
+      "lineHeight": "1.2",
+      "letterSpacing": "0",
+      "textTransform": "none",
+      "textAlign": "left",
+      "fills": [
+        {
+          "color": "#898a8a",
+          "opacity": 1,
+          "gradient": null
+        }
+      ]
+    },
+    {
+      "id": "c7342233-b819-80da-8007-bbc9abd8f158",
+      "kind": "shape",
+      "name": "Rectangle",
+      "x": -407,
+      "y": 4239,
+      "width": 2602,
+      "height": 884,
+      "rotation": 0,
+      "opacity": 1,
+      "blendMode": "normal",
+      "zIndex": 43,
+      "visible": true,
+      "shapeType": "rect",
+      "fills": [
+        {
+          "color": null,
+          "opacity": null,
+          "gradient": {
+            "type": "linear",
+            "startX": 0.5,
+            "startY": 0,
+            "endX": 0.5,
+            "endY": 1,
+            "width": 1,
+            "stops": [
+              {
+                "color": "#b1b2b5",
+                "opacity": 0,
+                "offset": 0
+              },
+              {
+                "color": "#b1b2b5",
+                "opacity": 1,
+                "offset": 0.14
+              },
+              {
+                "color": "#b1b2b5",
+                "opacity": 1,
+                "offset": 0.81
+              },
+              {
+                "color": "#b1b2b5",
+                "opacity": 0,
+                "offset": 1
+              }
+            ]
+          }
+        }
+      ],
+      "strokes": [],
+      "cornerRadius": 0,
+      "blur": null
+    },
+    {
+      "id": "c7342233-b819-80da-8007-bb8dc5142a2d",
+      "kind": "image",
+      "name": "hf_20260317_192920_4869906f-b198-487e-9d8d-cefd3ce54483",
+      "x": -4,
+      "y": 4155,
+      "width": 1935,
+      "height": 1079.999999999999,
+      "rotation": 0,
+      "opacity": 1,
+      "blendMode": "normal",
+      "zIndex": 44,
+      "visible": true,
+      "assetSourceName": "hf_20260317_192920_4869906f-b198-487e-9d8d-cefd3ce54483",
+      "assetSourceId": "c7342233-b819-80da-8007-bb8dc5142a2d",
+      "assetKey": "benefitsScene"
+    },
+    {
+      "id": "c7342233-b819-80da-8007-bbc9c3c4c4fe",
+      "kind": "shape",
+      "name": "Rectangle",
+      "x": -407,
+      "y": 5224,
+      "width": 2602,
+      "height": 884,
+      "rotation": 0,
+      "opacity": 1,
+      "blendMode": "normal",
+      "zIndex": 45,
+      "visible": true,
+      "shapeType": "rect",
+      "fills": [
+        {
+          "color": null,
+          "opacity": null,
+          "gradient": {
+            "type": "linear",
+            "startX": 0.5,
+            "startY": 0,
+            "endX": 0.5,
+            "endY": 1,
+            "width": 1,
+            "stops": [
+              {
+                "color": "#b1b2b5",
+                "opacity": 0,
+                "offset": 0
+              },
+              {
+                "color": "#b1b2b5",
+                "opacity": 1,
+                "offset": 0.14
+              },
+              {
+                "color": "#b1b2b5",
+                "opacity": 1,
+                "offset": 0.81
+              },
+              {
+                "color": "#b1b2b5",
+                "opacity": 0,
+                "offset": 1
+              }
+            ]
+          }
+        }
+      ],
+      "strokes": [],
+      "cornerRadius": 0,
+      "blur": null
+    },
+    {
+      "id": "c7342233-b819-80da-8007-bb933a7b0d55",
+      "kind": "image",
+      "name": "hf_20260317_192947_02ff1162-ebe4-4107-9357-045f42fd8841",
+      "x": -4,
+      "y": 5096,
+      "width": 1935,
+      "height": 1079.999999999999,
+      "rotation": 0,
+      "opacity": 1,
+      "blendMode": "normal",
+      "zIndex": 46,
+      "visible": true,
+      "assetSourceName": "hf_20260317_192947_02ff1162-ebe4-4107-9357-045f42fd8841",
+      "assetSourceId": "c7342233-b819-80da-8007-bb933a7b0d55",
+      "assetKey": "scene192947"
+    },
+    {
+      "id": "c7342233-b819-80da-8007-bbc9c833e7b7",
+      "kind": "shape",
+      "name": "Rectangle",
+      "x": -407,
+      "y": 6242,
+      "width": 2602,
+      "height": 884,
+      "rotation": 0,
+      "opacity": 1,
+      "blendMode": "normal",
+      "zIndex": 47,
+      "visible": true,
+      "shapeType": "rect",
+      "fills": [
+        {
+          "color": null,
+          "opacity": null,
+          "gradient": {
+            "type": "linear",
+            "startX": 0.5,
+            "startY": 0,
+            "endX": 0.5,
+            "endY": 1,
+            "width": 1,
+            "stops": [
+              {
+                "color": "#b1b2b5",
+                "opacity": 0,
+                "offset": 0
+              },
+              {
+                "color": "#b1b2b5",
+                "opacity": 1,
+                "offset": 0.14
+              },
+              {
+                "color": "#b1b2b5",
+                "opacity": 1,
+                "offset": 0.81
+              },
+              {
+                "color": "#b1b2b5",
+                "opacity": 0,
+                "offset": 1
+              }
+            ]
+          }
+        }
+      ],
+      "strokes": [],
+      "cornerRadius": 0,
+      "blur": null
+    },
+    {
+      "id": "c7342233-b819-80da-8007-bb93b1619b79",
+      "kind": "image",
+      "name": "hf_20260317_032640_849c29bb-3222-4ba8-abec-3b7a606c04fb",
+      "x": 4,
+      "y": 6101,
+      "width": 1920,
+      "height": 1079.999999999999,
+      "rotation": 0,
+      "opacity": 1,
+      "blendMode": "normal",
+      "zIndex": 48,
+      "visible": true,
+      "assetSourceName": "hf_20260317_032640_849c29bb-3222-4ba8-abec-3b7a606c04fb",
+      "assetSourceId": "c7342233-b819-80da-8007-bb93b1619b79",
+      "assetKey": "scene032640"
+    },
+    {
+      "id": "c7342233-b819-80da-8007-bbc9cb6cfd2e",
+      "kind": "shape",
+      "name": "Rectangle",
+      "x": -407,
+      "y": 7184,
+      "width": 2602,
+      "height": 884,
+      "rotation": 0,
+      "opacity": 1,
+      "blendMode": "normal",
+      "zIndex": 49,
+      "visible": true,
+      "shapeType": "rect",
+      "fills": [
+        {
+          "color": null,
+          "opacity": null,
+          "gradient": {
+            "type": "linear",
+            "startX": 0.5,
+            "startY": 0,
+            "endX": 0.5,
+            "endY": 1,
+            "width": 1,
+            "stops": [
+              {
+                "color": "#b1b2b5",
+                "opacity": 0,
+                "offset": 0
+              },
+              {
+                "color": "#b1b2b5",
+                "opacity": 1,
+                "offset": 0.14
+              },
+              {
+                "color": "#b1b2b5",
+                "opacity": 1,
+                "offset": 0.81
+              },
+              {
+                "color": "#b1b2b5",
+                "opacity": 0,
+                "offset": 1
+              }
+            ]
+          }
+        }
+      ],
+      "strokes": [],
+      "cornerRadius": 0,
+      "blur": null
+    },
+    {
+      "id": "c7342233-b819-80da-8007-bb93c6d1cea7",
+      "kind": "image",
+      "name": "hf_20260317_192933_fb330689-1f22-49c3-8642-37fe97297435",
+      "x": 0,
+      "y": 7126,
+      "width": 1935,
+      "height": 1079.999999999991,
+      "rotation": 0,
+      "opacity": 1,
+      "blendMode": "normal",
+      "zIndex": 50,
+      "visible": true,
+      "assetSourceName": "hf_20260317_192933_fb330689-1f22-49c3-8642-37fe97297435",
+      "assetSourceId": "c7342233-b819-80da-8007-bb93c6d1cea7",
+      "assetKey": "scene192933"
+    },
+    {
+      "id": "c7342233-b819-80da-8007-bbc9cecb99d4",
+      "kind": "shape",
+      "name": "Rectangle",
+      "x": -407,
+      "y": 8151,
+      "width": 2602,
+      "height": 884,
+      "rotation": 0,
+      "opacity": 1,
+      "blendMode": "normal",
+      "zIndex": 51,
+      "visible": true,
+      "shapeType": "rect",
+      "fills": [
+        {
+          "color": null,
+          "opacity": null,
+          "gradient": {
+            "type": "linear",
+            "startX": 0.5,
+            "startY": 0,
+            "endX": 0.5,
+            "endY": 1,
+            "width": 1,
+            "stops": [
+              {
+                "color": "#b1b2b5",
+                "opacity": 0,
+                "offset": 0
+              },
+              {
+                "color": "#b1b2b5",
+                "opacity": 1,
+                "offset": 0.14
+              },
+              {
+                "color": "#b1b2b5",
+                "opacity": 1,
+                "offset": 0.81
+              },
+              {
+                "color": "#b1b2b5",
+                "opacity": 0,
+                "offset": 1
+              }
+            ]
+          }
+        }
+      ],
+      "strokes": [],
+      "cornerRadius": 0,
+      "blur": null
+    },
+    {
+      "id": "c7342233-b819-80da-8007-bb93648b789b",
+      "kind": "image",
+      "name": "hf_20260317_032638_61105319-f625-47f5-b76f-3fe5f7a6d7f4",
+      "x": -29,
+      "y": 8094,
+      "width": 1920,
+      "height": 1080,
+      "rotation": 0,
+      "opacity": 1,
+      "blendMode": "normal",
+      "zIndex": 52,
+      "visible": true,
+      "assetSourceName": "hf_20260317_032638_61105319-f625-47f5-b76f-3fe5f7a6d7f4",
+      "assetSourceId": "c7342233-b819-80da-8007-bb93648b789b",
+      "assetKey": "scene032638"
+    },
+    {
+      "id": "c7342233-b819-80da-8007-bbc9d094b453",
+      "kind": "shape",
+      "name": "Rectangle",
+      "x": -407,
+      "y": 9841,
+      "width": 2602,
+      "height": 884,
+      "rotation": 0,
+      "opacity": 1,
+      "blendMode": "normal",
+      "zIndex": 53,
+      "visible": true,
+      "shapeType": "rect",
+      "fills": [
+        {
+          "color": null,
+          "opacity": null,
+          "gradient": {
+            "type": "linear",
+            "startX": 0.5,
+            "startY": 0,
+            "endX": 0.5,
+            "endY": 1,
+            "width": 1,
+            "stops": [
+              {
+                "color": "#b1b2b5",
+                "opacity": 0,
+                "offset": 0
+              },
+              {
+                "color": "#b1b2b5",
+                "opacity": 1,
+                "offset": 0.14
+              },
+              {
+                "color": "#b1b2b5",
+                "opacity": 1,
+                "offset": 0.81
+              },
+              {
+                "color": "#b1b2b5",
+                "opacity": 0,
+                "offset": 1
+              }
+            ]
+          }
+        }
+      ],
+      "strokes": [],
+      "cornerRadius": 0,
+      "blur": null
+    },
+    {
+      "id": "c7342233-b819-80da-8007-bb921d9f3929",
+      "kind": "image",
+      "name": "hf_20260317_221330_6f543a8f-5276-4b71-b906-3d168aa6e480",
+      "x": -35,
+      "y": 9797,
+      "width": 1935,
+      "height": 1080,
+      "rotation": 0,
+      "opacity": 1,
+      "blendMode": "normal",
+      "zIndex": 54,
+      "visible": true,
+      "assetSourceName": "hf_20260317_221330_6f543a8f-5276-4b71-b906-3d168aa6e480",
+      "assetSourceId": "c7342233-b819-80da-8007-bb921d9f3929",
+      "assetKey": "scene221330"
+    },
+    {
+      "id": "c7342233-b819-80da-8007-bb8dc803f474",
+      "kind": "image",
+      "name": "hf_20260317_221336_a8fb8077-ba77-4984-87f3-6388a4f7353e",
+      "x": -10055,
+      "y": 8146,
+      "width": 1935,
+      "height": 1080,
+      "rotation": 0,
+      "opacity": 1,
+      "blendMode": "normal",
+      "zIndex": 55,
+      "visible": true,
+      "assetSourceName": "hf_20260317_221336_a8fb8077-ba77-4984-87f3-6388a4f7353e",
+      "assetSourceId": "c7342233-b819-80da-8007-bb8dc803f474",
+      "assetKey": "scene221336"
+    },
+    {
+      "id": "c7342233-b819-80da-8007-bbca993ec369",
+      "kind": "shape",
+      "name": "Rectangle",
+      "x": -314,
+      "y": 8988,
+      "width": 2602,
+      "height": 884,
+      "rotation": 0,
+      "opacity": 1,
+      "blendMode": "normal",
+      "zIndex": 56,
+      "visible": true,
+      "shapeType": "rect",
+      "fills": [
+        {
+          "color": null,
+          "opacity": null,
+          "gradient": {
+            "type": "linear",
+            "startX": 0.5,
+            "startY": 0,
+            "endX": 0.5,
+            "endY": 1,
+            "width": 1,
+            "stops": [
+              {
+                "color": "#b1b2b5",
+                "opacity": 0,
+                "offset": 0
+              },
+              {
+                "color": "#b1b2b5",
+                "opacity": 1,
+                "offset": 0.14
+              },
+              {
+                "color": "#b1b2b5",
+                "opacity": 1,
+                "offset": 0.81
+              },
+              {
+                "color": "#b1b2b5",
+                "opacity": 0,
+                "offset": 1
+              }
+            ]
+          }
+        }
+      ],
+      "strokes": [],
+      "cornerRadius": 0,
+      "blur": null
+    },
+    {
+      "id": "c7342233-b819-80da-8007-bbca89f86f64",
+      "kind": "image",
+      "name": "hf_20260317_221336_a8fb8077-ba77-4984-87f3-6388a4f7353e",
+      "x": -15,
+      "y": 8921,
+      "width": 1935,
+      "height": 1080,
+      "rotation": 0,
+      "opacity": 1,
+      "blendMode": "normal",
+      "zIndex": 57,
+      "visible": true,
+      "assetSourceName": "hf_20260317_221336_a8fb8077-ba77-4984-87f3-6388a4f7353e",
+      "assetSourceId": "c7342233-b819-80da-8007-bbca89f86f64",
+      "assetKey": "scene221336"
+    },
+    {
+      "id": "c7342233-b819-80da-8007-bbcb5e5d9ba3",
+      "kind": "shape",
+      "name": "Dark / Button / Destructive / Icon + Text / Default",
+      "x": 663,
+      "y": 12592,
+      "width": 537,
+      "height": 65,
+      "rotation": 0,
+      "opacity": 1,
+      "blendMode": "normal",
+      "zIndex": 58,
+      "visible": true,
+      "shapeType": "board",
+      "fills": [
+        {
+          "color": "#c80857",
+          "opacity": 1,
+          "gradient": null
+        }
+      ],
+      "strokes": [],
+      "cornerRadius": 8,
+      "blur": null
+    },
+    {
+      "id": "c7342233-b819-80da-8007-bbcb5e5d9ba4",
+      "kind": "shape",
+      "name": "_Utilities / Text / White",
+      "x": 898.4601654685398,
+      "y": 12600,
+      "width": 86.98809499700906,
+      "height": 48.81693408128922,
+      "rotation": 0,
+      "opacity": 1,
+      "blendMode": "normal",
+      "zIndex": 59,
+      "visible": true,
+      "shapeType": "board",
+      "fills": [],
+      "strokes": [],
+      "cornerRadius": null,
+      "blur": null
+    },
+    {
+      "id": "c7342233-b819-80da-8007-bbcb5e5d9ba5",
+      "kind": "text",
+      "name": "Input",
+      "x": 900.5202619177956,
+      "y": 12617.024170475492,
+      "width": 60.00000000000023,
+      "height": 15.000000000005457,
+      "rotation": 0,
+      "opacity": 1,
+      "blendMode": "normal",
+      "zIndex": 60,
+      "visible": true,
+      "text": "BUY NOW!",
+      "fontFamily": "Work Sans",
+      "fontSize": 12,
+      "fontWeight": "500",
+      "lineHeight": "1.2",
+      "letterSpacing": "0",
+      "textTransform": "uppercase",
+      "textAlign": "center",
+      "fills": [
+        {
+          "color": "#ffffff",
+          "opacity": 1,
+          "gradient": null
+        }
+      ]
+    },
+    {
+      "id": "c7342233-b819-80da-8007-bbcb5e5de50f",
+      "kind": "shape",
+      "name": "Icons / Tools + Layers / M / Effects M",
+      "x": 877.4601654685398,
+      "y": 12616,
+      "width": 17,
+      "height": 17,
+      "rotation": 0,
+      "opacity": 1,
+      "blendMode": "normal",
+      "zIndex": 61,
+      "visible": true,
+      "shapeType": "board",
+      "fills": [],
+      "strokes": [],
+      "cornerRadius": 0,
+      "blur": null
+    },
+    {
+      "id": "c7342233-b819-80da-8007-bbcb5e5de510",
+      "kind": "path",
+      "name": "svg-path",
+      "x": 879.5851654685398,
+      "y": 12616.711875000005,
+      "width": 12.75,
+      "height": 15.576250000000073,
+      "rotation": 0,
+      "opacity": 1,
+      "blendMode": "normal",
+      "zIndex": 62,
+      "visible": true,
+      "path": "M-709.0396728515625,11751.7119140625C-709.0396728515625,11756.0126953125,-711.1117553710938,11759.5,-715.4146728515625,11759.5C-711.1117553710938,11759.5,-709.0396728515625,11762.986328125,-709.0396728515625,11767.2880859375C-709.0396728515625,11762.986328125,-706.9680786132812,11759.5,-702.6646728515625,11759.5C-706.9680786132812,11759.5,-709.0396728515625,11756.0126953125,-709.0396728515625,11751.7119140625Z",
+      "fills": [],
+      "strokes": [
+        {
+          "color": "#ffffff",
+          "opacity": 1,
+          "width": 1
+        }
+      ]
+    },
+    {
+      "id": "c7342233-b819-80da-8007-bbcc26cd5f1a",
+      "kind": "image",
+      "name": "image",
+      "x": 0,
+      "y": 12824,
+      "width": 2006,
+      "height": 112,
+      "rotation": 0,
+      "opacity": 1,
+      "blendMode": "normal",
+      "zIndex": 63,
+      "visible": true,
+      "assetSourceName": "image",
+      "assetSourceId": "c7342233-b819-80da-8007-bbcc26cd5f1a",
+      "assetKey": "topStrip"
+    },
+    {
+      "id": "c7342233-b819-80da-8007-bbc9d454c4a0",
+      "kind": "shape",
+      "name": "Rectangle",
+      "x": -414,
+      "y": 11740,
+      "width": 2602,
+      "height": 884,
+      "rotation": 0,
+      "opacity": 1,
+      "blendMode": "normal",
+      "zIndex": 64,
+      "visible": true,
+      "shapeType": "rect",
+      "fills": [
+        {
+          "color": null,
+          "opacity": null,
+          "gradient": {
+            "type": "linear",
+            "startX": 0.5,
+            "startY": 0,
+            "endX": 0.5,
+            "endY": 1,
+            "width": 1,
+            "stops": [
+              {
+                "color": "#b1b2b5",
+                "opacity": 0,
+                "offset": 0
+              },
+              {
+                "color": "#b1b2b5",
+                "opacity": 1,
+                "offset": 0.14
+              },
+              {
+                "color": "#b1b2b5",
+                "opacity": 1,
+                "offset": 0.81
+              },
+              {
+                "color": "#b1b2b5",
+                "opacity": 0,
+                "offset": 1
+              }
+            ]
+          }
+        }
+      ],
+      "strokes": [],
+      "cornerRadius": 0,
+      "blur": null
+    },
+    {
+      "id": "c7342233-b819-80da-8007-bb98e8ad4829",
+      "kind": "image",
+      "name": "hf_20260317_192812_8d370bb5-0550-4073-8990-5b0741229e98",
+      "x": -9,
+      "y": 11657,
+      "width": 1922,
+      "height": 1080,
+      "rotation": 0,
+      "opacity": 1,
+      "blendMode": "normal",
+      "zIndex": 65,
+      "visible": true,
+      "assetSourceName": "hf_20260317_192812_8d370bb5-0550-4073-8990-5b0741229e98",
+      "assetSourceId": "c7342233-b819-80da-8007-bb98e8ad4829",
+      "assetKey": "scene192812"
+    }
+  ]
+}

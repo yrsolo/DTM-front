@@ -1,0 +1,999 @@
+{
+  "catalog": [
+    {
+      "id": "grafrolik",
+      "title": "Графролик",
+      "description": "Графическая заставка и близкие форматы.",
+      "sortOrder": 10
+    },
+    {
+      "id": "logo_integration",
+      "title": "Интеграция в лого",
+      "description": "Интеграции и встройка в логотип.",
+      "sortOrder": 20
+    },
+    {
+      "id": "shorts",
+      "title": "Шортс",
+      "description": "Короткие вертикальные и shorts-форматы.",
+      "sortOrder": 30
+    },
+    {
+      "id": "shooting_video",
+      "title": "Съёмочный ролик",
+      "description": "Съёмочные и live-action ролики.",
+      "sortOrder": 40
+    },
+    {
+      "id": "logo_3d",
+      "title": "3D лого",
+      "description": "Трёхмерные логотипы и лого-ролики.",
+      "sortOrder": 50
+    },
+    {
+      "id": "interactive_ustnik",
+      "title": "Интерактивный устник",
+      "description": "Интерактивные устники и related variants.",
+      "sortOrder": 60
+    },
+    {
+      "id": "first_person_announce",
+      "title": "Анонс от 1 лица",
+      "description": "Анонсы от первого лица.",
+      "sortOrder": 70
+    },
+    {
+      "id": "still_frame",
+      "title": "Стоп-кадр",
+      "description": "Стоп-кадры и freeze-frame варианты.",
+      "sortOrder": 80
+    },
+    {
+      "id": "graphic_transition",
+      "title": "Графический переход",
+      "description": "Переходы, транзишны и similar graphics.",
+      "sortOrder": 90
+    },
+    {
+      "id": "screencast",
+      "title": "Скринкаст",
+      "description": "Скринкасты и screen capture форматы.",
+      "sortOrder": 100
+    },
+    {
+      "id": "video_adaptation",
+      "title": "Адаптация ролика",
+      "description": "Адаптации и ресайзы роликов.",
+      "sortOrder": 110
+    },
+    {
+      "id": "screen_branding",
+      "title": "Брендинг экранов",
+      "description": "Брендинг экранов и экранные пакеты.",
+      "sortOrder": 120
+    },
+    {
+      "id": "dynamic_logo",
+      "title": "Дин лого",
+      "description": "Динамический логотип.",
+      "sortOrder": 130
+    },
+    {
+      "id": "electronic_logo",
+      "title": "Эл лого",
+      "description": "Электронный логотип.",
+      "sortOrder": 140
+    },
+    {
+      "id": "branded_qr",
+      "title": "Брендированный QR код",
+      "description": "Брендированные QR-коды.",
+      "sortOrder": 150
+    },
+    {
+      "id": "web",
+      "title": "Web",
+      "description": "Лендинги, страницы, кнопки и обложки для сайта.",
+      "sortOrder": 160
+    }
+  ],
+  "aliasRules": [
+    {
+      "formatId": "dynamic_logo",
+      "aliases": [
+        "дин лого",
+        "динлого",
+        "динам лого",
+        "динамический логотип",
+        "динам логотип",
+        "дин.лого"
+      ],
+      "containsAll": [
+        [
+          "дин",
+          "лого"
+        ],
+        [
+          "динам",
+          "лого"
+        ],
+        [
+          "динамич",
+          "логотип"
+        ]
+      ],
+      "priority": 120
+    },
+    {
+      "formatId": "electronic_logo",
+      "aliases": [
+        "эл лого",
+        "эл.лого",
+        "эллого",
+        "эл логотип",
+        "электронный логотип"
+      ],
+      "containsAll": [
+        [
+          "эл",
+          "лого"
+        ],
+        [
+          "электрон",
+          "лого"
+        ]
+      ],
+      "priority": 120
+    },
+    {
+      "formatId": "web",
+      "aliases": [
+        "лендинг",
+        "landing",
+        "web",
+        "digital лендинг",
+        "лендинг конкурс",
+        "обложка на сайт",
+        "кнопка для сайта"
+      ],
+      "containsAll": [
+        [
+          "лендинг"
+        ],
+        [
+          "landing"
+        ],
+        [
+          "сайт"
+        ],
+        [
+          "страниц"
+        ],
+        [
+          "web"
+        ],
+        [
+          "digital",
+          "лендинг"
+        ],
+        [
+          "кнопка",
+          "сайт"
+        ],
+        [
+          "обложка",
+          "сайт"
+        ]
+      ],
+      "priority": 115
+    },
+    {
+      "formatId": "logo_3d",
+      "aliases": [
+        "3d лого",
+        "3d logo",
+        "3д лого",
+        "3 д лого"
+      ],
+      "containsAll": [
+        [
+          "3d",
+          "лого"
+        ],
+        [
+          "3д",
+          "лого"
+        ]
+      ],
+      "priority": 110
+    },
+    {
+      "formatId": "grafrolik",
+      "aliases": [
+        "графролик",
+        "граф ролик",
+        "графическая заставка",
+        "граф заставка"
+      ],
+      "containsAll": [
+        [
+          "граф",
+          "ролик"
+        ],
+        [
+          "граф",
+          "заставк"
+        ]
+      ],
+      "priority": 100
+    },
+    {
+      "formatId": "logo_integration",
+      "aliases": [
+        "интеграция в лого",
+        "интеграция логотип",
+        "лого интеграция"
+      ],
+      "containsAll": [
+        [
+          "интеграц",
+          "лого"
+        ]
+      ],
+      "priority": 100
+    },
+    {
+      "formatId": "shorts",
+      "aliases": [
+        "шортс",
+        "shorts",
+        "short"
+      ],
+      "containsAll": [
+        [
+          "short"
+        ],
+        [
+          "шорт"
+        ]
+      ],
+      "priority": 100
+    },
+    {
+      "formatId": "interactive_ustnik",
+      "aliases": [
+        "интерактивный устник",
+        "интерактивный устн",
+        "интерактив устник"
+      ],
+      "containsAll": [
+        [
+          "интерактив",
+          "устник"
+        ]
+      ],
+      "priority": 100
+    },
+    {
+      "formatId": "first_person_announce",
+      "aliases": [
+        "анонс от 1 лица",
+        "анонс от первого лица",
+        "анонс 1 лицо"
+      ],
+      "containsAll": [
+        [
+          "анонс",
+          "1",
+          "лица"
+        ],
+        [
+          "анонс",
+          "первого",
+          "лица"
+        ]
+      ],
+      "priority": 100
+    },
+    {
+      "formatId": "still_frame",
+      "aliases": [
+        "стоп кадр",
+        "стоп-кадр",
+        "стопкадр",
+        "freeze frame"
+      ],
+      "containsAll": [
+        [
+          "стоп",
+          "кадр"
+        ]
+      ],
+      "priority": 100
+    },
+    {
+      "formatId": "screencast",
+      "aliases": [
+        "скринкаст",
+        "screen cast",
+        "screencast"
+      ],
+      "containsAll": [
+        [
+          "скрин"
+        ],
+        [
+          "screen",
+          "cast"
+        ]
+      ],
+      "priority": 100
+    },
+    {
+      "formatId": "screen_branding",
+      "aliases": [
+        "брендинг экранов",
+        "брендинг экрана",
+        "экраны брендинг"
+      ],
+      "containsAll": [
+        [
+          "брендинг",
+          "экран"
+        ]
+      ],
+      "priority": 100
+    },
+    {
+      "formatId": "shooting_video",
+      "aliases": [
+        "съемочный ролик",
+        "съёмочный ролик",
+        "съемка",
+        "съёмка",
+        "live action"
+      ],
+      "containsAll": [
+        [
+          "съем",
+          "ролик"
+        ],
+        [
+          "съе",
+          "ролик"
+        ]
+      ],
+      "priority": 95
+    },
+    {
+      "formatId": "graphic_transition",
+      "aliases": [
+        "графический переход",
+        "граф переход",
+        "переход",
+        "transition"
+      ],
+      "containsAll": [
+        [
+          "граф",
+          "переход"
+        ],
+        [
+          "transition"
+        ]
+      ],
+      "priority": 90,
+      "excludes": [
+        "сайт",
+        "лендинг",
+        "страниц"
+      ]
+    },
+    {
+      "formatId": "video_adaptation",
+      "aliases": [
+        "адаптация ролика",
+        "адаптация",
+        "ресайз ролика"
+      ],
+      "containsAll": [
+        [
+          "адаптац",
+          "ролик"
+        ],
+        [
+          "адаптац"
+        ]
+      ],
+      "priority": 90
+    },
+    {
+      "formatId": "graphic_transition",
+      "aliases": [
+        "графический переход",
+        "граф переход",
+        "переход",
+        "transition"
+      ],
+      "containsAll": [
+        [
+          "граф",
+          "переход"
+        ],
+        [
+          "transition"
+        ]
+      ],
+      "priority": 90
+    },
+    {
+      "formatId": "branded_qr",
+      "aliases": [
+        "брендированный qr код",
+        "брендированный qr",
+        "qr код",
+        "qr-code",
+        "qr"
+      ],
+      "containsAll": [
+        [
+          "qr"
+        ],
+        [
+          "кьюар"
+        ],
+        [
+          "бренд",
+          "qr"
+        ]
+      ],
+      "priority": 80
+    }
+  ],
+  "manualOverrides": [
+    {
+      "rawValue": "- Брендинг - 5 сек",
+      "formatId": "screen_branding"
+    },
+    {
+      "rawValue": "- Заставка на каналах ТНТ и ТНТ4(единая) - 10 сек",
+      "formatId": "still_frame"
+    },
+    {
+      "rawValue": "2 ролика, хрон. 15 сек. и 10 сек.",
+      "formatId": "grafrolik"
+    },
+    {
+      "rawValue": "3)        Брендинг стола жюри",
+      "formatId": "screen_branding"
+    },
+    {
+      "rawValue": "3Д",
+      "formatId": "logo_3d"
+    },
+    {
+      "rawValue": "3D",
+      "formatId": "logo_3d"
+    },
+    {
+      "rawValue": "3D \n5 сек",
+      "formatId": "logo_3d"
+    },
+    {
+      "rawValue": "3D logo\n5 сек\nПУСТЫНЯ",
+      "formatId": "logo_3d"
+    },
+    {
+      "rawValue": "3D logo\n5 сек ГОРОД",
+      "formatId": "logo_3d"
+    },
+    {
+      "rawValue": "3D logo\n5 сек ДОМ",
+      "formatId": "logo_3d"
+    },
+    {
+      "rawValue": "3D, Владимир",
+      "formatId": "logo_3d"
+    },
+    {
+      "rawValue": "3D, Выборг",
+      "formatId": "logo_3d"
+    },
+    {
+      "rawValue": "3D, Казань",
+      "formatId": "logo_3d"
+    },
+    {
+      "rawValue": "3D, Ярославль",
+      "formatId": "logo_3d"
+    },
+    {
+      "rawValue": "анонс",
+      "formatId": "first_person_announce"
+    },
+    {
+      "rawValue": "Анонсы от Кравец + съемочные пристежки (2шт)",
+      "formatId": "first_person_announce"
+    },
+    {
+      "rawValue": "апдейт интеграции",
+      "formatId": "video_adaptation"
+    },
+    {
+      "rawValue": "Апдейт пэкшота сданного ролика.",
+      "formatId": "video_adaptation"
+    },
+    {
+      "rawValue": "Апдейт ролика",
+      "formatId": "video_adaptation"
+    },
+    {
+      "rawValue": "Баннер",
+      "formatId": "web"
+    },
+    {
+      "rawValue": "Баннеры",
+      "formatId": "web"
+    },
+    {
+      "rawValue": "Баннеры \n16 шт в ВК",
+      "formatId": "web"
+    },
+    {
+      "rawValue": "Баннеры / перетяжки",
+      "formatId": "web"
+    },
+    {
+      "rawValue": "Баннеры наружной рекламы",
+      "formatId": "web"
+    },
+    {
+      "rawValue": "брендинг",
+      "formatId": "screen_branding"
+    },
+    {
+      "rawValue": "Брендинг\n+ редакционный брендинг",
+      "formatId": "screen_branding"
+    },
+    {
+      "rawValue": "Брендинг\n10-15 сек",
+      "formatId": "screen_branding"
+    },
+    {
+      "rawValue": "Брендинг\n2 шт",
+      "formatId": "screen_branding"
+    },
+    {
+      "rawValue": "Брендинг\nколонны",
+      "formatId": "screen_branding"
+    },
+    {
+      "rawValue": "Брендинг\nколонны\n10 сек",
+      "formatId": "screen_branding"
+    },
+    {
+      "rawValue": "Брендинг\nстолов",
+      "formatId": "screen_branding"
+    },
+    {
+      "rawValue": "Брендинг - 2",
+      "formatId": "screen_branding"
+    },
+    {
+      "rawValue": "Брендинг 10 сек",
+      "formatId": "screen_branding"
+    },
+    {
+      "rawValue": "Брендинг 5 сек\nАквакрем и мицеллярка",
+      "formatId": "screen_branding"
+    },
+    {
+      "rawValue": "Брендинг 5 сек\nПэдсы и маска",
+      "formatId": "screen_branding"
+    },
+    {
+      "rawValue": "брендинг на плазмы в шоу",
+      "formatId": "screen_branding"
+    },
+    {
+      "rawValue": "Брендинг планшета",
+      "formatId": "screen_branding"
+    },
+    {
+      "rawValue": "брендинг профайлов",
+      "formatId": "screen_branding"
+    },
+    {
+      "rawValue": "Брендинг спасения",
+      "formatId": "dynamic_logo"
+    },
+    {
+      "rawValue": "Брендинг тоннеля",
+      "formatId": "screen_branding"
+    },
+    {
+      "rawValue": "брендинг, ирригатор",
+      "formatId": "screen_branding"
+    },
+    {
+      "rawValue": "Варианты пэкшота",
+      "formatId": "still_frame"
+    },
+    {
+      "rawValue": "Вызов. Интеграция в название испытания",
+      "formatId": "still_frame"
+    },
+    {
+      "rawValue": "Гаф заставка\n10 сек",
+      "formatId": "grafrolik"
+    },
+    {
+      "rawValue": "графика",
+      "formatId": "screen_branding"
+    },
+    {
+      "rawValue": "Графика\nдля дженерика",
+      "formatId": "video_adaptation"
+    },
+    {
+      "rawValue": "Графика\nпод устники\n\n3 очередь\nСценарий 2 (плащ)",
+      "formatId": "interactive_ustnik"
+    },
+    {
+      "rawValue": "графика внутрь (стол)",
+      "formatId": "still_frame"
+    },
+    {
+      "rawValue": "Графика к устникам \n(Мартиросян в образах) Кейс",
+      "formatId": "interactive_ustnik"
+    },
+    {
+      "rawValue": "Графика к устникам \n(Мартиросян в образах) Хлопушка",
+      "formatId": "interactive_ustnik"
+    },
+    {
+      "rawValue": "Демонстрация моб приложения",
+      "formatId": "screencast"
+    },
+    {
+      "rawValue": "Дженерик",
+      "formatId": "grafrolik"
+    },
+    {
+      "rawValue": "Диджитал в ТВ ролик",
+      "formatId": "grafrolik"
+    },
+    {
+      "rawValue": "Диджитал ВК",
+      "formatId": "web"
+    },
+    {
+      "rawValue": "Диджитал ролик",
+      "formatId": "grafrolik"
+    },
+    {
+      "rawValue": "ДрифтЛого",
+      "formatId": "still_frame"
+    },
+    {
+      "rawValue": "Замена брендинга на отснятом материала",
+      "formatId": "screen_branding"
+    },
+    {
+      "rawValue": "заставка",
+      "formatId": "grafrolik"
+    },
+    {
+      "rawValue": "Заставка \n10 сек (Астория + Пятёрочка) съемочная при участи Шеф повара - Константина Оганесяна\n15 сек",
+      "formatId": "grafrolik"
+    },
+    {
+      "rawValue": "Игра",
+      "formatId": "web"
+    },
+    {
+      "rawValue": "инеграция лого",
+      "formatId": "logo_integration"
+    },
+    {
+      "rawValue": "Интергация в лого / Преза",
+      "formatId": "logo_integration"
+    },
+    {
+      "rawValue": "ИТВ",
+      "formatId": "web"
+    },
+    {
+      "rawValue": "Карельский драйв",
+      "formatId": "still_frame"
+    },
+    {
+      "rawValue": "картинка",
+      "formatId": "web"
+    },
+    {
+      "rawValue": "Клинап",
+      "formatId": "video_adaptation"
+    },
+    {
+      "rawValue": "Кнопка",
+      "formatId": "web"
+    },
+    {
+      "rawValue": "Лайт ролик",
+      "formatId": "shooting_video"
+    },
+    {
+      "rawValue": "Лайт ролик\n3 шт по 20 сек",
+      "formatId": "shooting_video"
+    },
+    {
+      "rawValue": "Лайт ролики\nМария Маркова",
+      "formatId": "shooting_video"
+    },
+    {
+      "rawValue": "левом нижнем углу экрана",
+      "formatId": "dynamic_logo"
+    },
+    {
+      "rawValue": "логотип",
+      "formatId": "electronic_logo"
+    },
+    {
+      "rawValue": "логотип на пэкшот",
+      "formatId": "video_adaptation"
+    },
+    {
+      "rawValue": "Лэндинг",
+      "formatId": "web"
+    },
+    {
+      "rawValue": "Мобильный супербаннер",
+      "formatId": "web"
+    },
+    {
+      "rawValue": "Монтаж с пэкшотом 10 сек",
+      "formatId": "still_frame"
+    },
+    {
+      "rawValue": "НГ заставка 5 сек на базе их видео про духовку",
+      "formatId": "still_frame"
+    },
+    {
+      "rawValue": "обратный отсчет",
+      "formatId": "still_frame"
+    },
+    {
+      "rawValue": "Озвучка + набивки",
+      "formatId": "video_adaptation"
+    },
+    {
+      "rawValue": "Онлайн игра\nБаннеры",
+      "formatId": "web"
+    },
+    {
+      "rawValue": "пекшот",
+      "formatId": "still_frame"
+    },
+    {
+      "rawValue": "Переход с анонсов\nна ролик клиента 20 сек",
+      "formatId": "video_adaptation"
+    },
+    {
+      "rawValue": "плашка для шоу",
+      "formatId": "dynamic_logo"
+    },
+    {
+      "rawValue": "Подмигивание обезьяны на банке",
+      "formatId": "video_adaptation"
+    },
+    {
+      "rawValue": "Пост\nанонсирующий",
+      "formatId": "web"
+    },
+    {
+      "rawValue": "Пост в ВК",
+      "formatId": "web"
+    },
+    {
+      "rawValue": "Посты в ВК\n5 шт",
+      "formatId": "web"
+    },
+    {
+      "rawValue": "пристёжка",
+      "formatId": "still_frame"
+    },
+    {
+      "rawValue": "Пуш",
+      "formatId": "dynamic_logo"
+    },
+    {
+      "rawValue": "Пуш\n3 шт",
+      "formatId": "dynamic_logo"
+    },
+    {
+      "rawValue": "Пуш\n4 шт",
+      "formatId": "dynamic_logo"
+    },
+    {
+      "rawValue": "пэкшот",
+      "formatId": "video_adaptation"
+    },
+    {
+      "rawValue": "Ред брендинг",
+      "formatId": "screen_branding"
+    },
+    {
+      "rawValue": "Ред посты\nв вк",
+      "formatId": "web"
+    },
+    {
+      "rawValue": "Редакционный брендинг\n20 сек в лупе",
+      "formatId": "screen_branding"
+    },
+    {
+      "rawValue": "Редбрендинг",
+      "formatId": "screen_branding"
+    },
+    {
+      "rawValue": "Ролик",
+      "formatId": "grafrolik"
+    },
+    {
+      "rawValue": "ролики с VFX",
+      "formatId": "grafrolik"
+    },
+    {
+      "rawValue": "Скрикаст\nакция 11.11",
+      "formatId": "screencast"
+    },
+    {
+      "rawValue": "стикер",
+      "formatId": "web"
+    },
+    {
+      "rawValue": "Съемки\nАбрамов 2 по 15 сек",
+      "formatId": "logo_integration"
+    },
+    {
+      "rawValue": "Съемки+графика\n20 сек",
+      "formatId": "shooting_video"
+    },
+    {
+      "rawValue": "Тв заставка 10сек",
+      "formatId": "grafrolik"
+    },
+    {
+      "rawValue": "тизер",
+      "formatId": "still_frame"
+    },
+    {
+      "rawValue": "ТНТ\nРолик имиджевый 10 сек",
+      "formatId": "grafrolik"
+    },
+    {
+      "rawValue": "ТНТ - Ролик с акцией 10 сек\nТНТ4 - Такой же ролик но с другой озвучкой",
+      "formatId": "grafrolik"
+    },
+    {
+      "rawValue": "ТНТ 4\nРолик имиджевый 10 сек",
+      "formatId": "grafrolik"
+    },
+    {
+      "rawValue": "транзишен",
+      "formatId": "still_frame"
+    },
+    {
+      "rawValue": "транзишн",
+      "formatId": "still_frame"
+    },
+    {
+      "rawValue": "Транзишн (3 сек)",
+      "formatId": "still_frame"
+    },
+    {
+      "rawValue": "устник",
+      "formatId": "interactive_ustnik"
+    },
+    {
+      "rawValue": "Устник (Лого и инфографика)",
+      "formatId": "interactive_ustnik"
+    },
+    {
+      "rawValue": "Устник (ноутбук)",
+      "formatId": "interactive_ustnik"
+    },
+    {
+      "rawValue": "устник ДЕБ КАРТА",
+      "formatId": "interactive_ustnik"
+    },
+    {
+      "rawValue": "устник монетки",
+      "formatId": "interactive_ustnik"
+    },
+    {
+      "rawValue": "Устник Петрозаводск",
+      "formatId": "interactive_ustnik"
+    },
+    {
+      "rawValue": "Устник Плёс",
+      "formatId": "interactive_ustnik"
+    },
+    {
+      "rawValue": "устник Псков",
+      "formatId": "interactive_ustnik"
+    },
+    {
+      "rawValue": "Устник с графикой\n25сек",
+      "formatId": "interactive_ustnik"
+    },
+    {
+      "rawValue": "Устник Санкт-Петербург",
+      "formatId": "interactive_ustnik"
+    },
+    {
+      "rawValue": "Устник Саратов",
+      "formatId": "interactive_ustnik"
+    },
+    {
+      "rawValue": "Устник Сергиев Посад",
+      "formatId": "interactive_ustnik"
+    },
+    {
+      "rawValue": "устники",
+      "formatId": "interactive_ustnik"
+    },
+    {
+      "rawValue": "Устники 25 сек – 3 шт",
+      "formatId": "interactive_ustnik"
+    },
+    {
+      "rawValue": "Устники с графикой\n6 шт",
+      "formatId": "interactive_ustnik"
+    },
+    {
+      "rawValue": "Фотопост",
+      "formatId": "web"
+    },
+    {
+      "rawValue": "фотопост в ВК",
+      "formatId": "web"
+    },
+    {
+      "rawValue": "Фотопосты",
+      "formatId": "web"
+    },
+    {
+      "rawValue": "чатбот",
+      "formatId": "web"
+    },
+    {
+      "rawValue": "DIGITAL\nбаннеры 9 шт.",
+      "formatId": "web"
+    },
+    {
+      "rawValue": "DIGITAL\nфотопост в ВК - 2 шт",
+      "formatId": "web"
+    },
+    {
+      "rawValue": "Digital / Баннеры",
+      "formatId": "web"
+    },
+    {
+      "rawValue": "Digital / Обложки для плей-листов",
+      "formatId": "web"
+    },
+    {
+      "rawValue": "fullscreen banner",
+      "formatId": "web"
+    },
+    {
+      "rawValue": "KV",
+      "formatId": "web"
+    },
+    {
+      "rawValue": "VIP-Анонс + переход + пристежка 15 сек",
+      "formatId": "first_person_announce"
+    }
+  ]
+}

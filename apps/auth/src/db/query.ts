@@ -24,6 +24,8 @@ function convertYdbValueToNative(type: any, value: any): unknown {
       return value?.int32Value ?? 0;
     case Types.TIMESTAMP.typeId:
       return toDateFromMicros(value?.uint64Value);
+    case Types.BOOL.typeId:
+      return value?.boolValue ?? false;
     default:
       if (value?.textValue != null) return value.textValue;
       if (value?.int32Value != null) return value.int32Value;
@@ -80,6 +82,19 @@ export function optionalUtf8(value: string | null) {
   return {
     type: { optionalType: { item: Types.UTF8 } },
     value: TypedValues.fromNative(Types.UTF8, value).value,
+  };
+}
+
+export function optionalBool(value: boolean | null) {
+  if (value == null) {
+    return {
+      type: { optionalType: { item: Types.BOOL } },
+      value: { nullFlagValue: 0 },
+    };
+  }
+  return {
+    type: { optionalType: { item: Types.BOOL } },
+    value: TypedValues.fromNative(Types.BOOL, value).value,
   };
 }
 

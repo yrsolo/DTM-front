@@ -6,6 +6,7 @@ import { isMaskingForced } from "../auth/maskingMode";
 const MIN_API_INTERVAL_MS = 5000;
 let apiRateChain: Promise<void> = Promise.resolve();
 let lastApiCallAt = 0;
+const ownerNameCache = new Map<string, string | null>();
 
 async function runWithApiRateLimit<T>(fn: () => Promise<T>): Promise<T> {
   let release: () => void = () => {};
@@ -228,11 +229,16 @@ export async function fetchApiSnapshotWithMeta(
 }
 
 export async function fetchPersonNameByOwnerId(ownerId: string): Promise<string | null> {
+  const normalizedOwnerId = ownerId.trim();
+  if (!normalizedOwnerId) return null;
+  if (ownerNameCache.has(normalizedOwnerId)) {
+    return ownerNameCache.get(normalizedOwnerId) ?? null;
+  }
   const cfg = await loadPublicConfig();
   const apiBaseUrl = resolveBrowserApiBase(cfg);
-  if (!apiBaseUrl || !ownerId) return null;
+  if (!apiBaseUrl) return null;
 
-  const path = `${cfg.apiFrontendPath.replace(/^\/+/, "").replace(/\/$/, "")}/entities/people/${encodeURIComponent(ownerId)}`;
+  const path = `${cfg.apiFrontendPath.replace(/^\/+/, "").replace(/\/$/, "")}/entities/people/${encodeURIComponent(normalizedOwnerId)}`;
   const url = new URL(path, `${apiBaseUrl.replace(/\/+$/, "")}/`).toString();
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), Math.max(1000, cfg.apiTimeoutMs));
@@ -252,10 +258,58 @@ export async function fetchPersonNameByOwnerId(ownerId: string): Promise<string 
 
     const payload = await res.json();
     const name = payload?.name ?? payload?.entity?.name ?? null;
-    return typeof name === "string" && name.trim() ? name : null;
+    const resolved = typeof name === "string" && name.trim() ? name : null;
+    ownerNameCache.set(normalizedOwnerId, resolved);
+    return resolved;
   } catch {
     return null;
   } finally {
     clearTimeout(timer);
   }
+}
+
+export async function fetchPersonNamesByOwnerIds(ownerIds: string[]): Promise<Record<string, string>> {
+  const cfg = await loadPublicConfig();
+  const apiBaseUrl = resolveBrowserApiBase(cfg);
+  if (!apiBaseUrl) return {};
+
+  const uniqueOwnerIds = [...new Set(ownerIds.map((value) => value.trim()).filter(Boolean))];
+  const unresolvedOwnerIds = uniqueOwnerIds.filter((ownerId) => !ownerNameCache.has(ownerId));
+  const credentials = resolveApiCredentials(apiBaseUrl);
+
+  await Promise.all(
+    unresolvedOwnerIds.map(async (ownerId) => {
+      const path = `${cfg.apiFrontendPath.replace(/^\/+/, "").replace(/\/$/, "")}/entities/people/${encodeURIComponent(ownerId)}`;
+      const url = new URL(path, `${apiBaseUrl.replace(/\/+$/, "")}/`).toString();
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), Math.max(1000, cfg.apiTimeoutMs));
+
+      try {
+        const res = await fetch(url, {
+          headers: { accept: "application/json" },
+          credentials,
+          signal: controller.signal,
+        });
+        if (!res.ok) {
+          ownerNameCache.set(ownerId, null);
+          return;
+        }
+        const payload = await res.json();
+        const name = payload?.name ?? payload?.entity?.name ?? null;
+        ownerNameCache.set(ownerId, typeof name === "string" && name.trim() ? name : null);
+      } catch {
+        ownerNameCache.set(ownerId, null);
+      } finally {
+        clearTimeout(timer);
+      }
+    })
+  );
+
+  return uniqueOwnerIds.reduce<Record<string, string>>((acc, ownerId) => {
+    const resolved = ownerNameCache.get(ownerId);
+    if (resolved) {
+      acc[ownerId] = resolved;
+    }
+    return acc;
+  }, {});
 }
