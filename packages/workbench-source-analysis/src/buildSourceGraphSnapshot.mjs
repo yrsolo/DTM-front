@@ -60,8 +60,9 @@ function buildLinkedModuleIndex(reports, output = new Map()) {
 }
 
 function projectNode(node, linkedModuleIndex, parentId = null, parentPath = "") {
-  const label = node.componentName;
-  const path = parentPath ? `${parentPath} > ${label}` : label;
+  const label = node.displayLabel ?? node.componentName;
+  const pathSegment = node.componentName;
+  const path = parentPath ? `${parentPath} > ${pathSegment}` : pathSegment;
   const projectedChildren = (node.children ?? []).map((child) => projectNode(child, linkedModuleIndex, node.id, path));
   const projectedNode = {
     id: node.id,
@@ -84,6 +85,7 @@ function projectNode(node, linkedModuleIndex, parentId = null, parentPath = "") 
     meta: {
       canonicalPath: node.canonicalPath,
       sourceNodeClass: node.class,
+      displayLabel: node.displayLabel ?? node.componentName,
     },
     runtimeProjectionIds: [],
   };

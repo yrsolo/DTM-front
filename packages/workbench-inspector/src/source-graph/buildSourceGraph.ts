@@ -14,6 +14,7 @@ type SourceGraphBuildResult = {
   sourceNodesById: Map<SourceNodeId, SourceNode>;
   runtimeProjectionsById: Map<string, InspectorRuntimeProjection>;
   elementsBySourceNodeId: Map<SourceNodeId, Element>;
+  elementsByProjectionId: Map<string, Element>;
 };
 
 function humanizeLabel(value: string): string {
@@ -39,17 +40,6 @@ function buildPath(parts: string[]): string {
   return parts.filter(Boolean).join(" > ");
 }
 
-function toBounds(element: Element | null | undefined): InspectorNodeBounds | null {
-  const bounds = element?.getBoundingClientRect();
-  if (!bounds) return null;
-  return {
-    x: bounds.x,
-    y: bounds.y,
-    width: bounds.width,
-    height: bounds.height,
-  };
-}
-
 function toProjection(
   registration: InspectorRuntimeRegistration,
   sourceNodeId: SourceNodeId
@@ -57,7 +47,7 @@ function toProjection(
   return {
     id: registration.id,
     sourceNodeId,
-    bounds: toBounds(registration.anchorElement),
+    bounds: null,
     isVisible: Boolean(registration.anchorElement),
     isInteractive:
       registration.anchorElement instanceof HTMLElement
@@ -87,6 +77,7 @@ export function buildInspectorSourceGraph(
   const sourceNodesById = new Map<SourceNodeId, SourceNode>();
   const runtimeProjectionsById = new Map<string, InspectorRuntimeProjection>();
   const elementsBySourceNodeId = new Map<SourceNodeId, Element>();
+  const elementsByProjectionId = new Map<string, Element>();
 
   const buildNode = (registration: InspectorRuntimeRegistration, depth: number, ancestors: string[]): SourceNode => {
     const label = normalizeLabel(registration);
@@ -119,6 +110,7 @@ export function buildInspectorSourceGraph(
     runtimeProjectionsById.set(projection.id, projection);
     if (registration.anchorElement) {
       elementsBySourceNodeId.set(sourceNodeId, registration.anchorElement);
+      elementsByProjectionId.set(projection.id, registration.anchorElement);
     }
     return node;
   };
@@ -130,21 +122,37 @@ export function buildInspectorSourceGraph(
     sourceNodesById,
     runtimeProjectionsById,
     elementsBySourceNodeId,
+    elementsByProjectionId,
   };
 }
 
 export function mapSourceGraphToInspectorTree(sourceNodes: SourceNode[], projectionsById: Map<string, InspectorRuntimeProjection>): InspectorNode[] {
   const mapNode = (node: SourceNode): InspectorNode => {
     const primaryProjection = node.runtimeProjectionIds.length ? projectionsById.get(node.runtimeProjectionIds[0]) ?? null : null;
+    const projectionCount = node.runtimeProjectionIds.length;
+    const nodeType =
+      node.category === "component-definition"
+        ? "definition"
+        : node.category === "repeated-projection-group"
+          ? "repeated-group"
+          : "placement";
+    const label =
+      nodeType === "repeated-group" && projectionCount > 0
+        ? `${node.label} x${projectionCount}`
+        : node.label;
     return {
       id: node.id as InspectorNodeId,
       sourceNodeId: node.id,
       runtimeId: primaryProjection?.id ?? node.id,
+      nodeType,
       bindingKey: node.bindingKey ?? null,
       bindingStatus: (node.meta?.bindingStatus as InspectorNode["bindingStatus"]) ?? undefined,
+      projectionIds: [...node.runtimeProjectionIds],
+      projectionCount,
+      highlightMode: nodeType === "repeated-group" || projectionCount > 1 ? "multi" : "single",
       runtimeProjectionCount: node.runtimeProjectionIds.length,
-      label: node.label,
-      displayLabel: node.label,
+      label,
+      displayLabel: label,
       componentName: node.componentName ?? null,
       kind: node.kind,
       tagName: primaryProjection?.tagName ?? (node.componentName?.toLowerCase() || "component"),

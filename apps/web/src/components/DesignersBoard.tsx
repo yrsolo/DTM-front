@@ -1,6 +1,6 @@
 import React from "react";
 import { GroupV1, PersonV1, TaskV1 } from "@dtm/schema/snapshot";
-import { InspectorNodeBoundary } from "@dtm/workbench-inspector";
+import { InspectorNodeBoundary } from "../inspector-integration/boundary";
 
 const MAX_DESIGNER_COLUMNS = 10;
 

@@ -30,22 +30,10 @@ function getChildComponentName(child: React.ReactElement): string | null {
   return null;
 }
 
-function hasUsableBounds(element: Element | null): boolean {
-  if (!element) return false;
-  const rect = element.getBoundingClientRect();
-  return rect.width > 0 && rect.height > 0;
-}
-
 function resolveUsableAnchorElement(element: Element | null): Element | null {
   if (!element) return null;
-  if (hasUsableBounds(element)) return element;
-  const walker = document.createTreeWalker(element, NodeFilter.SHOW_ELEMENT);
-  let current = walker.nextNode();
-  while (current) {
-    if (current instanceof Element && hasUsableBounds(current)) {
-      return current;
-    }
-    current = walker.nextNode();
+  if (element.firstElementChild instanceof Element) {
+    return element.firstElementChild;
   }
   return element;
 }

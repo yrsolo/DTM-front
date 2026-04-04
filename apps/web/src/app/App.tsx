@@ -1,13 +1,17 @@
 import React from "react";
 import { BrowserRouter, Navigate, Route, Routes, useLocation } from "react-router-dom";
-import { InspectorNodeBoundary } from "@dtm/workbench-inspector";
 
 import { Layout } from "../components/Layout";
 import { getFrontendBasePath } from "../config/runtimeContour";
-import { WorkbenchInspectorMount } from "../inspector-integration";
+import { InspectorNodeBoundary } from "../inspector-integration/boundary";
+import { getWorkbenchInspectorActivation } from "../inspector-integration/activation";
 import { AdminPage } from "../pages/AdminPage";
 import { MiniAppPage, MobileWebPage } from "../pages/MiniAppPage";
 import { TimelinePage } from "../pages/TimelinePage";
+
+const LazyWorkbenchInspectorMount = React.lazy(() =>
+  import("../inspector-integration").then((module) => ({ default: module.WorkbenchInspectorMount }))
+);
 
 const FormatSortPage = React.lazy(() =>
   import("../pages/FormatSortPage").then((module) => ({ default: module.FormatSortPage }))
@@ -59,67 +63,81 @@ function TimelineEntryPage() {
   );
 }
 
+function AppRoutes() {
+  return (
+    <Routes>
+      <Route path="/" element={<TimelineEntryPage />} />
+      <Route
+        path="/promo"
+        element={
+          <React.Suspense fallback={<div className="card">Loading promo...</div>}>
+            <PromoPage />
+          </React.Suspense>
+        }
+      />
+      <Route
+        path="/promo-draft"
+        element={
+          <React.Suspense fallback={<div className="card">Loading promo draft...</div>}>
+            <PromoDraftPage />
+          </React.Suspense>
+        }
+      />
+      <Route
+        path="/format-sort"
+        element={
+          <React.Suspense fallback={<div className="card">Loading format lab...</div>}>
+            <FormatSortPage />
+          </React.Suspense>
+        }
+      />
+      <Route
+        path="/designer-sort"
+        element={
+          <React.Suspense fallback={<div className="card">Loading designer lab...</div>}>
+            <DesignerSortPage />
+          </React.Suspense>
+        }
+      />
+      <Route
+        path="/analytics"
+        element={
+          <React.Suspense fallback={<div className="card">Loading analytics...</div>}>
+            <AnalyticsPage />
+          </React.Suspense>
+        }
+      />
+      <Route path="/app" element={<MiniAppPage />} />
+      <Route path="/m" element={<MobileWebPage />} />
+      <Route path="/mobile" element={<MobileWebPage />} />
+      <Route
+        path="/admin"
+        element={
+          <InspectorNodeBoundary label="Admin route" kind="content" sourcePath="apps/web/src/app/App.tsx">
+            <AdminPage />
+          </InspectorNodeBoundary>
+        }
+      />
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
+  );
+}
+
 export function App() {
   const frontendBasePath = getFrontendBasePath();
+  const inspectorActivation = React.useMemo(() => getWorkbenchInspectorActivation(), []);
   return (
     <BrowserRouter basename={frontendBasePath === "/" ? undefined : frontendBasePath.replace(/\/$/, "")}>
-      <Layout>
-        <Routes>
-          <Route path="/" element={<TimelineEntryPage />} />
-          <Route
-            path="/promo"
-            element={
-              <React.Suspense fallback={<div className="card">Загружаем promo...</div>}>
-                <PromoPage />
-              </React.Suspense>
-            }
-          />
-          <Route
-            path="/promo-draft"
-            element={
-              <React.Suspense fallback={<div className="card">Загружаем promo draft...</div>}>
-                <PromoDraftPage />
-              </React.Suspense>
-            }
-          />
-          <Route
-            path="/format-sort"
-            element={
-              <React.Suspense fallback={<div className="card">Загружаем лабораторию форматов...</div>}>
-                <FormatSortPage />
-              </React.Suspense>
-            }
-          />
-          <Route
-            path="/designer-sort"
-            element={
-              <React.Suspense fallback={<div className="card">Загружаем лабораторию дизайнеров...</div>}>
-                <DesignerSortPage />
-              </React.Suspense>
-            }
-          />
-          <Route
-            path="/analytics"
-            element={
-              <React.Suspense fallback={<div className="card">Загружаем аналитику отдела...</div>}>
-                <AnalyticsPage />
-              </React.Suspense>
-            }
-          />
-          <Route path="/app" element={<MiniAppPage />} />
-          <Route path="/m" element={<MobileWebPage />} />
-          <Route path="/mobile" element={<MobileWebPage />} />
-          <Route
-            path="/admin"
-            element={
-              <InspectorNodeBoundary label="Admin route" kind="content" sourcePath="apps/web/src/app/App.tsx">
-                <AdminPage />
-              </InspectorNodeBoundary>
-            }
-          />
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-        <WorkbenchInspectorMount />
+      <Layout
+        inspectorMount={
+          inspectorActivation.enabled ? (
+            <React.Suspense fallback={null}>
+              <LazyWorkbenchInspectorMount />
+            </React.Suspense>
+          ) : null
+        }
+      >
+        <AppRoutes />
       </Layout>
     </BrowserRouter>
   );

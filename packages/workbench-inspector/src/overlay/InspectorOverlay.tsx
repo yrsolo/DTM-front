@@ -17,9 +17,33 @@ function getUnderlyingElementAtPoint(clientX: number, clientY: number): Element 
   return null;
 }
 
+function collectRenderableRects(elements: Element[]): DOMRect[] {
+  const uniqueRects = new Map<string, DOMRect>();
+  for (const element of elements) {
+    const rect = element.getBoundingClientRect();
+    if (rect.width <= 0 || rect.height <= 0) continue;
+    const key = [
+      Math.round(rect.left),
+      Math.round(rect.top),
+      Math.round(rect.width),
+      Math.round(rect.height),
+    ].join(":");
+    if (!uniqueRects.has(key)) {
+      uniqueRects.set(key, rect);
+    }
+  }
+  return [...uniqueRects.values()].sort((left, right) => {
+    if (left.top !== right.top) return left.top - right.top;
+    if (left.left !== right.left) return left.left - right.left;
+    if (left.width !== right.width) return left.width - right.width;
+    return left.height - right.height;
+  });
+}
+
 export function InspectorOverlay() {
-  const { getNodeById, getNodeElement, getNodeElementDebug, refreshNodes, resolveNodeFromElement, setHoveredNodeId, setPanelOpen, setPickMode, setSelectedNodeId, state } =
+  const { getNodeById, getNodeElement, getNodeElements, getNodeElementDebug, refreshNodes, resolveNodeFromElement, setHoveredNodeId, setPanelOpen, setPickMode, setSelectedNodeId, state } =
     useInspectorContext();
+  const [viewportVersion, setViewportVersion] = React.useState(0);
 
   React.useEffect(() => {
     if (!state.enabled || state.pickMode !== "on") return;
@@ -62,11 +86,25 @@ export function InspectorOverlay() {
 
   if (!state.enabled) return null;
 
-  const activeNode = state.selectedNodeId ? getNodeById(state.selectedNodeId) : state.hoveredNodeId ? getNodeById(state.hoveredNodeId) : null;
-  const canHighlightActiveNode = Boolean(activeNode && activeNode.bindingStatus === "bound");
-  const activeElement = canHighlightActiveNode && activeNode ? getNodeElement(activeNode.id) : null;
+  const selectedNode = state.selectedNodeId ? getNodeById(state.selectedNodeId) : null;
+  const hoveredNode = state.hoveredNodeId ? getNodeById(state.hoveredNodeId) : null;
+  const activeNode = selectedNode ?? hoveredNode;
+  const activeElement = activeNode ? getNodeElement(activeNode.id) : null;
+  const activeElements = activeNode ? getNodeElements(activeNode.id) : [];
+  const selectedRects = selectedNode ? collectRenderableRects(getNodeElements(selectedNode.id)) : [];
+  const hoveredRects = hoveredNode ? collectRenderableRects(getNodeElements(hoveredNode.id)) : [];
+  React.useEffect(() => {
+    if (!selectedNode && !hoveredNode) return;
+    const update = () => setViewportVersion((version) => version + 1);
+    window.addEventListener("scroll", update, true);
+    window.addEventListener("resize", update);
+    return () => {
+      window.removeEventListener("scroll", update, true);
+      window.removeEventListener("resize", update);
+    };
+  }, [hoveredNode, selectedNode]);
   const activeElementDebug = activeNode ? getNodeElementDebug(activeNode.id) : null;
-  const rect = activeElement?.getBoundingClientRect() ?? null;
+  const rects = activeNode === selectedNode ? selectedRects : hoveredRects;
 
   React.useEffect(() => {
     if (!state.debug) return;
@@ -74,15 +112,7 @@ export function InspectorOverlay() {
       console.debug("[workbench-inspector] overlay", { reason: "no-active-node" });
       return;
     }
-    if (!canHighlightActiveNode) {
-      console.debug("[workbench-inspector] overlay", {
-        reason: "binding-not-bound",
-        nodeId: activeNode.id,
-        bindingStatus: activeNode.bindingStatus,
-      });
-      return;
-    }
-    if (!activeElement) {
+    if (!activeElement && !activeElements.length) {
       console.debug("[workbench-inspector] overlay", {
         reason: "no-element",
         nodeId: activeNode.id,
@@ -92,35 +122,24 @@ export function InspectorOverlay() {
       });
       return;
     }
-    if (!rect || rect.width <= 0 || rect.height <= 0) {
+    if (!rects.length) {
       console.debug("[workbench-inspector] overlay", {
         reason: "zero-rect",
         nodeId: activeNode.id,
-        rect: rect
-          ? {
-              x: rect.x,
-              y: rect.y,
-              width: rect.width,
-              height: rect.height,
-            }
-          : null,
+        rectCount: rects.length,
       });
       return;
     }
     console.debug("[workbench-inspector] overlay", {
       reason: "rendering-highlight",
       nodeId: activeNode.id,
+      bindingStatus: activeNode.bindingStatus,
       mode: activeElementDebug?.mode,
       matchedNodeId: activeElementDebug?.matchedNodeId,
       tagName: activeElementDebug?.tagName,
-      rect: {
-        x: rect.x,
-        y: rect.y,
-        width: rect.width,
-        height: rect.height,
-      },
+      rectCount: rects.length,
     });
-  }, [activeElement, activeElementDebug, activeNode, canHighlightActiveNode, rect, state.debug]);
+  }, [activeElement, activeElementDebug, activeElements.length, activeNode, rects.length, state.debug, viewportVersion]);
 
   return (
     <>
@@ -137,46 +156,99 @@ export function InspectorOverlay() {
           }}
         />
       ) : null}
-      {activeNode && rect ? (
-        <div
-          aria-hidden="true"
-          data-workbench-inspector-overlay="foundation"
-          style={{
-            position: "fixed",
-            left: `${Math.max(0, rect.left)}px`,
-            top: `${Math.max(0, rect.top)}px`,
-            width: `${Math.max(0, rect.width)}px`,
-            height: `${Math.max(0, rect.height)}px`,
-            border: state.selectedNodeId === activeNode.id ? "2px solid #7cf7c6" : "2px solid #ffd166",
-            background: state.selectedNodeId === activeNode.id ? "rgba(124, 247, 198, 0.12)" : "rgba(255, 209, 102, 0.12)",
-            boxShadow: "0 0 0 1px rgba(12, 16, 28, 0.7)",
-            pointerEvents: "none",
-            zIndex: 9998,
-          }}
-        >
-          <div
-            style={{
-              position: "absolute",
-              top: "-28px",
-              left: 0,
-              maxWidth: "min(40vw, 320px)",
-              padding: "6px 10px",
-              borderRadius: "10px",
-              background: "rgba(10, 14, 24, 0.92)",
-              color: "#eff6ff",
-              fontSize: "12px",
-              lineHeight: 1.2,
-              whiteSpace: "nowrap",
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-            }}
-          >
-            {activeNode.label}
-          </div>
-        </div>
-      ) : (
+      {selectedNode && selectedRects.length ? (
+        <>
+          {selectedRects.map((nextRect, index) => (
+            <div
+              key={`selected-${selectedNode.id}-${index}-${Math.round(nextRect.left)}-${Math.round(nextRect.top)}`}
+              aria-hidden="true"
+              data-workbench-inspector-overlay="foundation"
+              style={{
+                position: "fixed",
+                left: `${Math.max(0, nextRect.left)}px`,
+                top: `${Math.max(0, nextRect.top)}px`,
+                width: `${Math.max(0, nextRect.width)}px`,
+                height: `${Math.max(0, nextRect.height)}px`,
+                border: "2px solid #7cf7c6",
+                background: "rgba(124, 247, 198, 0.12)",
+                boxShadow: "0 0 0 1px rgba(12, 16, 28, 0.7)",
+                pointerEvents: "none",
+                zIndex: 9998,
+              }}
+            >
+              {index === 0 ? (
+                <div
+                  style={{
+                    position: "absolute",
+                    top: "-28px",
+                    left: 0,
+                    maxWidth: "min(40vw, 320px)",
+                    padding: "6px 10px",
+                    borderRadius: "10px",
+                    background: "rgba(10, 14, 24, 0.92)",
+                    color: "#eff6ff",
+                    fontSize: "12px",
+                    lineHeight: 1.2,
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                  }}
+                >
+                  {selectedNode.label}
+                </div>
+              ) : null}
+            </div>
+          ))}
+        </>
+      ) : null}
+      {hoveredNode && hoveredRects.length ? (
+        <>
+          {hoveredRects.map((nextRect, index) => (
+            <div
+              key={`hovered-${hoveredNode.id}-${index}-${Math.round(nextRect.left)}-${Math.round(nextRect.top)}`}
+              aria-hidden="true"
+              data-workbench-inspector-overlay="foundation"
+              style={{
+                position: "fixed",
+                left: `${Math.max(0, nextRect.left)}px`,
+                top: `${Math.max(0, nextRect.top)}px`,
+                width: `${Math.max(0, nextRect.width)}px`,
+                height: `${Math.max(0, nextRect.height)}px`,
+                border: "2px solid #ffd166",
+                background: "rgba(255, 209, 102, 0.12)",
+                boxShadow: "0 0 0 1px rgba(12, 16, 28, 0.7)",
+                pointerEvents: "none",
+                zIndex: 9999,
+              }}
+            >
+              {index === 0 ? (
+                <div
+                  style={{
+                    position: "absolute",
+                    top: "-28px",
+                    left: 0,
+                    maxWidth: "min(40vw, 320px)",
+                    padding: "6px 10px",
+                    borderRadius: "10px",
+                    background: "rgba(10, 14, 24, 0.92)",
+                    color: "#eff6ff",
+                    fontSize: "12px",
+                    lineHeight: 1.2,
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                  }}
+                >
+                  {hoveredNode.label}
+                </div>
+              ) : null}
+            </div>
+          ))}
+        </>
+      ) : null}
+      {!selectedRects.length && !hoveredRects.length ? (
         <div aria-hidden="true" data-workbench-inspector-overlay="foundation" style={{ display: "none" }} />
-      )}
+      ) : null}
     </>
   );
 }

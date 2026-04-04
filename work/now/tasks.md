@@ -10,6 +10,7 @@
 - [x] CAM-PROMO-LANDING-V1 - public `/promo` landing shipped with separate runtime content file, manual-play hero video, short/full marketing blocks, dedicated promo shell, screenshot-led product scenes from viewer-safe captures, and docs updates.
 - [x] CAM-PROMO-REFERENCE-PACK-V1 - stable promo reference pack committed in-repo with master ref, 5 scene slices, reading guide, comparison checklist, and mandatory review loop for future `/promo` iterations.
 - [x] CAM-PROMO-REFERENCE-ALIGNMENT-V2 - `/promo` rebuilt into a screenshot-led editorial narrative: single-focus hero, secondary video strip, editorial/showcase/summary/cta section types, baseline-vs-after screenshots, and review note against the promo reference pack.
+- [x] CAM-PROMO-REBUILD-FROM-DRAFT-V3 - rebuild local `/promo` around clean background scenes from `ref/02`, replace raster copy with live Roboto text blocks, preserve promo-draft composition as reference only, and keep reusable noise overlay.
 - [ ] CAM-ATTACHMENTS-PDF-PREVIEW-STANDARDIZATION - force PDF.js preview even with missing metadata, align modal copy, and avoid browser viewer fallbacks.
 - [ ] CAM-TELEGRAM-MINIAPP-NO-YANDEX-AUTH - allow Telegram Mini App access for people directory telegram IDs without Yandex login.
 - [ ] CAM-USER-ALL-TASKS-FLAG - admin-controlled all-tasks access + hide designer grouping for non-privileged users.
@@ -66,6 +67,7 @@ See: `docs/deep/TROUBLESHOOTING.md`
 - [x] CAM-WORKBENCH-INSPECTOR-FOCUS-SETS - marked targets, focus-only filtering, local dev persistence
 - [ ] CAM-WORKBENCH-INSPECTOR-BINDINGS - target ownership mapping into current workbench
 - [ ] CAM-WORKBENCH-INSPECTOR-LIVE-COVERAGE - broaden verified target coverage across live surfaces
+- [ ] CAM-WORKBENCH-INSPECTOR-TREE-DOM-BINDING-V1 - stabilize bidirectional tree <-> DOM mapping for placement / repeated-group / runtime-projection nodes, make tree-selection highlight projection-first, and align pick-mode with the same binding model
 
 ## Session 2026-03-24
 - [x] Workbench Inspector bindings MVP expanded: semantic targets added for tasks timeline/table, designers timeline/board, task drawer, and attachments section.
@@ -85,6 +87,23 @@ See: `docs/deep/TROUBLESHOOTING.md`
 - [x] Scoped host preview foundation added: host preview now uses layered `effectiveDesign` / `effectiveKeyColors` overlays instead of mutating canonical layout state, `TimelinePage` consumes effective preview values, and inspector scope actions are gated by honest host capabilities (`token` only for now).
 - [x] Authoring parameter semantics foundation added: descriptors now carry constraint semantics (`min/max/step/editorHint`), generic parse/validate/coerce runs before draft application, effective preview values expose state/normalized value/message, and invalid raw input no longer passes straight into host preview.
 - [x] Source graph interior decomposition broadened for meaningful JSX host elements: linked component internals now capture `button/select/span` controls and meaningful container nodes like `div.filters`, making trees deeper for components such as `FiltersBar` and `DesignersBoard` without falling back to raw DOM traversal.
+
+## Session 2026-04-01
+- [x] Inspector refresh stabilized: startup now stays snapshot-first, heavy runtime scan is guarded, `Refresh tree` no longer freezes the page, and the tree remains visible after refresh instead of collapsing into an empty state.
+- [x] Inspector tree empty-state hardening added: `Hide invisible`, `Focus`, and `Cycles only` no longer trap the shell in a blank tree; the sidebar now falls back to a broader node set and explains which filter was relaxed.
+- [ ] Inspector tree/DOM binding plan fixed as the next active stream:
+  - `placement`, `repeated-group`, and `runtime-projection` stay separate entities in the binding model
+  - tree selection must resolve highlight through `projectionIds -> elements -> rects`
+  - repeated groups must highlight every runtime instance, not a single aggregate box
+  - pick mode must resolve DOM clicks back through the same projection-first path
+  - debug output should expose projection count, resolved element count, and rendered rect count for selected nodes
+
+## Session 2026-04-02
+- [x] Promo landing refocused on `promo-draft` composition for the first pass: `/promo` now has a glass top menu, a rebuilt hero, neon transition with video, and a second system screen using the `ref/02` scene assets instead of the old promo structure.
+- [x] Promo landing expanded beyond the first pass: `/promo` now renders the remaining draft-inspired screens from structured scene data with `ref/02` backgrounds, separate cutout objects, and browser-checked section continuity instead of stopping after the hero/video/system trio.
+
+## Session 2026-04-04
+- [x] Promo draft lock-in docs fixed: `work/now/promo-draft-structure.md` synchronized with `ref/02/draft`, and `work/now/promo-copy.md` created as the text source-of-truth for the 14-screen rebuild.
 
 # Workbench Authoring
 

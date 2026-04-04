@@ -12,6 +12,30 @@ type DragState = {
   originY: number;
 };
 
+type ResizeState =
+  | {
+      kind: "panel";
+      startClientX: number;
+      startClientY: number;
+      originWidth: number;
+      originHeight: number;
+    }
+  | {
+      kind: "tree";
+      startClientX: number;
+      originTreePaneWidth: number;
+    };
+
+const MIN_PANEL_WIDTH = 760;
+const MIN_PANEL_HEIGHT = 520;
+const MIN_TREE_PANE_WIDTH = 280;
+const MIN_DETAILS_PANE_WIDTH = 320;
+const PANEL_VIEWPORT_PADDING = 24;
+
+function clamp(value: number, min: number, max: number): number {
+  return Math.max(min, Math.min(max, value));
+}
+
 function collectAncestorIds(nodesById: Map<string, InspectorNode>, nodeId: string | null | undefined): string[] {
   if (!nodeId) return [];
   const ancestors: string[] = [];
@@ -33,6 +57,16 @@ function buildNodeIndex(nodes: InspectorNode[]): Map<string, InspectorNode> {
   };
   for (const node of nodes) visit(node);
   return index;
+}
+
+function countNodes(nodes: InspectorNode[]): number {
+  let count = 0;
+  const visit = (node: InspectorNode) => {
+    count += 1;
+    for (const child of node.children ?? []) visit(child);
+  };
+  for (const node of nodes) visit(node);
+  return count;
 }
 
 function filterNodesForFocus(
@@ -57,6 +91,71 @@ function filterNodesForFocus(
     return output;
   };
   return filter(nodes);
+}
+
+function filterNodesForRepeatedOnly(nodes: InspectorNode[]): InspectorNode[] {
+  const filter = (input: InspectorNode[]): InspectorNode[] => {
+    const output: InspectorNode[] = [];
+    for (const node of input) {
+      const children = filter(node.children ?? []);
+      if (node.nodeType !== "repeated-group" && !children.length) continue;
+      output.push({ ...node, children });
+    }
+    return output;
+  };
+  return filter(nodes);
+}
+
+function hasRenderableBounds(node: InspectorNode): boolean {
+  if (!node.bounds) return false;
+  return node.bounds.width > 0 && node.bounds.height > 0;
+}
+
+function hasAnyRuntimeVisibilityData(nodes: InspectorNode[]): boolean {
+  let found = false;
+  const visit = (node: InspectorNode) => {
+    if (found) return;
+    if (
+      node.projectionCount > 0 ||
+      node.bounds != null ||
+      node.bindingStatus === "bound" ||
+      node.bindingStatus === "multiple" ||
+      node.bindingStatus === "stale"
+    ) {
+      found = true;
+      return;
+    }
+    for (const child of node.children ?? []) visit(child);
+  };
+  for (const node of nodes) visit(node);
+  return found;
+}
+
+function filterNodesForVisibleOnly(nodes: InspectorNode[]): InspectorNode[] {
+  if (!hasAnyRuntimeVisibilityData(nodes)) return nodes;
+
+  const filter = (input: InspectorNode[], ancestorRenderable: boolean): InspectorNode[] => {
+    const output: InspectorNode[] = [];
+    for (const node of input) {
+      const hasRuntimeVisibilitySignal = node.projectionCount > 0 || node.bounds != null;
+      const nodeIsRenderable =
+        (node.projectionCount > 1) ||
+        (hasRuntimeVisibilitySignal && node.isVisible && (node.projectionCount > 0 || hasRenderableBounds(node)));
+      const nextAncestorRenderable = ancestorRenderable || nodeIsRenderable;
+      const children = filter(node.children ?? [], nextAncestorRenderable);
+      const keepBecauseOfVisibleAncestor =
+        ancestorRenderable &&
+        (node.children?.length ?? 0) === 0 &&
+        node.nodeType !== "definition" &&
+        (node.kind === "text" || node.kind === "image" || node.kind === "control");
+      const keepBecauseOfRepeatedStructure =
+        ancestorRenderable && node.nodeType !== "definition" && (node.kind === "text" || node.kind === "image");
+      if (!nodeIsRenderable && !children.length && !keepBecauseOfVisibleAncestor && !keepBecauseOfRepeatedStructure) continue;
+      output.push({ ...node, children });
+    }
+    return output;
+  };
+  return filter(nodes, false);
 }
 
 function toField(id: string, label: string, value: string | number | boolean | null | undefined): InspectorPropertyField {
@@ -84,24 +183,81 @@ function getKindBadgeColor(kind: InspectorNode["kind"]): string {
   }
 }
 
+function normalizePreviewText(value: string | null | undefined, maxLength = 44): string | null {
+  const normalized = value?.replace(/\s+/g, " ").trim() ?? "";
+  if (!normalized) return null;
+  if (normalized.length <= maxLength) return normalized;
+  return `${normalized.slice(0, Math.max(0, maxLength - 1)).trimEnd()}…`;
+}
+
+function getElementPreviewText(element: Element): string | null {
+  if (element instanceof HTMLInputElement) {
+    return normalizePreviewText(element.value || element.placeholder || element.getAttribute("aria-label"));
+  }
+  if (element instanceof HTMLTextAreaElement) {
+    return normalizePreviewText(element.value || element.placeholder || element.getAttribute("aria-label"));
+  }
+  if (element instanceof HTMLSelectElement) {
+    const selectedLabel =
+      element.selectedOptions?.length
+        ? [...element.selectedOptions].map((option) => option.textContent ?? "").join(", ")
+        : element.value;
+    return normalizePreviewText(selectedLabel || element.getAttribute("aria-label"));
+  }
+  const preferred =
+    element.getAttribute("aria-label") ||
+    element.getAttribute("title") ||
+    element.getAttribute("alt") ||
+    element.textContent;
+  return normalizePreviewText(preferred);
+}
+
+function getNodeRuntimePreviewText(node: InspectorNode, elements: Element[]): string | null {
+  const previewableTags = new Set(["button", "a", "label", "option", "summary", "input", "textarea", "select"]);
+  const normalizedTagName = node.tagName.toLowerCase();
+  const isPreviewableTag = previewableTags.has(normalizedTagName);
+  const isLeafNode = (node.children?.length ?? 0) === 0;
+  if (!isPreviewableTag && node.kind !== "text") {
+    return null;
+  }
+  if (!isLeafNode && node.kind !== "text") {
+    return null;
+  }
+  for (const element of elements) {
+    const preview = getElementPreviewText(element);
+    if (preview && preview.toLowerCase() !== node.label.toLowerCase()) {
+      return preview;
+    }
+  }
+  return null;
+}
+
 export function InspectorSidebar() {
   const {
     adapter,
+    allRootNodes,
     debugEvents,
     draftChanges,
     clearDraftChangesForNode,
     getNodeById,
     getNodeElement,
+    getNodeElements,
     getBindingDebug,
+    getHighlightDebug,
     getNodeElementDebug,
-    rootNodes,
+    meaningfulRootNodes,
+    refreshNodes,
     setFocusMode,
     setHierarchyQuery,
     setHoveredNodeId,
     setPanelOpen,
     setPanelPosition,
+    setPanelSize,
     setPickMode,
     setSelectedNodeId,
+    setAutoRefreshTree,
+    setHideInvisible,
+    setTreePaneWidth,
     setTreeFilterMode,
     state,
     toggleNodeExpanded,
@@ -110,7 +266,13 @@ export function InspectorSidebar() {
     removeDraftChange,
   } = useInspectorContext();
   const [dragState, setDragState] = React.useState<DragState | null>(null);
+  const [resizeState, setResizeState] = React.useState<ResizeState | null>(null);
   const [parameterInputValues, setParameterInputValues] = React.useState<Record<string, string>>({});
+  const shellRef = React.useRef<HTMLElement | null>(null);
+  const headerRef = React.useRef<HTMLDivElement | null>(null);
+  const leftChromeRef = React.useRef<HTMLDivElement | null>(null);
+  const [bodyHeight, setBodyHeight] = React.useState(320);
+  const [leftChromeHeight, setLeftChromeHeight] = React.useState(120);
 
   React.useEffect(() => {
     if (!dragState) return;
@@ -128,6 +290,46 @@ export function InspectorSidebar() {
     };
   }, [dragState, setPanelPosition]);
 
+  React.useEffect(() => {
+    if (!resizeState) return;
+    const handlePointerMove = (event: PointerEvent) => {
+      const maxPanelWidth = Math.max(MIN_PANEL_WIDTH, window.innerWidth - PANEL_VIEWPORT_PADDING);
+      const maxPanelHeight = Math.max(MIN_PANEL_HEIGHT, window.innerHeight - PANEL_VIEWPORT_PADDING);
+      if (resizeState.kind === "panel") {
+        const nextWidth = clamp(
+          resizeState.originWidth + (event.clientX - resizeState.startClientX),
+          MIN_PANEL_WIDTH,
+          maxPanelWidth
+        );
+        const nextHeight = clamp(
+          resizeState.originHeight + (event.clientY - resizeState.startClientY),
+          MIN_PANEL_HEIGHT,
+          maxPanelHeight
+        );
+        setPanelSize({ width: nextWidth, height: nextHeight });
+        return;
+      }
+
+      const maxTreePaneWidth = Math.max(
+        MIN_TREE_PANE_WIDTH,
+        state.panelSize.width - MIN_DETAILS_PANE_WIDTH - 14
+      );
+      const nextTreePaneWidth = clamp(
+        resizeState.originTreePaneWidth + (event.clientX - resizeState.startClientX),
+        MIN_TREE_PANE_WIDTH,
+        maxTreePaneWidth
+      );
+      setTreePaneWidth(nextTreePaneWidth);
+    };
+    const handlePointerUp = () => setResizeState(null);
+    window.addEventListener("pointermove", handlePointerMove);
+    window.addEventListener("pointerup", handlePointerUp);
+    return () => {
+      window.removeEventListener("pointermove", handlePointerMove);
+      window.removeEventListener("pointerup", handlePointerUp);
+    };
+  }, [resizeState, setPanelSize, setTreePaneWidth, state.panelSize.width]);
+
   if (!state.enabled) return null;
 
   const beginDrag = (event: React.PointerEvent<HTMLElement>) => {
@@ -141,6 +343,30 @@ export function InspectorSidebar() {
     });
   };
 
+  const beginPanelResize = (event: React.PointerEvent<HTMLElement>) => {
+    if (event.button !== 0) return;
+    event.preventDefault();
+    event.stopPropagation();
+    setResizeState({
+      kind: "panel",
+      startClientX: event.clientX,
+      startClientY: event.clientY,
+      originWidth: panelWidth,
+      originHeight: panelHeight,
+    });
+  };
+
+  const beginTreePaneResize = (event: React.PointerEvent<HTMLElement>) => {
+    if (event.button !== 0) return;
+    event.preventDefault();
+    event.stopPropagation();
+    setResizeState({
+      kind: "tree",
+      startClientX: event.clientX,
+      originTreePaneWidth: treePaneWidth,
+    });
+  };
+
   const shellStyle: React.CSSProperties = {
     position: "fixed",
     left: `${state.panelPosition.x}px`,
@@ -148,6 +374,132 @@ export function InspectorSidebar() {
     zIndex: 9999,
     color: "#eff6ff",
   };
+  const panelWidth = state.panelSize.width;
+  const panelHeight = state.panelSize.height;
+  const treePaneWidth = clamp(
+    state.treePaneWidth,
+    MIN_TREE_PANE_WIDTH,
+    Math.max(MIN_TREE_PANE_WIDTH, panelWidth - MIN_DETAILS_PANE_WIDTH - 14)
+  );
+  const detailsPaneWidth = Math.max(MIN_DETAILS_PANE_WIDTH, panelWidth - treePaneWidth - 14);
+
+  const baseTreeRootNodes =
+    state.hierarchy.treeFilterMode === "smart"
+      ? meaningfulRootNodes
+      : state.hierarchy.treeFilterMode === "repeated"
+        ? allRootNodes
+        : allRootNodes;
+  const visibleTreeRootNodes =
+    state.hierarchy.treeFilterMode === "repeated"
+      ? filterNodesForRepeatedOnly(baseTreeRootNodes)
+      : baseTreeRootNodes;
+  const repeatedFilterFallbackRootNodes =
+    state.hierarchy.treeFilterMode === "repeated" && !visibleTreeRootNodes.length
+      ? allRootNodes
+      : visibleTreeRootNodes;
+  const visibilityFilteredRootNodes = state.hierarchy.hideInvisible
+    ? filterNodesForVisibleOnly(repeatedFilterFallbackRootNodes)
+    : repeatedFilterFallbackRootNodes;
+  const runtimeVisibilityFallbackRootNodes =
+    state.hierarchy.hideInvisible && !visibilityFilteredRootNodes.length
+      ? repeatedFilterFallbackRootNodes
+      : visibilityFilteredRootNodes;
+  const nodesById = buildNodeIndex(runtimeVisibilityFallbackRootNodes);
+  const markedNodeIds = new Set(state.hierarchy.markedNodeIds);
+  const focusFilteredRootNodes = filterNodesForFocus(
+    runtimeVisibilityFallbackRootNodes,
+    nodesById,
+    markedNodeIds,
+    state.hierarchy.focusMode
+  );
+  const filteredRootNodes =
+    state.hierarchy.focusMode === "marked" && !focusFilteredRootNodes.length
+      ? runtimeVisibilityFallbackRootNodes
+      : focusFilteredRootNodes;
+  const treeFallbackReason =
+    state.hierarchy.treeFilterMode === "repeated" && !visibleTreeRootNodes.length
+      ? "Cycles only found no nodes, showing all registered nodes."
+      : state.hierarchy.hideInvisible && !visibilityFilteredRootNodes.length
+      ? "Hide invisible hidden all nodes, showing the broader tree."
+      : state.hierarchy.focusMode === "marked" && !focusFilteredRootNodes.length
+        ? "Focus mode has no marked nodes, showing all available nodes."
+        : null;
+  const visibleNodeCount = countNodes(filteredRootNodes);
+  const selectedNode = getNodeById(state.selectedNodeId);
+  const selectedElement = getNodeElement(state.selectedNodeId);
+  const selectedElementDebug = getNodeElementDebug(state.selectedNodeId);
+  const selectedBindingDebug = getBindingDebug(state.selectedNodeId);
+  const selectedHighlightDebug = getHighlightDebug(state.selectedNodeId);
+  const enrichment = selectedNode ? adapter.enrichNode?.(selectedNode) ?? null : null;
+  const selectedDraftChanges = selectedNode
+    ? draftChanges.filter((entry) => entry.sourceNodeId === (selectedNode.sourceNodeId ?? selectedNode.id))
+    : [];
+  const parameterDescriptors = selectedNode ? adapter.getParameterDescriptors?.(selectedNode) ?? [] : [];
+  const effectivePreviewValues =
+    selectedNode ? adapter.getEffectivePreviewValues?.(selectedNode, draftChanges) ?? [] : [];
+  const previewCapabilities = adapter.getPreviewCapabilities?.(selectedNode ?? null) ?? {
+    token: false,
+    component: false,
+    placement: false,
+    "instance-preview": false,
+  };
+  const canOpenInWorkbench = selectedNode ? (adapter.canOpenNodeInWorkbench?.(selectedNode) ?? false) : false;
+  const mergedLabel = enrichment?.label ?? selectedNode?.label ?? "No node selected";
+
+  const copyFieldValue = React.useCallback((value: string) => {
+    if (!value || value === "-") return;
+    void navigator.clipboard?.writeText(value);
+  }, []);
+
+  React.useLayoutEffect(() => {
+    const measure = () => {
+      const shellHeight = shellRef.current?.clientHeight ?? panelHeight;
+      const headerHeight = headerRef.current?.offsetHeight ?? 0;
+      const nextBodyHeight = Math.max(220, shellHeight - headerHeight - 14);
+      const nextLeftChromeHeight = leftChromeRef.current?.offsetHeight ?? 120;
+      setBodyHeight((current) => (current === nextBodyHeight ? current : nextBodyHeight));
+      setLeftChromeHeight((current) => (current === nextLeftChromeHeight ? current : nextLeftChromeHeight));
+    };
+
+    measure();
+    if (typeof window === "undefined" || typeof ResizeObserver === "undefined") return;
+    const observer = new ResizeObserver(() => measure());
+    if (shellRef.current) observer.observe(shellRef.current);
+    if (headerRef.current) observer.observe(headerRef.current);
+    if (leftChromeRef.current) observer.observe(leftChromeRef.current);
+    return () => observer.disconnect();
+  }, [panelHeight, panelWidth, treeFallbackReason, state.hierarchy.hideInvisible, state.hierarchy.treeFilterMode, state.hierarchy.focusMode]);
+
+  const treeHeight = Math.max(220, bodyHeight - leftChromeHeight - 8);
+
+  React.useEffect(() => {
+    if (!selectedNode) return;
+    setParameterInputValues((current) => {
+      let changed = false;
+      const next = { ...current };
+      for (const descriptor of parameterDescriptors) {
+        if (next[descriptor.id] != null) continue;
+        const effective = effectivePreviewValues.find((item) => item.parameterId === descriptor.id);
+        next[descriptor.id] = effective?.value ?? "";
+        changed = true;
+      }
+      return changed ? next : current;
+    });
+  }, [effectivePreviewValues, parameterDescriptors, selectedNode]);
+
+  const handleRowSelect = React.useCallback(
+    (nodeId: string, hasChildren: boolean, toggle: () => void) => {
+      console.debug("[workbench-inspector] row click", { nodeId, hasChildren, selectedNodeId: state.selectedNodeId });
+      if (state.selectedNodeId === nodeId && hasChildren) {
+        toggle();
+        toggleNodeExpanded(nodeId);
+        return;
+      }
+      setSelectedNodeId(nodeId);
+      setHoveredNodeId(nodeId);
+    },
+    [setHoveredNodeId, setSelectedNodeId, state.selectedNodeId, toggleNodeExpanded]
+  );
 
   if (!state.panelOpen) {
     return (
@@ -226,29 +578,6 @@ export function InspectorSidebar() {
     );
   }
 
-  const nodesById = buildNodeIndex(rootNodes);
-  const markedNodeIds = new Set(state.hierarchy.markedNodeIds);
-  const filteredRootNodes = filterNodesForFocus(rootNodes, nodesById, markedNodeIds, state.hierarchy.focusMode);
-  const selectedNode = getNodeById(state.selectedNodeId);
-  const selectedElement = getNodeElement(state.selectedNodeId);
-  const selectedElementDebug = getNodeElementDebug(state.selectedNodeId);
-  const selectedBindingDebug = getBindingDebug(state.selectedNodeId);
-  const enrichment = selectedNode ? adapter.enrichNode?.(selectedNode) ?? null : null;
-  const selectedDraftChanges = selectedNode
-    ? draftChanges.filter((entry) => entry.sourceNodeId === (selectedNode.sourceNodeId ?? selectedNode.id))
-    : [];
-  const parameterDescriptors = selectedNode ? adapter.getParameterDescriptors?.(selectedNode) ?? [] : [];
-  const effectivePreviewValues =
-    selectedNode ? adapter.getEffectivePreviewValues?.(selectedNode, draftChanges) ?? [] : [];
-  const previewCapabilities = adapter.getPreviewCapabilities?.(selectedNode ?? null) ?? {
-    token: false,
-    component: false,
-    placement: false,
-    "instance-preview": false,
-  };
-  const canOpenInWorkbench = selectedNode ? (adapter.canOpenNodeInWorkbench?.(selectedNode) ?? false) : false;
-  const mergedLabel = enrichment?.label ?? selectedNode?.label ?? "No node selected";
-
   const createDraftChange = (scope: DraftChangeScope, parameterId?: string) => {
     if (!selectedNode) return;
     if (!previewCapabilities[scope]) return;
@@ -280,11 +609,13 @@ export function InspectorSidebar() {
           title: "Node",
           fields: [
             toField("label", "Label", mergedLabel),
+            toField("nodeType", "Node type", selectedNode.nodeType),
             toField("componentName", "Component", selectedNode.componentName ?? null),
             toField("sourceNodeId", "Source node", selectedNode.sourceNodeId ?? selectedNode.id),
             toField("sourceCategory", "Source category", selectedNode.sourceCategory ?? null),
             toField("bindingKey", "Binding key", selectedNode.bindingKey ?? null),
             toField("bindingStatus", "Binding status", selectedNode.bindingStatus ?? null),
+            toField("projectionCount", "Projection count", selectedNode.projectionCount),
             toField("runtimeProjectionCount", "Runtime projections", selectedNode.runtimeProjectionCount ?? 0),
             toField("definitionId", "Definition", selectedNode.definitionId ?? null),
             toField("placementId", "Placement", selectedNode.placementId ?? null),
@@ -308,6 +639,24 @@ export function InspectorSidebar() {
             toField("h", "Height", selectedNode.bounds?.height != null ? Math.round(selectedNode.bounds.height) : null),
             toField("visible", "Visible", selectedNode.isVisible),
             toField("interactive", "Interactive", selectedNode.isInteractive),
+          ],
+        },
+        {
+          id: "highlight",
+          title: "Highlight",
+          fields: [
+            toField("highlightMode", "Highlight mode", selectedNode.highlightMode),
+            toField("projectionCountDebug", "Projection count", selectedHighlightDebug.projectionCount),
+            toField("projectionElementCount", "Projection elements", selectedHighlightDebug.projectionElementCount),
+            toField("resolvedElementCount", "Resolved node elements", selectedHighlightDebug.resolvedElementCount),
+            toField("renderableRectCount", "Renderable rects", selectedHighlightDebug.renderableRectCount),
+            toField(
+              "missingProjectionIds",
+              "Missing projections",
+              selectedHighlightDebug.missingProjectionIds.length
+                ? selectedHighlightDebug.missingProjectionIds.join(", ")
+                : null
+            ),
           ],
         },
       ]
@@ -396,6 +745,8 @@ export function InspectorSidebar() {
             title: "Overlay debug",
             fields: [
               toField("overlay-selected-node", "Selected node", selectedNode?.id ?? "none"),
+              toField("overlay-graph-mode", "Graph mode", selectedBindingDebug.graphMode),
+              toField("overlay-resolution-path", "Resolution path", selectedBindingDebug.resolutionPath ?? "-"),
               toField("overlay-binding-status", "Binding status", selectedNode?.bindingStatus ?? "none"),
               toField("overlay-runtime-count", "Runtime projections", selectedNode?.runtimeProjectionCount ?? 0),
               toField("overlay-element-found", "Element found", selectedElementDebug.found),
@@ -403,6 +754,8 @@ export function InspectorSidebar() {
               toField("overlay-matched-node", "Matched node", selectedElementDebug.matchedNodeId ?? "-"),
               toField("overlay-tag", "Element tag", selectedElementDebug.tagName ?? "-"),
               toField("overlay-canonical-matches", "Canonical matches", selectedBindingDebug.canonicalMatches.join(", ") || "-"),
+              toField("overlay-source-key", "Source path key", selectedBindingDebug.sourcePathComponentKey ?? "-"),
+              toField("overlay-source-matches", "Source matches", selectedBindingDebug.sourcePathMatches.join(", ") || "-"),
               toField("overlay-owner-key", "Owner key", selectedBindingDebug.ownerComponentKey ?? "-"),
               toField("overlay-owner-matches", "Owner matches", selectedBindingDebug.ownerMatches.join(", ") || "-"),
               toField("overlay-component-name", "Component name", selectedBindingDebug.componentName ?? "-"),
@@ -445,42 +798,11 @@ export function InspectorSidebar() {
   const bridgeSections = enrichment?.propertySections ?? [];
   const allSections = [...genericSections, ...authoringSections, ...draftSections, ...parameterSections, ...semanticSection, ...ownershipSection, ...bridgeSections, ...debugSections];
 
-  const treeHeight =
-    typeof window !== "undefined" ? Math.max(360, Math.min(720, window.innerHeight - state.panelPosition.y - 160)) : 520;
-
-  React.useEffect(() => {
-    if (!selectedNode) return;
-    setParameterInputValues((current) => {
-      let changed = false;
-      const next = { ...current };
-      for (const descriptor of parameterDescriptors) {
-        if (next[descriptor.id] != null) continue;
-        const effective = effectivePreviewValues.find((item) => item.parameterId === descriptor.id);
-        next[descriptor.id] = effective?.value ?? "";
-        changed = true;
-      }
-      return changed ? next : current;
-    });
-  }, [effectivePreviewValues, parameterDescriptors, selectedNode]);
-
-  const handleRowSelect = React.useCallback(
-    (nodeId: string, hasChildren: boolean, toggle: () => void) => {
-      console.debug("[workbench-inspector] row click", { nodeId, hasChildren, selectedNodeId: state.selectedNodeId });
-      if (state.selectedNodeId === nodeId && hasChildren) {
-        toggle();
-        toggleNodeExpanded(nodeId);
-        return;
-      }
-      setSelectedNodeId(nodeId);
-      setHoveredNodeId(nodeId);
-    },
-    [setHoveredNodeId, setSelectedNodeId, state.selectedNodeId, toggleNodeExpanded]
-  );
-
   function TreeNode(props: NodeRendererProps<InspectorNode>) {
     const nodeData = props.node.data;
     const nodeEnrichment = adapter.enrichNode?.(nodeData) ?? null;
     const nodeLabel = nodeEnrichment?.label ?? nodeData.label;
+    const nodeRuntimePreview = getNodeRuntimePreviewText(nodeData, getNodeElements(nodeData.id));
     const isMarked = markedNodeIds.has(nodeData.id);
     const kindColor = getKindBadgeColor(nodeData.kind);
     const availability = nodeEnrichment?.meta?.availability;
@@ -578,6 +900,20 @@ export function InspectorSidebar() {
               <div style={{ fontSize: "12px", fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                 {nodeLabel}
               </div>
+              {nodeRuntimePreview ? (
+                <div
+                  style={{
+                    marginTop: 1,
+                    fontSize: "11px",
+                    opacity: 0.72,
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  “{nodeRuntimePreview}”
+                </div>
+              ) : null}
             </div>
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 2 }}>
@@ -615,6 +951,20 @@ export function InspectorSidebar() {
                 {bindingStatus}
               </span>
             ) : null}
+            {nodeData.nodeType === "repeated-group" ? (
+              <span
+                style={{
+                  fontSize: "9px",
+                  opacity: 0.8,
+                  padding: "1px 6px",
+                  borderRadius: "999px",
+                  border: "1px solid rgba(124,247,198,0.18)",
+                  background: "rgba(124,247,198,0.1)",
+                }}
+              >
+                x{nodeData.projectionCount}
+              </span>
+            ) : null}
           </div>
         </div>
         <button
@@ -644,12 +994,15 @@ export function InspectorSidebar() {
 
   return (
     <aside
+      ref={shellRef}
+      className="workbenchInspectorShell"
       aria-label="Workbench inspector"
       data-workbench-inspector-shell="true"
       data-workbench-inspector-sidebar="foundation"
       style={{
         ...shellStyle,
-        width: "980px",
+        width: `${panelWidth}px`,
+        height: `${panelHeight}px`,
         maxWidth: "calc(100vw - 24px)",
         maxHeight: "calc(100vh - 24px)",
         overflow: "hidden",
@@ -659,9 +1012,44 @@ export function InspectorSidebar() {
         background: "linear-gradient(180deg, rgba(23, 28, 38, 0.98), rgba(13, 17, 24, 0.98))",
         boxShadow: "0 30px 80px rgba(0, 0, 0, 0.42)",
         backdropFilter: "blur(16px)",
+        display: "flex",
+        flexDirection: "column",
+        gap: 14,
+        boxSizing: "border-box",
       }}
     >
-      <div style={{ display: "flex", justifyContent: "space-between", gap: 16, marginBottom: 14 }}>
+      <style>{`
+        .workbenchInspectorShell .workbenchInspectorScroll {
+          scrollbar-width: thin;
+          scrollbar-color: rgba(150, 186, 255, 0.88) rgba(10, 14, 26, 0.72);
+        }
+        .workbenchInspectorShell .workbenchInspectorScroll::-webkit-scrollbar {
+          width: 11px;
+          height: 11px;
+        }
+        .workbenchInspectorShell .workbenchInspectorScroll::-webkit-scrollbar-track {
+          background: linear-gradient(180deg, rgba(15, 22, 40, 0.94), rgba(12, 16, 32, 0.9));
+          border-radius: 999px;
+          border: 1px solid rgba(108, 136, 210, 0.18);
+        }
+        .workbenchInspectorShell .workbenchInspectorScroll::-webkit-scrollbar-thumb {
+          background:
+            linear-gradient(180deg, rgba(187, 219, 255, 0.96) 0%, rgba(114, 160, 255, 0.94) 42%, rgba(174, 130, 255, 0.95) 100%);
+          border-radius: 999px;
+          border: 2px solid rgba(10, 14, 26, 0.82);
+          box-shadow:
+            0 0 10px rgba(126, 188, 255, 0.34),
+            0 0 18px rgba(171, 137, 255, 0.18);
+        }
+        .workbenchInspectorShell .workbenchInspectorScroll::-webkit-scrollbar-thumb:hover {
+          background:
+            linear-gradient(180deg, rgba(205, 230, 255, 0.98) 0%, rgba(136, 182, 255, 0.96) 45%, rgba(189, 152, 255, 0.97) 100%);
+          box-shadow:
+            0 0 12px rgba(126, 188, 255, 0.55),
+            0 0 20px rgba(171, 137, 255, 0.24);
+        }
+      `}</style>
+      <div ref={headerRef} style={{ display: "flex", justifyContent: "space-between", gap: 16, flex: "0 0 auto" }}>
         <div onPointerDown={beginDrag} style={{ flex: 1, cursor: dragState ? "grabbing" : "grab", userSelect: "none" }}>
           <div style={{ fontSize: "11px", letterSpacing: "0.08em", textTransform: "uppercase", opacity: 0.65 }}>
             Workbench Inspector
@@ -727,17 +1115,44 @@ export function InspectorSidebar() {
           </button>
           <button
             type="button"
-            onClick={() => setTreeFilterMode(state.hierarchy.treeFilterMode === "smart" ? "all" : "smart")}
+            onClick={() => refreshNodes()}
             style={{
               border: "1px solid rgba(255,255,255,0.12)",
               borderRadius: "999px",
               padding: "8px 12px",
-              background: state.hierarchy.treeFilterMode === "smart" ? "rgba(164, 145, 255, 0.18)" : "transparent",
+              background: "transparent",
               color: "inherit",
               cursor: "pointer",
             }}
           >
-            {state.hierarchy.treeFilterMode === "smart" ? "Meaningful components" : "All registered nodes"}
+            Refresh tree
+          </button>
+          <button
+            type="button"
+            onClick={() =>
+              setTreeFilterMode(
+                state.hierarchy.treeFilterMode === "smart"
+                  ? "all"
+                  : state.hierarchy.treeFilterMode === "all"
+                    ? "repeated"
+                    : "smart"
+              )
+            }
+            style={{
+              border: "1px solid rgba(255,255,255,0.12)",
+              borderRadius: "999px",
+              padding: "8px 12px",
+              background:
+                state.hierarchy.treeFilterMode !== "all" ? "rgba(164, 145, 255, 0.18)" : "transparent",
+              color: "inherit",
+              cursor: "pointer",
+            }}
+          >
+            {state.hierarchy.treeFilterMode === "smart"
+              ? "Meaningful components"
+              : state.hierarchy.treeFilterMode === "all"
+                ? "All registered nodes"
+                : "Cycles only"}
           </button>
           <button
             type="button"
@@ -756,26 +1171,51 @@ export function InspectorSidebar() {
         </div>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "360px minmax(0, 1fr)", gap: 14, height: `${treeHeight + 96}px` }}>
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: `${treePaneWidth}px 14px minmax(${detailsPaneWidth}px, 1fr)`,
+          gap: 0,
+          minHeight: 0,
+          height: `${bodyHeight}px`,
+          flex: "1 1 auto",
+        }}
+      >
         <section
           style={{
             minWidth: 0,
+            minHeight: 0,
             borderRight: "1px solid rgba(255,255,255,0.06)",
             paddingRight: 12,
             background: "rgba(255,255,255,0.02)",
             borderRadius: "16px",
             padding: "12px",
+            display: "flex",
+            flexDirection: "column",
+            overflow: "hidden",
           }}
         >
+          <div ref={leftChromeRef} style={{ flex: "0 0 auto" }}>
           <div style={{ display: "flex", justifyContent: "space-between", gap: 8, marginBottom: 8 }}>
             <div>
               <div style={{ fontSize: "11px", letterSpacing: "0.08em", textTransform: "uppercase", opacity: 0.6 }}>Layers</div>
               <div style={{ fontSize: "12px", opacity: 0.75 }}>
-                {state.hierarchy.focusMode === "marked" ? "Focused nodes" : "All visible nodes"}
+                {state.hierarchy.focusMode === "marked" && !focusFilteredRootNodes.length
+                  ? "Fallback to all nodes"
+                  : state.hierarchy.focusMode === "marked"
+                    ? "Focused nodes"
+                    : "All visible nodes"}
               </div>
             </div>
-            <div style={{ fontSize: "11px", opacity: 0.55, alignSelf: "end" }}>
-              {state.hierarchy.treeFilterMode === "smart" ? "Meaningful components" : "All registered nodes"}
+            <div style={{ fontSize: "11px", opacity: 0.55, alignSelf: "end", textAlign: "right" }}>
+              <div>
+                {state.hierarchy.treeFilterMode === "smart"
+                  ? "Meaningful components"
+                  : state.hierarchy.treeFilterMode === "all"
+                    ? "All registered nodes"
+                    : "Cycles only"}
+              </div>
+              <div>{visibleNodeCount} nodes</div>
             </div>
           </div>
           <input
@@ -794,30 +1234,185 @@ export function InspectorSidebar() {
               padding: "10px 12px",
             }}
           />
-          <Tree<InspectorNode>
-            key={state.hierarchy.treeFilterMode}
-            data={filteredRootNodes}
-            width={348}
-            height={treeHeight}
-            indent={20}
-            rowHeight={52}
-            overscanCount={8}
-            padding={0}
-            searchTerm={state.hierarchy.query}
-            searchMatch={(node, searchTerm) =>
-              node.data.label.toLowerCase().includes(searchTerm.toLowerCase()) ||
-              node.data.tagName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-              (adapter.enrichNode?.(node.data)?.label ?? "").toLowerCase().includes(searchTerm.toLowerCase())
-            }
-            childrenAccessor="children"
-            idAccessor="id"
-            initialOpenState={Object.fromEntries(state.hierarchy.expandedNodeIds.map((id) => [id, true]))}
+          <label
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+              marginBottom: 10,
+              fontSize: "12px",
+              opacity: 0.82,
+              cursor: "pointer",
+            }}
           >
-            {TreeNode}
-          </Tree>
+            <input
+              type="checkbox"
+              checked={state.hierarchy.hideInvisible}
+              onChange={(event) => setHideInvisible(event.target.checked)}
+            />
+            Hide invisible
+          </label>
+          <label
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+              marginBottom: 10,
+              fontSize: "12px",
+              opacity: 0.82,
+              cursor: "pointer",
+            }}
+          >
+            <input
+              type="checkbox"
+              checked={state.hierarchy.autoRefreshTree}
+              onChange={(event) => setAutoRefreshTree(event.target.checked)}
+            />
+            Auto-refresh tree
+          </label>
+          {treeFallbackReason ? (
+            <div
+              style={{
+                marginBottom: 10,
+                borderRadius: "10px",
+                border: "1px solid rgba(255,255,255,0.1)",
+                background: "rgba(255,255,255,0.04)",
+                padding: "8px 10px",
+                fontSize: "12px",
+                opacity: 0.82,
+              }}
+            >
+              {treeFallbackReason}
+            </div>
+          ) : null}
+          </div>
+          <div className="workbenchInspectorScroll" style={{ flex: "1 1 auto", minHeight: 0, overflow: "auto", paddingRight: 2 }}>
+          {filteredRootNodes.length ? (
+            <Tree<InspectorNode>
+              key={`${state.hierarchy.treeFilterMode}:${state.hierarchy.hideInvisible ? "visible" : "all"}:${state.hierarchy.focusMode}`}
+              data={filteredRootNodes}
+              width={Math.max(240, treePaneWidth - 12)}
+              height={treeHeight}
+              indent={20}
+              rowHeight={64}
+              overscanCount={8}
+              padding={0}
+              searchTerm={state.hierarchy.query}
+              searchMatch={(node, searchTerm) =>
+                node.data.label.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                node.data.tagName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                (adapter.enrichNode?.(node.data)?.label ?? "").toLowerCase().includes(searchTerm.toLowerCase())
+              }
+              childrenAccessor="children"
+              idAccessor="id"
+              initialOpenState={Object.fromEntries(state.hierarchy.expandedNodeIds.map((id) => [id, true]))}
+            >
+              {TreeNode}
+            </Tree>
+          ) : (
+            <div
+              className="workbenchInspectorScroll"
+              style={{
+                display: "grid",
+                gap: 10,
+                alignContent: "start",
+                minHeight: treeHeight,
+                paddingTop: 8,
+                overflow: "auto",
+              }}
+            >
+              <div
+                style={{
+                  borderRadius: "10px",
+                  border: "1px solid rgba(255,255,255,0.1)",
+                  background: "rgba(255,255,255,0.04)",
+                  padding: "10px 12px",
+                  fontSize: "12px",
+                  opacity: 0.82,
+                }}
+              >
+                No nodes match the current inspector filters.
+              </div>
+              <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                {state.hierarchy.hideInvisible ? (
+                  <button
+                    type="button"
+                    onClick={() => setHideInvisible(false)}
+                    style={{
+                      border: "1px solid rgba(255,255,255,0.12)",
+                      borderRadius: "10px",
+                      padding: "8px 10px",
+                      background: "transparent",
+                      color: "inherit",
+                      cursor: "pointer",
+                    }}
+                  >
+                    Show invisible
+                  </button>
+                ) : null}
+                {state.hierarchy.focusMode === "marked" ? (
+                  <button
+                    type="button"
+                    onClick={() => setFocusMode("all")}
+                    style={{
+                      border: "1px solid rgba(255,255,255,0.12)",
+                      borderRadius: "10px",
+                      padding: "8px 10px",
+                      background: "transparent",
+                      color: "inherit",
+                      cursor: "pointer",
+                    }}
+                  >
+                    Show all nodes
+                  </button>
+                ) : null}
+                {state.hierarchy.treeFilterMode !== "all" ? (
+                  <button
+                    type="button"
+                    onClick={() => setTreeFilterMode("all")}
+                    style={{
+                      border: "1px solid rgba(255,255,255,0.12)",
+                      borderRadius: "10px",
+                      padding: "8px 10px",
+                      background: "transparent",
+                      color: "inherit",
+                      cursor: "pointer",
+                    }}
+                  >
+                    All registered nodes
+                  </button>
+                ) : null}
+              </div>
+            </div>
+          )}
+          </div>
         </section>
 
-        <section style={{ minWidth: 0, overflow: "auto", paddingRight: 4 }}>
+        <div
+          role="separator"
+          aria-orientation="vertical"
+          onPointerDown={beginTreePaneResize}
+          style={{
+            width: "14px",
+            cursor: "col-resize",
+            position: "relative",
+            userSelect: "none",
+          }}
+        >
+          <div
+            style={{
+              position: "absolute",
+              left: "6px",
+              top: "10px",
+              bottom: "10px",
+              width: "2px",
+              borderRadius: "999px",
+              background: resizeState?.kind === "tree" ? "rgba(110, 168, 255, 0.8)" : "rgba(255,255,255,0.12)",
+            }}
+          />
+        </div>
+
+        <section className="workbenchInspectorScroll" style={{ minWidth: 0, minHeight: 0, overflow: "auto", paddingRight: 4, paddingLeft: 14 }}>
           {selectedNode ? (
             <div style={{ display: "grid", gap: 14 }}>
               <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
@@ -906,6 +1501,8 @@ export function InspectorSidebar() {
                         <div key={field.id} style={{ display: "grid", gridTemplateColumns: "120px minmax(0, 1fr)", gap: 12, alignItems: "center" }}>
                           <div style={{ opacity: 0.7, fontSize: "12px" }}>{field.label}</div>
                           <div
+                            onClick={() => copyFieldValue(field.value)}
+                            title={field.value && field.value !== "-" ? "Click to copy full value" : undefined}
                             style={{
                               minWidth: 0,
                               borderRadius: "10px",
@@ -916,6 +1513,8 @@ export function InspectorSidebar() {
                               overflow: "hidden",
                               textOverflow: "ellipsis",
                               whiteSpace: "nowrap",
+                              cursor: field.value && field.value !== "-" ? "copy" : "default",
+                              userSelect: "none",
                             }}
                           >
                             {field.value}
@@ -1136,6 +1735,24 @@ export function InspectorSidebar() {
           )}
         </section>
       </div>
+      <div
+        aria-hidden="true"
+        onPointerDown={beginPanelResize}
+        style={{
+          position: "absolute",
+          right: 6,
+          bottom: 6,
+          width: 18,
+          height: 18,
+          cursor: "nwse-resize",
+          borderRadius: "8px",
+          background:
+            resizeState?.kind === "panel"
+              ? "linear-gradient(135deg, rgba(110, 168, 255, 0.55), rgba(124, 247, 198, 0.55))"
+              : "linear-gradient(135deg, rgba(255,255,255,0.06), rgba(255,255,255,0.18))",
+          boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.1)",
+        }}
+      />
     </aside>
   );
 }

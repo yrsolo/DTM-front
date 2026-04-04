@@ -9,7 +9,7 @@ export type AuthoringValueKind = "string" | "number" | "boolean" | "enum" | "col
 export type AuthoringValueState = "valid" | "invalid" | "clamped" | "coerced" | "unresolved" | "blocked";
 export type InspectorPickMode = "off" | "on";
 export type InspectorFocusMode = "all" | "marked";
-export type InspectorTreeFilterMode = "smart" | "all";
+export type InspectorTreeFilterMode = "smart" | "all" | "repeated";
 
 export type InspectorNodeMeta = Record<string, InspectorValue>;
 
@@ -25,7 +25,14 @@ export type InspectorPanelPosition = {
   y: number;
 };
 
+export type InspectorPanelSize = {
+  width: number;
+  height: number;
+};
+
 export type InspectorNodeKind = "semantic" | "control" | "content" | "text" | "image" | "container" | "unknown";
+export type InspectorNodeType = "definition" | "placement" | "repeated-group";
+export type InspectorHighlightMode = "single" | "multi";
 
 export type InspectorRuntimeProjection = {
   id: string;
@@ -149,8 +156,12 @@ export type InspectorNode = {
   id: InspectorNodeId;
   sourceNodeId?: SourceNodeId;
   runtimeId?: string;
+  nodeType: InspectorNodeType;
   bindingKey?: string | null;
   bindingStatus?: SourceRuntimeBindingStatus;
+  projectionIds: string[];
+  projectionCount: number;
+  highlightMode: InspectorHighlightMode;
   runtimeProjectionCount?: number;
   label: string;
   displayLabel?: string;
@@ -220,6 +231,8 @@ export type InspectorHierarchyState = {
   query: string;
   focusMode: InspectorFocusMode;
   treeFilterMode: InspectorTreeFilterMode;
+  hideInvisible: boolean;
+  autoRefreshTree: boolean;
 };
 
 export type InspectorState = {
@@ -228,6 +241,8 @@ export type InspectorState = {
   selectedNodeId: InspectorNodeId | null;
   panelOpen: boolean;
   panelPosition: InspectorPanelPosition;
+  panelSize: InspectorPanelSize;
+  treePaneWidth: number;
   pickMode: InspectorPickMode;
   debug: boolean;
   hierarchy: InspectorHierarchyState;

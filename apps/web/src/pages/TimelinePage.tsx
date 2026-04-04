@@ -16,7 +16,7 @@ import { readMaskingMode, writeMaskingMode } from "../auth/maskingMode";
 import { canUseLocalDevAuthUi } from "../config/localDevAuth";
 import { useElementWidth } from "../utils/useElementWidth";
 import { toShortPersonName } from "../utils/personName";
-import { InspectorNodeBoundary } from "@dtm/workbench-inspector";
+import { InspectorNodeBoundary } from "../inspector-integration/boundary";
 
 const ZOOM_PRESETS = [0.1, 0.2, 0.3, 0.4, 0.5, 0.75, 1, 1.25, 1.5, 2, 3, 4, 5, 6, 8, 10];
 const DAY_MS = 24 * 60 * 60 * 1000;

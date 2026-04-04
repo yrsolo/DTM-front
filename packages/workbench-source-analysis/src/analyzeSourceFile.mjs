@@ -14,8 +14,9 @@ const ENRICHMENT_WRAPPER_NAMES = new Set(["InspectorNodeBoundary"]);
 const STRUCTURAL_NAME_RE =
   /(Shell|Layout|Page|Panel|Section|Header|Footer|Body|Content|Toolbar|Group|Row|Column|Modal|Drawer|Sidebar|Dock|Surface|Frame|Wrapper|Container)$/;
 const INTERACTIVE_HOST_TAGS = new Set(["button", "select", "input", "textarea", "a"]);
-const TEXTUAL_HOST_TAGS = new Set(["span", "label", "strong", "em", "p", "h1", "h2", "h3", "h4", "h5", "h6"]);
-const STRUCTURAL_HOST_TAGS = new Set(["form", "section", "header", "footer", "nav", "aside", "main", "article"]);
+const TEXTUAL_HOST_TAGS = new Set(["span", "label", "strong", "em", "p", "h1", "h2", "h3", "h4", "h5", "h6", "text", "tspan"]);
+const STRUCTURAL_HOST_TAGS = new Set(["form", "section", "header", "footer", "nav", "aside", "main", "article", "svg", "g"]);
+const GRAPHICAL_HOST_TAGS = new Set(["img", "picture", "canvas", "image", "rect", "line", "path", "circle", "ellipse", "polyline", "polygon"]);
 const CONDITIONAL_CONTAINER_TAGS = new Set(["div", "ul", "li"]);
 
 const compilerOptionsCache = new Map();
@@ -26,7 +27,7 @@ function isComponentName(name) {
 }
 
 function isMeaningfulHostTag(name) {
-  return INTERACTIVE_HOST_TAGS.has(name) || TEXTUAL_HOST_TAGS.has(name) || STRUCTURAL_HOST_TAGS.has(name);
+  return INTERACTIVE_HOST_TAGS.has(name) || TEXTUAL_HOST_TAGS.has(name) || STRUCTURAL_HOST_TAGS.has(name) || GRAPHICAL_HOST_TAGS.has(name);
 }
 
 function normalizePath(value) {
@@ -370,6 +371,7 @@ function createRawNode(sourceFile, jsxNode, componentName, children, repeated) {
   return {
     rawId: `raw:${toLocation(sourceFile, jsxNode)}:${componentName}`,
     componentName,
+    displayLabel: componentName,
     sourcePath: normalizePath(sourceFile.fileName),
     sourceLocation: toLocation(sourceFile, jsxNode),
     repeated,
@@ -395,9 +397,78 @@ function getJsxAttribute(node, attributeName) {
   return "";
 }
 
-function getHostDisplayName(sourceFile, node, tagName) {
+function resolveStaticStringExpression(sourceFile, expression) {
+  if (!expression) return "";
+  if (ts.isStringLiteral(expression) || ts.isNoSubstitutionTemplateLiteral(expression)) {
+    return expression.text;
+  }
+  if (ts.isIdentifier(expression)) {
+    for (const statement of sourceFile.statements) {
+      if (!ts.isVariableStatement(statement)) continue;
+      for (const declaration of statement.declarationList.declarations) {
+        if (!ts.isIdentifier(declaration.name) || declaration.name.text !== expression.text) continue;
+        const initializer = declaration.initializer;
+        if (!initializer) return "";
+        if (ts.isStringLiteral(initializer) || ts.isNoSubstitutionTemplateLiteral(initializer)) {
+          return initializer.text;
+        }
+      }
+    }
+  }
+  return "";
+}
+
+function collectStaticJsxText(parts, child) {
+  if (ts.isJsxText(child)) {
+    const normalized = child.getText().replace(/\s+/g, " ").trim();
+    if (normalized) parts.push(normalized);
+    return;
+  }
+  if (ts.isJsxExpression(child) && child.expression) {
+    const resolved = resolveStaticStringExpression(child.getSourceFile(), child.expression);
+    const normalized = resolved.replace(/\s+/g, " ").trim();
+    if (normalized) {
+      parts.push(normalized);
+    }
+    return;
+  }
+  if (ts.isJsxElement(child) || ts.isJsxFragment(child)) {
+    const nestedChildren = ts.isJsxElement(child) ? child.children : child.children;
+    for (const nestedChild of nestedChildren) {
+      collectStaticJsxText(parts, nestedChild);
+    }
+  }
+}
+
+function getInlineTextContent(node) {
+  const children =
+    ts.isJsxElement(node) ? node.children : ts.isJsxSelfClosingElement(node) ? [] : ts.isJsxFragment(node) ? node.children : [];
+  if (!children.length) return "";
+  const parts = [];
+  for (const child of children) {
+    collectStaticJsxText(parts, child);
+  }
+  return parts.join(" ").replace(/\s+/g, " ").trim();
+}
+
+function getHostIdentityName(sourceFile, node, tagName) {
+  if (INTERACTIVE_HOST_TAGS.has(tagName) || TEXTUAL_HOST_TAGS.has(tagName)) {
+    return tagName;
+  }
+  const className = getJsxAttribute(node, "className");
+  if (className) return `${tagName}.${className.split(/\s+/)[0]}`;
+  return tagName;
+}
+
+function getHostDisplayLabel(sourceFile, node, tagName) {
   const ariaLabel = getJsxAttribute(node, "aria-label");
-  if (ariaLabel) return ariaLabel;
+  if (ariaLabel) return `${tagName} "${ariaLabel}"`;
+  const title = getJsxAttribute(node, "title");
+  if (title) return `${tagName} "${title}"`;
+  if (INTERACTIVE_HOST_TAGS.has(tagName) || TEXTUAL_HOST_TAGS.has(tagName)) {
+    const inlineText = getInlineTextContent(node);
+    if (inlineText) return `${tagName} "${inlineText}"`;
+  }
   const className = getJsxAttribute(node, "className");
   if (className) return `${tagName}.${className.split(/\s+/)[0]}`;
   return tagName;
@@ -494,14 +565,17 @@ function extractNodesFromJsx(sourceFile, node, repeated = false) {
       return [createRawNode(sourceFile, node, tagName, [], repeated || isInsideMapCallback(node))];
     }
     if (!isMeaningfulHostTag(tagName) && !shouldKeepConditionalHostTag(tagName, node, [])) return [];
+    const componentName = getHostIdentityName(sourceFile, node, tagName);
+    const rawNode = createRawNode(
+      sourceFile,
+      node,
+      componentName,
+      [],
+      repeated || isInsideMapCallback(node)
+    );
+    rawNode.displayLabel = getHostDisplayLabel(sourceFile, node, tagName);
     return [
-      createRawNode(
-        sourceFile,
-        node,
-        getHostDisplayName(sourceFile, node, tagName),
-        [],
-        repeated || isInsideMapCallback(node)
-      ),
+      rawNode,
     ];
   }
 
@@ -514,14 +588,17 @@ function extractNodesFromJsx(sourceFile, node, repeated = false) {
     );
     if (!isComponentName(tagName)) {
       if (!isMeaningfulHostTag(tagName) && !shouldKeepConditionalHostTag(tagName, node, children)) return children;
+      const componentName = getHostIdentityName(sourceFile, node, tagName);
+      const rawNode = createRawNode(
+        sourceFile,
+        node.openingElement,
+        componentName,
+        children,
+        repeated || isInsideMapCallback(node)
+      );
+      rawNode.displayLabel = getHostDisplayLabel(sourceFile, node, tagName);
       return [
-        createRawNode(
-          sourceFile,
-          node.openingElement,
-          getHostDisplayName(sourceFile, node, tagName),
-          children,
-          repeated || isInsideMapCallback(node)
-        ),
+        rawNode,
       ];
     }
     return [
@@ -573,24 +650,24 @@ function buildCanonicalPath(parentPath, componentName, index) {
   return parentPath ? `${parentPath}/${segment}` : segment;
 }
 
-function normalizeRawNodes(rawNodes, parentPath = "") {
+function normalizeRawNodes(rawNodes, parentPath = "", startIndex = 0) {
   const normalized = [];
 
   for (const rawNode of rawNodes) {
-    const normalizedChildren = normalizeRawNodes(rawNode.children, parentPath);
     const nodeClass = classifyRawNode(rawNode);
+    const flattenedChildren = normalizeRawNodes(rawNode.children, parentPath, startIndex + normalized.length);
 
     if (nodeClass === "technical-wrapper" || nodeClass === "enrichment-wrapper") {
-      normalized.push(...normalizedChildren);
+      normalized.push(...flattenedChildren);
       continue;
     }
 
-    if (nodeClass === "structural" && !shouldKeepStructuralNode(rawNode, normalizedChildren)) {
-      normalized.push(...normalizedChildren);
+    if (nodeClass === "structural" && !shouldKeepStructuralNode(rawNode, flattenedChildren)) {
+      normalized.push(...flattenedChildren);
       continue;
     }
 
-    const canonicalPath = buildCanonicalPath(parentPath, rawNode.componentName, normalized.length);
+    const canonicalPath = buildCanonicalPath(parentPath, rawNode.componentName, startIndex + normalized.length);
     const idPrefix =
       nodeClass === "repeated-pattern"
         ? "rpt"
@@ -604,6 +681,7 @@ function normalizeRawNodes(rawNodes, parentPath = "") {
       id: `${idPrefix}:${sanitizeIdPart(canonicalPath)}`,
       class: nodeClass,
       componentName: rawNode.componentName,
+      displayLabel: rawNode.displayLabel ?? rawNode.componentName,
       sourcePath: rawNode.sourcePath,
       sourceLocation: rawNode.sourceLocation ?? null,
       canonicalPath,

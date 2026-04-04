@@ -1,6 +1,6 @@
 import React from "react";
 import { useLocation } from "react-router-dom";
-import { InspectorNodeBoundary } from "@dtm/workbench-inspector";
+import { InspectorNodeBoundary } from "../inspector-integration/boundary";
 import { useSnapshot } from "../data/useSnapshot";
 import { resolvePublicAssetUrl } from "../config/publicPaths";
 import { AppLocale, getUiText, UiText } from "../i18n/uiText";
@@ -155,7 +155,7 @@ function sanitizeRuntimeDefaultsForHost(input: RuntimeDefaults): RuntimeDefaults
   return { ...input, demoMode: false };
 }
 
-export function Layout(props: { children: React.ReactNode }) {
+export function Layout(props: { children: React.ReactNode; inspectorMount?: React.ReactNode }) {
   const location = useLocation();
   const INTRO_FADE_MS = 3000;
   const INTRO_VIDEO_DELAY_MS = 1000;
@@ -700,7 +700,7 @@ export function Layout(props: { children: React.ReactNode }) {
       }}
     >
       <InspectorNodeBoundary label="App shell" kind="content" sourcePath="apps/web/src/components/Layout.tsx">
-      <div className={appShellClassName} style={layoutVarsStyle}>
+      <div className={appShellClassName} style={layoutVarsStyle} data-inspector-host-root="true">
         {!isMiniAppRoute && !isPromoRoute && !isFormatSortRoute ? (
           <InspectorNodeBoundary
             label="App topbar"
@@ -762,6 +762,7 @@ export function Layout(props: { children: React.ReactNode }) {
         ) : null}
       </div>
       </InspectorNodeBoundary>
+      {props.inspectorMount ?? null}
     </LayoutContext.Provider>
   );
 }

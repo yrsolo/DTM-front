@@ -5,7 +5,7 @@ import type {
   EffectivePreviewValue,
   InspectorNode,
 } from "@dtm/workbench-inspector";
-import { resolveAuthoringInput } from "@dtm/workbench-inspector";
+import { resolveAuthoringInput } from "./authoringUtils";
 
 import { KEY_COLOR_ITEMS, TASK_PALETTE_ITEMS, type KeyColors } from "../design/colors";
 import { ALL_DESIGN_CONTROL_ITEMS, type DesignControls } from "../design/controls";

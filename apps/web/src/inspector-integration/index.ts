@@ -21,6 +21,17 @@ import { getInspectorOwnershipRefs } from "./targetBindings";
 import { getInspectorTargetById } from "./targetRegistry";
 import { openTargetInWorkbench } from "./openWorkbench";
 
+function shallowEqualRecord(left: Record<string, unknown>, right: Record<string, unknown>): boolean {
+  const leftKeys = Object.keys(left);
+  const rightKeys = Object.keys(right);
+  if (leftKeys.length !== rightKeys.length) return false;
+  for (const key of leftKeys) {
+    if (!Object.prototype.hasOwnProperty.call(right, key)) return false;
+    if (!Object.is(left[key], right[key])) return false;
+  }
+  return true;
+}
+
 function createWorkbenchInspectorAdapter(
   canUseWorkbench: boolean,
   sourceGraphSnapshot: SourceGraphSnapshot | null,
@@ -64,8 +75,16 @@ function createWorkbenchInspectorAdapter(
       }
     }
 
-    layoutState.setDesignPreviewOverlay(designOverlay);
-    layoutState.setKeyColorPreviewOverlay(keyColorOverlay);
+    layoutState.setDesignPreviewOverlay((current) =>
+      shallowEqualRecord(current as Record<string, unknown>, designOverlay as Record<string, unknown>)
+        ? current
+        : designOverlay
+    );
+    layoutState.setKeyColorPreviewOverlay((current) =>
+      shallowEqualRecord(current as Record<string, unknown>, keyColorOverlay as Record<string, unknown>)
+        ? current
+        : keyColorOverlay
+    );
   };
 
   return {
@@ -74,7 +93,10 @@ function createWorkbenchInspectorAdapter(
     },
     getHostRootElement() {
       if (typeof document === "undefined") return null;
-      return document.getElementById("root");
+      return (
+        document.querySelector("[data-inspector-host-root='true']") ??
+        document.getElementById("root")
+      );
     },
     getSourceGraphSnapshot() {
       return sourceGraphSnapshot;
