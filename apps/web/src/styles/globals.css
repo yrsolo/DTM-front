@@ -225,12 +225,10 @@ a {
   display: inline-flex;
   align-items: stretch;
   margin-left: 28px;
-  background: linear-gradient(180deg, rgba(20, 26, 48, 0.9), rgba(14, 19, 37, 0.88));
-  border: 1px solid rgba(116, 133, 188, 0.18);
-  box-shadow:
-    0 14px 28px rgba(0, 0, 0, 0.24),
-    inset 0 1px 0 rgba(255, 255, 255, 0.04);
-  overflow: hidden;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  overflow: visible;
 }
 
 .sectionSwitchTab {
@@ -243,18 +241,18 @@ a {
   font-weight: 800;
   border-bottom-width: 3px;
   transition:
-    background 140ms ease,
     color 140ms ease,
-    border-color 140ms ease;
+    border-color 140ms ease,
+    text-shadow 140ms ease;
 }
 
 .sectionSwitchTab:hover {
   color: #dfe8ff;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(122, 144, 203, 0.05));
+  background: transparent;
 }
 
 .sectionSwitchTab + .sectionSwitchTab {
-  border-left: 1px solid rgba(116, 133, 188, 0.12);
+  border-left: 0;
 }
 
 .brand strong {
@@ -4270,6 +4268,17 @@ button:hover {
     linear-gradient(180deg, rgba(255, 255, 255, 0.03), transparent),
     radial-gradient(circle at 50% 0%, rgba(255, 140, 201, 0.12), transparent 58%);
   color: #f7f2ff;
+}
+
+.sectionSwitchTab.adminTabButton {
+  background: transparent;
+}
+
+.sectionSwitchTab.adminTabButton.isActive {
+  background: transparent;
+  border-bottom-color: rgba(214, 160, 255, 0.92);
+  color: #f7f2ff;
+  text-shadow: 0 0 18px rgba(214, 160, 255, 0.34);
 }
 
 .adminSubtabPanel .adminTabButton {
