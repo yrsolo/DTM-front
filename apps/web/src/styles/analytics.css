@@ -18,6 +18,41 @@
   gap: 16px;
 }
 
+.analyticsHeaderPrimary {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+}
+
+.analyticsHeaderTopRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.analyticsHeaderText {
+  display: grid;
+}
+
+.analyticsBrand {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  border-radius: 14px;
+}
+
+.analyticsBrandIcon {
+  width: 64px;
+  height: 64px;
+  object-fit: contain;
+}
+
+.analyticsCloseButton {
+  margin-left: auto;
+}
+
 .analyticsEyebrow {
   font-size: 12px;
   letter-spacing: 0.12em;
@@ -35,6 +70,13 @@
   flex-wrap: wrap;
   justify-content: flex-end;
   gap: 10px;
+}
+
+.analyticsMainTabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0;
+  border-bottom: 1px solid rgba(140, 159, 221, 0.12);
 }
 
 .analyticsMetaBadge {
@@ -154,6 +196,10 @@
 .analyticsTabs {
   display: flex;
   gap: 10px;
+}
+
+.analyticsEmbeddedSection {
+  display: grid;
 }
 
 .analyticsFormatsView,
@@ -425,6 +471,10 @@
     grid-template-columns: 1fr;
   }
 
+  .analyticsHeaderTopRow {
+    width: 100%;
+  }
+
   .analyticsHeaderMeta {
     justify-content: flex-start;
   }
@@ -439,6 +489,10 @@
 
   .analyticsDonutLayout {
     grid-template-columns: 1fr;
+  }
+
+  .analyticsMainTabs {
+    overflow-x: auto;
   }
 
   .analyticsPeriodStepperLabel {

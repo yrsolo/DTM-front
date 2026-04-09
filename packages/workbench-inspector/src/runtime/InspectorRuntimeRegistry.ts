@@ -18,11 +18,13 @@ type RuntimeListener = () => void;
 type RuntimeStore = {
   registrations: Map<InspectorNodeId, InspectorRuntimeRegistration>;
   listeners: Set<RuntimeListener>;
+  emitScheduled: boolean;
 };
 
 const runtimeStore: RuntimeStore = {
   registrations: new Map(),
   listeners: new Set(),
+  emitScheduled: false,
 };
 
 function registrationsEqual(
@@ -45,7 +47,17 @@ function registrationsEqual(
 }
 
 function emitChange() {
-  for (const listener of runtimeStore.listeners) listener();
+  if (runtimeStore.emitScheduled) return;
+  runtimeStore.emitScheduled = true;
+  const flush = () => {
+    runtimeStore.emitScheduled = false;
+    for (const listener of runtimeStore.listeners) listener();
+  };
+  if (typeof window !== "undefined" && typeof window.requestAnimationFrame === "function") {
+    window.requestAnimationFrame(() => flush());
+    return;
+  }
+  setTimeout(flush, 0);
 }
 
 export function registerInspectorRuntimeNode(registration: InspectorRuntimeRegistration): () => void {

@@ -1,6 +1,6 @@
 import React from "react";
 import { TaskAttachmentV1, TaskV1 } from "@dtm/schema/snapshot";
-import { InspectorNodeBoundary } from "@dtm/workbench-inspector";
+import { InspectorNodeBoundary } from "../../inspector-integration/boundary";
 
 import {
   deleteTaskAttachment,

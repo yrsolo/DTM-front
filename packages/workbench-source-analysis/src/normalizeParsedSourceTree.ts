@@ -39,25 +39,26 @@ function shouldKeepStructuralNode(node: RawParsedSourceNode, normalizedChildren:
 
 function normalizeNodeList(
   rawNodes: RawParsedSourceNode[],
-  parentPath: string
+  parentPath: string,
+  startIndex = 0
 ): NormalizedSourceNode[] {
   const normalized: NormalizedSourceNode[] = [];
 
   for (const rawNode of rawNodes) {
-    const normalizedChildren = normalizeNodeList(rawNode.children, parentPath);
     const nodeClass = classifyRawParsedSourceNode(rawNode);
+    const flattenedChildren = normalizeNodeList(rawNode.children, parentPath, startIndex + normalized.length);
 
     if (nodeClass === "technical-wrapper" || nodeClass === "enrichment-wrapper") {
-      normalized.push(...normalizedChildren);
+      normalized.push(...flattenedChildren);
       continue;
     }
 
-    if (nodeClass === "structural" && !shouldKeepStructuralNode(rawNode, normalizedChildren)) {
-      normalized.push(...normalizedChildren);
+    if (nodeClass === "structural" && !shouldKeepStructuralNode(rawNode, flattenedChildren)) {
+      normalized.push(...flattenedChildren);
       continue;
     }
 
-    const canonicalPath = buildCanonicalPath(parentPath, rawNode.componentName, normalized.length);
+    const canonicalPath = buildCanonicalPath(parentPath, rawNode.componentName, startIndex + normalized.length);
     const idPrefix =
       nodeClass === "repeated-pattern"
         ? "rpt"

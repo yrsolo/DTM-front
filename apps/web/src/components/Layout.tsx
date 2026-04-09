@@ -1,6 +1,6 @@
 import React from "react";
-import { useLocation } from "react-router-dom";
-import { InspectorNodeBoundary } from "@dtm/workbench-inspector";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
+import { InspectorNodeBoundary } from "../inspector-integration/boundary";
 import { useSnapshot } from "../data/useSnapshot";
 import { resolvePublicAssetUrl } from "../config/publicPaths";
 import { AppLocale, getUiText, UiText } from "../i18n/uiText";
@@ -95,6 +95,11 @@ export const LayoutContext = React.createContext<LayoutContextValue | null>(null
 const VIEW_MODE_STORAGE_KEY = "dtm.viewMode.v1";
 const SORT_MODE_STORAGE_KEY = "dtm.sortMode.v1";
 const LOCALE_STORAGE_KEY = "dtm.locale.v1";
+const PRIMARY_SECTION_LINKS: ReadonlyArray<{ to: string; label: string; end?: boolean }> = [
+  { to: "/", label: "Таблица", end: true },
+  { to: "/analytics", label: "Аналитика" },
+  { to: "/promo", label: "Промо" },
+];
 
 type UiPreset = {
   design: DesignControls;
@@ -155,8 +160,9 @@ function sanitizeRuntimeDefaultsForHost(input: RuntimeDefaults): RuntimeDefaults
   return { ...input, demoMode: false };
 }
 
-export function Layout(props: { children: React.ReactNode }) {
+export function Layout(props: { children: React.ReactNode; inspectorMount?: React.ReactNode }) {
   const location = useLocation();
+  const navigate = useNavigate();
   const INTRO_FADE_MS = 3000;
   const INTRO_VIDEO_DELAY_MS = 1000;
   const brandIconUrl = React.useMemo(() => resolvePublicAssetUrl("dtm_ico_64x64.png"), []);
@@ -635,8 +641,17 @@ export function Layout(props: { children: React.ReactNode }) {
   }, [layoutVarsStyle]);
 
   const isAdminRoute = location.pathname === "/admin";
+  const isMainTimelineRoute = location.pathname === "/";
   const isMiniAppRoute =
     location.pathname === "/app" || location.pathname === "/m" || location.pathname === "/mobile";
+  const handleBrandClick = React.useCallback(() => {
+    if (isMainTimelineRoute) {
+      startLogoIntro();
+      return;
+    }
+
+    void navigate("/");
+  }, [isMainTimelineRoute, navigate, startLogoIntro]);
 
   React.useEffect(() => {
     if (typeof document === "undefined") return;
@@ -700,7 +715,7 @@ export function Layout(props: { children: React.ReactNode }) {
       }}
     >
       <InspectorNodeBoundary label="App shell" kind="content" sourcePath="apps/web/src/components/Layout.tsx">
-      <div className={appShellClassName} style={layoutVarsStyle}>
+      <div className={appShellClassName} style={layoutVarsStyle} data-inspector-host-root="true">
         {!isMiniAppRoute && !isPromoRoute && !isFormatSortRoute ? (
           <InspectorNodeBoundary
             label="App topbar"
@@ -714,8 +729,8 @@ export function Layout(props: { children: React.ReactNode }) {
                 <button
                   type="button"
                   className="brandIconButton"
-                  onClick={startLogoIntro}
-                  aria-label="Play logo intro"
+                  onClick={handleBrandClick}
+                  aria-label={isMainTimelineRoute ? "Play logo intro" : "Open DTM table"}
                 >
                   <img className="brandIcon" src={brandIconUrl} alt="" aria-hidden="true" />
                 </button>
@@ -723,6 +738,18 @@ export function Layout(props: { children: React.ReactNode }) {
                   <strong>{ui.appTitle}</strong>
                   <span className="muted">{ui.appSubtitle}</span>
                 </div>
+                <nav className="sectionSwitch" aria-label="Основные разделы">
+                  {PRIMARY_SECTION_LINKS.map((link) => (
+                    <NavLink
+                      key={link.to}
+                      to={link.to}
+                      end={link.end}
+                      className={({ isActive }) => `sectionSwitchTab adminTabButton ${isActive ? "isActive" : ""}`}
+                    >
+                      {link.label}
+                    </NavLink>
+                  ))}
+                </nav>
               </div>
             </div>
           </div>
@@ -762,6 +789,7 @@ export function Layout(props: { children: React.ReactNode }) {
         ) : null}
       </div>
       </InspectorNodeBoundary>
+      {props.inspectorMount ?? null}
     </LayoutContext.Provider>
   );
 }

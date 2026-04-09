@@ -1,4 +1,4 @@
-import type { InspectorActivation, InspectorState } from "../contracts/types";
+import type { InspectorActivation, InspectorPanelSize, InspectorState } from "../contracts/types";
 
 function getInitialPanelPosition() {
   if (typeof window === "undefined") {
@@ -11,6 +11,17 @@ function getInitialPanelPosition() {
   };
 }
 
+function getInitialPanelSize(): InspectorPanelSize {
+  if (typeof window === "undefined") {
+    return { width: 980, height: 700 };
+  }
+
+  return {
+    width: Math.max(760, Math.min(1120, window.innerWidth - 32)),
+    height: Math.max(520, Math.min(820, window.innerHeight - 32)),
+  };
+}
+
 export function createInitialInspectorState(activation: InspectorActivation): InspectorState {
   return {
     enabled: activation.enabled,
@@ -18,6 +29,8 @@ export function createInitialInspectorState(activation: InspectorActivation): In
     selectedNodeId: null,
     panelOpen: false,
     panelPosition: getInitialPanelPosition(),
+    panelSize: getInitialPanelSize(),
+    treePaneWidth: 360,
     pickMode: "off",
     debug: activation.debug ?? false,
     hierarchy: {
@@ -26,6 +39,8 @@ export function createInitialInspectorState(activation: InspectorActivation): In
       query: "",
       focusMode: "all",
       treeFilterMode: "smart",
+      hideInvisible: true,
+      autoRefreshTree: false,
     },
   };
 }

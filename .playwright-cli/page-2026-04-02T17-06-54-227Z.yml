@@ -1,0 +1,44 @@
+- generic [ref=e5]:
+  - banner:
+    - generic [ref=e6]:
+      - link "DTM home" [ref=e7] [cursor=pointer]:
+        - /url: "#promo-hero"
+        - generic [ref=e8]: DTM
+      - navigation "Promo navigation" [ref=e9]:
+        - link "Таблица" [ref=e10] [cursor=pointer]:
+          - /url: "#promo-hero"
+        - link "Видеоролик" [ref=e11] [cursor=pointer]:
+          - /url: "#promo-video"
+        - link "Система" [ref=e12] [cursor=pointer]:
+          - /url: "#promo-system"
+      - link "Открыть DTM" [ref=e13] [cursor=pointer]:
+        - /url: "#"
+  - main [ref=e14]:
+    - generic [ref=e15]:
+      - img
+      - generic [ref=e16]:
+        - paragraph [ref=e17]: МЕНЕДЖЕР ЗАДАЧ ДЛЯ ДИЗАЙН-КОМАНД
+        - heading "Таблица на входе. Порядок на выходе." [level=1] [ref=e18]:
+          - generic [ref=e19]: Таблица на входе.
+          - generic [ref=e20]: Порядок на выходе.
+        - generic [ref=e21]:
+          - paragraph [ref=e22]: "DTM превращает рабочую таблицу в управляемую систему для дизайн-команды: с понятным потоком задач, аккуратными статусами и быстрым входом для всех участников."
+          - paragraph [ref=e23]: Вся структура остаётся знакомой, но начинает работать как цельный инструмент, а не как компромисс между хаосом и ручными договорённостями.
+        - generic [ref=e24]:
+          - link "Открыть DTM" [ref=e25] [cursor=pointer]:
+            - /url: "#"
+          - link "Посмотреть ролик" [ref=e26] [cursor=pointer]:
+            - /url: "#promo-video"
+    - generic [ref=e27]:
+      - img [ref=e29]
+      - img
+    - generic [ref=e33]:
+      - img
+      - generic [ref=e35]:
+        - paragraph [ref=e36]: ЕДИНЫЙ РАБОЧИЙ КОНТУР
+        - heading "Один экран. Вся система." [level=2] [ref=e37]:
+          - generic [ref=e38]: Один экран.
+          - generic [ref=e39]: Вся система.
+        - generic [ref=e40]:
+          - paragraph [ref=e41]: Планирование, приоритеты, исполнители и визуальный контекст собираются в одной спокойной рабочей среде, без переключений между разрозненными сервисами.
+          - paragraph [ref=e42]: "DTM помогает команде видеть не только список задач, но и саму логику проекта: от входящих запросов до согласованного результата."

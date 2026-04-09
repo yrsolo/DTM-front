@@ -10,9 +10,9 @@ import {
   type InspectorNode,
   type InspectorNodeEnrichment,
   type InspectorPropertiesSection,
+  type SourceBackedDraftChange,
   type SourceGraphSnapshot,
 } from "@dtm/workbench-inspector";
-import timelineSourceGraphSnapshot from "../generated/workbench-source-graph.timeline.json";
 
 import { LayoutContext, type LayoutContextValue } from "../components/Layout";
 import { getWorkbenchInspectorActivation } from "./activation";
@@ -20,10 +20,54 @@ import { getAuthoringParameterDescriptorsForNode, getEffectivePreviewValuesForNo
 import { getInspectorOwnershipRefs } from "./targetBindings";
 import { getInspectorTargetById } from "./targetRegistry";
 import { openTargetInWorkbench } from "./openWorkbench";
+import { createSourceBackedEditingController } from "./sourceBackedEditing";
+import {
+  getMatchedWorkbenchSnapshots,
+  getMatchingWorkbenchSourceSurfaces,
+} from "./surfaceRegistry";
+
+function shallowEqualRecord(left: Record<string, unknown>, right: Record<string, unknown>): boolean {
+  const leftKeys = Object.keys(left);
+  const rightKeys = Object.keys(right);
+  if (leftKeys.length !== rightKeys.length) return false;
+  for (const key of leftKeys) {
+    if (!Object.prototype.hasOwnProperty.call(right, key)) return false;
+    if (!Object.is(left[key], right[key])) return false;
+  }
+  return true;
+}
+
+function mergeSourceGraphSnapshots(
+  snapshots: Array<SourceGraphSnapshot | null | undefined>
+): SourceGraphSnapshot | null {
+  const availableSnapshots = snapshots.filter(Boolean) as SourceGraphSnapshot[];
+  if (!availableSnapshots.length) return null;
+  if (availableSnapshots.length === 1) return availableSnapshots[0];
+
+  const seenRootNodeIds = new Set<string>();
+  const rootNodes = [];
+
+  for (const snapshot of availableSnapshots) {
+    for (const node of snapshot.rootNodes ?? []) {
+      if (seenRootNodeIds.has(node.id)) continue;
+      seenRootNodeIds.add(node.id);
+      rootNodes.push(node);
+    }
+  }
+
+  return {
+    id: `merged:${availableSnapshots.map((snapshot) => snapshot.id).join("+")}`,
+    version: availableSnapshots[0].version,
+    entry: availableSnapshots.map((snapshot) => snapshot.entry).join(" + "),
+    generatedAt: availableSnapshots[0].generatedAt,
+    rootNodes,
+  };
+}
 
 function createWorkbenchInspectorAdapter(
   canUseWorkbench: boolean,
   sourceGraphSnapshot: SourceGraphSnapshot | null,
+  sourceBackedEditingController: ReturnType<typeof createSourceBackedEditingController>,
   layoutState: {
     design: LayoutContextValue["design"];
     keyColors: LayoutContextValue["keyColors"];
@@ -64,8 +108,16 @@ function createWorkbenchInspectorAdapter(
       }
     }
 
-    layoutState.setDesignPreviewOverlay(designOverlay);
-    layoutState.setKeyColorPreviewOverlay(keyColorOverlay);
+    layoutState.setDesignPreviewOverlay((current) =>
+      shallowEqualRecord(current as Record<string, unknown>, designOverlay as Record<string, unknown>)
+        ? current
+        : designOverlay
+    );
+    layoutState.setKeyColorPreviewOverlay((current) =>
+      shallowEqualRecord(current as Record<string, unknown>, keyColorOverlay as Record<string, unknown>)
+        ? current
+        : keyColorOverlay
+    );
   };
 
   return {
@@ -74,7 +126,10 @@ function createWorkbenchInspectorAdapter(
     },
     getHostRootElement() {
       if (typeof document === "undefined") return null;
-      return document.getElementById("root");
+      return (
+        document.querySelector("[data-inspector-host-root='true']") ??
+        document.getElementById("root")
+      );
     },
     getSourceGraphSnapshot() {
       return sourceGraphSnapshot;
@@ -126,6 +181,9 @@ function createWorkbenchInspectorAdapter(
       };
       return enrichment;
     },
+    getSourceBackedParameters(node) {
+      return node.sourceBackedParameters ?? [];
+    },
     getParameterDescriptors(node) {
       return getAuthoringParameterDescriptorsForNode(node);
     },
@@ -137,6 +195,15 @@ function createWorkbenchInspectorAdapter(
     },
     applyDraftChanges(draftChanges) {
       applyGlobalPreviewOverlay(draftChanges);
+    },
+    previewSourceBackedDrafts(draftChanges: SourceBackedDraftChange[]) {
+      sourceBackedEditingController.previewSourceBackedDrafts(draftChanges);
+    },
+    clearSourceBackedDraftPreview() {
+      sourceBackedEditingController.clearSourceBackedDraftPreview();
+    },
+    async applySourceBackedDrafts(draftChanges: SourceBackedDraftChange[]) {
+      return sourceBackedEditingController.applySourceBackedDrafts(draftChanges);
     },
     canOpenNodeInWorkbench(node) {
       return Boolean(canUseWorkbench && node.semanticTargetId);
@@ -155,11 +222,18 @@ export function WorkbenchInspectorMount() {
   const sourceGraphSnapshot = React.useMemo<SourceGraphSnapshot | null>(() => {
     if (typeof window === "undefined") return null;
     const pathname = window.location.pathname.replace(/\/+$/, "") || "/";
-    return pathname === "/" ? (timelineSourceGraphSnapshot as SourceGraphSnapshot) : null;
+    const matchedSnapshots = getMatchedWorkbenchSnapshots(pathname).map((entry) => entry.snapshot);
+    return mergeSourceGraphSnapshots(matchedSnapshots);
   }, []);
+  const matchedSurfaceLabels = React.useMemo(() => {
+    if (typeof window === "undefined") return [] as string[];
+    const pathname = window.location.pathname.replace(/\/+$/, "") || "/";
+    return getMatchingWorkbenchSourceSurfaces(pathname).map((surface) => surface.label);
+  }, []);
+  const sourceBackedEditingController = React.useMemo(() => createSourceBackedEditingController(), []);
   const adapter = React.useMemo(
     () =>
-      createWorkbenchInspectorAdapter(layout.canUseWorkbench, sourceGraphSnapshot, {
+      createWorkbenchInspectorAdapter(layout.canUseWorkbench, sourceGraphSnapshot, sourceBackedEditingController, {
         design: layout.design,
         keyColors: layout.keyColors,
         setDesignPreviewOverlay: layout.setDesignPreviewOverlay,
@@ -173,9 +247,20 @@ export function WorkbenchInspectorMount() {
       layout.previewCapabilities,
       layout.setDesignPreviewOverlay,
       layout.setKeyColorPreviewOverlay,
+      sourceBackedEditingController,
       sourceGraphSnapshot,
     ]
   );
+
+  React.useEffect(() => {
+    if (!activation.debug || typeof window === "undefined") return;
+    console.info("[workbench-inspector] source surfaces matched", {
+      pathname: window.location.pathname,
+      surfaces: matchedSurfaceLabels,
+      snapshotId: sourceGraphSnapshot?.id ?? null,
+      snapshotEntry: sourceGraphSnapshot?.entry ?? null,
+    });
+  }, [activation.debug, matchedSurfaceLabels, sourceGraphSnapshot]);
 
   if (!activation.enabled) return null;
 

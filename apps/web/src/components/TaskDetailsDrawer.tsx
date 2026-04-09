@@ -1,7 +1,7 @@
 import React from "react";
 import { createPortal } from "react-dom";
 import { GroupV1, PersonV1, TaskV1 } from "@dtm/schema/snapshot";
-import { InspectorNodeBoundary } from "@dtm/workbench-inspector";
+import { InspectorNodeBoundary } from "../inspector-integration/boundary";
 import { fetchRuHolidayAndTransferDaysInRange } from "../calendar/ruNonWorkingDays";
 import { fetchPersonNameByOwnerId } from "../data/api";
 import { getUiText } from "../i18n/uiText";
