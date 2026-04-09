@@ -1,6 +1,7 @@
 import { resolvePublicAssetUrl } from "../config/publicPaths";
 
 export const promoAssets = {
+  brandLogo: resolvePublicAssetUrl("dtm_ico_64x64.png"),
   noiseOverlay: resolvePublicAssetUrl("promo/ref-02/noise-overlay.svg"),
   promoVideo: resolvePublicAssetUrl("DTM_lo.mp4"),
 

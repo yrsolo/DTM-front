@@ -1,0 +1,92 @@
+[
+  {
+    "id": "app-shell",
+    "kind": "shell",
+    "label": "App shell",
+    "enabled": true,
+    "entry": "apps/web/src/app/App.tsx",
+    "snapshotOutputPath": "apps/web/src/generated/workbench-source-graph.app.json",
+    "matchMode": "always",
+    "paths": []
+  },
+  {
+    "id": "timeline",
+    "kind": "route",
+    "label": "Timeline",
+    "enabled": true,
+    "entry": "apps/web/src/pages/TimelinePage.tsx",
+    "snapshotOutputPath": "apps/web/src/generated/workbench-source-graph.timeline.json",
+    "matchMode": "exact",
+    "paths": ["/"]
+  },
+  {
+    "id": "promo",
+    "kind": "route",
+    "label": "Promo",
+    "enabled": true,
+    "entry": "apps/web/src/pages/PromoPage.tsx",
+    "snapshotOutputPath": "apps/web/src/generated/workbench-source-graph.promo.json",
+    "matchMode": "exact",
+    "paths": ["/promo"]
+  },
+  {
+    "id": "promo-draft",
+    "kind": "route",
+    "label": "Promo draft",
+    "enabled": true,
+    "entry": "apps/web/src/pages/PromoDraftPage.tsx",
+    "snapshotOutputPath": "apps/web/src/generated/workbench-source-graph.promo-draft.json",
+    "matchMode": "exact",
+    "paths": ["/promo-draft"]
+  },
+  {
+    "id": "format-sort",
+    "kind": "route",
+    "label": "Format sort lab",
+    "enabled": true,
+    "entry": "apps/web/src/pages/FormatSortPage.tsx",
+    "snapshotOutputPath": "apps/web/src/generated/workbench-source-graph.format-sort.json",
+    "matchMode": "exact",
+    "paths": ["/format-sort"]
+  },
+  {
+    "id": "designer-sort",
+    "kind": "route",
+    "label": "Designer sort lab",
+    "enabled": true,
+    "entry": "apps/web/src/pages/DesignerSortPage.tsx",
+    "snapshotOutputPath": "apps/web/src/generated/workbench-source-graph.designer-sort.json",
+    "matchMode": "exact",
+    "paths": ["/designer-sort"]
+  },
+  {
+    "id": "analytics",
+    "kind": "route",
+    "label": "Analytics",
+    "enabled": true,
+    "entry": "apps/web/src/pages/AnalyticsPage.tsx",
+    "snapshotOutputPath": "apps/web/src/generated/workbench-source-graph.analytics.json",
+    "matchMode": "exact",
+    "paths": ["/analytics"]
+  },
+  {
+    "id": "admin",
+    "kind": "route",
+    "label": "Admin",
+    "enabled": true,
+    "entry": "apps/web/src/pages/AdminPage.tsx",
+    "snapshotOutputPath": "apps/web/src/generated/workbench-source-graph.admin.json",
+    "matchMode": "exact",
+    "paths": ["/admin"]
+  },
+  {
+    "id": "miniapp",
+    "kind": "route",
+    "label": "Mini app",
+    "enabled": true,
+    "entry": "apps/web/src/pages/MiniAppPage.tsx",
+    "snapshotOutputPath": "apps/web/src/generated/workbench-source-graph.miniapp.json",
+    "matchMode": "exact",
+    "paths": ["/app", "/m", "/mobile"]
+  }
+]

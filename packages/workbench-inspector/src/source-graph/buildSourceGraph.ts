@@ -17,6 +17,13 @@ type SourceGraphBuildResult = {
   elementsByProjectionId: Map<string, Element>;
 };
 
+type SourceGraphArtifacts = {
+  rootNodes: SourceNode[];
+  runtimeProjectionsById: Map<string, InspectorRuntimeProjection>;
+  elementsBySourceNodeId: Map<SourceNodeId, Element>;
+  elementsByProjectionId: Map<string, Element>;
+};
+
 function humanizeLabel(value: string): string {
   const normalized = value
     .replace(/[_-]+/g, " ")
@@ -38,6 +45,11 @@ function normalizeLabel(registration: InspectorRuntimeRegistration): string {
 
 function buildPath(parts: string[]): string {
   return parts.filter(Boolean).join(" > ");
+}
+
+function getCanonicalSourceNodeIdFromElement(element: Element | null | undefined): SourceNodeId | null {
+  const sourceNodeId = element?.getAttribute("data-wb-id")?.trim() ?? "";
+  return sourceNodeId ? (sourceNodeId as SourceNodeId) : null;
 }
 
 function toProjection(
@@ -82,12 +94,13 @@ export function buildInspectorSourceGraph(
   const buildNode = (registration: InspectorRuntimeRegistration, depth: number, ancestors: string[]): SourceNode => {
     const label = normalizeLabel(registration);
     const childRegistrations = childrenByParent.get(registration.id) ?? [];
-    const sourceNodeId = registration.id;
+    const canonicalSourceNodeId = getCanonicalSourceNodeIdFromElement(registration.anchorElement);
+    const sourceNodeId = canonicalSourceNodeId ?? registration.id;
     const node: SourceNode = {
       id: sourceNodeId,
       label,
       category: "placement",
-      bindingKey: null,
+      bindingKey: canonicalSourceNodeId ?? null,
       componentName: registration.componentName?.trim() || "Component",
       kind: (registration.kind ?? "content") as InspectorNodeKind,
       path: buildPath([...ancestors, label]),
@@ -101,7 +114,13 @@ export function buildInspectorSourceGraph(
       parentId: registration.parentId ?? null,
       children: childRegistrations.map((child) => buildNode(child, depth + 1, [...ancestors, label])),
       semanticTargetId: registration.semanticTargetId ?? null,
-      meta: registration.debugName ? { debugName: registration.debugName } : undefined,
+      meta:
+        registration.debugName || canonicalSourceNodeId
+          ? {
+              ...(registration.debugName ? { debugName: registration.debugName } : {}),
+              ...(canonicalSourceNodeId ? { canonicalSourceNodeId } : {}),
+            }
+          : undefined,
       runtimeProjectionIds: [registration.id],
     };
     sourceNodesById.set(node.id, node);
@@ -116,6 +135,58 @@ export function buildInspectorSourceGraph(
   };
 
   const rootNodes = (childrenByParent.get(null) ?? []).map((registration) => buildNode(registration, 0, []));
+
+  return {
+    rootNodes,
+    sourceNodesById,
+    runtimeProjectionsById,
+    elementsBySourceNodeId,
+    elementsByProjectionId,
+  };
+}
+
+export function mergeSourceGraphArtifacts(graphs: SourceGraphArtifacts[]): SourceGraphBuildResult {
+  const rootNodes: SourceNode[] = [];
+  const sourceNodesById = new Map<SourceNodeId, SourceNode>();
+  const runtimeProjectionsById = new Map<string, InspectorRuntimeProjection>();
+  const elementsBySourceNodeId = new Map<SourceNodeId, Element>();
+  const elementsByProjectionId = new Map<string, Element>();
+  const seenNodeIds = new Set<string>();
+
+  const pushNode = (node: SourceNode) => {
+    if (seenNodeIds.has(node.id)) return;
+    seenNodeIds.add(node.id);
+    rootNodes.push(node);
+  };
+
+  const indexNode = (node: SourceNode) => {
+    if (!sourceNodesById.has(node.id)) {
+      sourceNodesById.set(node.id, node);
+    }
+    for (const child of node.children ?? []) indexNode(child);
+  };
+
+  for (const graph of graphs) {
+    for (const node of graph.rootNodes) {
+      pushNode(node);
+      indexNode(node);
+    }
+    for (const [projectionId, projection] of graph.runtimeProjectionsById) {
+      if (!runtimeProjectionsById.has(projectionId)) {
+        runtimeProjectionsById.set(projectionId, projection);
+      }
+    }
+    for (const [sourceNodeId, element] of graph.elementsBySourceNodeId) {
+      if (!elementsBySourceNodeId.has(sourceNodeId)) {
+        elementsBySourceNodeId.set(sourceNodeId, element);
+      }
+    }
+    for (const [projectionId, element] of graph.elementsByProjectionId) {
+      if (!elementsByProjectionId.has(projectionId)) {
+        elementsByProjectionId.set(projectionId, element);
+      }
+    }
+  }
 
   return {
     rootNodes,
@@ -172,6 +243,7 @@ export function mapSourceGraphToInspectorTree(sourceNodes: SourceNode[], project
       isInteractive: primaryProjection?.isInteractive ?? false,
       semanticTargetId: node.semanticTargetId ?? null,
       meta: node.meta,
+      sourceBackedParameters: node.sourceBackedParameters,
     };
   };
 

@@ -17,7 +17,7 @@ If step 1-3 is not completed, agent must not continue execution.
 4. Other docs (`docs/README.md`, `work/*`, `README.md`).
 
 ## 2) Task tracking
-If Jira is not used, execution lifecycle must be tracked in:
+execution lifecycle must be tracked in:
 - `work/now/tasks.md`
 - `work/roadmap/README.md`
 

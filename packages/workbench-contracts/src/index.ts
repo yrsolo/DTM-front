@@ -7,6 +7,16 @@ export type DraftChangeScope = "token" | "component" | "placement" | "instance-p
 export type DraftChangeStatus = "active" | "stale" | "unresolved" | "invalid";
 export type AuthoringValueKind = "string" | "number" | "boolean" | "enum" | "color" | "length" | "token-ref" | "expression";
 export type AuthoringValueState = "valid" | "invalid" | "clamped" | "coerced" | "unresolved" | "blocked";
+export type SourceBackedEditKind =
+  | "set-literal"
+  | "delta-number"
+  | "delta-length"
+  | "replace-text"
+  | "css-rule-set"
+  | "placement-style-override";
+export type SourceBackedTargetScope = "placement" | "shared-style-rule" | "component";
+export type SourceBackedApplyStrategy = "patch-origin" | "wrap-expression" | "create-placement-override";
+export type SourceBackedExpressionEditMode = "delta-number" | "delta-length" | "replace-literal" | "unsupported";
 export type InspectorPickMode = "off" | "on";
 export type InspectorFocusMode = "all" | "marked";
 export type InspectorTreeFilterMode = "smart" | "all" | "repeated";
@@ -55,6 +65,9 @@ export type SourceNode = {
   sourcePath?: string | null;
   sourceLocation?: string | null;
   definitionId?: SourceNodeId | null;
+  placementScopeId?: string | null;
+  templateToken?: string | null;
+  idVersion?: string | null;
   placementId?: SourceNodeId | null;
   repeatedGroupId?: SourceNodeId | null;
   depth: number;
@@ -63,6 +76,7 @@ export type SourceNode = {
   semanticTargetId?: string | null;
   meta?: InspectorNodeMeta;
   runtimeProjectionIds: string[];
+  sourceBackedParameters?: SourceBackedParameter[];
 };
 
 export type SourceGraphSnapshot = {
@@ -77,6 +91,7 @@ export type SourceRuntimeBinding = {
   sourceNodeId: SourceNodeId;
   bindingKey: string | null;
   runtimeProjectionIds: string[];
+  elementCount?: number;
   status: SourceRuntimeBindingStatus;
 };
 
@@ -93,6 +108,69 @@ export type DraftChange = {
 export type AuthoringParameterOption = {
   value: string;
   label: string;
+};
+
+export type SourceValueOrigin = {
+  kind: "jsx-attr" | "jsx-text" | "inline-style" | "class-name" | "token-ref" | "expression";
+  sourcePath: string;
+  sourceLocation: string;
+  displaySourcePath?: string | null;
+  resolvedSourcePath?: string | null;
+  astPath: string;
+  editable: boolean;
+};
+
+export type SourceBackedParameter = {
+  id: string;
+  sourceNodeId: SourceNodeId;
+  label: string;
+  group: string;
+  valueKind: AuthoringValueKind;
+  currentValue: string;
+  normalizedValue?: string | null;
+  origin: SourceValueOrigin;
+  readonlyReason?: string | null;
+  supportedScopes: DraftChangeScope[];
+  selector?: string | null;
+  cssProperty?: string | null;
+  canCreatePlacementOverride?: boolean;
+  expressionEditMode?: SourceBackedExpressionEditMode | null;
+};
+
+export type SourceBackedDraftChange = {
+  id: string;
+  parameterId: string;
+  sourceNodeId: SourceNodeId;
+  parameterLabel: string;
+  parameterGroup: string;
+  valueKind: AuthoringValueKind;
+  originKind: SourceValueOrigin["kind"];
+  origin: SourceValueOrigin;
+  currentValue: string;
+  draftValue: string;
+  normalizedValue?: string | null;
+  editKind: SourceBackedEditKind;
+  targetScope: SourceBackedTargetScope;
+  applyStrategy: SourceBackedApplyStrategy;
+  status: DraftChangeStatus;
+  selector?: string | null;
+  cssProperty?: string | null;
+  canCreatePlacementOverride?: boolean;
+  expressionEditMode?: SourceBackedExpressionEditMode | null;
+  nodeSourcePath?: string | null;
+  nodeSourceLocation?: string | null;
+};
+
+export type SourceBackedApplyIssue = {
+  draftId: string;
+  parameterId: string;
+  message: string;
+};
+
+export type SourceBackedApplyResult = {
+  ok: boolean;
+  patches: SourceSyncPatch[];
+  issues: SourceBackedApplyIssue[];
 };
 
 export type AuthoringParameterDescriptor = {
@@ -144,12 +222,23 @@ export type AuthoringValue = {
   value: string;
 };
 
+export type SourceSyncPatchOperation = {
+  start: number;
+  end: number;
+  nextText: string;
+  description: string;
+  oldText: string;
+};
+
 export type SourceSyncPatch = {
   id: string;
   sourceNodeId: SourceNodeId;
   sourcePath: string;
   description: string;
   patchText: string;
+  operations: SourceSyncPatchOperation[];
+  baseText?: string;
+  nextText?: string;
 };
 
 export type InspectorNode = {
@@ -184,6 +273,7 @@ export type InspectorNode = {
   isInteractive: boolean;
   semanticTargetId?: string | null;
   meta?: InspectorNodeMeta;
+  sourceBackedParameters?: SourceBackedParameter[];
 };
 
 export type InspectorPropertyField = {
@@ -253,10 +343,28 @@ export type InspectorAdapter = {
   getHostRootElement?(): Element | null;
   getSourceGraphSnapshot?(): SourceGraphSnapshot | null;
   enrichNode?(node: InspectorNode): InspectorNodeEnrichment | null;
+  getSourceBackedParameters?(node: InspectorNode): SourceBackedParameter[];
   getParameterDescriptors?(node: InspectorNode): AuthoringParameterDescriptor[];
   getEffectivePreviewValues?(node: InspectorNode, draftChanges: DraftChange[]): EffectivePreviewValue[];
   getPreviewCapabilities?(node?: InspectorNode | null): HostPreviewCapabilities;
   applyDraftChanges?(draftChanges: DraftChange[]): void;
+  previewSourceBackedDrafts?(draftChanges: SourceBackedDraftChange[]): void;
+  clearSourceBackedDraftPreview?(): void;
+  applySourceBackedDrafts?(draftChanges: SourceBackedDraftChange[]): Promise<SourceBackedApplyResult> | SourceBackedApplyResult;
   canOpenNodeInWorkbench?(node: InspectorNode): boolean;
   openNodeInWorkbench?(node: InspectorNode): void;
 };
+
+export {
+  __wbNextScope,
+  __wbNodeId,
+  createDefinitionId,
+  createDefinitionRootScopeId,
+  createPlacementScopeId,
+  createSourceNodeId,
+  createTemplateNodeToken,
+  normalizeRepoRelativeSourceLocation,
+  normalizeRepoRelativeSourcePath,
+  WORKBENCH_SOURCE_ID_VERSION,
+} from "./sourceNodeIds";
+export { WorkbenchScopeBoundary, useWorkbenchScope } from "./runtimeIds";

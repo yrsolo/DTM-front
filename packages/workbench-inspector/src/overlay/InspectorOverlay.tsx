@@ -17,11 +17,27 @@ function getUnderlyingElementAtPoint(clientX: number, clientY: number): Element 
   return null;
 }
 
+function clipRectToViewport(rect: DOMRect): DOMRect | null {
+  if (typeof window === "undefined") return rect;
+  const viewportLeft = 0;
+  const viewportTop = 0;
+  const viewportRight = window.innerWidth;
+  const viewportBottom = window.innerHeight;
+  const left = Math.max(viewportLeft, rect.left);
+  const top = Math.max(viewportTop, rect.top);
+  const right = Math.min(viewportRight, rect.right);
+  const bottom = Math.min(viewportBottom, rect.bottom);
+  const width = right - left;
+  const height = bottom - top;
+  if (width <= 0 || height <= 0) return null;
+  return new DOMRect(left, top, width, height);
+}
+
 function collectRenderableRects(elements: Element[]): DOMRect[] {
   const uniqueRects = new Map<string, DOMRect>();
   for (const element of elements) {
-    const rect = element.getBoundingClientRect();
-    if (rect.width <= 0 || rect.height <= 0) continue;
+    const rect = clipRectToViewport(element.getBoundingClientRect());
+    if (!rect) continue;
     const key = [
       Math.round(rect.left),
       Math.round(rect.top),
@@ -41,7 +57,7 @@ function collectRenderableRects(elements: Element[]): DOMRect[] {
 }
 
 export function InspectorOverlay() {
-  const { getNodeById, getNodeElement, getNodeElements, getNodeElementDebug, refreshNodes, resolveNodeFromElement, setHoveredNodeId, setPanelOpen, setPickMode, setSelectedNodeId, state } =
+  const { getNodeById, getNodeElement, getNodeElements, getNodeElementDebug, resolveNodeFromElement, setHoveredNodeId, setPanelOpen, setPickMode, setSelectedNodeId, state } =
     useInspectorContext();
   const [viewportVersion, setViewportVersion] = React.useState(0);
 
@@ -64,7 +80,6 @@ export function InspectorOverlay() {
       if (!node) return;
       setSelectedNodeId(node.id);
       setPanelOpen(true);
-      refreshNodes();
     };
 
     const onKeyDown = (event: KeyboardEvent) => {
@@ -82,7 +97,7 @@ export function InspectorOverlay() {
       document.removeEventListener("click", onClick, true);
       window.removeEventListener("keydown", onKeyDown);
     };
-  }, [refreshNodes, resolveNodeFromElement, setHoveredNodeId, setPanelOpen, setPickMode, setSelectedNodeId, state.enabled, state.pickMode]);
+  }, [resolveNodeFromElement, setHoveredNodeId, setPanelOpen, setPickMode, setSelectedNodeId, state.enabled, state.pickMode]);
 
   if (!state.enabled) return null;
 

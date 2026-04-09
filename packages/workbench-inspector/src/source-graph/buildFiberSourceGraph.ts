@@ -271,6 +271,11 @@ function sanitizeIdPart(value: string): string {
   return value.replace(/[^a-zA-Z0-9_-]+/g, "_");
 }
 
+function getCanonicalSourceNodeId(anchor: Element | null | undefined): SourceNodeId | null {
+  const sourceNodeId = anchor?.getAttribute("data-wb-id")?.trim() ?? "";
+  return sourceNodeId ? (sourceNodeId as SourceNodeId) : null;
+}
+
 function normalizePath(value: string): string {
   const normalized = value.replace(/\\/g, "/");
   const viteFsMatch = normalized.match(/^https?:\/\/[^/]+\/@fs\/(.+)$/i);
@@ -512,6 +517,7 @@ export function buildFiberSourceGraph(
         const placementBindingKey = getPlacementBindingKey(componentName, sourcePath, sourceLocation);
         const anchor = resolveFiberAnchorElement(child);
         const registration = anchor ? registrationByElement.get(anchor) : undefined;
+        const canonicalSourceNodeId = getCanonicalSourceNodeId(anchor);
         const ownerComponentPath = buildOwnerComponentPath([...parentOwnerComponents, componentName]);
         const projectionId = registration?.id ?? `proj_${sourceNodeId}`;
         const projection = toProjection(projectionId, sourceNodeId, anchor);
@@ -548,6 +554,7 @@ export function buildFiberSourceGraph(
           semanticTargetId: registration?.semanticTargetId ?? null,
           meta: {
             ...(registration?.debugName ? { debugName: registration.debugName } : {}),
+            ...(canonicalSourceNodeId ? { canonicalSourceNodeId } : {}),
             definitionId,
             definitionBindingKey,
             repeatedGroupId,
@@ -584,9 +591,10 @@ export function buildFiberSourceGraph(
         const label = displayLabel || humanizeLabel(componentName);
         const idSeed = sourceLocation ? `${sourceLocation}:${componentName}` : componentName;
         const occurrenceIndex = takeSiblingOccurrenceIndex(parentId, idSeed);
-        const sourceNodeId = parentId
-          ? `${parentId}.${sanitizeIdPart(idSeed)}_${occurrenceIndex}`
-          : `src_${sanitizeIdPart(idSeed)}_${occurrenceIndex}`;
+        const canonicalSourceNodeId = getCanonicalSourceNodeId(anchor);
+        const sourceNodeId =
+          canonicalSourceNodeId ??
+          (parentId ? `${parentId}.${sanitizeIdPart(idSeed)}_${occurrenceIndex}` : `src_${sanitizeIdPart(idSeed)}_${occurrenceIndex}`);
         const templateKey = getTemplateKey(componentName, sourceLocation);
         const repeatedGroupBindingKey =
           shouldTrackHostTemplate(tagName) && (repeatedTemplateCounts.get(templateKey) ?? 0) > 1
@@ -613,7 +621,7 @@ export function buildFiberSourceGraph(
           id: sourceNodeId,
           label,
           category: "placement",
-          bindingKey: getPlacementBindingKey(componentName, sourcePath, sourceLocation),
+          bindingKey: canonicalSourceNodeId ?? getPlacementBindingKey(componentName, sourcePath, sourceLocation),
           componentName,
           kind: inferKind(componentName, anchor),
           path,
@@ -629,6 +637,7 @@ export function buildFiberSourceGraph(
           semanticTargetId: null,
           meta: {
             displayLabel,
+            ...(canonicalSourceNodeId ? { canonicalSourceNodeId } : {}),
             repeatedGroupId,
             repeatedGroupBindingKey,
             repeatedCount: repeatedTemplateCounts.get(templateKey) ?? 1,

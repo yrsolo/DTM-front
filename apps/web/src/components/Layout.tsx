@@ -1,5 +1,5 @@
 import React from "react";
-import { NavLink, useLocation } from "react-router-dom";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { InspectorNodeBoundary } from "../inspector-integration/boundary";
 import { useSnapshot } from "../data/useSnapshot";
 import { resolvePublicAssetUrl } from "../config/publicPaths";
@@ -162,6 +162,7 @@ function sanitizeRuntimeDefaultsForHost(input: RuntimeDefaults): RuntimeDefaults
 
 export function Layout(props: { children: React.ReactNode; inspectorMount?: React.ReactNode }) {
   const location = useLocation();
+  const navigate = useNavigate();
   const INTRO_FADE_MS = 3000;
   const INTRO_VIDEO_DELAY_MS = 1000;
   const brandIconUrl = React.useMemo(() => resolvePublicAssetUrl("dtm_ico_64x64.png"), []);
@@ -640,8 +641,17 @@ export function Layout(props: { children: React.ReactNode; inspectorMount?: Reac
   }, [layoutVarsStyle]);
 
   const isAdminRoute = location.pathname === "/admin";
+  const isMainTimelineRoute = location.pathname === "/";
   const isMiniAppRoute =
     location.pathname === "/app" || location.pathname === "/m" || location.pathname === "/mobile";
+  const handleBrandClick = React.useCallback(() => {
+    if (isMainTimelineRoute) {
+      startLogoIntro();
+      return;
+    }
+
+    void navigate("/");
+  }, [isMainTimelineRoute, navigate, startLogoIntro]);
 
   React.useEffect(() => {
     if (typeof document === "undefined") return;
@@ -719,8 +729,8 @@ export function Layout(props: { children: React.ReactNode; inspectorMount?: Reac
                 <button
                   type="button"
                   className="brandIconButton"
-                  onClick={startLogoIntro}
-                  aria-label="Play logo intro"
+                  onClick={handleBrandClick}
+                  aria-label={isMainTimelineRoute ? "Play logo intro" : "Open DTM table"}
                 >
                   <img className="brandIcon" src={brandIconUrl} alt="" aria-hidden="true" />
                 </button>

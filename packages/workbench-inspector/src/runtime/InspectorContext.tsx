@@ -3,12 +3,15 @@ import React from "react";
 import type {
   DraftChange,
   DraftChangeScope,
+  SourceBackedApplyResult,
+  SourceBackedDraftChange,
   SourceNode,
   SourceNodeCategory,
   InspectorActivation,
   InspectorAdapter,
   InspectorFocusMode,
   InspectorNode,
+  InspectorNodeBounds,
   InspectorPanelSize,
   InspectorPanelPosition,
   InspectorPickMode,
@@ -20,14 +23,20 @@ import type {
 } from "../contracts/types";
 import { createInitialInspectorState } from "../model/createInitialState";
 import { buildFiberSourceGraph } from "../source-graph/buildFiberSourceGraph";
-import { buildInspectorSourceGraph, mapSourceGraphToInspectorTree } from "../source-graph/buildSourceGraph";
-import { getInspectorRuntimeRegistrations, resolveInspectorNodeIdFromElement } from "./InspectorRuntimeRegistry";
+import { buildInspectorSourceGraph, mapSourceGraphToInspectorTree, mergeSourceGraphArtifacts } from "../source-graph/buildSourceGraph";
+import {
+  getInspectorRuntimeRegistrations,
+  resolveInspectorNodeIdFromElement,
+  subscribeInspectorRuntime,
+} from "./InspectorRuntimeRegistry";
 
 type InspectorContextValue = {
   activation: InspectorActivation;
   adapter: InspectorAdapter;
   state: InspectorState;
   draftChanges: DraftChange[];
+  sourceBackedDraftChanges: SourceBackedDraftChange[];
+  sourceBackedApplyResult: SourceBackedApplyResult | null;
   debugEvents: string[];
   rootNodes: InspectorNode[];
   meaningfulRootNodes: InspectorNode[];
@@ -36,6 +45,7 @@ type InspectorContextValue = {
   getNodeById: (nodeId: string | null | undefined) => InspectorNode | null;
   getNodeElement: (nodeId: string | null | undefined) => Element | null;
   getNodeElements: (nodeId: string | null | undefined) => Element[];
+  getNodeDirectElements: (nodeId: string | null | undefined) => Element[];
   getNodeElementDebug: (nodeId: string | null | undefined) => {
     found: boolean;
     mode: "direct" | "descendant" | "ancestor" | "missing";
@@ -73,6 +83,13 @@ type InspectorContextValue = {
   upsertDraftChange: (change: Omit<DraftChange, "id" | "status"> & { id?: string; status?: DraftChange["status"] }) => void;
   removeDraftChange: (draftChangeId: string) => void;
   clearDraftChangesForNode: (sourceNodeId: string) => void;
+  upsertSourceBackedDraftChange: (
+    change: Omit<SourceBackedDraftChange, "id" | "status"> & { id?: string; status?: SourceBackedDraftChange["status"] }
+  ) => void;
+  removeSourceBackedDraftChange: (draftChangeId: string) => void;
+  discardSourceBackedDraftChanges: (sourceNodeId?: string | null) => void;
+  discardSourceBackedDraftIds: (draftIds: string[]) => void;
+  applySourceBackedDraftChanges: (draftIds?: string[] | null) => Promise<SourceBackedApplyResult>;
   setHierarchyQuery: (query: string) => void;
   setFocusMode: (focusMode: InspectorFocusMode) => void;
   setTreeFilterMode: (mode: InspectorTreeFilterMode) => void;
@@ -91,6 +108,13 @@ type DomAssistedBindingResult = {
   elementsByProjectionId: Map<string, Element>;
 };
 
+type DomIdGraph = {
+  runtimeProjectionsById: Map<string, InspectorRuntimeProjection>;
+  elementsBySourceNodeId: Map<string, Element[]>;
+  elementsByProjectionId: Map<string, Element>;
+  sourceNodeIdByProjectionId: Map<string, string>;
+};
+
 type RuntimeSourceNodeIndex = {
   nodesById: Map<string, SourceNode>;
   nodesByBindingKey: Map<string, SourceNode[]>;
@@ -104,6 +128,18 @@ type RuntimeSourceNodeIndex = {
   nodesBySourcePathAndComponentAndCategory: Map<string, SourceNode[]>;
   nodesBySourcePathComponentAndPreview: Map<string, SourceNode[]>;
   nodesBySourcePathComponentAndPreviewAndCategory: Map<string, SourceNode[]>;
+};
+
+type StableNodeLocator = {
+  id: string;
+  sourceNodeId: string | null;
+  bindingKey: string | null;
+  projectionIds: string[];
+  path: string | null;
+  ownerPath: string | null;
+  componentName: string | null;
+  label: string | null;
+  sourceCategory: SourceNodeCategory | null;
 };
 
 function toCategoryKey(category: SourceNodeCategory | null | undefined): string {
@@ -133,9 +169,35 @@ function parseSourceLocationLine(sourceLocation: string | null | undefined): num
   return Number.isFinite(line) ? line : null;
 }
 
+function normalizeSourcePathForBinding(sourcePath: string | null | undefined): string | null {
+  if (!sourcePath) return null;
+  let normalized = sourcePath.replace(/\\/g, "/").trim();
+  const viteFsMatch = normalized.match(/^https?:\/\/[^/]+\/@fs\/(.+)$/i);
+  if (viteFsMatch?.[1]) normalized = viteFsMatch[1];
+  if (normalized.startsWith("/@fs/")) normalized = normalized.slice("/@fs/".length);
+  if (normalized.startsWith("/")) normalized = normalized.slice(1);
+
+  const repoMarkerMatch = normalized.match(/(?:^|\/)(apps|packages|docs|scripts|work|presentation)\//i);
+  if (repoMarkerMatch?.index != null) {
+    normalized = normalized.slice(repoMarkerMatch.index + (normalized[repoMarkerMatch.index] === "/" ? 1 : 0));
+  }
+
+  const driveMatch = normalized.match(/^[a-z]:\//i);
+  if (driveMatch) {
+    normalized = `${normalized[0].toUpperCase()}${normalized.slice(1)}`;
+  }
+
+  return normalized;
+}
+
+function toDisplaySourcePath(sourcePath: string | null | undefined): string | null {
+  return normalizeSourcePathForBinding(sourcePath);
+}
+
 function getSourcePathAndComponentKey(sourcePath: string | null | undefined, componentName: string | null | undefined): string | null {
-  if (!sourcePath || !componentName) return null;
-  return `${sourcePath}::${componentName}`;
+  const normalizedSourcePath = normalizeSourcePathForBinding(sourcePath);
+  if (!normalizedSourcePath || !componentName) return null;
+  return `${normalizedSourcePath}::${componentName}`;
 }
 
 function getSourcePathComponentAndPreviewKey(
@@ -143,8 +205,31 @@ function getSourcePathComponentAndPreviewKey(
   componentName: string | null | undefined,
   previewText: string | null | undefined
 ): string | null {
-  if (!sourcePath || !componentName || !previewText) return null;
-  return `${sourcePath}::${componentName}::${previewText}`;
+  const normalizedSourcePath = normalizeSourcePathForBinding(sourcePath);
+  if (!normalizedSourcePath || !componentName || !previewText) return null;
+  return `${normalizedSourcePath}::${componentName}::${previewText}`;
+}
+
+function normalizeBindingPathSegment(segment: string | null | undefined): string {
+  if (!segment) return "";
+  return segment
+    .replace(/"[^"]*"/g, "")
+    .replace(/\s+/g, " ")
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9.]+/g, "");
+}
+
+function getOwnerPathBindingKey(path: string | null | undefined, componentName: string | null | undefined): string | null {
+  if (!path) return null;
+  const normalizedSegments = path
+    .split(">")
+    .map((segment) => normalizeBindingPathSegment(segment))
+    .filter(Boolean);
+  if (!normalizedSegments.length) return null;
+  const normalizedPathTail = normalizedSegments.slice(-6).join(">");
+  const normalizedComponentName = normalizeBindingPathSegment(componentName);
+  return `${normalizedPathTail}::${normalizedComponentName}`;
 }
 
 function chooseClosestRuntimeNodesBySourceLocation(
@@ -281,6 +366,62 @@ function collectProjectionElementsForNode(
   return uniqueElements;
 }
 
+function createStableNodeLocator(node: InspectorNode | null | undefined): StableNodeLocator | null {
+  if (!node) return null;
+  return {
+    id: node.id,
+    sourceNodeId: node.sourceNodeId ?? null,
+    bindingKey: node.bindingKey ?? null,
+    projectionIds: [...(node.projectionIds ?? [])],
+    path: node.path ?? null,
+    ownerPath: node.ownerPath ?? null,
+    componentName: node.componentName ?? null,
+    label: node.label ?? null,
+    sourceCategory: node.sourceCategory ?? null,
+  };
+}
+
+function resolveStableNodeId(
+  locator: StableNodeLocator | null,
+  nodesById: Map<string, InspectorNode>,
+  sourceNodeIdByRuntimeProjectionId: Map<string, string>
+): string | null {
+  if (!locator) return null;
+  if (nodesById.has(locator.id)) return locator.id;
+  if (locator.sourceNodeId && nodesById.has(locator.sourceNodeId)) return locator.sourceNodeId;
+
+  for (const projectionId of locator.projectionIds) {
+    const mappedNodeId = sourceNodeIdByRuntimeProjectionId.get(projectionId) ?? null;
+    if (mappedNodeId && nodesById.has(mappedNodeId)) return mappedNodeId;
+  }
+
+  for (const node of nodesById.values()) {
+    if (locator.bindingKey && node.bindingKey === locator.bindingKey) return node.id;
+  }
+
+  for (const node of nodesById.values()) {
+    if (
+      node.componentName === locator.componentName &&
+      node.path === locator.path &&
+      (node.sourceCategory ?? null) === locator.sourceCategory
+    ) {
+      return node.id;
+    }
+  }
+
+  for (const node of nodesById.values()) {
+    if (
+      node.componentName === locator.componentName &&
+      node.ownerPath === locator.ownerPath &&
+      node.label === locator.label
+    ) {
+      return node.id;
+    }
+  }
+
+  return null;
+}
+
 function collectBoundProjectionIds(bindings: Map<string, ResolvedSourceRuntimeBinding>): Set<string> {
   const projectionIds = new Set<string>();
   for (const binding of bindings.values()) {
@@ -291,9 +432,163 @@ function collectBoundProjectionIds(bindings: Map<string, ResolvedSourceRuntimeBi
   return projectionIds;
 }
 
-function collectRuntimeMeaningfulSupplementNodes(
+function collectSourcePathsFromTree(nodes: SourceNode[]): Set<string> {
+  const sourcePaths = new Set<string>();
+  const visit = (node: SourceNode) => {
+    const normalizedSourcePath = normalizeSourcePathForBinding(node.sourcePath);
+    if (normalizedSourcePath) sourcePaths.add(normalizedSourcePath);
+    for (const child of node.children ?? []) visit(child);
+  };
+  for (const node of nodes) visit(node);
+  return sourcePaths;
+}
+
+function collectSourceNodeIdsFromTree(nodes: SourceNode[]): Set<string> {
+  const sourceNodeIds = new Set<string>();
+  const visit = (node: SourceNode) => {
+    sourceNodeIds.add(node.id);
+    for (const child of node.children ?? []) visit(child);
+  };
+  for (const node of nodes) visit(node);
+  return sourceNodeIds;
+}
+
+function isMeaningfulWrapperLikeSourceNode(node: SourceNode): boolean {
+  const rawName = node.componentName || node.label || "";
+  const rootName = rawName.split(".")[0] ?? rawName;
+  if (!rootName) return false;
+  if (
+    /^(app|layout|browserrouter|approutes|routes|route|renderedroute|timelineentrypage|fragment|strictmode|suspense)$/i.test(
+      rootName
+    )
+  ) {
+    return true;
+  }
+  if (/entrypage$/i.test(rootName) || /routes$/i.test(rootName)) return true;
+  if (/provider$/i.test(rawName) || rawName.includes(".Provider")) return true;
+  return false;
+}
+
+function isAuthoringToolSourceNode(node: SourceNode): boolean {
+  const sourcePath = normalizeSourcePathForBinding(node.sourcePath);
+  const componentName = (node.componentName || "").trim();
+  const label = (node.label || "").trim();
+  if (sourcePath?.endsWith("apps/web/src/components/ControlsWorkbench.tsx")) return true;
+  if (/^ControlsWorkbench$/i.test(componentName)) return true;
+  if (/^div\.controlDock$/i.test(componentName) || /^Workbench dock$/i.test(label)) return true;
+  return false;
+}
+
+function filterMeaningfulSourceNodes(nodes: SourceNode[], parentId: string | null = null): SourceNode[] {
+  const output: SourceNode[] = [];
+  for (const node of nodes) {
+    if (isAuthoringToolSourceNode(node)) continue;
+    const children = filterMeaningfulSourceNodes(node.children ?? [], node.id);
+    const isWrapperLike = isMeaningfulWrapperLikeSourceNode(node);
+    if (isWrapperLike && children.length === 0 && !(node.runtimeProjectionIds?.length ?? 0)) {
+      continue;
+    }
+    const shouldFlatten =
+      isWrapperLike &&
+      children.length > 0 &&
+      node.category !== "repeated-projection-group";
+    if (shouldFlatten) {
+      output.push(
+        ...children.map((child) => (child.parentId === parentId ? child : { ...child, parentId }))
+      );
+      continue;
+    }
+    if (node.category === "component-definition" && !children.length && !node.runtimeProjectionIds.length) {
+      continue;
+    }
+    output.push({
+      ...node,
+      parentId,
+      children,
+    });
+  }
+  return output;
+}
+
+function getCanonicalSourceNodeIdMeta(node: SourceNode): string | null {
+  const value = node.meta?.canonicalSourceNodeId;
+  return typeof value === "string" && value.trim() ? value.trim() : null;
+}
+
+function mergeSourceNodes(left: SourceNode, right: SourceNode): SourceNode {
+  return {
+    ...left,
+    ...right,
+    label: left.label || right.label,
+    componentName: left.componentName || right.componentName,
+    kind: left.kind || right.kind,
+    path: left.path || right.path,
+    ownerPath: left.ownerPath || right.ownerPath,
+    sourcePath: left.sourcePath || right.sourcePath,
+    sourceLocation: left.sourceLocation || right.sourceLocation,
+    definitionId: left.definitionId ?? right.definitionId,
+    placementId: left.placementId ?? right.placementId,
+    repeatedGroupId: left.repeatedGroupId ?? right.repeatedGroupId,
+    semanticTargetId: left.semanticTargetId ?? right.semanticTargetId,
+    runtimeProjectionIds: [...new Set([...(left.runtimeProjectionIds ?? []), ...(right.runtimeProjectionIds ?? [])])],
+    children: dedupeSourceNodeForest([...(left.children ?? []), ...(right.children ?? [])]),
+    meta: {
+      ...(left.meta ?? {}),
+      ...(right.meta ?? {}),
+    },
+  };
+}
+
+function dedupeSourceNodeForest(nodes: SourceNode[]): SourceNode[] {
+  const mergedById = new Map<string, SourceNode>();
+  const order: string[] = [];
+
+  for (const node of nodes) {
+    const normalizedNode: SourceNode = {
+      ...node,
+      children: dedupeSourceNodeForest(node.children ?? []),
+      runtimeProjectionIds: [...new Set(node.runtimeProjectionIds ?? [])],
+    };
+    const existing = mergedById.get(node.id);
+    if (!existing) {
+      mergedById.set(node.id, normalizedNode);
+      order.push(node.id);
+      continue;
+    }
+    mergedById.set(node.id, mergeSourceNodes(existing, normalizedNode));
+  }
+
+  return order.map((id) => mergedById.get(id)!);
+}
+
+function pruneDuplicateSourceNodeIdsInForest(nodes: SourceNode[]): SourceNode[] {
+  const seenNodeIds = new Set<string>();
+
+  const visit = (node: SourceNode, parentId: string | null, depth: number): SourceNode | null => {
+    if (seenNodeIds.has(node.id)) return null;
+    seenNodeIds.add(node.id);
+    const children = (node.children ?? [])
+      .map((child) => visit(child, node.id, depth + 1))
+      .filter((child): child is SourceNode => Boolean(child));
+    return {
+      ...node,
+      parentId,
+      depth,
+      children,
+    };
+  };
+
+  return nodes
+    .map((node) => visit(node, null, 0))
+    .filter((node): node is SourceNode => Boolean(node));
+}
+
+function collectRuntimeSupplementNodes(
   nodes: SourceNode[],
-  boundProjectionIds: Set<string>
+  boundProjectionIds: Set<string>,
+  coveredSourcePaths: Set<string>,
+  coveredSourceNodeIds: Set<string>,
+  mode: "meaningful" | "all"
 ): SourceNode[] {
   const visit = (node: SourceNode, parentId: string | null, depth: number): SourceNode | null => {
     const filteredChildren = (node.children ?? [])
@@ -301,7 +596,16 @@ function collectRuntimeMeaningfulSupplementNodes(
       .filter((child): child is SourceNode => Boolean(child));
     const hasBoundProjection = (node.runtimeProjectionIds ?? []).some((projectionId) => boundProjectionIds.has(projectionId));
     const isLeafMeaningfulKind = node.kind === "control" || node.kind === "text" || node.kind === "image";
-    const keepNode = !hasBoundProjection && (isLeafMeaningfulKind || filteredChildren.length > 0);
+    const normalizedSourcePath = normalizeSourcePathForBinding(node.sourcePath);
+    const isCoveredBySnapshot = normalizedSourcePath ? coveredSourcePaths.has(normalizedSourcePath) : false;
+    const canonicalSourceNodeId = getCanonicalSourceNodeIdMeta(node);
+    const isCoveredBySourceNodeId = coveredSourceNodeIds.has(node.id) || (canonicalSourceNodeId ? coveredSourceNodeIds.has(canonicalSourceNodeId) : false);
+    const hasRuntimeProjection = (node.runtimeProjectionIds?.length ?? 0) > 0;
+    const keepNode =
+      !hasBoundProjection &&
+      !isCoveredBySnapshot &&
+      !isCoveredBySourceNodeId &&
+      (mode === "meaningful" ? isLeafMeaningfulKind || filteredChildren.length > 0 : hasRuntimeProjection || filteredChildren.length > 0);
     if (!keepNode) return null;
     return {
       ...node,
@@ -315,9 +619,13 @@ function collectRuntimeMeaningfulSupplementNodes(
     };
   };
 
-  return nodes
+  return pruneDuplicateSourceNodeIdsInForest(
+    dedupeSourceNodeForest(
+    nodes
     .map((node) => visit(node, null, 0))
-    .filter((node): node is SourceNode => Boolean(node));
+    .filter((node): node is SourceNode => Boolean(node))
+    )
+  );
 }
 
 const InspectorContext = React.createContext<InspectorContextValue | null>(null);
@@ -328,6 +636,7 @@ const DISABLED_ACTIVATION: InspectorActivation = {
 };
 const INSPECTOR_UI_STORAGE_KEY = "dtm.workbenchInspector.ui.v3";
 const INSPECTOR_DRAFT_STORAGE_KEY = "dtm.workbenchInspector.draft.v1";
+const INSPECTOR_SOURCE_BACKED_DRAFT_STORAGE_KEY = "dtm.workbenchInspector.sourceBackedDraft.v1";
 
 function readStoredInspectorState(): Partial<InspectorState> | null {
   if (typeof window === "undefined") return null;
@@ -415,8 +724,51 @@ function readStoredDraftChanges(): DraftChange[] {
   }
 }
 
+function readStoredSourceBackedDraftChanges(): SourceBackedDraftChange[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = window.localStorage.getItem(INSPECTOR_SOURCE_BACKED_DRAFT_STORAGE_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    return parsed.filter((entry): entry is SourceBackedDraftChange => {
+      return (
+        entry &&
+        typeof entry.id === "string" &&
+        typeof entry.parameterId === "string" &&
+        typeof entry.sourceNodeId === "string" &&
+        typeof entry.parameterLabel === "string" &&
+        typeof entry.parameterGroup === "string" &&
+        typeof entry.valueKind === "string" &&
+        typeof entry.originKind === "string" &&
+        typeof entry.currentValue === "string" &&
+        typeof entry.draftValue === "string" &&
+        typeof entry.editKind === "string" &&
+        typeof entry.targetScope === "string" &&
+        typeof entry.applyStrategy === "string" &&
+        typeof entry.status === "string" &&
+        entry.origin &&
+        typeof entry.origin.sourcePath === "string" &&
+        typeof entry.origin.sourceLocation === "string" &&
+        typeof entry.origin.astPath === "string"
+      );
+    });
+  } catch {
+    return [];
+  }
+}
+
 function makeDraftChangeId(sourceNodeId: string, scope: DraftChangeScope, group: string, key: string): string {
   return `${sourceNodeId}::${scope}::${group}::${key}`;
+}
+
+function makeSourceBackedDraftChangeId(
+  sourceNodeId: string,
+  parameterId: string,
+  targetScope: SourceBackedDraftChange["targetScope"],
+  applyStrategy: SourceBackedDraftChange["applyStrategy"]
+): string {
+  return `${sourceNodeId}::source-backed::${parameterId}::${targetScope}::${applyStrategy}`;
 }
 
 const DISABLED_ADAPTER: InspectorAdapter = {
@@ -439,6 +791,21 @@ function indexRuntimeSourceNodes(nodes: SourceNode[]): RuntimeSourceNodeIndex {
   const nodesBySourcePathComponentAndPreview = new Map<string, SourceNode[]>();
   const nodesBySourcePathComponentAndPreviewAndCategory = new Map<string, SourceNode[]>();
   const visit = (node: SourceNode) => {
+    const existingNode = nodesById.get(node.id);
+    if (existingNode) {
+      const mergedProjectionIds = [...new Set([...(existingNode.runtimeProjectionIds ?? []), ...(node.runtimeProjectionIds ?? [])])];
+      if (mergedProjectionIds.length !== (existingNode.runtimeProjectionIds?.length ?? 0)) {
+        existingNode.runtimeProjectionIds = mergedProjectionIds;
+      }
+      if ((existingNode.children?.length ?? 0) === 0 && (node.children?.length ?? 0) > 0) {
+        existingNode.children = node.children;
+      }
+      for (const projectionId of node.runtimeProjectionIds) {
+        nodesByProjectionId.set(projectionId, existingNode);
+      }
+      for (const child of node.children ?? []) visit(child);
+      return;
+    }
     nodesById.set(node.id, node);
     if (node.bindingKey) {
       const bucket = nodesByBindingKey.get(node.bindingKey) ?? [];
@@ -449,14 +816,16 @@ function indexRuntimeSourceNodes(nodes: SourceNode[]): RuntimeSourceNodeIndex {
       categoryBucket.push(node);
       nodesByBindingKeyAndCategory.set(categoryBucketKey, categoryBucket);
     }
-    const ownerComponentKey = `${node.ownerPath ?? node.path}::${node.componentName ?? ""}`;
-    const ownerBucket = nodesByOwnerComponentKey.get(ownerComponentKey) ?? [];
-    ownerBucket.push(node);
-    nodesByOwnerComponentKey.set(ownerComponentKey, ownerBucket);
-    const ownerCategoryBucketKey = getCategoryScopedKey(ownerComponentKey, node.category);
-    const ownerCategoryBucket = nodesByOwnerComponentKeyAndCategory.get(ownerCategoryBucketKey) ?? [];
-    ownerCategoryBucket.push(node);
-    nodesByOwnerComponentKeyAndCategory.set(ownerCategoryBucketKey, ownerCategoryBucket);
+    const ownerComponentKey = getOwnerPathBindingKey(node.ownerPath ?? node.path, node.componentName);
+    if (ownerComponentKey) {
+      const ownerBucket = nodesByOwnerComponentKey.get(ownerComponentKey) ?? [];
+      ownerBucket.push(node);
+      nodesByOwnerComponentKey.set(ownerComponentKey, ownerBucket);
+      const ownerCategoryBucketKey = getCategoryScopedKey(ownerComponentKey, node.category);
+      const ownerCategoryBucket = nodesByOwnerComponentKeyAndCategory.get(ownerCategoryBucketKey) ?? [];
+      ownerCategoryBucket.push(node);
+      nodesByOwnerComponentKeyAndCategory.set(ownerCategoryBucketKey, ownerCategoryBucket);
+    }
     const componentName = node.componentName ?? "";
     const componentBucket = nodesByComponentName.get(componentName) ?? [];
     componentBucket.push(node);
@@ -519,6 +888,51 @@ function getBindingStatus(runtimeProjectionIds: string[]): SourceRuntimeBindingS
   return "bound";
 }
 
+function isCanonicalSourceNodeId(value: string | null | undefined): boolean {
+  return /^(src|rpt|defn)_/i.test(value ?? "");
+}
+
+function getElementBounds(element: Element): InspectorNodeBounds | null {
+  const rect = element.getBoundingClientRect();
+  if (!Number.isFinite(rect.width) || !Number.isFinite(rect.height)) return null;
+  return {
+    x: rect.x,
+    y: rect.y,
+    width: rect.width,
+    height: rect.height,
+  };
+}
+
+function isElementActuallyVisible(element: Element): boolean {
+  if (typeof (element as Element & { checkVisibility?: (options?: object) => boolean }).checkVisibility === "function") {
+    try {
+      const isVisible = (
+        element as Element & { checkVisibility: (options?: object) => boolean }
+      ).checkVisibility({
+        checkOpacity: true,
+        checkVisibilityCSS: true,
+        contentVisibilityAuto: true,
+      });
+      if (!isVisible) return false;
+    } catch {
+      // Fall through to conservative manual checks when needed.
+    }
+  }
+  if (element.getClientRects().length === 0) return false;
+  const bounds = getElementBounds(element);
+  if (!bounds || bounds.width <= 0 || bounds.height <= 0) return false;
+  if (typeof window === "undefined" || !(element instanceof HTMLElement || element instanceof SVGElement)) {
+    return true;
+  }
+  const style = window.getComputedStyle(element);
+  if (style.display === "none") return false;
+  if (style.visibility === "hidden" || style.visibility === "collapse") return false;
+  if (Number(style.opacity) === 0) return false;
+  if (element instanceof HTMLElement && element.hidden) return false;
+  if ("ariaHidden" in element && element.getAttribute("aria-hidden") === "true") return false;
+  return true;
+}
+
 function isHostLikeComponentName(componentName: string | null | undefined): boolean {
   if (!componentName) return false;
   const tagName = componentName.split(".")[0] ?? componentName;
@@ -577,6 +991,64 @@ function getElementIdentityName(element: Element): string {
   return `${tagName}.${firstClassName}`;
 }
 
+function buildDomIdGraph(hostRoot: Element | null): DomIdGraph {
+  const runtimeProjectionsById = new Map<string, InspectorRuntimeProjection>();
+  const elementsBySourceNodeId = new Map<string, Element[]>();
+  const elementsByProjectionId = new Map<string, Element>();
+  const sourceNodeIdByProjectionId = new Map<string, string>();
+
+  if (!hostRoot) {
+    return {
+      runtimeProjectionsById,
+      elementsBySourceNodeId,
+      elementsByProjectionId,
+      sourceNodeIdByProjectionId,
+    };
+  }
+
+  const elements: Element[] = [];
+  if (hostRoot instanceof HTMLElement || hostRoot instanceof SVGElement) {
+    if (hostRoot.hasAttribute("data-wb-id")) {
+      elements.push(hostRoot);
+    }
+  }
+  elements.push(...hostRoot.querySelectorAll("[data-wb-id]"));
+
+  const countsBySourceNodeId = new Map<string, number>();
+
+  for (const element of elements) {
+    const sourceNodeId = element.getAttribute("data-wb-id")?.trim() ?? "";
+    if (!sourceNodeId) continue;
+    const nextIndex = countsBySourceNodeId.get(sourceNodeId) ?? 0;
+    countsBySourceNodeId.set(sourceNodeId, nextIndex + 1);
+    const projectionId = `wbdom:${sourceNodeId}:${nextIndex}`;
+    const bucket = elementsBySourceNodeId.get(sourceNodeId) ?? [];
+    bucket.push(element);
+    elementsBySourceNodeId.set(sourceNodeId, bucket);
+    elementsByProjectionId.set(projectionId, element);
+    sourceNodeIdByProjectionId.set(projectionId, sourceNodeId);
+    const bounds = getElementBounds(element);
+    runtimeProjectionsById.set(projectionId, {
+      id: projectionId,
+      sourceNodeId,
+      bounds,
+      isVisible: isElementActuallyVisible(element),
+      isInteractive:
+        element instanceof HTMLElement
+          ? element.tabIndex >= 0 || typeof element.onclick === "function" || /^(button|a|input|select|textarea)$/.test(element.tagName.toLowerCase())
+          : false,
+      tagName: element.tagName.toLowerCase(),
+    });
+  }
+
+  return {
+    runtimeProjectionsById,
+    elementsBySourceNodeId,
+    elementsByProjectionId,
+    sourceNodeIdByProjectionId,
+  };
+}
+
 function elementMatchesSourceNode(element: Element, node: SourceNode): boolean {
   const expectedTagName = getExpectedTagName(node.componentName);
   if (!expectedTagName) return false;
@@ -586,6 +1058,62 @@ function elementMatchesSourceNode(element: Element, node: SourceNode): boolean {
   if (!expectedPreviewText) return true;
   const actualPreviewText = getElementPreviewText(element);
   return actualPreviewText === expectedPreviewText;
+}
+
+function applyRuntimeElementPreviewBindings(
+  sourceRootNodes: SourceNode[],
+  existingBindings: Map<string, ResolvedSourceRuntimeBinding>,
+  runtimeNodesById: Map<string, SourceNode>,
+  runtimeElementsByProjectionId: Map<string, Element>
+): Map<string, ResolvedSourceRuntimeBinding> {
+  const bindings = new Map(existingBindings);
+  const runtimeNodes = [...runtimeNodesById.values()];
+
+  const visit = (node: SourceNode) => {
+    const existingBinding = bindings.get(node.id);
+    if (
+      !isCanonicalSourceNodeId(node.id) &&
+      !isCanonicalSourceNodeId(node.bindingKey) &&
+      !existingBinding?.runtimeProjectionIds.length &&
+      isHostLikeComponentName(node.componentName)
+    ) {
+      const expectedTagName = getExpectedTagName(node.componentName);
+      const expectedPreviewText = getNodeExpectedPreviewText(node);
+      const candidates = runtimeNodes.filter((runtimeNode) => {
+        if (!runtimeNode.runtimeProjectionIds.length) return false;
+        if (normalizeSourcePathForBinding(runtimeNode.sourcePath) !== normalizeSourcePathForBinding(node.sourcePath)) return false;
+        for (const projectionId of runtimeNode.runtimeProjectionIds) {
+          const element = runtimeElementsByProjectionId.get(projectionId) ?? null;
+          if (!element) continue;
+          if (expectedTagName && element.tagName.toLowerCase() !== expectedTagName) continue;
+          if (expectedPreviewText) {
+            const actualPreviewText = getElementPreviewText(element);
+            if (actualPreviewText !== expectedPreviewText) continue;
+          }
+          return true;
+        }
+        return false;
+      });
+
+      const matchedRuntimeNodes = chooseClosestRuntimeNodesBySourceLocation(node.sourceLocation, candidates, {
+        maxDistance: Math.max(getSourceLocationMatchDistance(node), 96),
+      });
+      const runtimeProjectionIds = matchedRuntimeNodes.flatMap((runtimeNode) => runtimeNode.runtimeProjectionIds);
+      if (runtimeProjectionIds.length) {
+        bindings.set(node.id, {
+          sourceNodeId: node.id,
+          bindingKey: existingBinding?.bindingKey ?? node.bindingKey ?? null,
+          runtimeProjectionIds,
+          status: "stale",
+          resolutionPath: "runtime-element-preview-fallback",
+        });
+      }
+    }
+    for (const child of node.children ?? []) visit(child);
+  };
+
+  for (const node of sourceRootNodes) visit(node);
+  return bindings;
 }
 
 function applyDomAssistedBindings(
@@ -609,7 +1137,12 @@ function applyDomAssistedBindings(
       const domChildren = [...parentElement.children];
       const unresolvedHostChildren = (node.children ?? []).filter((child) => {
         const binding = bindings.get(child.id);
-        return (!binding || !binding.runtimeProjectionIds.length) && isHostLikeComponentName(child.componentName);
+        return (
+          !isCanonicalSourceNodeId(child.id) &&
+          !isCanonicalSourceNodeId(child.bindingKey) &&
+          (!binding || !binding.runtimeProjectionIds.length) &&
+          isHostLikeComponentName(child.componentName)
+        );
       });
       let domCursor = 0;
       for (const childNode of unresolvedHostChildren) {
@@ -647,20 +1180,27 @@ function applyDomAssistedBindings(
 
 function buildSourceRuntimeBindings(
   sourceRootNodes: SourceNode[],
-  runtimeIndex: RuntimeSourceNodeIndex
+  runtimeIndex: RuntimeSourceNodeIndex,
+  domIdGraph: DomIdGraph
 ): Map<string, ResolvedSourceRuntimeBinding> {
   const bindings = new Map<string, ResolvedSourceRuntimeBinding>();
   const visit = (node: SourceNode) => {
-    const matchedRuntimeNodes = node.bindingKey
-      ? runtimeIndex.nodesByBindingKeyAndCategory.get(getCategoryScopedKey(node.bindingKey, node.category)) ?? []
-      : [];
-    const runtimeProjectionIds = matchedRuntimeNodes.flatMap((runtimeNode) => runtimeNode.runtimeProjectionIds);
+    const domProjectionIds = [...(domIdGraph.elementsBySourceNodeId.get(node.id) ?? [])].map(
+      (_element, index) => `wbdom:${node.id}:${index}`
+    );
+    const matchedRuntimeNodes =
+      !domProjectionIds.length && node.bindingKey
+        ? runtimeIndex.nodesByBindingKeyAndCategory.get(getCategoryScopedKey(node.bindingKey, node.category)) ?? []
+        : [];
+    const runtimeProjectionIds = domProjectionIds.length
+      ? domProjectionIds
+      : matchedRuntimeNodes.flatMap((runtimeNode) => runtimeNode.runtimeProjectionIds);
     bindings.set(node.id, {
       sourceNodeId: node.id,
       bindingKey: node.bindingKey ?? null,
       runtimeProjectionIds,
       status: getBindingStatus(runtimeProjectionIds),
-      resolutionPath: matchedRuntimeNodes.length ? "canonical-binding" : "unresolved",
+      resolutionPath: domProjectionIds.length ? "data-wb-id" : matchedRuntimeNodes.length ? "canonical-binding" : "unresolved",
     });
     for (const child of node.children ?? []) visit(child);
   };
@@ -679,12 +1219,16 @@ function buildSourceRuntimeFallbackBindings(
     if (canonicalBinding?.runtimeProjectionIds.length) {
       bindings.set(node.id, canonicalBinding);
     } else {
-      const ownerComponentKey = `${node.ownerPath ?? node.path}::${node.componentName ?? ""}`;
-      const ownerMatchedRuntimeNodes =
-        runtimeIndex.nodesByOwnerComponentKeyAndCategory.get(getCategoryScopedKey(ownerComponentKey, node.category)) ?? [];
+      const isCanonicalNode = isCanonicalSourceNodeId(node.id) || isCanonicalSourceNodeId(node.bindingKey);
       const nodePreviewText = getNodeExpectedPreviewText(node);
+      const requiresExactHostPreviewMatch = Boolean(nodePreviewText && isHostLikeComponentName(node.componentName));
+      const ownerComponentKey = getOwnerPathBindingKey(node.ownerPath ?? node.path, node.componentName) ?? "";
+      const ownerMatchedRuntimeNodes =
+        requiresExactHostPreviewMatch || isCanonicalNode
+          ? []
+          : runtimeIndex.nodesByOwnerComponentKeyAndCategory.get(getCategoryScopedKey(ownerComponentKey, node.category)) ?? [];
       const previewMatchedRuntimeNodes =
-        !ownerMatchedRuntimeNodes.length && nodePreviewText
+        !isCanonicalNode && !ownerMatchedRuntimeNodes.length && nodePreviewText
           ? chooseClosestRuntimeNodesBySourceLocation(
               node.sourceLocation,
               runtimeIndex.nodesBySourcePathComponentAndPreviewAndCategory.get(
@@ -697,7 +1241,10 @@ function buildSourceRuntimeFallbackBindings(
             )
           : [];
       const sourceMatchedRuntimeNodes =
-        !ownerMatchedRuntimeNodes.length && !previewMatchedRuntimeNodes.length
+        !isCanonicalNode &&
+        !requiresExactHostPreviewMatch &&
+        !ownerMatchedRuntimeNodes.length &&
+        !previewMatchedRuntimeNodes.length
           ? chooseClosestRuntimeNodesBySourceLocation(
               node.sourceLocation,
               runtimeIndex.nodesBySourcePathAndComponentAndCategory.get(
@@ -707,6 +1254,8 @@ function buildSourceRuntimeFallbackBindings(
             )
           : [];
       const componentMatchedRuntimeNodes =
+        !isCanonicalNode &&
+        !requiresExactHostPreviewMatch &&
         !ownerMatchedRuntimeNodes.length &&
         !sourceMatchedRuntimeNodes.length &&
         node.componentName &&
@@ -739,6 +1288,45 @@ function buildSourceRuntimeFallbackBindings(
     }
     for (const child of node.children ?? []) visit(child);
   };
+  for (const node of sourceRootNodes) visit(node);
+  return bindings;
+}
+
+function applyDescendantProjectionBindings(
+  sourceRootNodes: SourceNode[],
+  existingBindings: Map<string, ResolvedSourceRuntimeBinding>
+): Map<string, ResolvedSourceRuntimeBinding> {
+  const bindings = new Map(existingBindings);
+
+  const visit = (node: SourceNode): string[] => {
+    const ownBinding = bindings.get(node.id);
+    const ownProjectionIds = ownBinding?.runtimeProjectionIds ?? [];
+    const descendantProjectionIds = new Set<string>();
+
+    for (const child of node.children ?? []) {
+      for (const projectionId of visit(child)) {
+        descendantProjectionIds.add(projectionId);
+      }
+    }
+
+    if (ownProjectionIds.length) {
+      for (const projectionId of ownProjectionIds) descendantProjectionIds.add(projectionId);
+      return [...descendantProjectionIds];
+    }
+
+    if (!isHostLikeComponentName(node.componentName) && descendantProjectionIds.size) {
+      bindings.set(node.id, {
+        sourceNodeId: node.id,
+        bindingKey: ownBinding?.bindingKey ?? node.bindingKey ?? null,
+        runtimeProjectionIds: [...descendantProjectionIds],
+        status: descendantProjectionIds.size > 1 ? "multiple" : "stale",
+        resolutionPath: "descendant-projections",
+      });
+    }
+
+    return [...descendantProjectionIds];
+  };
+
   for (const node of sourceRootNodes) visit(node);
   return bindings;
 }
@@ -787,10 +1375,16 @@ export function InspectorProvider(props: {
     mergeStoredInspectorState(createInitialInspectorState(activation), readStoredInspectorState())
   );
   const [draftChanges, setDraftChanges] = React.useState<DraftChange[]>(() => readStoredDraftChanges());
+  const [sourceBackedDraftChanges, setSourceBackedDraftChanges] = React.useState<SourceBackedDraftChange[]>(() =>
+    readStoredSourceBackedDraftChanges()
+  );
+  const [sourceBackedApplyResult, setSourceBackedApplyResult] = React.useState<SourceBackedApplyResult | null>(null);
   const [refreshToken, setRefreshToken] = React.useState(0);
-  const [runtimeScanVersion, setRuntimeScanVersion] = React.useState(0);
+  const [runtimeScanVersion, setRuntimeScanVersion] = React.useState(1);
   const [debugEvents, setDebugEvents] = React.useState<string[]>([]);
   const lastDebugSelectionRef = React.useRef<string>("");
+  const selectedLocatorRef = React.useRef<StableNodeLocator | null>(null);
+  const hoveredLocatorRef = React.useRef<StableNodeLocator | null>(null);
 
   const pushDebugEvent = React.useCallback(
     (message: string) => {
@@ -838,6 +1432,18 @@ export function InspectorProvider(props: {
     }
   }, [draftChanges]);
 
+  React.useEffect(() => {
+    if (typeof window === "undefined") return;
+    try {
+      window.localStorage.setItem(
+        INSPECTOR_SOURCE_BACKED_DRAFT_STORAGE_KEY,
+        JSON.stringify(sourceBackedDraftChanges)
+      );
+    } catch {
+      // ignore storage write errors
+    }
+  }, [sourceBackedDraftChanges]);
+
   const scanResult = React.useMemo(
     () => {
       if (!state.enabled) {
@@ -873,7 +1479,7 @@ export function InspectorProvider(props: {
       const registrations = getInspectorRuntimeRegistrations();
       const snapshot = adapter.getSourceGraphSnapshot?.() ?? null;
       const snapshotRootNodes = snapshot?.rootNodes?.length ? snapshot.rootNodes : null;
-      const shouldRunRuntimeScan = !snapshotRootNodes || runtimeScanVersion > 0;
+      const shouldRunRuntimeScan = state.enabled;
 
       if (snapshotRootNodes && !shouldRunRuntimeScan) {
         const runtimeProjectionsById = new Map<string, InspectorRuntimeProjection>();
@@ -914,27 +1520,49 @@ export function InspectorProvider(props: {
         };
       }
 
-      const autoSourceGraph = buildFiberSourceGraph(adapter.getHostRootElement?.() ?? null, registrations);
+      const hostRootElement = adapter.getHostRootElement?.() ?? null;
+      const domIdGraph = buildDomIdGraph(hostRootElement);
+      const autoSourceGraph = buildFiberSourceGraph(hostRootElement, registrations);
+      const registrationSourceGraph = buildInspectorSourceGraph(registrations);
       if (autoSourceGraph?.debug.aborted) {
         console.warn("[workbench-inspector] fiber scan reached safety budget; using partial graph", {
           visited: autoSourceGraph.debug.visited,
           durationMs: autoSourceGraph.debug.durationMs,
           rootNodes: autoSourceGraph.rootNodes.length,
         });
-      } else if (!autoSourceGraph && runtimeScanVersion > 0) {
+      } else if (!autoSourceGraph && shouldRunRuntimeScan) {
         console.warn("[workbench-inspector] fiber scan unavailable; falling back to registrations graph", {
           registrations: registrations.length,
         });
       }
-      const fallbackSourceGraph = autoSourceGraph ?? buildInspectorSourceGraph(registrations);
+      const fallbackSourceGraph = autoSourceGraph
+        ? mergeSourceGraphArtifacts([autoSourceGraph, registrationSourceGraph])
+        : registrationSourceGraph;
       const graphMode = autoSourceGraph ? ("fiber" as const) : ("registrations" as const);
+      for (const [projectionId, projection] of domIdGraph.runtimeProjectionsById) {
+        fallbackSourceGraph.runtimeProjectionsById.set(projectionId, projection);
+      }
+      for (const [projectionId, element] of domIdGraph.elementsByProjectionId) {
+        fallbackSourceGraph.elementsByProjectionId.set(projectionId, element);
+      }
       const runtimeIndex = indexRuntimeSourceNodes(fallbackSourceGraph.rootNodes);
       const canonicalSourceBindings = snapshotRootNodes
-        ? buildSourceRuntimeBindings(snapshotRootNodes, runtimeIndex)
+        ? buildSourceRuntimeBindings(snapshotRootNodes, runtimeIndex, domIdGraph)
         : new Map<string, ResolvedSourceRuntimeBinding>();
-      const sourceBindings = snapshotRootNodes
+      const fallbackSourceBindings = snapshotRootNodes
         ? buildSourceRuntimeFallbackBindings(snapshotRootNodes, runtimeIndex, canonicalSourceBindings)
         : canonicalSourceBindings;
+      const descendantProjectionBindings = snapshotRootNodes
+        ? applyDescendantProjectionBindings(snapshotRootNodes, fallbackSourceBindings)
+        : fallbackSourceBindings;
+      const sourceBindings = snapshotRootNodes
+        ? applyRuntimeElementPreviewBindings(
+            snapshotRootNodes,
+            descendantProjectionBindings,
+            runtimeIndex.nodesById,
+            fallbackSourceGraph.elementsByProjectionId
+          )
+        : descendantProjectionBindings;
       const domAssistedBindings = snapshotRootNodes
         ? applyDomAssistedBindings(snapshotRootNodes, sourceBindings, fallbackSourceGraph.elementsByProjectionId)
         : { bindings: sourceBindings, elementsByProjectionId: new Map<string, Element>() };
@@ -942,14 +1570,17 @@ export function InspectorProvider(props: {
       const sourceRootNodes = snapshotRootNodes
         ? bindSourceNodes(snapshotRootNodes, domAssistedBindings.bindings, runtimeIndex.nodesByProjectionId)
         : fallbackSourceGraph.rootNodes;
-      if (snapshotRootNodes && runtimeScanVersion > 0) {
+      if (snapshotRootNodes && shouldRunRuntimeScan) {
         let bound = 0;
         let stale = 0;
         let unresolved = 0;
+        const resolutionPathCounts = new Map<string, number>();
         const unresolvedSamples: Array<{ id: string; label: string; path: string }> = [];
         const visit = (nodes: SourceNode[]) => {
           for (const node of nodes) {
             const status = String(node.meta?.bindingStatus ?? "unresolved");
+            const resolutionPath = String(node.meta?.bindingResolutionPath ?? "unresolved");
+            resolutionPathCounts.set(resolutionPath, (resolutionPathCounts.get(resolutionPath) ?? 0) + 1);
             if (status === "bound") bound += 1;
             else if (status === "stale") stale += 1;
             else unresolved += 1;
@@ -970,6 +1601,7 @@ export function InspectorProvider(props: {
           bound,
           stale,
           unresolved,
+          resolutionPaths: Object.fromEntries([...resolutionPathCounts.entries()].sort((left, right) => right[1] - left[1])),
           unresolvedSamples,
         });
 
@@ -1043,6 +1675,7 @@ export function InspectorProvider(props: {
           for (const runtimeProjectionId of binding.runtimeProjectionIds) {
             sourceNodeIdByRuntimeProjectionId.set(runtimeProjectionId, sourceNodeId);
             const element =
+              domIdGraph.elementsByProjectionId.get(runtimeProjectionId) ??
               domAssistedBindings.elementsByProjectionId.get(runtimeProjectionId) ??
               fallbackSourceGraph.elementsByProjectionId.get(runtimeProjectionId) ??
               null;
@@ -1060,6 +1693,7 @@ export function InspectorProvider(props: {
           const firstProjectionId = binding.runtimeProjectionIds[0];
           if (!firstProjectionId) continue;
           const element =
+            domIdGraph.elementsByProjectionId.get(firstProjectionId) ??
             domAssistedBindings.elementsByProjectionId.get(firstProjectionId) ??
             fallbackSourceGraph.elementsByProjectionId.get(firstProjectionId) ??
             null;
@@ -1085,9 +1719,24 @@ export function InspectorProvider(props: {
           }
         }
       } else {
+        for (const [sourceNodeId, elements] of domIdGraph.elementsBySourceNodeId) {
+          if (!elements.length) continue;
+          elementsByNodeId.set(sourceNodeId, [...elements]);
+          elementsById.set(sourceNodeId, elements[0]);
+        }
         for (const [sourceNodeId, element] of fallbackSourceGraph.elementsBySourceNodeId) {
-          elementsById.set(sourceNodeId, element);
-          elementsByNodeId.set(sourceNodeId, [element]);
+          if (!elementsById.has(sourceNodeId)) {
+            elementsById.set(sourceNodeId, element);
+          }
+          if (!elementsByNodeId.has(sourceNodeId)) {
+            elementsByNodeId.set(sourceNodeId, [element]);
+          }
+        }
+        for (const [projectionId, sourceNodeId] of domIdGraph.sourceNodeIdByProjectionId) {
+          sourceNodeIdByRuntimeProjectionId.set(projectionId, sourceNodeId);
+        }
+        for (const [projectionId, element] of domIdGraph.elementsByProjectionId) {
+          elementsByProjectionId.set(projectionId, element);
         }
         for (const [projectionId, runtimeNode] of runtimeIndex.nodesByProjectionId) {
           sourceNodeIdByRuntimeProjectionId.set(projectionId, runtimeNode.id);
@@ -1108,17 +1757,38 @@ export function InspectorProvider(props: {
         ...fallbackSourceGraph,
         rootNodes: sourceRootNodes,
       };
+      const coveredSourcePaths = snapshotRootNodes ? collectSourcePathsFromTree(sourceRootNodes) : new Set<string>();
+      const coveredSourceNodeIds = snapshotRootNodes ? collectSourceNodeIdsFromTree(sourceRootNodes) : new Set<string>();
       const runtimeMeaningfulSupplements =
-        snapshotRootNodes && boundProjectionIds.size
-          ? collectRuntimeMeaningfulSupplementNodes(fallbackSourceGraph.rootNodes, boundProjectionIds)
+        snapshotRootNodes
+          ? filterMeaningfulSourceNodes(
+              collectRuntimeSupplementNodes(
+                fallbackSourceGraph.rootNodes,
+                boundProjectionIds,
+                coveredSourcePaths,
+                coveredSourceNodeIds,
+                "meaningful"
+              )
+            )
           : [];
+      const runtimeAllSupplements =
+        snapshotRootNodes
+          ? collectRuntimeSupplementNodes(
+              fallbackSourceGraph.rootNodes,
+              boundProjectionIds,
+              coveredSourcePaths,
+              coveredSourceNodeIds,
+              "all"
+            )
+          : [];
+      const meaningfulSourceRootNodes = filterMeaningfulSourceNodes(sourceGraph.rootNodes);
       const meaningfulRootNodes = mapSourceGraphToInspectorTree(
-        [...sourceGraph.rootNodes, ...runtimeMeaningfulSupplements],
+        [...meaningfulSourceRootNodes, ...runtimeMeaningfulSupplements],
         sourceGraph.runtimeProjectionsById
       );
       const allRootNodes = mapSourceGraphToInspectorTree(
-        fallbackSourceGraph.rootNodes,
-        fallbackSourceGraph.runtimeProjectionsById
+        snapshotRootNodes ? [...sourceGraph.rootNodes, ...runtimeAllSupplements] : fallbackSourceGraph.rootNodes,
+        snapshotRootNodes ? sourceGraph.runtimeProjectionsById : fallbackSourceGraph.runtimeProjectionsById
       );
       const duplicateNodeIds = collectDuplicateInspectorNodeIds(allRootNodes);
       if (duplicateNodeIds.length) {
@@ -1158,6 +1828,23 @@ export function InspectorProvider(props: {
     [adapter, refreshToken, runtimeScanVersion, state.enabled]
   );
 
+  const hasAnyResolvedRuntimeBinding = React.useMemo(() => {
+    let found = false;
+    const visit = (nodes: SourceNode[]) => {
+      for (const node of nodes) {
+        const status = String(node.meta?.bindingStatus ?? "unresolved");
+        if (status === "bound" || status === "stale" || status === "multiple") {
+          found = true;
+          return;
+        }
+        if (node.children?.length) visit(node.children);
+        if (found) return;
+      }
+    };
+    visit(scanResult.sourceRootNodes);
+    return found;
+  }, [scanResult.sourceRootNodes]);
+
   React.useEffect(() => {
     const activeSourceNodeIds = new Set<string>();
     const visit = (node: SourceNode) => {
@@ -1171,11 +1858,24 @@ export function InspectorProvider(props: {
         return entry.status === nextStatus ? entry : { ...entry, status: nextStatus };
       })
     );
+    setSourceBackedDraftChanges((prev) =>
+      prev.map((entry) => {
+        const nextStatus = activeSourceNodeIds.has(entry.sourceNodeId) ? "active" : "stale";
+        return entry.status === nextStatus ? entry : { ...entry, status: nextStatus };
+      })
+    );
   }, [scanResult.sourceRootNodes]);
 
   React.useEffect(() => {
     adapter.applyDraftChanges?.(draftChanges);
   }, [adapter, draftChanges]);
+
+  React.useEffect(() => {
+    adapter.previewSourceBackedDrafts?.(sourceBackedDraftChanges);
+    return () => {
+      adapter.clearSourceBackedDraftPreview?.();
+    };
+  }, [adapter, sourceBackedDraftChanges]);
 
   React.useEffect(() => {
     if (!state.debug) return;
@@ -1186,7 +1886,49 @@ export function InspectorProvider(props: {
   }, [pushDebugEvent, scanResult.rootNodes.length, state.debug, state.hoveredNodeId, state.selectedNodeId]);
 
   React.useEffect(() => {
-    if (!state.enabled || !state.hierarchy.autoRefreshTree) return;
+    selectedLocatorRef.current = createStableNodeLocator(
+      state.selectedNodeId ? scanResult.nodesById.get(state.selectedNodeId) ?? null : null
+    );
+    hoveredLocatorRef.current = createStableNodeLocator(
+      state.hoveredNodeId ? scanResult.nodesById.get(state.hoveredNodeId) ?? null : null
+    );
+  }, [scanResult.nodesById, state.hoveredNodeId, state.selectedNodeId]);
+
+  React.useEffect(() => {
+    setState((prev) => {
+      let changed = false;
+      let nextSelectedNodeId = prev.selectedNodeId;
+      let nextHoveredNodeId = prev.hoveredNodeId;
+
+      if (prev.selectedNodeId && !scanResult.nodesById.has(prev.selectedNodeId)) {
+        nextSelectedNodeId = resolveStableNodeId(
+          selectedLocatorRef.current,
+          scanResult.nodesById,
+          scanResult.sourceNodeIdByRuntimeProjectionId
+        );
+        changed = nextSelectedNodeId !== prev.selectedNodeId;
+      }
+
+      if (prev.hoveredNodeId && !scanResult.nodesById.has(prev.hoveredNodeId)) {
+        nextHoveredNodeId = resolveStableNodeId(
+          hoveredLocatorRef.current,
+          scanResult.nodesById,
+          scanResult.sourceNodeIdByRuntimeProjectionId
+        );
+        changed = changed || nextHoveredNodeId !== prev.hoveredNodeId;
+      }
+
+      if (!changed) return prev;
+      return {
+        ...prev,
+        selectedNodeId: nextSelectedNodeId ?? null,
+        hoveredNodeId: nextHoveredNodeId ?? null,
+      };
+    });
+  }, [scanResult.nodesById, scanResult.sourceNodeIdByRuntimeProjectionId]);
+
+  React.useEffect(() => {
+    if (!state.enabled || !state.hierarchy.autoRefreshTree || state.pickMode === "on") return;
     const rootElement = adapter.getHostRootElement?.() ?? null;
     if (!rootElement || typeof MutationObserver === "undefined") return;
 
@@ -1220,13 +1962,56 @@ export function InspectorProvider(props: {
       observer.disconnect();
       if (timeoutId) clearTimeout(timeoutId);
     };
-  }, [adapter, state.enabled, state.hierarchy.autoRefreshTree]);
+  }, [adapter, state.enabled, state.hierarchy.autoRefreshTree, state.pickMode]);
+
+  React.useEffect(() => {
+    if (!state.enabled || hasAnyResolvedRuntimeBinding) return;
+
+    let timeoutId: ReturnType<typeof setTimeout> | null = null;
+    let bootstrappingActive = true;
+    let scheduled = false;
+
+    const queueBootstrapRefresh = () => {
+      if (!bootstrappingActive || scheduled) return;
+      scheduled = true;
+      timeoutId = setTimeout(() => {
+        scheduled = false;
+        setRuntimeScanVersion((version) => version + 1);
+        setRefreshToken((token) => token + 1);
+      }, 120);
+    };
+
+    const unsubscribe = subscribeInspectorRuntime(() => {
+      queueBootstrapRefresh();
+    });
+
+    const bootstrapTimers = [0, 180, 600, 1400].map((delay) =>
+      setTimeout(() => {
+        queueBootstrapRefresh();
+      }, delay)
+    );
+
+    const stopTimer = setTimeout(() => {
+      bootstrappingActive = false;
+      unsubscribe();
+    }, 4000);
+
+    return () => {
+      bootstrappingActive = false;
+      unsubscribe();
+      if (timeoutId) clearTimeout(timeoutId);
+      clearTimeout(stopTimer);
+      for (const timer of bootstrapTimers) clearTimeout(timer);
+    };
+  }, [hasAnyResolvedRuntimeBinding, state.enabled]);
 
   const value = React.useMemo<InspectorContextValue>(
     () => ({
       activation,
       adapter,
       draftChanges,
+      sourceBackedDraftChanges,
+      sourceBackedApplyResult,
       debugEvents,
       state,
       rootNodes: scanResult.rootNodes,
@@ -1256,6 +2041,10 @@ export function InspectorProvider(props: {
           scanResult.elementsByNodeId
         );
       },
+      getNodeDirectElements: (nodeId) => {
+        if (!nodeId) return [];
+        return [...(scanResult.elementsByNodeId.get(nodeId) ?? [])];
+      },
       getNodeElementDebug: (nodeId) => {
         const resolved = findElementForNode(nodeId, scanResult.nodesById, scanResult.elementsById);
         return {
@@ -1270,7 +2059,7 @@ export function InspectorProvider(props: {
         const bindingKey = node?.bindingKey ?? null;
         const componentName = node?.componentName ?? null;
         const sourcePathComponentKey = getSourcePathAndComponentKey(node?.sourcePath, componentName);
-        const ownerComponentKey = node ? `${node.ownerPath ?? node.path}::${node.componentName ?? ""}` : null;
+        const ownerComponentKey = node ? getOwnerPathBindingKey(node.ownerPath ?? node.path, node.componentName) : null;
         const canonicalMatches = bindingKey
           ? (scanResult.runtimeIndex.nodesByBindingKey.get(bindingKey) ?? []).map((item) => item.id)
           : [];
@@ -1333,6 +2122,13 @@ export function InspectorProvider(props: {
         setRefreshToken((token) => token + 1);
       },
       resolveNodeFromElement: (element) => {
+        const domSourceNodeId = element?.closest?.("[data-wb-id]")?.getAttribute("data-wb-id")?.trim() ?? null;
+        if (domSourceNodeId) {
+          pushDebugEvent(
+            `resolve element tag=${element?.tagName?.toLowerCase() ?? "none"} runtimeId=none sourceNodeId=${domSourceNodeId}`
+          );
+          return scanResult.nodesById.get(domSourceNodeId) ?? null;
+        }
         const runtimeId = resolveInspectorNodeIdFromElement(element);
         const sourceNodeIdFromRuntimeProjection = runtimeId
           ? scanResult.sourceNodeIdByRuntimeProjectionId.get(runtimeId) ?? null
@@ -1375,7 +2171,8 @@ export function InspectorProvider(props: {
           if (selectedNode) {
             const bindingKey = selectedNode.bindingKey ?? null;
             const componentName = selectedNode.componentName ?? null;
-            const ownerComponentKey = `${selectedNode.ownerPath ?? selectedNode.path}::${selectedNode.componentName ?? ""}`;
+            const ownerComponentKey =
+              getOwnerPathBindingKey(selectedNode.ownerPath ?? selectedNode.path, selectedNode.componentName) ?? "";
             const sourcePathComponentKey = getSourcePathAndComponentKey(selectedNode.sourcePath, componentName);
             const canonicalMatches = bindingKey
               ? (scanResult.runtimeIndex.nodesByBindingKey.get(bindingKey) ?? []).map((item) => item.id)
@@ -1460,6 +2257,72 @@ export function InspectorProvider(props: {
       clearDraftChangesForNode: (sourceNodeId) => {
         setDraftChanges((prev) => prev.filter((entry) => entry.sourceNodeId !== sourceNodeId));
       },
+      upsertSourceBackedDraftChange: (change) => {
+        setSourceBackedApplyResult(null);
+        setSourceBackedDraftChanges((prev) => {
+          const id =
+            change.id ??
+            makeSourceBackedDraftChangeId(
+              change.sourceNodeId,
+              change.parameterId,
+              change.targetScope,
+              change.applyStrategy
+            );
+          const nextChange: SourceBackedDraftChange = {
+            ...change,
+            id,
+            status: change.status ?? "active",
+          };
+          const existingIndex = prev.findIndex((entry) => entry.id === id);
+          if (existingIndex === -1) return [...prev, nextChange];
+          const next = [...prev];
+          next[existingIndex] = nextChange;
+          return next;
+        });
+      },
+      removeSourceBackedDraftChange: (draftChangeId) => {
+        setSourceBackedApplyResult(null);
+        setSourceBackedDraftChanges((prev) => prev.filter((entry) => entry.id !== draftChangeId));
+      },
+      discardSourceBackedDraftChanges: (sourceNodeId) => {
+        setSourceBackedApplyResult(null);
+        setSourceBackedDraftChanges((prev) =>
+          sourceNodeId ? prev.filter((entry) => entry.sourceNodeId !== sourceNodeId) : []
+        );
+      },
+      discardSourceBackedDraftIds: (draftIds) => {
+        if (!draftIds.length) return;
+        const draftIdSet = new Set(draftIds);
+        setSourceBackedApplyResult(null);
+        setSourceBackedDraftChanges((prev) => prev.filter((entry) => !draftIdSet.has(entry.id)));
+      },
+      applySourceBackedDraftChanges: async (draftIds) => {
+        const draftsToApply =
+          draftIds?.length ? sourceBackedDraftChanges.filter((entry) => draftIds.includes(entry.id)) : sourceBackedDraftChanges;
+        const result =
+          (await adapter.applySourceBackedDrafts?.(draftsToApply)) ??
+          ({
+            ok: false,
+            patches: [],
+            issues: [
+              {
+                draftId: "adapter",
+                parameterId: "adapter",
+                message: "Source-backed apply is not available in the current host.",
+              },
+            ],
+          } satisfies SourceBackedApplyResult);
+        setSourceBackedApplyResult(result);
+        if (result.ok) {
+          if (draftIds?.length) {
+            const appliedIds = new Set(draftIds);
+            setSourceBackedDraftChanges((prev) => prev.filter((entry) => !appliedIds.has(entry.id)));
+          } else {
+            setSourceBackedDraftChanges([]);
+          }
+        }
+        return result;
+      },
       setHierarchyQuery: (query) => {
         setState((prev) =>
           prev.hierarchy.query === query ? prev : { ...prev, hierarchy: { ...prev.hierarchy, query } }
@@ -1525,6 +2388,8 @@ export function InspectorProvider(props: {
       adapter,
       debugEvents,
       draftChanges,
+      sourceBackedApplyResult,
+      sourceBackedDraftChanges,
       pushDebugEvent,
       scanResult.elementsById,
       scanResult.elementsByNodeId,
@@ -1550,3 +2415,5 @@ export function useInspectorContext(): InspectorContextValue {
   }
   return ctx;
 }
+
+export { toDisplaySourcePath };

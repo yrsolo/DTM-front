@@ -1,0 +1,520 @@
+{
+  "id": "snapshot:promo-draft",
+  "version": "wbid-v1",
+  "entry": "apps/web/src/pages/PromoDraftPage.tsx",
+  "generatedAt": "2026-04-08T21:38:37.083Z",
+  "rootNodes": [
+    {
+      "id": "def_2rg87vgg1p0iq",
+      "label": "PromoDraftPage",
+      "category": "component-definition",
+      "bindingKey": "def_2rg87vgg1p0iq",
+      "componentName": "PromoDraftPage",
+      "kind": "content",
+      "path": "PromoDraftPage",
+      "ownerPath": "PromoDraftPage",
+      "sourcePath": "apps/web/src/pages/PromoDraftPage.tsx",
+      "sourceLocation": "apps/web/src/pages/PromoDraftPage.tsx:49:1",
+      "definitionId": "def_2rg87vgg1p0iq",
+      "placementScopeId": "scp_2340zhzkte3tg",
+      "templateToken": "tpl_2sbkkvpnemr6n",
+      "idVersion": "wbid-v1",
+      "placementId": null,
+      "repeatedGroupId": null,
+      "depth": 0,
+      "parentId": null,
+      "children": [
+        {
+          "id": "src_1ajvz0jckzehx",
+          "label": "div.promoDraftIsolatedPage",
+          "category": "placement",
+          "bindingKey": "src_1ajvz0jckzehx",
+          "componentName": "div.promoDraftIsolatedPage",
+          "kind": "container",
+          "path": "PromoDraftPage > div.promoDraftIsolatedPage",
+          "ownerPath": "PromoDraftPage > div.promoDraftIsolatedPage",
+          "sourcePath": "apps/web/src/pages/PromoDraftPage.tsx",
+          "sourceLocation": "apps/web/src/pages/PromoDraftPage.tsx:91:5",
+          "definitionId": "def_2rg87vgg1p0iq",
+          "placementScopeId": "scp_2340zhzkte3tg",
+          "templateToken": "tpl_2j04p3bmkq7rs",
+          "idVersion": "wbid-v1",
+          "placementId": "src_1ajvz0jckzehx",
+          "repeatedGroupId": null,
+          "depth": 1,
+          "parentId": "def_2rg87vgg1p0iq",
+          "children": [
+            {
+              "id": "src_12j7gcv3sl2w3",
+              "label": "div.promoDraftCard",
+              "category": "placement",
+              "bindingKey": "src_12j7gcv3sl2w3",
+              "componentName": "div.promoDraftCard",
+              "kind": "container",
+              "path": "PromoDraftPage > div.promoDraftIsolatedPage > div.promoDraftCard",
+              "ownerPath": "PromoDraftPage > div.promoDraftIsolatedPage > div.promoDraftCard",
+              "sourcePath": "apps/web/src/pages/PromoDraftPage.tsx",
+              "sourceLocation": "apps/web/src/pages/PromoDraftPage.tsx:104:7",
+              "definitionId": "def_2rg87vgg1p0iq",
+              "placementScopeId": "scp_2340zhzkte3tg",
+              "templateToken": "tpl_156hbu9p02495",
+              "idVersion": "wbid-v1",
+              "placementId": "src_12j7gcv3sl2w3",
+              "repeatedGroupId": null,
+              "depth": 2,
+              "parentId": "src_1ajvz0jckzehx",
+              "children": [],
+              "semanticTargetId": null,
+              "meta": {
+                "canonicalPath": "PromoDraftPage:0/div_promoDraftIsolatedPage:0/div_promoDraftCard:0",
+                "sourceNodeClass": "placement",
+                "displayLabel": "div.promoDraftCard",
+                "tagName": "div",
+                "sourceNodeId": "src_12j7gcv3sl2w3"
+              },
+              "runtimeProjectionIds": [],
+              "sourceBackedParameters": [
+                {
+                  "id": "src_12j7gcv3sl2w3::param:0:attr:className",
+                  "sourceNodeId": "src_12j7gcv3sl2w3",
+                  "label": "Class name",
+                  "group": "Identity",
+                  "valueKind": "string",
+                  "currentValue": "promoDraftCard",
+                  "normalizedValue": "promoDraftCard",
+                  "origin": {
+                    "kind": "class-name",
+                    "sourcePath": "apps/web/src/pages/PromoDraftPage.tsx",
+                    "sourceLocation": "apps/web/src/pages/PromoDraftPage.tsx:104:22",
+                    "astPath": "attr:className",
+                    "editable": false,
+                    "displaySourcePath": "apps/web/src/pages/PromoDraftPage.tsx",
+                    "resolvedSourcePath": "N:/PROJECTS/DTM/DTM-front/apps/web/src/pages/PromoDraftPage.tsx"
+                  },
+                  "readonlyReason": "className",
+                  "supportedScopes": [
+                    "placement"
+                  ],
+                  "selector": null,
+                  "cssProperty": null,
+                  "canCreatePlacementOverride": false,
+                  "expressionEditMode": null
+                },
+                {
+                  "id": "src_12j7gcv3sl2w3::param:1:css:.promoDraftCard:background",
+                  "sourceNodeId": "src_12j7gcv3sl2w3",
+                  "label": "Background",
+                  "group": "Fill & Stroke",
+                  "valueKind": "color",
+                  "currentValue": "#101013",
+                  "normalizedValue": "#101013",
+                  "origin": {
+                    "kind": "class-name",
+                    "sourcePath": "apps/web/src/styles/globals.css",
+                    "sourceLocation": "apps/web/src/styles/globals.css:3084:3",
+                    "astPath": "css:.promoDraftCard:background",
+                    "editable": true,
+                    "displaySourcePath": "apps/web/src/styles/globals.css",
+                    "resolvedSourcePath": "N:/PROJECTS/DTM/DTM-front/apps/web/src/styles/globals.css"
+                  },
+                  "readonlyReason": null,
+                  "supportedScopes": [
+                    "placement"
+                  ],
+                  "selector": ".promoDraftCard",
+                  "cssProperty": "background",
+                  "canCreatePlacementOverride": true,
+                  "expressionEditMode": null
+                },
+                {
+                  "id": "src_12j7gcv3sl2w3::param:2:css:.promoDraftCard:width",
+                  "sourceNodeId": "src_12j7gcv3sl2w3",
+                  "label": "Width",
+                  "group": "Layout",
+                  "valueKind": "length",
+                  "currentValue": "calc(100vw - 24px)",
+                  "normalizedValue": "calc(100vw - 24px)",
+                  "origin": {
+                    "kind": "class-name",
+                    "sourcePath": "apps/web/src/styles/globals.css",
+                    "sourceLocation": "apps/web/src/styles/globals.css:3106:5",
+                    "astPath": "css:.promoDraftCard:width",
+                    "editable": false,
+                    "displaySourcePath": "apps/web/src/styles/globals.css",
+                    "resolvedSourcePath": "N:/PROJECTS/DTM/DTM-front/apps/web/src/styles/globals.css"
+                  },
+                  "readonlyReason": "className",
+                  "supportedScopes": [
+                    "placement"
+                  ],
+                  "selector": ".promoDraftCard",
+                  "cssProperty": "width",
+                  "canCreatePlacementOverride": true,
+                  "expressionEditMode": null
+                },
+                {
+                  "id": "src_12j7gcv3sl2w3::param:3:css:.promoDraftCard:margin",
+                  "sourceNodeId": "src_12j7gcv3sl2w3",
+                  "label": "Margin",
+                  "group": "Spacing",
+                  "valueKind": "length",
+                  "currentValue": "0 auto",
+                  "normalizedValue": "0 auto",
+                  "origin": {
+                    "kind": "class-name",
+                    "sourcePath": "apps/web/src/styles/globals.css",
+                    "sourceLocation": "apps/web/src/styles/globals.css:3081:3",
+                    "astPath": "css:.promoDraftCard:margin",
+                    "editable": true,
+                    "displaySourcePath": "apps/web/src/styles/globals.css",
+                    "resolvedSourcePath": "N:/PROJECTS/DTM/DTM-front/apps/web/src/styles/globals.css"
+                  },
+                  "readonlyReason": null,
+                  "supportedScopes": [
+                    "placement"
+                  ],
+                  "selector": ".promoDraftCard",
+                  "cssProperty": "margin",
+                  "canCreatePlacementOverride": true,
+                  "expressionEditMode": null
+                },
+                {
+                  "id": "src_12j7gcv3sl2w3::param:4:css:.promoDraftCard:border",
+                  "sourceNodeId": "src_12j7gcv3sl2w3",
+                  "label": "Border",
+                  "group": "Style",
+                  "valueKind": "string",
+                  "currentValue": "0",
+                  "normalizedValue": "0",
+                  "origin": {
+                    "kind": "class-name",
+                    "sourcePath": "apps/web/src/styles/globals.css",
+                    "sourceLocation": "apps/web/src/styles/globals.css:3085:3",
+                    "astPath": "css:.promoDraftCard:border",
+                    "editable": true,
+                    "displaySourcePath": "apps/web/src/styles/globals.css",
+                    "resolvedSourcePath": "N:/PROJECTS/DTM/DTM-front/apps/web/src/styles/globals.css"
+                  },
+                  "readonlyReason": null,
+                  "supportedScopes": [
+                    "placement"
+                  ],
+                  "selector": ".promoDraftCard",
+                  "cssProperty": "border",
+                  "canCreatePlacementOverride": true,
+                  "expressionEditMode": null
+                },
+                {
+                  "id": "src_12j7gcv3sl2w3::param:5:css:.promoDraftCard:border-radius",
+                  "sourceNodeId": "src_12j7gcv3sl2w3",
+                  "label": "Border radius",
+                  "group": "Style",
+                  "valueKind": "string",
+                  "currentValue": "20px",
+                  "normalizedValue": "20px",
+                  "origin": {
+                    "kind": "class-name",
+                    "sourcePath": "apps/web/src/styles/globals.css",
+                    "sourceLocation": "apps/web/src/styles/globals.css:3107:5",
+                    "astPath": "css:.promoDraftCard:border-radius",
+                    "editable": true,
+                    "displaySourcePath": "apps/web/src/styles/globals.css",
+                    "resolvedSourcePath": "N:/PROJECTS/DTM/DTM-front/apps/web/src/styles/globals.css"
+                  },
+                  "readonlyReason": null,
+                  "supportedScopes": [
+                    "placement"
+                  ],
+                  "selector": ".promoDraftCard",
+                  "cssProperty": "border-radius",
+                  "canCreatePlacementOverride": true,
+                  "expressionEditMode": null
+                },
+                {
+                  "id": "src_12j7gcv3sl2w3::param:6:css:.promoDraftCard:box-shadow",
+                  "sourceNodeId": "src_12j7gcv3sl2w3",
+                  "label": "Box shadow",
+                  "group": "Style",
+                  "valueKind": "string",
+                  "currentValue": "0 28px 80px rgba(0, 0, 0, 0.28),\n    inset 0 1px 0 rgba(255, 255, 255, 0.05)",
+                  "normalizedValue": "0 28px 80px rgba(0, 0, 0, 0.28),\n    inset 0 1px 0 rgba(255, 255, 255, 0.05)",
+                  "origin": {
+                    "kind": "class-name",
+                    "sourcePath": "apps/web/src/styles/globals.css",
+                    "sourceLocation": "apps/web/src/styles/globals.css:3086:3",
+                    "astPath": "css:.promoDraftCard:box-shadow",
+                    "editable": true,
+                    "displaySourcePath": "apps/web/src/styles/globals.css",
+                    "resolvedSourcePath": "N:/PROJECTS/DTM/DTM-front/apps/web/src/styles/globals.css"
+                  },
+                  "readonlyReason": null,
+                  "supportedScopes": [
+                    "placement"
+                  ],
+                  "selector": ".promoDraftCard",
+                  "cssProperty": "box-shadow",
+                  "canCreatePlacementOverride": true,
+                  "expressionEditMode": null
+                },
+                {
+                  "id": "src_12j7gcv3sl2w3::param:7:css:.promoDraftCard:overflow",
+                  "sourceNodeId": "src_12j7gcv3sl2w3",
+                  "label": "Overflow",
+                  "group": "Style",
+                  "valueKind": "string",
+                  "currentValue": "hidden",
+                  "normalizedValue": "hidden",
+                  "origin": {
+                    "kind": "class-name",
+                    "sourcePath": "apps/web/src/styles/globals.css",
+                    "sourceLocation": "apps/web/src/styles/globals.css:3083:3",
+                    "astPath": "css:.promoDraftCard:overflow",
+                    "editable": true,
+                    "displaySourcePath": "apps/web/src/styles/globals.css",
+                    "resolvedSourcePath": "N:/PROJECTS/DTM/DTM-front/apps/web/src/styles/globals.css"
+                  },
+                  "readonlyReason": null,
+                  "supportedScopes": [
+                    "placement"
+                  ],
+                  "selector": ".promoDraftCard",
+                  "cssProperty": "overflow",
+                  "canCreatePlacementOverride": true,
+                  "expressionEditMode": null
+                }
+              ]
+            }
+          ],
+          "semanticTargetId": null,
+          "meta": {
+            "canonicalPath": "PromoDraftPage:0/div_promoDraftIsolatedPage:0",
+            "sourceNodeClass": "structural",
+            "displayLabel": "div.promoDraftIsolatedPage",
+            "tagName": "div",
+            "sourceNodeId": "src_1ajvz0jckzehx"
+          },
+          "runtimeProjectionIds": [],
+          "sourceBackedParameters": [
+            {
+              "id": "src_1ajvz0jckzehx::param:0:attr:className",
+              "sourceNodeId": "src_1ajvz0jckzehx",
+              "label": "Class name",
+              "group": "Identity",
+              "valueKind": "string",
+              "currentValue": "promoDraftIsolatedPage",
+              "normalizedValue": "promoDraftIsolatedPage",
+              "origin": {
+                "kind": "class-name",
+                "sourcePath": "apps/web/src/pages/PromoDraftPage.tsx",
+                "sourceLocation": "apps/web/src/pages/PromoDraftPage.tsx:91:20",
+                "astPath": "attr:className",
+                "editable": false,
+                "displaySourcePath": "apps/web/src/pages/PromoDraftPage.tsx",
+                "resolvedSourcePath": "N:/PROJECTS/DTM/DTM-front/apps/web/src/pages/PromoDraftPage.tsx"
+              },
+              "readonlyReason": "className",
+              "supportedScopes": [
+                "placement"
+              ],
+              "selector": null,
+              "cssProperty": null,
+              "canCreatePlacementOverride": false,
+              "expressionEditMode": null
+            },
+            {
+              "id": "src_1ajvz0jckzehx::param:1:css:.promoDraftIsolatedPage:display",
+              "sourceNodeId": "src_1ajvz0jckzehx",
+              "label": "Display",
+              "group": "Layout",
+              "valueKind": "string",
+              "currentValue": "grid",
+              "normalizedValue": "grid",
+              "origin": {
+                "kind": "class-name",
+                "sourcePath": "apps/web/src/styles/globals.css",
+                "sourceLocation": "apps/web/src/styles/globals.css:3050:3",
+                "astPath": "css:.promoDraftIsolatedPage:display",
+                "editable": true,
+                "displaySourcePath": "apps/web/src/styles/globals.css",
+                "resolvedSourcePath": "N:/PROJECTS/DTM/DTM-front/apps/web/src/styles/globals.css"
+              },
+              "readonlyReason": null,
+              "supportedScopes": [
+                "placement"
+              ],
+              "selector": ".promoDraftIsolatedPage",
+              "cssProperty": "display",
+              "canCreatePlacementOverride": true,
+              "expressionEditMode": null
+            },
+            {
+              "id": "src_1ajvz0jckzehx::param:2:css:.promoDraftIsolatedPage:width",
+              "sourceNodeId": "src_1ajvz0jckzehx",
+              "label": "Width",
+              "group": "Layout",
+              "valueKind": "length",
+              "currentValue": "100%",
+              "normalizedValue": "100%",
+              "origin": {
+                "kind": "class-name",
+                "sourcePath": "apps/web/src/styles/globals.css",
+                "sourceLocation": "apps/web/src/styles/globals.css:3047:3",
+                "astPath": "css:.promoDraftIsolatedPage:width",
+                "editable": true,
+                "displaySourcePath": "apps/web/src/styles/globals.css",
+                "resolvedSourcePath": "N:/PROJECTS/DTM/DTM-front/apps/web/src/styles/globals.css"
+              },
+              "readonlyReason": null,
+              "supportedScopes": [
+                "placement"
+              ],
+              "selector": ".promoDraftIsolatedPage",
+              "cssProperty": "width",
+              "canCreatePlacementOverride": true,
+              "expressionEditMode": null
+            },
+            {
+              "id": "src_1ajvz0jckzehx::param:3:css:.promoDraftIsolatedPage:gap",
+              "sourceNodeId": "src_1ajvz0jckzehx",
+              "label": "Gap",
+              "group": "Spacing",
+              "valueKind": "length",
+              "currentValue": "16px",
+              "normalizedValue": "16px",
+              "origin": {
+                "kind": "class-name",
+                "sourcePath": "apps/web/src/styles/globals.css",
+                "sourceLocation": "apps/web/src/styles/globals.css:3051:3",
+                "astPath": "css:.promoDraftIsolatedPage:gap",
+                "editable": true,
+                "displaySourcePath": "apps/web/src/styles/globals.css",
+                "resolvedSourcePath": "N:/PROJECTS/DTM/DTM-front/apps/web/src/styles/globals.css"
+              },
+              "readonlyReason": null,
+              "supportedScopes": [
+                "placement"
+              ],
+              "selector": ".promoDraftIsolatedPage",
+              "cssProperty": "gap",
+              "canCreatePlacementOverride": true,
+              "expressionEditMode": null
+            },
+            {
+              "id": "src_1ajvz0jckzehx::param:4:css:.promoDraftIsolatedPage:margin",
+              "sourceNodeId": "src_1ajvz0jckzehx",
+              "label": "Margin",
+              "group": "Spacing",
+              "valueKind": "length",
+              "currentValue": "0 auto",
+              "normalizedValue": "0 auto",
+              "origin": {
+                "kind": "class-name",
+                "sourcePath": "apps/web/src/styles/globals.css",
+                "sourceLocation": "apps/web/src/styles/globals.css:3048:3",
+                "astPath": "css:.promoDraftIsolatedPage:margin",
+                "editable": true,
+                "displaySourcePath": "apps/web/src/styles/globals.css",
+                "resolvedSourcePath": "N:/PROJECTS/DTM/DTM-front/apps/web/src/styles/globals.css"
+              },
+              "readonlyReason": null,
+              "supportedScopes": [
+                "placement"
+              ],
+              "selector": ".promoDraftIsolatedPage",
+              "cssProperty": "margin",
+              "canCreatePlacementOverride": true,
+              "expressionEditMode": null
+            },
+            {
+              "id": "src_1ajvz0jckzehx::param:5:css:.promoDraftIsolatedPage:padding",
+              "sourceNodeId": "src_1ajvz0jckzehx",
+              "label": "Padding",
+              "group": "Spacing",
+              "valueKind": "length",
+              "currentValue": "12px 12px 40px",
+              "normalizedValue": "12px 12px 40px",
+              "origin": {
+                "kind": "class-name",
+                "sourcePath": "apps/web/src/styles/globals.css",
+                "sourceLocation": "apps/web/src/styles/globals.css:3101:5",
+                "astPath": "css:.promoDraftIsolatedPage:padding",
+                "editable": true,
+                "displaySourcePath": "apps/web/src/styles/globals.css",
+                "resolvedSourcePath": "N:/PROJECTS/DTM/DTM-front/apps/web/src/styles/globals.css"
+              },
+              "readonlyReason": null,
+              "supportedScopes": [
+                "placement"
+              ],
+              "selector": ".promoDraftIsolatedPage",
+              "cssProperty": "padding",
+              "canCreatePlacementOverride": true,
+              "expressionEditMode": null
+            },
+            {
+              "id": "src_1ajvz0jckzehx::param:6:css:.promoDraftIsolatedPage:justify-items",
+              "sourceNodeId": "src_1ajvz0jckzehx",
+              "label": "Justify items",
+              "group": "Style",
+              "valueKind": "string",
+              "currentValue": "center",
+              "normalizedValue": "center",
+              "origin": {
+                "kind": "class-name",
+                "sourcePath": "apps/web/src/styles/globals.css",
+                "sourceLocation": "apps/web/src/styles/globals.css:3052:3",
+                "astPath": "css:.promoDraftIsolatedPage:justify-items",
+                "editable": true,
+                "displaySourcePath": "apps/web/src/styles/globals.css",
+                "resolvedSourcePath": "N:/PROJECTS/DTM/DTM-front/apps/web/src/styles/globals.css"
+              },
+              "readonlyReason": null,
+              "supportedScopes": [
+                "placement"
+              ],
+              "selector": ".promoDraftIsolatedPage",
+              "cssProperty": "justify-items",
+              "canCreatePlacementOverride": true,
+              "expressionEditMode": null
+            },
+            {
+              "id": "src_1ajvz0jckzehx::param:7:css:.promoDraftIsolatedPage:overflow-x",
+              "sourceNodeId": "src_1ajvz0jckzehx",
+              "label": "Overflow x",
+              "group": "Style",
+              "valueKind": "string",
+              "currentValue": "clip",
+              "normalizedValue": "clip",
+              "origin": {
+                "kind": "class-name",
+                "sourcePath": "apps/web/src/styles/globals.css",
+                "sourceLocation": "apps/web/src/styles/globals.css:3053:3",
+                "astPath": "css:.promoDraftIsolatedPage:overflow-x",
+                "editable": true,
+                "displaySourcePath": "apps/web/src/styles/globals.css",
+                "resolvedSourcePath": "N:/PROJECTS/DTM/DTM-front/apps/web/src/styles/globals.css"
+              },
+              "readonlyReason": null,
+              "supportedScopes": [
+                "placement"
+              ],
+              "selector": ".promoDraftIsolatedPage",
+              "cssProperty": "overflow-x",
+              "canCreatePlacementOverride": true,
+              "expressionEditMode": null
+            }
+          ]
+        }
+      ],
+      "semanticTargetId": null,
+      "meta": {
+        "canonicalPath": "PromoDraftPage:0",
+        "sourceNodeClass": "component-definition",
+        "displayLabel": "PromoDraftPage",
+        "tagName": null
+      },
+      "runtimeProjectionIds": [],
+      "sourceBackedParameters": []
+    }
+  ]
+}
