@@ -202,6 +202,10 @@ function FormatPanel(props: {
 }
 
 export function FormatSortPage() {
+  return <FormatSortLab />;
+}
+
+export function FormatSortLab(props: { embedded?: boolean } = {}) {
   const defaultConfig = taskFormatConfig as TaskFormatConfig;
   const [config, setConfig] = React.useState<TaskFormatConfig>(() =>
     mergeConfig(defaultConfig, readStoredJson<TaskFormatConfig>(CONFIG_STORAGE_KEY))
@@ -342,9 +346,9 @@ export function FormatSortPage() {
     }));
   }
 
-  return (
-    <div className="formatSortPage">
-      <div className="card formatSortShell">
+  const content = (
+    <div className={props.embedded ? "formatSortShell formatSortShellEmbedded" : "card formatSortShell"}>
+        {!props.embedded ? (
         <div className="formatSortHeader">
           <div>
             <div className="formatSortEyebrow">Локальная лаборатория нормализации</div>
@@ -359,6 +363,7 @@ export function FormatSortPage() {
             <div className="formatSortMetaBadge">Контур: {dataset.snapshot.contour}</div>
           </div>
         </div>
+        ) : null}
 
         <div className="formatSortToolbar">
           <div className="formatSortToolbarPrimary">
@@ -460,7 +465,12 @@ export function FormatSortPage() {
             задач.
           </div>
         </div>
-      </div>
     </div>
   );
+
+  if (props.embedded) {
+    return content;
+  }
+
+  return <div className="formatSortPage">{content}</div>;
 }

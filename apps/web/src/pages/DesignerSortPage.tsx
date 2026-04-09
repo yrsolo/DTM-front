@@ -325,6 +325,10 @@ function DesignerPanel(props: {
 }
 
 export function DesignerSortPage() {
+  return <DesignerSortLab />;
+}
+
+export function DesignerSortLab(props: { embedded?: boolean } = {}) {
   const defaultConfig = React.useMemo<DesignerSortConfig>(() => ({ assignments: [] }), []);
   const [config, setConfig] = React.useState<DesignerSortConfig>(() =>
     mergeConfig(defaultConfig, readStoredJson<DesignerSortConfig>(DESIGNER_CONFIG_STORAGE_KEY))
@@ -503,9 +507,9 @@ export function DesignerSortPage() {
     }));
   }
 
-  return (
-    <div className="formatSortPage">
-      <div className="card formatSortShell">
+  const content = (
+    <div className={props.embedded ? "formatSortShell formatSortShellEmbedded" : "card formatSortShell"}>
+        {!props.embedded ? (
         <div className="formatSortHeader">
           <div>
             <div className="formatSortEyebrow">Локальная лаборатория дизайнеров</div>
@@ -520,6 +524,7 @@ export function DesignerSortPage() {
             <div className="formatSortMetaBadge">Контур: {dataset.snapshot.contour}</div>
           </div>
         </div>
+        ) : null}
 
         <div className="formatSortToolbar">
           <div className="formatSortToolbarPrimary">
@@ -612,7 +617,12 @@ export function DesignerSortPage() {
             Экспортированный JSON можно использовать как рабочую ручную раскладку, а следующий шаг уже спокойно перевести в YAML-конфиг.
           </div>
         </div>
-      </div>
     </div>
   );
+
+  if (props.embedded) {
+    return content;
+  }
+
+  return <div className="formatSortPage">{content}</div>;
 }

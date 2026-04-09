@@ -154,6 +154,7 @@ See: `docs/deep/TROUBLESHOOTING.md`
 
 ## Session 2026-04-09
 - [x] Desktop topbar now includes route tabs near the logo/title for `Таблица / Аналитика / Промо`, using admin-like active styling and responsive wrapping so the main table page gets direct section switching without a separate control row.
+- [x] `/analytics` now has a DTM logo shortcut back to the main table, an admin-style close button in the top-right, and top-level tabs `Графики / Дизайнеры / Типы задач` where the former standalone designer-sort and task-type sort tools are embedded directly into analytics while preserving their own routes.
 
 # Workbench Authoring
 

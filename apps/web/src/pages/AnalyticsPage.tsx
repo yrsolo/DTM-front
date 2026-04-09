@@ -1,4 +1,5 @@
 import React from "react";
+import { Link, useNavigate } from "react-router-dom";
 
 import type { DesignerSortAssignment } from "../designerSort/types";
 import type { NormalizedTaskFormatId } from "../formatSort/types";
@@ -19,7 +20,10 @@ import type {
   DepartmentAnalyticsReport,
 } from "../analytics/types";
 import { Tooltip, TooltipState } from "../components/Tooltip";
+import { resolvePublicAssetUrl } from "../config/publicPaths";
 import { taskFormatConfig } from "../formatSort/config";
+import { DesignerSortLab } from "./DesignerSortPage";
+import { FormatSortLab } from "./FormatSortPage";
 
 const ANALYTICS_CONFIG_STORAGE_KEY = "dtm.analytics.config.v1";
 const ANALYTICS_DATASET_STORAGE_KEY = "dtm.analytics.dataset.v1";
@@ -44,12 +48,16 @@ const DONUT_COLORS = [
   "#adb5bd",
 ];
 
-type AnalyticsTabId = "formats" | "productivity";
+type AnalyticsMainTabId = "charts" | "designers" | "taskTypes";
+type AnalyticsChartsTabId = "formats" | "productivity";
 type DonutSlice = AnalyticsDonutBreakdown["segments"][number] & {
   color: string;
   path: string;
   legendColor: string;
 };
+
+const ANALYTICS_MAIN_TAB_STORAGE_KEY = "dtm.analytics.mainTab.v1";
+const ANALYTICS_BRAND_LOGO_URL = resolvePublicAssetUrl("dtm_ico_64x64.png");
 
 function readStoredJson<T>(key: string): T | null {
   if (typeof window === "undefined") return null;
@@ -428,7 +436,13 @@ function ProductivityChart(props: {
 
 export function AnalyticsPage() {
   const defaultConfig = React.useMemo(() => buildDefaultConfig(), []);
-  const [tab, setTab] = React.useState<AnalyticsTabId>("formats");
+  const navigate = useNavigate();
+  const [mainTab, setMainTab] = React.useState<AnalyticsMainTabId>(() => {
+    if (typeof window === "undefined") return "charts";
+    const stored = window.localStorage.getItem(ANALYTICS_MAIN_TAB_STORAGE_KEY);
+    return stored === "designers" || stored === "taskTypes" ? stored : "charts";
+  });
+  const [chartsTab, setChartsTab] = React.useState<AnalyticsChartsTabId>("formats");
   const [config, setConfig] = React.useState<DepartmentAnalyticsConfig>(() =>
     mergeConfig(defaultConfig, readStoredJson<DepartmentAnalyticsConfig>(ANALYTICS_CONFIG_STORAGE_KEY))
   );
@@ -452,6 +466,11 @@ export function AnalyticsPage() {
   React.useEffect(() => {
     writeStoredJson(ANALYTICS_CONFIG_STORAGE_KEY, config);
   }, [config]);
+
+  React.useEffect(() => {
+    if (typeof window === "undefined") return;
+    window.localStorage.setItem(ANALYTICS_MAIN_TAB_STORAGE_KEY, mainTab);
+  }, [mainTab]);
 
   React.useEffect(() => {
     if (!dataset) return;
@@ -544,12 +563,28 @@ export function AnalyticsPage() {
     <div className="analyticsPage">
       <div className="card analyticsShell">
         <div className="analyticsHeader">
-          <div>
+          <div className="analyticsHeaderPrimary">
+            <div className="analyticsHeaderTopRow">
+              <Link to="/" className="analyticsBrand" aria-label="Вернуться на таблицу">
+                <img className="analyticsBrandIcon" src={ANALYTICS_BRAND_LOGO_URL} alt="" aria-hidden="true" />
+              </Link>
+              <button
+                type="button"
+                className="adminCloseButton analyticsCloseButton"
+                onClick={() => navigate("/")}
+                aria-label="Вернуться на таблицу"
+                title="Вернуться на таблицу"
+              >
+                &times;
+              </button>
+            </div>
+            <div className="analyticsHeaderText">
             <div className="analyticsEyebrow">Локальная лаборатория аналитики</div>
             <h1 className="pageTitle analyticsTitle">Аналитика отдела</h1>
             <div className="muted">
               Данные обновляются только вручную. Основа расчёта — полный SnapshotV1, нормализованные форматы и
               локальная сортировка дизайнеров.
+            </div>
             </div>
           </div>
           <div className="analyticsHeaderMeta">
@@ -559,6 +594,32 @@ export function AnalyticsPage() {
           </div>
         </div>
 
+        <div className="analyticsMainTabs">
+          <button
+            type="button"
+            className={`adminTabButton ${mainTab === "charts" ? "isActive" : ""}`}
+            onClick={() => setMainTab("charts")}
+          >
+            Графики
+          </button>
+          <button
+            type="button"
+            className={`adminTabButton ${mainTab === "designers" ? "isActive" : ""}`}
+            onClick={() => setMainTab("designers")}
+          >
+            Дизайнеры
+          </button>
+          <button
+            type="button"
+            className={`adminTabButton ${mainTab === "taskTypes" ? "isActive" : ""}`}
+            onClick={() => setMainTab("taskTypes")}
+          >
+            Типы задач
+          </button>
+        </div>
+
+        {mainTab === "charts" ? (
+        <>
         <div className="analyticsToolbar">
           <div className="analyticsToolbarPrimary">
             <button type="button" className="btn" onClick={() => void handleManualRefresh()} disabled={isRefreshing}>
@@ -737,13 +798,13 @@ export function AnalyticsPage() {
         </div>
 
         <div className="analyticsTabs">
-          <button type="button" className={`btn ${tab === "formats" ? "" : "btnGhost"}`} onClick={() => setTab("formats")}>
+          <button type="button" className={`btn ${chartsTab === "formats" ? "" : "btnGhost"}`} onClick={() => setChartsTab("formats")}>
             Форматы
           </button>
           <button
             type="button"
-            className={`btn ${tab === "productivity" ? "" : "btnGhost"}`}
-            onClick={() => setTab("productivity")}
+            className={`btn ${chartsTab === "productivity" ? "" : "btnGhost"}`}
+            onClick={() => setChartsTab("productivity")}
           >
             Производительность
           </button>
@@ -789,7 +850,7 @@ export function AnalyticsPage() {
 
         {!report ? (
           <div className="analyticsEmpty">Сначала нажми «Скачать все задачи», чтобы построить аналитику.</div>
-        ) : tab === "formats" ? (
+        ) : chartsTab === "formats" ? (
           <div className="analyticsFormatsView">
             <div className="analyticsPeriodToolbar">
               <div className="analyticsPeriodModeTabs">
@@ -886,6 +947,16 @@ export function AnalyticsPage() {
               smoothingWindowMonths={config.smoothingWindowMonths}
               setTooltipState={setTooltipState}
             />
+          </div>
+        )}
+        </>
+        ) : mainTab === "designers" ? (
+          <div className="analyticsEmbeddedSection">
+            <DesignerSortLab embedded />
+          </div>
+        ) : (
+          <div className="analyticsEmbeddedSection">
+            <FormatSortLab embedded />
           </div>
         )}
       </div>

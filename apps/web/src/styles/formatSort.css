@@ -11,6 +11,10 @@
   padding: 20px;
 }
 
+.formatSortShellEmbedded {
+  padding: 0;
+}
+
 .formatSortHeader {
   display: flex;
   justify-content: space-between;
