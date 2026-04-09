@@ -1,5 +1,5 @@
 import React from "react";
-import { useLocation } from "react-router-dom";
+import { NavLink, useLocation } from "react-router-dom";
 import { InspectorNodeBoundary } from "../inspector-integration/boundary";
 import { useSnapshot } from "../data/useSnapshot";
 import { resolvePublicAssetUrl } from "../config/publicPaths";
@@ -95,6 +95,11 @@ export const LayoutContext = React.createContext<LayoutContextValue | null>(null
 const VIEW_MODE_STORAGE_KEY = "dtm.viewMode.v1";
 const SORT_MODE_STORAGE_KEY = "dtm.sortMode.v1";
 const LOCALE_STORAGE_KEY = "dtm.locale.v1";
+const PRIMARY_SECTION_LINKS: ReadonlyArray<{ to: string; label: string; end?: boolean }> = [
+  { to: "/", label: "Таблица", end: true },
+  { to: "/analytics", label: "Аналитика" },
+  { to: "/promo", label: "Промо" },
+];
 
 type UiPreset = {
   design: DesignControls;
@@ -723,6 +728,18 @@ export function Layout(props: { children: React.ReactNode; inspectorMount?: Reac
                   <strong>{ui.appTitle}</strong>
                   <span className="muted">{ui.appSubtitle}</span>
                 </div>
+                <nav className="sectionSwitch" aria-label="Основные разделы">
+                  {PRIMARY_SECTION_LINKS.map((link) => (
+                    <NavLink
+                      key={link.to}
+                      to={link.to}
+                      end={link.end}
+                      className={({ isActive }) => `sectionSwitchTab adminTabButton ${isActive ? "isActive" : ""}`}
+                    >
+                      {link.label}
+                    </NavLink>
+                  ))}
+                </nav>
               </div>
             </div>
           </div>

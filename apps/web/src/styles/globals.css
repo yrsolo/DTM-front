@@ -186,6 +186,7 @@ a {
   flex-direction: row;
   align-items: center;
   gap: 12px;
+  flex-wrap: wrap;
 }
 
 .brandIcon {
@@ -218,6 +219,42 @@ a {
   display: flex;
   flex-direction: column;
   gap: 2px;
+}
+
+.sectionSwitch {
+  display: inline-flex;
+  align-items: stretch;
+  margin-left: 28px;
+  background: linear-gradient(180deg, rgba(20, 26, 48, 0.9), rgba(14, 19, 37, 0.88));
+  border: 1px solid rgba(116, 133, 188, 0.18);
+  box-shadow:
+    0 14px 28px rgba(0, 0, 0, 0.24),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  overflow: hidden;
+}
+
+.sectionSwitchTab {
+  min-height: 58px;
+  padding: 0 28px;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  font-size: 15px;
+  font-weight: 800;
+  border-bottom-width: 3px;
+  transition:
+    background 140ms ease,
+    color 140ms ease,
+    border-color 140ms ease;
+}
+
+.sectionSwitchTab:hover {
+  color: #dfe8ff;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(122, 144, 203, 0.05));
+}
+
+.sectionSwitchTab + .sectionSwitchTab {
+  border-left: 1px solid rgba(116, 133, 188, 0.12);
 }
 
 .brand strong {
@@ -4464,6 +4501,19 @@ button:hover {
     font-size: 16px;
   }
 
+  .sectionSwitch {
+    margin-left: 0;
+    width: 100%;
+  }
+
+  .sectionSwitchTab {
+    flex: 1 1 0;
+    min-width: 0;
+    min-height: 50px;
+    padding: 0 16px;
+    font-size: 14px;
+  }
+
   .drawerMilestoneColumns {
     grid-template-columns: 1fr;
   }
@@ -5217,7 +5267,7 @@ button:hover {
   transform: translateX(-50%);
   object-fit: contain;
   object-position: center top;
-  opacity: 0.96;
+  opacity: 1;
   z-index: 1;
 }
 
@@ -6044,7 +6094,7 @@ button:hover {
     right: auto;
     bottom: auto;
     grid-template-columns: 1fr;
-    margin-top: 24px;
+    margin-top: 4px;
   }
 
   .promoIconCard {
