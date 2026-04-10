@@ -328,15 +328,37 @@ export function DesignerSortPage() {
   return <DesignerSortLab />;
 }
 
-export function DesignerSortLab(props: { embedded?: boolean } = {}) {
+type DesignerSortLabProps = {
+  embedded?: boolean;
+  config?: DesignerSortConfig;
+  onConfigChange?: React.Dispatch<React.SetStateAction<DesignerSortConfig>>;
+  snapshot?: TaskFormatSourceSnapshot | null;
+};
+
+export function DesignerSortLab(props: DesignerSortLabProps = {}) {
   const defaultConfig = React.useMemo<DesignerSortConfig>(() => ({ assignments: [] }), []);
-  const [config, setConfig] = React.useState<DesignerSortConfig>(() =>
+  const [localConfig, setLocalConfig] = React.useState<DesignerSortConfig>(() =>
     mergeConfig(defaultConfig, readStoredJson<DesignerSortConfig>(DESIGNER_CONFIG_STORAGE_KEY))
   );
-  const [dataset, setDataset] = React.useState<BrowserDesignerSortDataset>(() => {
+  const [localDataset, setLocalDataset] = React.useState<BrowserDesignerSortDataset>(() => {
     const stored = readStoredJson<BrowserDesignerSortDataset>(DESIGNER_DATASET_STORAGE_KEY);
     return stored ?? buildDefaultDataset();
   });
+  const config = props.config ?? localConfig;
+  const setConfig = props.onConfigChange ?? setLocalConfig;
+  const dataset = React.useMemo<BrowserDesignerSortDataset>(() => {
+    if (props.snapshot) {
+      return { snapshot: props.snapshot };
+    }
+    return localDataset;
+  }, [localDataset, props.snapshot]);
+  const setDataset = React.useCallback(
+    (next: BrowserDesignerSortDataset) => {
+      if (typeof props.snapshot !== "undefined") return;
+      setLocalDataset(next);
+    },
+    [props.snapshot]
+  );
   const [search, setSearch] = React.useState("");
   const [hideSorted, setHideSorted] = React.useState(false);
   const [displayLimit, setDisplayLimit] = React.useState(100);
@@ -353,12 +375,14 @@ export function DesignerSortLab(props: { embedded?: boolean } = {}) {
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }));
 
   React.useEffect(() => {
+    if (props.onConfigChange) return;
     writeStoredJson(DESIGNER_CONFIG_STORAGE_KEY, config);
-  }, [config]);
+  }, [config, props.onConfigChange]);
 
   React.useEffect(() => {
+    if (typeof props.snapshot !== "undefined") return;
     writeStoredJson(DESIGNER_DATASET_STORAGE_KEY, dataset);
-  }, [dataset]);
+  }, [dataset, props.snapshot]);
 
   React.useEffect(() => {
     let cancelled = false;
@@ -484,7 +508,7 @@ export function DesignerSortLab(props: { embedded?: boolean } = {}) {
 
   function handleResetLocalState() {
     setConfig(defaultConfig);
-    setDataset(buildDefaultDataset());
+    setLocalDataset(buildDefaultDataset());
     if (typeof window !== "undefined") {
       window.localStorage.removeItem(DESIGNER_CONFIG_STORAGE_KEY);
       window.localStorage.removeItem(DESIGNER_DATASET_STORAGE_KEY);

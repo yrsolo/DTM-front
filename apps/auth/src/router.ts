@@ -54,6 +54,7 @@ import {
   setDefaultPresetHandler,
   updatePresetHandler,
 } from "./handlers/presetHandlers";
+import { getSharedAppStateHandler, putSharedAppStateHandler } from "./handlers/appStateHandlers";
 import type { HttpResult, NormalizedRequest } from "./types";
 
 export async function routeRequest(req: NormalizedRequest): Promise<HttpResult> {
@@ -143,6 +144,13 @@ export async function routeRequest(req: NormalizedRequest): Promise<HttpResult> 
     }
     if (req.method === "POST" && req.routePath === "/presets/import") {
       return importPresetHandler(req);
+    }
+    const sharedAppStateMatch = req.routePath.match(/^\/app-state\/([^/]+)$/);
+    if (req.method === "GET" && sharedAppStateMatch) {
+      return getSharedAppStateHandler(req, sharedAppStateMatch[1]);
+    }
+    if (req.method === "PUT" && sharedAppStateMatch) {
+      return putSharedAppStateHandler(req, sharedAppStateMatch[1]);
     }
     if (req.method === "POST" && req.routePath === "/admin/allowlist") {
       return addAllowlistEmailHandler(req);

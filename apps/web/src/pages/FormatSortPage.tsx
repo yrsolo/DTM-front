@@ -205,15 +205,40 @@ export function FormatSortPage() {
   return <FormatSortLab />;
 }
 
-export function FormatSortLab(props: { embedded?: boolean } = {}) {
+type FormatSortLabProps = {
+  embedded?: boolean;
+  config?: TaskFormatConfig;
+  onConfigChange?: React.Dispatch<React.SetStateAction<TaskFormatConfig>>;
+  snapshot?: TaskFormatSourceSnapshot | null;
+};
+
+export function FormatSortLab(props: FormatSortLabProps = {}) {
   const defaultConfig = taskFormatConfig as TaskFormatConfig;
-  const [config, setConfig] = React.useState<TaskFormatConfig>(() =>
+  const [localConfig, setLocalConfig] = React.useState<TaskFormatConfig>(() =>
     mergeConfig(defaultConfig, readStoredJson<TaskFormatConfig>(CONFIG_STORAGE_KEY))
   );
-  const [dataset, setDataset] = React.useState<BrowserFormatSortDataset>(() => {
+  const [localDataset, setLocalDataset] = React.useState<BrowserFormatSortDataset>(() => {
     const stored = readStoredJson<BrowserFormatSortDataset>(DATASET_STORAGE_KEY);
     return stored ?? buildDefaultDataset(defaultConfig);
   });
+  const config = props.config ?? localConfig;
+  const setConfig = props.onConfigChange ?? setLocalConfig;
+  const dataset = React.useMemo<BrowserFormatSortDataset>(() => {
+    if (props.snapshot) {
+      return {
+        snapshot: props.snapshot,
+        inventory: buildRawTaskFormatInventory(props.snapshot, config),
+      };
+    }
+    return localDataset;
+  }, [config, localDataset, props.snapshot]);
+  const setDataset = React.useCallback(
+    (next: BrowserFormatSortDataset) => {
+      if (typeof props.snapshot !== "undefined") return;
+      setLocalDataset(next);
+    },
+    [props.snapshot]
+  );
   const [search, setSearch] = React.useState("");
   const [hideSorted, setHideSorted] = React.useState(false);
   const [displayLimit, setDisplayLimit] = React.useState(100);
@@ -229,12 +254,14 @@ export function FormatSortLab(props: { embedded?: boolean } = {}) {
   }, [defaultConfig]);
 
   React.useEffect(() => {
+    if (props.onConfigChange) return;
     writeStoredJson(CONFIG_STORAGE_KEY, config);
-  }, [config]);
+  }, [config, props.onConfigChange]);
 
   React.useEffect(() => {
+    if (typeof props.snapshot !== "undefined") return;
     writeStoredJson(DATASET_STORAGE_KEY, dataset);
-  }, [dataset]);
+  }, [dataset, props.snapshot]);
 
   const inventory = React.useMemo(() => buildRawTaskFormatInventory(dataset.snapshot, config), [config, dataset.snapshot]);
 
@@ -317,7 +344,7 @@ export function FormatSortLab(props: { embedded?: boolean } = {}) {
     const nextConfig = mergeConfig(defaultConfig, null);
     const nextDataset = buildDefaultDataset(nextConfig);
     setConfig(nextConfig);
-    setDataset(nextDataset);
+    setLocalDataset(nextDataset);
     if (typeof window !== "undefined") {
       window.localStorage.removeItem(CONFIG_STORAGE_KEY);
       window.localStorage.removeItem(DATASET_STORAGE_KEY);

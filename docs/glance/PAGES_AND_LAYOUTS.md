@@ -193,6 +193,12 @@ Runtime semantics:
 - import / export / delete / set default;
 - drag-order persistence.
 
+Тот же bucket теперь используется и для shared lab state:
+- analytics config;
+- designer-sort config;
+- task-type config;
+- общий analytics snapshot для вкладок `Графики / Дизайнеры / Типы задач`.
+
 ### `Стиль -> UI`
 
 Read-only inventory layer для унификации дизайн-системы:

@@ -157,6 +157,10 @@ See: `docs/deep/TROUBLESHOOTING.md`
 - [x] `/analytics` now has a DTM logo shortcut back to the main table, an admin-style close button in the top-right, and top-level tabs `Графики / Дизайнеры / Типы задач` where the former standalone designer-sort and task-type sort tools are embedded directly into analytics while preserving their own routes.
 - [x] Promo CTAs and brand navigation were aligned to the main table route: all `/promo` “Открыть систему” actions plus the promo logo now point to `/`, and the shared topbar logo now routes to `/` on every non-table page while preserving the intro action on the main table itself.
 
+## Session 2026-04-10
+- [x] Promo transition video was replaced with a two-stage player: low-quality inline preview now opens a darkened overlay player with custom play/pause, timeline, and volume controls; the main stream uses `hls.js` for the high-quality `.m3u8`, closes on backdrop click, and fades out automatically after playback ends.
+- [x] Analytics lab state moved from browser-local storage to shared bucket-backed app state in the same storage as UI presets: analytics/designer/task-type configs plus the shared analytics snapshot now load/save through auth, bucket writes are skipped when JSON is unchanged, analytics auto-downloads a fresh snapshot once on page entry, and charts/designers/task types all reuse that one snapshot.
+
 # Workbench Authoring
 
 - [x] CAM-WORKBENCH-AUTHORING-VISION - code-first authoring product direction fixed with extraction-first boundaries

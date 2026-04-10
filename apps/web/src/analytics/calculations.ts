@@ -1,7 +1,7 @@
 import type { GroupV1, PersonV1, SnapshotV1, TaskV1 } from "@dtm/schema/snapshot";
 import { fetchRuHolidayAndTransferDaysInRange } from "../calendar/ruNonWorkingDays";
 import type { DesignerSortBucketId } from "../designerSort/types";
-import { taskFormatConfig } from "../formatSort/config";
+import type { TaskFormatConfig } from "../formatSort/types";
 import { resolveNormalizedTaskFormat, UNSORTED_FORMAT_ID } from "../formatSort/resolver";
 import { toShortPersonName } from "../utils/personName";
 import type {
@@ -136,7 +136,12 @@ function shouldIncludeBucket(bucketId: DesignerSortBucketId, config: DepartmentA
   return false;
 }
 
-function buildTaskRef(task: TaskV1, snapshot: SnapshotV1, productionDate: string): AnalyticsTaskRef {
+function buildTaskRef(
+  task: TaskV1,
+  snapshot: SnapshotV1,
+  productionDate: string,
+  formatConfig: TaskFormatConfig
+): AnalyticsTaskRef {
   const peopleById = new Map(snapshot.people.map((person) => [person.id, person]));
   const groupsById = new Map((snapshot.groups ?? []).map((group) => [group.id, group]));
   const designerName = resolveDesignerDisplayName(task, peopleById);
@@ -146,7 +151,7 @@ function buildTaskRef(task: TaskV1, snapshot: SnapshotV1, productionDate: string
     brand: task.brand ?? null,
     show: resolveShowName(task, groupsById),
     designerName,
-    formatId: resolveNormalizedTaskFormat(task.format_ ?? task.type ?? null, taskFormatConfig),
+    formatId: resolveNormalizedTaskFormat(task.format_ ?? task.type ?? null, formatConfig),
     productionDate,
     task,
   };
@@ -198,10 +203,11 @@ export function buildDepartmentAnalyticsReport(
   snapshot: SnapshotV1,
   analyticsConfig: DepartmentAnalyticsConfig,
   designerConfig: AnalyticsDesignerConfig | null,
+  formatConfig: TaskFormatConfig,
   autoHoursPerDesigner: number
 ): DepartmentAnalyticsReport {
   const monthMap = new Map<string, MonthlyDepartmentAnalyticsRow>();
-  const formatTitles = new Map(taskFormatConfig.catalog.map((entry) => [entry.id, entry.title]));
+  const formatTitles = new Map(formatConfig.catalog.map((entry) => [entry.id, entry.title]));
   const peopleById = new Map(snapshot.people.map((person) => [person.id, person]));
   let usedDesignerConfig = false;
 
@@ -214,7 +220,7 @@ export function buildDepartmentAnalyticsReport(
     if (!shouldIncludeBucket(bucketResolution.bucketId, analyticsConfig)) continue;
 
     const monthKey = productionDate.slice(0, 7);
-    const taskRef = buildTaskRef(task, snapshot, productionDate);
+    const taskRef = buildTaskRef(task, snapshot, productionDate, formatConfig);
     const designerName = resolveDesignerDisplayName(task, peopleById);
     const existing =
       monthMap.get(monthKey) ??
@@ -272,7 +278,7 @@ export function buildDepartmentAnalyticsReport(
     totalPracticalHours += row.practicalHours;
     totalTheoreticalHours += row.theoreticalCapacityHours;
     totalDesignerMonths += row.activeDesignerCount;
-    for (const entry of taskFormatConfig.catalog) {
+    for (const entry of formatConfig.catalog) {
       const count = row.tasksByFormat[entry.id]?.length ?? 0;
       if (!count) continue;
       topCounts.set(entry.id, (topCounts.get(entry.id) ?? 0) + count);
@@ -397,11 +403,21 @@ function buildRangeFromConfig(config: DepartmentAnalyticsConfig): {
 
 export function buildAnalyticsDonutBreakdown(
   report: DepartmentAnalyticsReport,
-  config: DepartmentAnalyticsConfig
+  config: DepartmentAnalyticsConfig,
+  formatConfig: TaskFormatConfig
 ): AnalyticsDonutBreakdown {
   const range = buildRangeFromConfig(config);
-  const formatTitles = new Map(taskFormatConfig.catalog.map((entry) => [entry.id, entry.title]));
-  const segments = new Map<string, { formatId: AnalyticsDonutBreakdown["segments"][number]["formatId"]; title: string; taskCount: number; hours: number; tasks: AnalyticsDonutTaskLine[] }>();
+  const formatTitles = new Map(formatConfig.catalog.map((entry) => [entry.id, entry.title]));
+  const segments = new Map<
+    string,
+    {
+      formatId: AnalyticsDonutBreakdown["segments"][number]["formatId"];
+      title: string;
+      taskCount: number;
+      hours: number;
+      tasks: AnalyticsDonutTaskLine[];
+    }
+  >();
 
   for (const row of report.rows) {
     const monthIndex = toMonthIndex(row.monthKey);
@@ -418,13 +434,11 @@ export function buildAnalyticsDonutBreakdown(
       };
       current.taskCount += tasks.length;
       current.hours += tasks.length * (config.formatHoursById[typedFormatId as keyof typeof config.formatHoursById] ?? 0);
-      current.tasks.push(
-        ...tasks.map((task) => ({
-          id: task.id,
-          brand: task.brand,
-          show: task.show,
-        }))
-      );
+      current.tasks.push(...tasks.map<AnalyticsDonutTaskLine>((task) => ({
+        id: task.id,
+        brand: task.brand,
+        show: task.show,
+      })));
       segments.set(formatId, current);
     }
 
@@ -437,13 +451,11 @@ export function buildAnalyticsDonutBreakdown(
         tasks: [],
       };
       current.taskCount += row.unsortedTaskCount;
-      current.tasks.push(
-        ...row.unsortedTasks.map((task) => ({
-          id: task.id,
-          brand: task.brand,
-          show: task.show,
-        }))
-      );
+      current.tasks.push(...row.unsortedTasks.map<AnalyticsDonutTaskLine>((task) => ({
+        id: task.id,
+        brand: task.brand,
+        show: task.show,
+      })));
       segments.set(UNSORTED_FORMAT_ID, current);
     }
   }

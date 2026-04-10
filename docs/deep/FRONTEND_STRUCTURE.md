@@ -18,7 +18,8 @@ Source of truth в коде:
 | `apps/web/src/config` | Runtime-конфиг, contour/base path и Telegram runtime detection | `publicConfig.ts`, `runtimeContour.ts`, `telegramRuntime.ts` |
 | `apps/web/src/data` | API-запросы, загрузка snapshot, нормализация, runtime defaults и selectors/view-models | `api.ts`, `useSnapshot.ts`, `normalize.ts`, `runtimeDefaults.ts`, `selectors/*` |
 | `apps/web/src/design` | Типы и дефолты design controls, key colors, схема workbench и code-owned UI inventory registry реальных элементов | `controls.ts`, `colors.ts`, `workbenchLayout.ts`, `uiRegistry.ts` |
-| `apps/web/src/formatSort` | Локальная лаборатория нормализации task `format_`, browser ingestion и resolver нормализованных форматов | `resolver.ts`, `browserIngestion.ts`, `types.ts` |
+| `apps/web/src/formatSort` | Лаборатория нормализации task `format_`, browser ingestion и resolver нормализованных форматов | `resolver.ts`, `browserIngestion.ts`, `types.ts` |
+| `apps/web/src/labs` | Shared bucket-backed lab state client и адаптеры общего analytics snapshot для embedded tool-страниц | `sharedState.ts`, `sharedSnapshots.ts` |
 | `apps/web/src/gantt` | SVG timeline и связанные rendering-компоненты | `UnifiedTimeline.tsx`, `TaskBar.tsx`, `TasksTimeline.tsx` |
 | `apps/web/src/i18n` | UI-тексты и локализация | `uiText.ts` |
 | `apps/web/src/pages` | Оркестрация desktop и mobile страниц | `TimelinePage.tsx`, `MiniAppPage.tsx` |
@@ -73,12 +74,14 @@ Source of truth в коде:
 - `uiRegistry.ts`
 - [ControlsWorkbench.tsx](../../apps/web/src/components/ControlsWorkbench.tsx)
 
-### Нормализация форматов задач
+### Нормализация форматов задач и lab state
 
 - `formatSort/resolver.ts`
 - `formatSort/browserIngestion.ts`
 - `content/formatSort/*`
 - `pages/FormatSortPage.tsx`
+- `labs/sharedState.ts`
+- `labs/sharedSnapshots.ts`
 
 ### Milestones и их тона
 
@@ -90,6 +93,6 @@ Source of truth в коде:
 - Чтение окружения и runtime-конфига не уходит глубоко в rendering-компоненты.
 - Нормализация данных централизована.
 - Один и тот же snapshot flow обслуживает desktop, Telegram Mini App и mobile web.
-- `/format-sort` намеренно не использует общий snapshot flow и не запускает background refresh.
+- `/analytics`, `/designer-sort` и `/format-sort` используют один shared analytics snapshot из bucket-backed app state; analytics скачивает новый snapshot один раз при входе, без background refresh во время открытой страницы.
 - Основной orchestration layer находится в `Layout.tsx`, `TimelinePage.tsx` и `MiniAppPage.tsx`.
 

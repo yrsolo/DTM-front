@@ -2,7 +2,7 @@ import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 
 import type { DesignerSortAssignment } from "../designerSort/types";
-import type { NormalizedTaskFormatId } from "../formatSort/types";
+import type { NormalizedTaskFormatId, TaskFormatConfig } from "../formatSort/types";
 import "../styles/analytics.css";
 import {
   buildAnalyticsDonutBreakdown,
@@ -22,12 +22,11 @@ import type {
 import { Tooltip, TooltipState } from "../components/Tooltip";
 import { resolvePublicAssetUrl } from "../config/publicPaths";
 import { taskFormatConfig } from "../formatSort/config";
+import { SHARED_LAB_STATE_IDS, loadSharedLabState, saveSharedLabState, stableSerialize } from "../labs/sharedState";
+import { toTaskFormatSourceSnapshot } from "../labs/sharedSnapshots";
 import { DesignerSortLab } from "./DesignerSortPage";
 import { FormatSortLab } from "./FormatSortPage";
 
-const ANALYTICS_CONFIG_STORAGE_KEY = "dtm.analytics.config.v1";
-const ANALYTICS_DATASET_STORAGE_KEY = "dtm.analytics.dataset.v1";
-const DESIGNER_SORT_STORAGE_KEY = "dtm.designerSort.config.v1";
 const FILE_INPUT_ACCEPT = "application/json,.json";
 const DONUT_COLORS = [
   "#6da3ff",
@@ -58,22 +57,6 @@ type DonutSlice = AnalyticsDonutBreakdown["segments"][number] & {
 
 const ANALYTICS_MAIN_TAB_STORAGE_KEY = "dtm.analytics.mainTab.v1";
 const ANALYTICS_BRAND_LOGO_URL = resolvePublicAssetUrl("dtm_ico_64x64.png");
-
-function readStoredJson<T>(key: string): T | null {
-  if (typeof window === "undefined") return null;
-  try {
-    const raw = window.localStorage.getItem(key);
-    if (!raw) return null;
-    return JSON.parse(raw) as T;
-  } catch {
-    return null;
-  }
-}
-
-function writeStoredJson(key: string, value: unknown) {
-  if (typeof window === "undefined") return;
-  window.localStorage.setItem(key, JSON.stringify(value));
-}
 
 function exportJsonFile(filename: string, payload: unknown) {
   const blob = new Blob([`${JSON.stringify(payload, null, 2)}\n`], { type: "application/json" });
@@ -137,10 +120,6 @@ function mergeConfig(
       ...(stored?.formatHoursById ?? {}),
     },
   };
-}
-
-function resolveDesignerConfig(imported: AnalyticsDesignerConfig | null): AnalyticsDesignerConfig | null {
-  return imported ?? readStoredJson<AnalyticsDesignerConfig>(DESIGNER_SORT_STORAGE_KEY);
 }
 
 function formatMetric(value: number): string {
@@ -436,6 +415,7 @@ function ProductivityChart(props: {
 
 export function AnalyticsPage() {
   const defaultConfig = React.useMemo(() => buildDefaultConfig(), []);
+  const defaultTaskFormatConfig = React.useMemo(() => taskFormatConfig as TaskFormatConfig, []);
   const navigate = useNavigate();
   const [mainTab, setMainTab] = React.useState<AnalyticsMainTabId>(() => {
     if (typeof window === "undefined") return "charts";
@@ -443,15 +423,10 @@ export function AnalyticsPage() {
     return stored === "designers" || stored === "taskTypes" ? stored : "charts";
   });
   const [chartsTab, setChartsTab] = React.useState<AnalyticsChartsTabId>("formats");
-  const [config, setConfig] = React.useState<DepartmentAnalyticsConfig>(() =>
-    mergeConfig(defaultConfig, readStoredJson<DepartmentAnalyticsConfig>(ANALYTICS_CONFIG_STORAGE_KEY))
-  );
-  const [dataset, setDataset] = React.useState<AnalyticsSourceDataset | null>(() =>
-    readStoredJson<AnalyticsSourceDataset>(ANALYTICS_DATASET_STORAGE_KEY)
-  );
-  const [designerConfig, setDesignerConfig] = React.useState<AnalyticsDesignerConfig | null>(() =>
-    resolveDesignerConfig(null)
-  );
+  const [config, setConfig] = React.useState<DepartmentAnalyticsConfig>(() => mergeConfig(defaultConfig, null));
+  const [dataset, setDataset] = React.useState<AnalyticsSourceDataset | null>(null);
+  const [designerConfig, setDesignerConfig] = React.useState<AnalyticsDesignerConfig>({ assignments: [] });
+  const [formatConfig, setFormatConfig] = React.useState<TaskFormatConfig>(defaultTaskFormatConfig);
   const [notice, setNotice] = React.useState<string | null>(null);
   const [error, setError] = React.useState<string | null>(null);
   const [isRefreshing, setIsRefreshing] = React.useState(false);
@@ -462,10 +437,86 @@ export function AnalyticsPage() {
   });
   const designerFileInputRef = React.useRef<HTMLInputElement | null>(null);
   const configFileInputRef = React.useRef<HTMLInputElement | null>(null);
+  const configHydratedRef = React.useRef(false);
+  const designerConfigHydratedRef = React.useRef(false);
+  const formatConfigHydratedRef = React.useRef(false);
+  const snapshotHydratedRef = React.useRef(false);
+  const lastSavedConfigRef = React.useRef<string | null>(null);
+  const lastSavedDesignerConfigRef = React.useRef<string | null>(null);
+  const lastSavedFormatConfigRef = React.useRef<string | null>(null);
+  const lastSavedSnapshotRef = React.useRef<string | null>(null);
 
   React.useEffect(() => {
-    writeStoredJson(ANALYTICS_CONFIG_STORAGE_KEY, config);
-  }, [config]);
+    let cancelled = false;
+
+    async function hydrate() {
+      try {
+        const analyticsResponse = await loadSharedLabState<DepartmentAnalyticsConfig>(SHARED_LAB_STATE_IDS.analyticsConfig);
+        if (cancelled) return;
+        const nextConfig = mergeConfig(defaultConfig, analyticsResponse.value);
+        setConfig(nextConfig);
+        lastSavedConfigRef.current = stableSerialize(nextConfig);
+      } catch {
+        if (!cancelled) {
+          lastSavedConfigRef.current = stableSerialize(config);
+        }
+      } finally {
+        configHydratedRef.current = true;
+      }
+
+      try {
+        const designerResponse = await loadSharedLabState<AnalyticsDesignerConfig>(SHARED_LAB_STATE_IDS.designerSortConfig);
+        if (cancelled) return;
+        const nextDesignerConfig = { assignments: designerResponse.value?.assignments ?? [] };
+        setDesignerConfig(nextDesignerConfig);
+        lastSavedDesignerConfigRef.current = stableSerialize(nextDesignerConfig);
+      } catch {
+        if (!cancelled) {
+          lastSavedDesignerConfigRef.current = stableSerialize(designerConfig);
+        }
+      } finally {
+        designerConfigHydratedRef.current = true;
+      }
+
+      try {
+        const formatResponse = await loadSharedLabState<TaskFormatConfig>(SHARED_LAB_STATE_IDS.taskFormatConfig);
+        if (cancelled) return;
+        const nextFormatConfig = formatResponse.value ?? defaultTaskFormatConfig;
+        setFormatConfig(nextFormatConfig);
+        lastSavedFormatConfigRef.current = stableSerialize(nextFormatConfig);
+      } catch {
+        if (!cancelled) {
+          lastSavedFormatConfigRef.current = stableSerialize(formatConfig);
+        }
+      } finally {
+        formatConfigHydratedRef.current = true;
+      }
+
+      try {
+        const snapshotResponse = await loadSharedLabState<AnalyticsSourceDataset>(
+          SHARED_LAB_STATE_IDS.sharedAnalyticsSnapshot
+        );
+        if (cancelled) return;
+        setDataset(snapshotResponse.value);
+        lastSavedSnapshotRef.current = stableSerialize(snapshotResponse.value ?? null);
+      } catch {
+        if (!cancelled) {
+          lastSavedSnapshotRef.current = stableSerialize(null);
+        }
+      } finally {
+        snapshotHydratedRef.current = true;
+      }
+
+      if (!cancelled) {
+        void handleAutomaticRefresh();
+      }
+    }
+
+    void hydrate();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   React.useEffect(() => {
     if (typeof window === "undefined") return;
@@ -473,8 +524,43 @@ export function AnalyticsPage() {
   }, [mainTab]);
 
   React.useEffect(() => {
-    if (!dataset) return;
-    writeStoredJson(ANALYTICS_DATASET_STORAGE_KEY, dataset);
+    if (!configHydratedRef.current) return;
+    const serialized = stableSerialize(config);
+    if (serialized === lastSavedConfigRef.current) return;
+    lastSavedConfigRef.current = serialized;
+    void saveSharedLabState(SHARED_LAB_STATE_IDS.analyticsConfig, config).catch(() => {
+      setError("Не удалось сохранить analytics config в bucket.");
+    });
+  }, [config]);
+
+  React.useEffect(() => {
+    if (!designerConfigHydratedRef.current) return;
+    const serialized = stableSerialize(designerConfig);
+    if (serialized === lastSavedDesignerConfigRef.current) return;
+    lastSavedDesignerConfigRef.current = serialized;
+    void saveSharedLabState(SHARED_LAB_STATE_IDS.designerSortConfig, designerConfig).catch(() => {
+      setError("Не удалось сохранить designer-sort config в bucket.");
+    });
+  }, [designerConfig]);
+
+  React.useEffect(() => {
+    if (!formatConfigHydratedRef.current) return;
+    const serialized = stableSerialize(formatConfig);
+    if (serialized === lastSavedFormatConfigRef.current) return;
+    lastSavedFormatConfigRef.current = serialized;
+    void saveSharedLabState(SHARED_LAB_STATE_IDS.taskFormatConfig, formatConfig).catch(() => {
+      setError("Не удалось сохранить config типов задач в bucket.");
+    });
+  }, [formatConfig]);
+
+  React.useEffect(() => {
+    if (!snapshotHydratedRef.current || !dataset) return;
+    const serialized = stableSerialize(dataset);
+    if (serialized === lastSavedSnapshotRef.current) return;
+    lastSavedSnapshotRef.current = serialized;
+    void saveSharedLabState(SHARED_LAB_STATE_IDS.sharedAnalyticsSnapshot, dataset).catch(() => {
+      setError("Не удалось сохранить общий snapshot в bucket.");
+    });
   }, [dataset]);
 
   React.useEffect(() => {
@@ -501,13 +587,13 @@ export function AnalyticsPage() {
 
   const report = React.useMemo(() => {
     if (!dataset) return null;
-    return buildDepartmentAnalyticsReport(dataset.snapshot, config, designerConfig, effectiveHoursPerDesigner);
-  }, [config, dataset, designerConfig, effectiveHoursPerDesigner]);
+    return buildDepartmentAnalyticsReport(dataset.snapshot, config, designerConfig, formatConfig, effectiveHoursPerDesigner);
+  }, [config, dataset, designerConfig, effectiveHoursPerDesigner, formatConfig]);
 
   const donutBreakdown = React.useMemo(() => {
     if (!report) return null;
-    return buildAnalyticsDonutBreakdown(report, config);
-  }, [report, config]);
+    return buildAnalyticsDonutBreakdown(report, config, formatConfig);
+  }, [report, config, formatConfig]);
 
   async function handleManualRefresh() {
     setIsRefreshing(true);
@@ -519,6 +605,23 @@ export function AnalyticsPage() {
       setNotice(`Собрано ${nextDataset.tasksTotalCollected} задач. Аналитика обновлена из полного SnapshotV1.`);
     } catch (nextError) {
       setError(nextError instanceof Error ? nextError.message : "Не удалось скачать полный snapshot для аналитики.");
+    } finally {
+      setIsRefreshing(false);
+    }
+  }
+
+  async function handleAutomaticRefresh() {
+    setIsRefreshing(true);
+    setError(null);
+    setNotice("Скачиваем актуальный snapshot для аналитики...");
+    try {
+      const nextDataset = await downloadAnalyticsSnapshotFromBrowser();
+      setDataset(nextDataset);
+      lastSavedSnapshotRef.current = stableSerialize(nextDataset);
+      await saveSharedLabState(SHARED_LAB_STATE_IDS.sharedAnalyticsSnapshot, nextDataset);
+      setNotice(`Snapshot обновлён при входе: ${nextDataset.tasksTotalCollected} задач.`);
+    } catch (nextError) {
+      setError(nextError instanceof Error ? nextError.message : "Не удалось обновить snapshot при входе в аналитику.");
     } finally {
       setIsRefreshing(false);
     }
@@ -750,7 +853,7 @@ export function AnalyticsPage() {
 
         {notice ? <div className="analyticsNotice">{notice}</div> : null}
         {error ? <div className="analyticsError">{error}</div> : null}
-        {!designerConfig?.assignments?.length ? (
+        {!designerConfig.assignments.length ? (
           <div className="analyticsNotice">
             Designer-sort config не найден. Пока все дизайнеры считаются штатными, но можно импортировать JSON из
             `/designer-sort`.
@@ -952,11 +1055,21 @@ export function AnalyticsPage() {
         </>
         ) : mainTab === "designers" ? (
           <div className="analyticsEmbeddedSection">
-            <DesignerSortLab embedded />
+            <DesignerSortLab
+              embedded
+              config={designerConfig}
+              onConfigChange={setDesignerConfig}
+              snapshot={toTaskFormatSourceSnapshot(dataset)}
+            />
           </div>
         ) : (
           <div className="analyticsEmbeddedSection">
-            <FormatSortLab embedded />
+            <FormatSortLab
+              embedded
+              config={formatConfig}
+              onConfigChange={setFormatConfig}
+              snapshot={toTaskFormatSourceSnapshot(dataset)}
+            />
           </div>
         )}
       </div>
