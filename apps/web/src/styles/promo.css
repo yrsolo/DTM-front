@@ -454,6 +454,25 @@
   -webkit-backdrop-filter: blur(22px);
 }
 
+.promoTransition__trigger {
+  display: block;
+  cursor: pointer;
+  appearance: none;
+  text-align: left;
+  transition:
+    transform 220ms ease,
+    box-shadow 220ms ease,
+    border-color 220ms ease;
+}
+
+.promoTransition__trigger:hover {
+  transform: translateY(-4px);
+  border-color: rgba(255, 255, 255, 0.14);
+  box-shadow:
+    0 28px 64px rgba(0, 0, 0, 0.26),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
 .promoTransition__video {
   display: block;
   width: 100%;
@@ -461,6 +480,147 @@
   border-radius: 18px;
   background: #0d0f15;
   object-fit: cover;
+}
+
+.promoTransition__playBadge {
+  position: absolute;
+  inset: auto auto 28px 28px;
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 54px;
+  padding: 0 18px;
+  border-radius: 999px;
+  background: rgba(12, 14, 20, 0.62);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow:
+    0 14px 28px rgba(0, 0, 0, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+.promoTransition__playBadge::after {
+  content: "Смотреть демо";
+  color: #efe8df;
+  font-size: 14px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.promoTransition__playIcon {
+  display: inline-block;
+  width: 0;
+  height: 0;
+  border-top: 9px solid transparent;
+  border-bottom: 9px solid transparent;
+  border-left: 14px solid #efe8df;
+}
+
+.promoVideoOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 220;
+  display: grid;
+  place-items: center;
+  padding: 48px;
+  background: rgba(9, 10, 14, 0);
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    opacity 1500ms ease,
+    background-color 1500ms ease;
+}
+
+.promoVideoOverlay--active {
+  background: rgba(9, 10, 14, 0.7);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.promoVideoOverlay__player {
+  width: min(1120px, calc(100vw - 120px));
+  border-radius: 28px;
+  padding: 18px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.03)),
+    rgba(15, 17, 23, 0.82);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow:
+    0 40px 120px rgba(0, 0, 0, 0.36),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(26px) saturate(140%);
+  -webkit-backdrop-filter: blur(26px) saturate(140%);
+  transform: translateY(28px) scale(0.96);
+  transition: transform 1500ms ease;
+}
+
+.promoVideoOverlay--active .promoVideoOverlay__player {
+  transform: translateY(0) scale(1);
+}
+
+.promoVideoOverlay__video {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: 18px;
+  background: #090b0f;
+  object-fit: cover;
+}
+
+.promoVideoOverlay__controls {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 20px;
+  margin-top: 16px;
+}
+
+.promoVideoOverlay__controlButton {
+  min-width: 90px;
+  min-height: 44px;
+  padding: 0 18px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.05);
+  color: #efe8df;
+  font: inherit;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+}
+
+.promoVideoOverlay__timeline {
+  display: grid;
+  gap: 8px;
+}
+
+.promoVideoOverlay__time {
+  display: flex;
+  justify-content: space-between;
+  color: rgba(221, 212, 204, 0.72);
+  font-size: 13px;
+  letter-spacing: 0.04em;
+}
+
+.promoVideoOverlay__volume {
+  display: inline-grid;
+  grid-template-columns: auto 120px;
+  align-items: center;
+  gap: 12px;
+  color: rgba(221, 212, 204, 0.8);
+  font-size: 13px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.promoVideoOverlay__range {
+  width: 100%;
+  accent-color: #d86aff;
+  cursor: pointer;
+}
+
+.promoVideoOverlay__range--volume {
+  width: 120px;
 }
 
 .promoSection--system {

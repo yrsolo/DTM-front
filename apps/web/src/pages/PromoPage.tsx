@@ -1,12 +1,24 @@
 import "../styles/promo.css";
 
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
+import Hls from "hls.js";
 
 import { promoAssets } from "../content/promoAssets";
 import { promoContent } from "../content/promoContent";
 
 const PROMO_DESIGN_WIDTH = 1920;
 const PROMO_PAGE_GUTTER = 48;
+const PROMO_PLAYER_FADE_MS = 1500;
+
+function formatVideoTime(value: number) {
+  if (!Number.isFinite(value) || value < 0) {
+    return "0:00";
+  }
+
+  const minutes = Math.floor(value / 60);
+  const seconds = Math.floor(value % 60);
+  return `${minutes}:${String(seconds).padStart(2, "0")}`;
+}
 
 function renderActions(
   actions: ReadonlyArray<{ label: string; href: string; tone?: "primary" | "secondary" }> | undefined,
@@ -47,9 +59,18 @@ function renderBullets(items: ReadonlyArray<string> | undefined) {
 export function PromoPage() {
   const sceneRef = useRef<HTMLDivElement | null>(null);
   const navRef = useRef<HTMLDivElement | null>(null);
+  const closeTimerRef = useRef<number | null>(null);
+  const hlsRef = useRef<Hls | null>(null);
+  const playerVideoRef = useRef<HTMLVideoElement | null>(null);
   const [scale, setScale] = useState(1);
   const [sceneHeight, setSceneHeight] = useState(0);
   const [navHeight, setNavHeight] = useState(78);
+  const [isPlayerMounted, setIsPlayerMounted] = useState(false);
+  const [isPlayerActive, setIsPlayerActive] = useState(false);
+  const [isPlayerPlaying, setIsPlayerPlaying] = useState(false);
+  const [playerDuration, setPlayerDuration] = useState(0);
+  const [playerCurrentTime, setPlayerCurrentTime] = useState(0);
+  const [playerVolume, setPlayerVolume] = useState(0.8);
 
   const coreNav = promoContent.screens.filter((screen) =>
     [
@@ -109,6 +130,156 @@ export function PromoPage() {
       resizeObserver.disconnect();
     };
   }, []);
+
+  useEffect(() => {
+    return () => {
+      if (closeTimerRef.current !== null) {
+        window.clearTimeout(closeTimerRef.current);
+      }
+
+      hlsRef.current?.destroy();
+      hlsRef.current = null;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!isPlayerMounted || !playerVideoRef.current) {
+      return;
+    }
+
+    const video = playerVideoRef.current;
+
+    video.volume = 0.8;
+    video.muted = false;
+    video.playsInline = true;
+
+    if (video.canPlayType("application/vnd.apple.mpegurl")) {
+      video.src = promoAssets.promoVideoStream;
+    } else if (Hls.isSupported()) {
+      const hls = new Hls({
+        enableWorker: true,
+      });
+
+      hls.loadSource(promoAssets.promoVideoStream);
+      hls.attachMedia(video);
+      hlsRef.current = hls;
+    } else {
+      video.src = promoAssets.promoVideoStream;
+    }
+
+    const syncState = () => {
+      setPlayerCurrentTime(video.currentTime);
+      setPlayerDuration(video.duration || 0);
+      setIsPlayerPlaying(!video.paused && !video.ended);
+    };
+
+    const handleEnded = () => {
+      syncState();
+      closePlayer();
+    };
+
+    video.addEventListener("loadedmetadata", syncState);
+    video.addEventListener("durationchange", syncState);
+    video.addEventListener("timeupdate", syncState);
+    video.addEventListener("play", syncState);
+    video.addEventListener("pause", syncState);
+    video.addEventListener("ended", handleEnded);
+
+    const playPromise = video.play();
+    playPromise?.catch(() => {
+      syncState();
+    });
+
+    return () => {
+      video.pause();
+      video.removeAttribute("src");
+      video.load();
+      video.removeEventListener("loadedmetadata", syncState);
+      video.removeEventListener("durationchange", syncState);
+      video.removeEventListener("timeupdate", syncState);
+      video.removeEventListener("play", syncState);
+      video.removeEventListener("pause", syncState);
+      video.removeEventListener("ended", handleEnded);
+      hlsRef.current?.destroy();
+      hlsRef.current = null;
+    };
+  }, [isPlayerMounted]);
+
+  useEffect(() => {
+    const video = playerVideoRef.current;
+    if (!video) {
+      return;
+    }
+
+    video.volume = playerVolume;
+    video.muted = playerVolume === 0;
+  }, [playerVolume]);
+
+  const openPlayer = () => {
+    if (closeTimerRef.current !== null) {
+      window.clearTimeout(closeTimerRef.current);
+      closeTimerRef.current = null;
+    }
+
+    setIsPlayerMounted(true);
+    window.requestAnimationFrame(() => {
+      setIsPlayerActive(true);
+    });
+  };
+
+  const closePlayer = () => {
+    setIsPlayerActive(false);
+
+    if (closeTimerRef.current !== null) {
+      window.clearTimeout(closeTimerRef.current);
+    }
+
+    closeTimerRef.current = window.setTimeout(() => {
+      setIsPlayerMounted(false);
+      setPlayerCurrentTime(0);
+      setPlayerDuration(0);
+      setIsPlayerPlaying(false);
+      closeTimerRef.current = null;
+    }, PROMO_PLAYER_FADE_MS);
+  };
+
+  const togglePlayback = () => {
+    const video = playerVideoRef.current;
+    if (!video) {
+      return;
+    }
+
+    if (video.paused) {
+      video.play().catch(() => undefined);
+      return;
+    }
+
+    video.pause();
+  };
+
+  const handleSeek = (nextValue: number) => {
+    const video = playerVideoRef.current;
+    if (!video || !Number.isFinite(nextValue)) {
+      return;
+    }
+
+    video.currentTime = nextValue;
+    setPlayerCurrentTime(nextValue);
+  };
+
+  const handleVolumeChange = (nextValue: number) => {
+    const normalizedVolume = Math.min(1, Math.max(0, nextValue));
+    const video = playerVideoRef.current;
+
+    setPlayerVolume(normalizedVolume);
+
+    if (!video) {
+      return;
+    }
+
+    video.volume = normalizedVolume;
+    video.muted = normalizedVolume === 0;
+  };
 
   const scaledWidth = useMemo(() => PROMO_DESIGN_WIDTH * scale, [scale]);
   const landingStyle = useMemo(
@@ -179,16 +350,24 @@ export function PromoPage() {
 
           <section className="promoTransition" id={transition.id}>
             <img className="promoTransition__backdrop" src={promoAssets.sceneTransition} alt="" aria-hidden="true" />
-            <div className="promoTransition__frame">
+            <button
+              className="promoTransition__frame promoTransition__trigger"
+              type="button"
+              onClick={openPlayer}
+              aria-label="Open promo video"
+            >
               <video
                 className="promoTransition__video"
-                src={promoAssets.promoVideo}
+                src={promoAssets.promoVideoPreview}
                 autoPlay
                 loop
                 muted
                 playsInline
               />
-            </div>
+              <span className="promoTransition__playBadge" aria-hidden="true">
+                <span className="promoTransition__playIcon" />
+              </span>
+            </button>
           </section>
 
           <section className="promoSection promoSection--system promoSection--right" id={system.id}>
@@ -423,6 +602,60 @@ export function PromoPage() {
           </section>
         </div>
       </main>
+
+      {isPlayerMounted ? (
+        <div
+          className={isPlayerActive ? "promoVideoOverlay promoVideoOverlay--active" : "promoVideoOverlay"}
+          onClick={closePlayer}
+          role="presentation"
+        >
+          <div className="promoVideoOverlay__player" onClick={(event) => event.stopPropagation()}>
+            <video ref={playerVideoRef} className="promoVideoOverlay__video" playsInline />
+
+            <div className="promoVideoOverlay__controls">
+              <button
+                className="promoVideoOverlay__controlButton"
+                type="button"
+                onClick={togglePlayback}
+                aria-label={isPlayerPlaying ? "Pause video" : "Play video"}
+              >
+                {isPlayerPlaying ? "Pause" : "Play"}
+              </button>
+
+              <div className="promoVideoOverlay__timeline">
+                <input
+                  className="promoVideoOverlay__range"
+                  type="range"
+                  min={0}
+                  max={Math.max(playerDuration, 0)}
+                  step={0.1}
+                  value={Math.min(playerCurrentTime, playerDuration || 0)}
+                  onChange={(event) => handleSeek(Number(event.target.value))}
+                  aria-label="Timeline"
+                />
+                <div className="promoVideoOverlay__time">
+                  <span>{formatVideoTime(playerCurrentTime)}</span>
+                  <span>{formatVideoTime(playerDuration)}</span>
+                </div>
+              </div>
+
+              <label className="promoVideoOverlay__volume">
+                <span>Vol</span>
+                <input
+                  className="promoVideoOverlay__range promoVideoOverlay__range--volume"
+                  type="range"
+                  min={0}
+                  max={1}
+                  step={0.01}
+                  value={playerVolume}
+                  onChange={(event) => handleVolumeChange(Number(event.target.value))}
+                  aria-label="Volume"
+                />
+              </label>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

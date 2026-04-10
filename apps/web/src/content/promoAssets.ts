@@ -3,7 +3,8 @@ import { resolvePublicAssetUrl } from "../config/publicPaths";
 export const promoAssets = {
   brandLogo: resolvePublicAssetUrl("dtm_ico_64x64.png"),
   noiseOverlay: resolvePublicAssetUrl("promo/ref-02/noise-overlay.svg"),
-  promoVideo: resolvePublicAssetUrl("DTM_lo.mp4"),
+  promoVideoPreview: "https://storage.yandexcloud.net/dtm-presets/video/DTM_lo_av1.mp4",
+  promoVideoStream: "https://storage.yandexcloud.net/dtm-presets/video/DTM_hi.m3u8",
 
   sceneTransition: resolvePublicAssetUrl("promo/ref-02/scene-transition.webp"),
   sceneSystem: resolvePublicAssetUrl("promo/ref-02/scene-system.webp"),
